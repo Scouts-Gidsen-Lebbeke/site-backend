@@ -12,10 +12,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, String>> {
-        val errors = mutableMapOf<String, String>()
-        ex.bindingResult.fieldErrors.forEach { error ->
-            errors[error.field] = error.defaultMessage ?: "Invalid value"
-        }
+        val errors = ex.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }
         return ResponseEntity(errors, HttpStatus.BAD_REQUEST)
     }
 
