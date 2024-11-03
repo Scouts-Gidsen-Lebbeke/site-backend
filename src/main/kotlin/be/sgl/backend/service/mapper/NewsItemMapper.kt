@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 
 @Mapper(componentModel = "spring")
 interface NewsItemMapper {
-    fun toDto(user: NewsItem): NewsItemDTO
+    fun toDto(item: NewsItem): NewsItemDTO
     fun toEntity(dto: NewsItemDTO): NewsItem
 }
 

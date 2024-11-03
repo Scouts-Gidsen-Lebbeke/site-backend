@@ -15,11 +15,11 @@ import java.time.LocalDateTime
 @EntityListeners(AuditingEntityListener::class)
 abstract class Auditable : Serializable {
     @CreatedBy
-    var createdBy: Int? = null
+    var createdBy: String? = null
     @CreatedDate
     var createdDate: LocalDateTime? = null
     @LastModifiedBy
-    var lastModifiedBy: Int? = null
+    var lastModifiedBy: String? = null
     @LastModifiedDate
     var lastModifiedDate: LocalDateTime? = null
     @Version
