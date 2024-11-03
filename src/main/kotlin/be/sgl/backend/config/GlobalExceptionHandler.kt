@@ -1,5 +1,6 @@
 package be.sgl.backend.config
 
+import be.sgl.backend.service.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -16,5 +17,10 @@ class GlobalExceptionHandler {
             errors[error.field] = error.defaultMessage ?: "Invalid value"
         }
         return ResponseEntity(errors, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(NotFoundException::class)
+    fun handleUserNotFoundException(ex: NotFoundException): ResponseEntity<String> {
+        return ResponseEntity(ex.message, HttpStatus.NOT_FOUND)
     }
 }

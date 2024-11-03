@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository
 
 @Repository
-interface NewsItemRepository : JpaRepository<NewsItem, Long> {
+interface NewsItemRepository : JpaRepository<NewsItem, Int> {
     fun getNewsItemByVisibleTrue() : List<NewsItem>
 }
