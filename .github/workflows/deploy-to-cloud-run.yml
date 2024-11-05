@@ -1,0 +1,46 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Log in to GCP Container Registry
+        run: |
+          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} | gcloud auth activate-service-account --key-file=-
+          gcloud auth configure-docker --quiet
+
+      - name: Build and push Docker image to Google Container Registry
+        run: |
+          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+
+      - name: Deploy to Cloud Run
+        env:
+          CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
+          gcloud run deploy site-backend \
+            --image $IMAGE_NAME \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --update-env-vars DB_HOST=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_USER=${{ env.DB_USER }},DB_PASS=${{ env.DB_PASS }},DB_NAME=${{ env.DB_NAME }}
