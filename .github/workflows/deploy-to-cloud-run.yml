@@ -21,11 +21,6 @@ jobs:
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: Log in to GCP Container Registry
-        run: |
-          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} | gcloud auth activate-service-account --key-file=-
-          gcloud auth configure-docker --quiet
-
       - name: Build and push Docker image to Google Container Registry
         run: |
           IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
