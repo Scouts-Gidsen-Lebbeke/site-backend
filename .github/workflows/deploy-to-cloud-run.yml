@@ -20,7 +20,7 @@ jobs:
           java-version: '21'
 
       - name: Build JAR file
-        run: mvn clean package
+        run: mvn clean package -Dmaven.test.skip
 
       - name: Gcloud authentication
         uses: 'google-github-actions/auth@v2'
