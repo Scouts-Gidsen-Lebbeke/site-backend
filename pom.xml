@@ -10,7 +10,7 @@
     </parent>
     <groupId>be.sgl</groupId>
     <artifactId>site-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>site-backend</name>
     <description>site-backend</description>
     <url/>
@@ -136,7 +136,9 @@
                 <executions>
                     <execution>
                         <id>kapt</id>
+                        <phase>process-sources</phase>
                         <goals>
+                            <goal>compile</goal>
                             <goal>kapt</goal>
                         </goals>
                         <configuration>
