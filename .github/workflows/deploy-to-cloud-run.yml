@@ -32,7 +32,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v2'
 
       - name: Authenticate Docker to Google Cloud Container Registry
-        run: gcloud auth configure-docker gcr.io --quiet
+        run: gcloud auth configure-docker --quiet
 
       - name: Build and push Docker image to Google Container Registry
         run: |
