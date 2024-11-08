@@ -52,6 +52,6 @@ jobs:
           gcloud run deploy site-backend \
             --image $IMAGE_NAME \
             --platform managed \
-            --region erurope-west1 \
+            --region europe-west1 \
             --allow-unauthenticated \
             --update-env-vars DB_HOST=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_USER=${{ env.DB_USER }},DB_PASS=${{ env.DB_PASS }},DB_NAME=${{ env.DB_NAME }}
