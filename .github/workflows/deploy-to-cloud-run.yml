@@ -43,10 +43,10 @@ jobs:
 
       - name: Deploy to Cloud Run
         env:
-          CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER_TEST }}
+          DB_PASS: ${{ secrets.DB_PASS_TEST }}
+          DB_NAME: ${{ secrets.DB_NAME_TEST }}
         run: |
           IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
           gcloud run deploy site-backend \
@@ -54,4 +54,4 @@ jobs:
             --platform managed \
             --region europe-west1 \
             --allow-unauthenticated \
-            --update-env-vars DB_HOST=/cloudsql/${{ env.CLOUD_SQL_CONNECTION_NAME }},DB_USER=${{ env.DB_USER }},DB_PASS=${{ env.DB_PASS }},DB_NAME=${{ env.DB_NAME }}
+            --update-env-vars DB_HOST=${{ env.DB_HOST }},DB_USER=${{ env.DB_USER }},DB_PASS=${{ env.DB_PASS }},DB_NAME=${{ env.DB_NAME }}
