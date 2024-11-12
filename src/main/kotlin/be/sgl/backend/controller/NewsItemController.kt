@@ -1,13 +1,11 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.dto.NewsItemDTO
 import be.sgl.backend.service.NewsItemService
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -28,7 +26,7 @@ class NewsItemController {
     }
 
     @PostMapping
-    fun createNewsItem(@Valid @RequestBody newsItem: NewsItemDTO, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<NewsItemDTO> {
+    fun createNewsItem(@Valid @RequestBody newsItem: NewsItemDTO): ResponseEntity<NewsItemDTO> {
         return ResponseEntity(newsItemService.saveNewsItemDTO(newsItem), HttpStatus.CREATED)
     }
 

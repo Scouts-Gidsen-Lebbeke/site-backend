@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserRepository : JpaRepository<User, Long> {
-    fun getUserByExternalIdEquals(id: String): User
+    fun getUserByUsernameEquals(username: String): User
 }
