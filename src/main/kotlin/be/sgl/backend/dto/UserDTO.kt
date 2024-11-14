@@ -1,17 +1,37 @@
 package be.sgl.backend.dto
 
-import be.sgl.backend.entity.User
-import be.sgl.backend.util.UserData
+import be.sgl.backend.entity.enum.Sex
 import java.io.Serializable
+import java.time.LocalDate
 
-class UserDTO(user: User, userData: UserData?) : UserData, Serializable {
-    val username = user.username
-    val name = user.name
-    val firstName = user.firstName
-    val image = user.image
-    override val birthdate = userData?.birthdate
-    override val emailAddress = userData?.emailAddress
-    override val mobile = userData?.mobile
-    override val hasReduction = userData?.hasReduction ?: false
-    override val branch = userData?.branch
-}
+open class UserDTO(
+    val username: String,
+    val name: String,
+    val firstName: String,
+    val image: String?
+) : Serializable
+
+class StaffDTO(
+    val nickname: String?,
+    val totem: String?,
+    username: String,
+    name: String,
+    firstName: String,
+    image: String?
+) : UserDTO(username, name, firstName, image)
+
+class ExtendedUserDTO(
+    val memberId: String?,
+    val birthdate: LocalDate,
+    val email: String?,
+    val mobile: String?,
+    val nis: String?,
+    val accountNo: String?,
+    val sex: Sex,
+    val hasReduction: Boolean,
+    val address: AddressDTO,
+    username: String,
+    name: String,
+    firstName: String,
+    image: String?
+) : UserDTO(username, name, firstName, image)

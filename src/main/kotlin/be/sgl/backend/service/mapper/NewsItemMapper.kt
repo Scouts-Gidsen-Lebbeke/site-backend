@@ -12,10 +12,3 @@ interface NewsItemMapper {
     fun toDto(item: NewsItem): NewsItemDTO
     fun toEntity(dto: NewsItemDTO): NewsItem
 }
-
-//@Configuration
-//class MapperConfig {
-//
-//    @Bean
-//    fun newsItemMapper(): NewsItemMapper = Mappers.getMapper(NewsItemMapper::class.java)
-//}

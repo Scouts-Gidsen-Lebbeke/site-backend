@@ -1,4 +1,4 @@
-package be.sgl.backend.config
+package be.sgl.backend.config.security
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain

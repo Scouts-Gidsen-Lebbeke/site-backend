@@ -16,8 +16,8 @@ class NewsItemController {
     lateinit var newsItemService: NewsItemService
 
     @GetMapping
-    fun getVisibleItems(): List<NewsItemDTO> {
-        return newsItemService.getVisibleItems()
+    fun getVisibleItems(): ResponseEntity<List<NewsItemDTO>> {
+        return ResponseEntity.ok(newsItemService.getVisibleItems())
     }
 
     @GetMapping("/{id}")

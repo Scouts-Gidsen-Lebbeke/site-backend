@@ -1,0 +1,11 @@
+package be.sgl.backend.service.mapper
+
+import be.sgl.backend.dto.MembershipDTO
+import be.sgl.backend.entity.Membership
+import org.mapstruct.Mapper
+
+@Mapper(componentModel = "spring")
+interface MembershipMapper {
+    fun toDto(membership: Membership): MembershipDTO
+    fun toEntity(dto: MembershipDTO): Membership
+}

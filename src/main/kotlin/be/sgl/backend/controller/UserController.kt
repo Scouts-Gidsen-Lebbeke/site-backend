@@ -2,7 +2,7 @@ package be.sgl.backend.controller
 
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.dto.UserDTO
-import be.sgl.backend.service.UserService
+import be.sgl.backend.service.user.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal

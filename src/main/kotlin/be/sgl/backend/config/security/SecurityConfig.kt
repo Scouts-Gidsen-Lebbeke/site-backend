@@ -1,5 +1,6 @@
-package be.sgl.backend.config
+package be.sgl.backend.config.security
 
+import be.sgl.backend.config.CustomUserDetails
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
@@ -17,11 +18,10 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
+        return http
             .csrf { it.disable() }
             .authorizeHttpRequests { authorizeRequests ->
                 authorizeRequests
-                    .requestMatchers(HttpMethod.GET, "/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/**").authenticated()
                     .requestMatchers(HttpMethod.PUT, "/**").authenticated()
                     .requestMatchers(HttpMethod.PATCH, "/**").authenticated()
@@ -36,8 +36,6 @@ class SecurityConfig {
                     }
                 }
             }
-        return http.build()
+            .build()
     }
-
-
 }
