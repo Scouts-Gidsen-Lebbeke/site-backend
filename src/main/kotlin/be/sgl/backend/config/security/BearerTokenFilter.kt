@@ -2,13 +2,14 @@ package be.sgl.backend.config.security
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
-import jakarta.servlet.FilterConfig
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(name = ["external.organization.id"], matchIfMissing = false)
 class BearerTokenFilter : Filter {
 
     companion object {
@@ -27,7 +28,4 @@ class BearerTokenFilter : Filter {
             tokenHolder.remove()
         }
     }
-
-    override fun init(filterConfig: FilterConfig?) {}
-    override fun destroy() {}
 }

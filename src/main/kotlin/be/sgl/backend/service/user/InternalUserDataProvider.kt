@@ -3,11 +3,11 @@ package be.sgl.backend.service.user
 import be.sgl.backend.entity.MedicalRecord
 import be.sgl.backend.entity.User
 import be.sgl.backend.entity.UserRegistration
-import org.springframework.context.annotation.Profile
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 
 @Service
-@Profile("internal")
+@Primary
 class InternalUserDataProvider : UserDataProvider {
     override fun createRegistration(registration: UserRegistration): User {
         TODO("Not yet implemented")

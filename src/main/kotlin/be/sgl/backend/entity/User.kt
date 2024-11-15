@@ -20,10 +20,9 @@ class User : Serializable {
     lateinit var firstName: String
     var image: String? = null
     @OneToOne(fetch = FetchType.LAZY)
-    val userData: UserData? = null
-    @ManyToMany
-    @JoinTable
-    val roles: MutableList<Role> = mutableListOf()
+    var userData = UserData()
+    @OneToMany
+    val roles: MutableList<UserRole> = mutableListOf()
     @ManyToMany
     @JoinTable(name = "sibling_relation")
     val siblings: MutableList<User> = mutableListOf()
