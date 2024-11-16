@@ -9,6 +9,6 @@ interface UserDataProvider {
     fun acceptRegistration(registration: UserRegistration): User
     fun getUser(username: String) : User
     fun getUserWithAllData(username: String): User
-    fun getMedicalRecord(username: String): MedicalRecord
-    fun updateMedicalRecord(username: String)
+    fun getMedicalRecord(user: User): MedicalRecord?
+    fun updateMedicalRecord(medicalRecord: MedicalRecord)
 }

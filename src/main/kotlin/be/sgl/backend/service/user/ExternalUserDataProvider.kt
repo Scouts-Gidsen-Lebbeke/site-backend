@@ -68,11 +68,11 @@ class ExternalUserDataProvider : UserDataProvider {
         return user
     }
 
-    override fun getMedicalRecord(username: String): MedicalRecord {
+    override fun getMedicalRecord(user: User): MedicalRecord? {
         TODO("Not yet implemented")
     }
 
-    override fun updateMedicalRecord(username: String) {
+    override fun updateMedicalRecord(medicalRecord: MedicalRecord) {
         TODO("Not yet implemented")
     }
 

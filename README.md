@@ -3,11 +3,11 @@
 
 ### Prerequisites
 Required:
-- A database environment
 - An SMTP mail client (a basic Gmail address will do)
 - A domain name with dns (there exit many cheap registrars)
 
 Optional:
+- A database environment (by default an H2 file-based db is created, so it is strongly encouraged to have a better environment)
 - A Mollie account (if you want to be able to receive payments)
 - A Keycloak resource key (if you want to use an external authentication provider)
 - Your Groepsadmin group id (if you want Groepsadmin to stay master of user data)
