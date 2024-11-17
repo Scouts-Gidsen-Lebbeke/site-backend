@@ -1,0 +1,16 @@
+<p>
+    Dag ${customer.full.name},
+</p>
+<p>
+    We hebben de betaling (€ ${event.price}) goed ontvangen, dus hierbij bevestigen we jouw ${event.type} voor ${event.name}.
+</p>
+<p th:if="${event.additional.data}">
+    Hieronder een overzicht van de ontvangen gegevens:
+    <ul>
+        <li th:each="entry : ${event.additional.data}" th:text="${entry.key + ': ' + entry.value}"></li>
+    </ul>
+</p>
+<p>
+    Stevige linker,<br/>
+    De leiding
+</p>
