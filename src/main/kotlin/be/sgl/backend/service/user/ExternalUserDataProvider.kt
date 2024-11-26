@@ -1,10 +1,9 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.security.BearerTokenFilter
-import be.sgl.backend.entity.MedicalRecord
-import be.sgl.backend.entity.User
-import be.sgl.backend.entity.UserRegistration
-import be.sgl.backend.entity.UserRole
+import be.sgl.backend.entity.*
+import be.sgl.backend.entity.enum.ContactRole
+import be.sgl.backend.entity.enum.Sex
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.UserRepository
 import be.sgl.backend.util.Functie
@@ -63,7 +62,46 @@ class ExternalUserDataProvider : UserDataProvider {
     override fun getUserWithAllData(username: String): User {
         val user = getUser(username)
         getExternalData(user.externalId)?.let {
-            user.userData.mobile
+            user.userData.email = it.email
+            user.userData.sex = when(it.persoonsgegevens.geslacht) {
+                "M" -> Sex.MALE
+                "V" -> Sex.FEMALE
+                else -> Sex.UNKNOWN
+            }
+            user.userData.mobile = it.persoonsgegevens.gsm
+            user.userData.hasHandicap = it.persoonsgegevens.beperking
+            user.userData.hasReduction = it.persoonsgegevens.verminderdlidgeld
+            user.userData.accountNo = it.persoonsgegevens.rekeningnummer
+            user.userData.birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
+            user.userData.memberId = it.verbondsgegevens.lidnummer
+            user.userData.addresses.addAll(it.adressen.map { a ->
+                val address = Address()
+                address.externalId = a.id
+                address.street = a.straat
+                address.number = a.nummer.toInt()
+                address.subPremise = a.bus
+                address.zipcode = a.postcode
+                address.city = a.gemeente
+                address.country = a.land
+                address.description = a.omschrijving
+                address.postalAdress = a.postadres
+                address
+            })
+            user.userData.contacts.addAll(it.contacten.map { c ->
+                val contact = Contact()
+                contact.name = c.achternaam
+                contact.firstName = c.voornaam
+                contact.role = when(c.rol) {
+                    "vader" -> ContactRole.FATHER
+                    "moeder" -> ContactRole.MOTHER
+                    "voogd" -> ContactRole.GUARDIAN
+                    else -> ContactRole.RESPONSIBLE
+                }
+                contact.address = user.userData.addresses.firstOrNull { it.externalId == c.id }
+                contact.mobile = c.gsm
+                contact.email = c.email
+                contact
+            })
         }
         return user
     }

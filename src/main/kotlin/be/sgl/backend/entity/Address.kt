@@ -10,6 +10,7 @@ class Address : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
+    var externalId: String? = null
     lateinit var street: String
     var number: Int = -1
     var subPremise: String? = null

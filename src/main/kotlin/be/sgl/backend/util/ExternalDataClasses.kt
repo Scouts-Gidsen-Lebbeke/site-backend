@@ -10,7 +10,7 @@ data class Lid(
     val gebruikersnaam: String, // only used at user creation
     val adressen: List<Adres>,
     val contacten: List<Contact>,
-    val email: String?,
+    val email: String,
     val functies: List<Functie>,
     val groepseigenVelden: Map<String, GroepseigenVelden>,
 )
@@ -37,7 +37,7 @@ data class Verbondsgegevens(
 )
 
 data class Adres(
-    val id: String, // ignored
+    val id: String,
     val land: String,
     val postcode: String,
     val gemeente: String,

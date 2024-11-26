@@ -19,5 +19,5 @@ class Contact : Auditable() {
     var email: String? = null
     var nis: String? = null
     @ManyToOne
-    val address: Address? = null
+    var address: Address? = null
 }
