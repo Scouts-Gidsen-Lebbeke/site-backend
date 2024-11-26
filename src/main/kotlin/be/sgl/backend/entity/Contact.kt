@@ -17,6 +17,7 @@ class Contact : Auditable() {
     var role = ContactRole.RESPONSIBLE
     var mobile: String? = null
     var email: String? = null
+    var nis: String? = null
     @ManyToOne
     val address: Address? = null
 }

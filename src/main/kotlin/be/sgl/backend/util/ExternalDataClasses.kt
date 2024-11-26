@@ -18,7 +18,7 @@ data class Lid(
 data class Persoonsgegevens(
     val geslacht: String?,
     val gsm: String?,
-    val beperking: Boolean, // ignored
+    val beperking: Boolean,
     val verminderdlidgeld: Boolean,
     val rekeningnummer: String?
 )

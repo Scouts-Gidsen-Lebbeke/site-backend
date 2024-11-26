@@ -18,4 +18,8 @@ class Address : Auditable() {
     lateinit var country: String
     var description: String? = null
     var postalAdress: Boolean = false
+
+    fun getStreetAdress(): String {
+        return "$street $number${subPremise ?: ""}"
+    }
 }

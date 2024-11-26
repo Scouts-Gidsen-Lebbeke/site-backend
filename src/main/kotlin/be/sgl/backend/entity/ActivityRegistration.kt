@@ -3,6 +3,8 @@ package be.sgl.backend.entity
 import be.woutschoovaerts.mollie.data.payment.PaymentStatus
 import jakarta.persistence.*
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 @Entity
 class ActivityRegistration : Auditable() {
@@ -20,4 +22,8 @@ class ActivityRegistration : Auditable() {
     var present = false
     lateinit var start: LocalDateTime
     lateinit var end: LocalDateTime
+
+    fun calculateDays(): Int {
+        return ChronoUnit.DAYS.between(start, end).absoluteValue.toInt()
+    }
 }

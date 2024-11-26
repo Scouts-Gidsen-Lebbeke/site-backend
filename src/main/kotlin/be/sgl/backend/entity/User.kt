@@ -26,4 +26,8 @@ class User : Serializable {
     @ManyToMany
     @JoinTable(name = "sibling_relation")
     val siblings: MutableList<User> = mutableListOf()
+
+    fun getFullName(): String {
+        return "$firstName $name"
+    }
 }
