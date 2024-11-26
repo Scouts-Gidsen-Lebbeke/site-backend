@@ -31,23 +31,23 @@ class BelcotaxService {
     @Autowired
     private lateinit var mailService: MailService
 
-    fun getDispatchForFiscalYearAndRate(fiscalYear: Int?, rate: Double?): Verzendingen {
+    fun getDispatchForFiscalYearAndRate(fiscalYear: Int?, rate: Double): Verzendingen {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
         val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
-        val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user) }
+        val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, rate) }
         return dispatchService.createDispatch(fetchOwner(), fetchCertifier(), forms)
     }
 
-    fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double?): List<ByteArray> {
+    fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double): List<ByteArray> {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
         val user = userDataProvider.getUserWithAllData(username)
         val activities = registrationRepository.getByUserAndStartBetweenOrderByStart(user, beginOfYear, endOfYear).filter(::relevantActivity)
         val owner = fetchOwner()
         val certifier = fetchCertifier()
-        return activities.asForms(user).map { formService.createForm(owner, certifier, it) }
+        return activities.asForms(user, rate).map { formService.createForm(owner, certifier, it) }
     }
 
-    fun sendFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double?) {
+    fun sendFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double) {
         val year = fiscalYear ?: (LocalDate.now().year - 1)
         val user = userDataProvider.getUserWithAllData(username)
         val forms = getFormsForUserFiscalYearAndRate(username, year, rate)
@@ -74,8 +74,8 @@ class BelcotaxService {
         return userData.getAge(registration.start) < (if (userData.hasHandicap) 21 else 14)
     }
 
-    private fun List<ActivityRegistration>.asForms(user: User) = chunked(4).map {
-        DeclarationFormDTO(user, it[0], it.getOrNull(1), it.getOrNull(2), it.getOrNull(3))
+    private fun List<ActivityRegistration>.asForms(user: User, rate: Double) = chunked(4).map {
+        DeclarationFormDTO(user, it[0], it.getOrNull(1), it.getOrNull(2), it.getOrNull(3), rate)
     }
 
     private fun fetchOwner() = organizationRepository.getByType(OrganizationType.OWNER)

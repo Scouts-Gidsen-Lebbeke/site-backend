@@ -13,10 +13,12 @@ import java.time.format.DateTimeFormatter
 class DispatchService {
 
     /**
-     * Some things are NOT checked here:
-     *  - The logical grouping of declarations on members in chunks of four
-     *  - The age restriction of participating members
-     *  - The validity of nis numbers (both on organization level and on user level)
+     * Given the [owner] and [certifier] [Organization]s, generate the dispatch for the listed [forms]
+     * in the official [Verzendingen] format. Only the validity relevant for this specific dispatch is enforced.
+     * This means that some things are NOT checked here:
+     *  - The logical grouping of declarations on members in chunks of four.
+     *  - The age restriction of participating members.
+     *  - The validity of nis numbers (both on organization level and on user level).
      */
     fun createDispatch(owner: Organization, certifier: Organization, forms: List<DeclarationFormDTO>, previous: String? = null) : Verzendingen {
         check(forms.isNotEmpty()) { "At least one declaration should be present!" }
@@ -98,7 +100,7 @@ class DispatchService {
             // r8007Division => Not used for this form
             r8010Aantalrecords = (forms.size + 2).toString() // Don't search an explanation
             r8011Controletotaal = (forms.size * (forms.size - 1) / 2).toString() // Sum of all sequence numbers
-            r8012Controletotaal = TODO("") // Sum of all f86_2059_totaalcontrole fields
+            r8012Controletotaal = forms.sumOf { it.totalPrice * 2 }.toString() // Sum of all f86_2059_totaalcontrole fields
             r8013Totaalvoorheffingen = "0" // Don't search an explanation
         })
         dispatch.r9002Inkomstenjaar = dispatch.v0002Inkomstenjaar
@@ -148,13 +150,12 @@ class DispatchService {
         f862031Certificationautorisation = "2" // Local association
         f862055Begindate1 = formDTO.activity1.start.asBelcotaxDate()
         f862056Enddate1 = formDTO.activity1.end.asBelcotaxDate()
-        val totalAmount = formDTO.activity1.price + (formDTO.activity2?.price ?: 0.0) + (formDTO.activity3?.price ?: 0.0) + (formDTO.activity4?.price ?: 0.0)
-        f862059Totaalcontrole = (2 * totalAmount).toString()
-        f862060Amount1 = formDTO.activity1.price.toString()
-        f862061Amount2 = formDTO.activity2?.price?.toString()
-        f862062Amount3 = formDTO.activity3?.price?.toString()
-        f862063Amount4 = formDTO.activity4?.price?.toString()
-        f862064Totalamount = totalAmount.toString()
+        f862059Totaalcontrole = (2 * formDTO.totalPrice).toString()
+        f862060Amount1 = formDTO.activity1.price.pricePrecision()
+        f862061Amount2 = formDTO.activity2?.price.pricePrecision()
+        f862062Amount3 = formDTO.activity3?.price.pricePrecision()
+        f862063Amount4 = formDTO.activity4?.price.pricePrecision()
+        f862064Totalamount = formDTO.totalPrice.toString()
         f862093Begindate2 = formDTO.activity2?.start?.asBelcotaxDate()
         f862100Certifierpostnr = certifier.address.zipcode.assertLength("certifier zipcode", 4) // Only belgian certifiers are allowed
         f862101Childcountry = f2018Landwoonplaats // This should be correct for 99.9% of all cases
@@ -163,13 +164,13 @@ class DispatchService {
         f862107Childfirstname = formDTO.user.firstName.assertMaxLength("child first name for $f2010Referentie", 30)
         f862109Certifiercbenumber = certifier.kbo.assertLength("organization national number", 10)
         f862110Numberofday1 = formDTO.activity1.calculateDays().toString()
-        f862111Dailytariff1
+        f862111Dailytariff1 = formDTO.dailyPrice(formDTO.activity1).pricePrecision()
         f862113Numberofday2 = formDTO.activity2?.calculateDays()?.toString()
-        f862115Dailytariff2
+        f862115Dailytariff2 = formDTO.dailyPrice(formDTO.activity2).pricePrecision()
         f862116Numberofday3 = formDTO.activity3?.calculateDays()?.toString()
-        f862117Dailytariff3
+        f862117Dailytariff3 = formDTO.dailyPrice(formDTO.activity3).pricePrecision()
         f862119Numberofday4 = formDTO.activity4?.calculateDays()?.toString()
-        f862120Dailytariff4
+        f862120Dailytariff4 = formDTO.dailyPrice(formDTO.activity4).pricePrecision()
         f862139Childpostnr = f2016Postcodebelgisch ?: f2112Buitenlandspostnummer // This should be correct for 99.9% of all cases
         f862140Childmunicipality = f2017Gemeente // This should be correct for 99.9% of all cases
         f862144Enddate2 = formDTO.activity2?.end?.asBelcotaxDate()
@@ -190,6 +191,8 @@ class DispatchService {
 
     private fun LocalDateTime.asBelcotaxDate() = toLocalDate().asBelcotaxDate()
 
+    private fun Double?.pricePrecision() = this?.let { String.format("%.2f", it) }
+
     private fun String.toCountryCode() = when (this) {
         "BE" -> "150"
         "NL" -> "129"
@@ -200,17 +203,17 @@ class DispatchService {
         else -> TODO("Find out which stupid country mapping system our stupid Belgian government uses.")
     }
 
-    private fun String.escaped(): String = TODO("")
+    // No charset defined in the xsd, but this is from experience.
+    // FOD Justitie lets you create a company with it, but FOD Financiën doesn't accept declarations with it, big fun.
+    private fun String.escaped() = replace("&", "")
 
-    private fun String?.assertLength(field: String, length: Int): String {
+    private fun String?.assertLength(field: String, length: Int) = apply {
         checkNotNull(this) { "Missing $field" }
         check(this.length == length) { "Invalid $field length (should be $length): $this!" }
-        return this
     }
 
-    private fun String.assertMaxLength(field: String, maxLength: Int): String {
+    private fun String.assertMaxLength(field: String, maxLength: Int) = apply {
         check(this.length <= maxLength) { "Invalid $field length (max $maxLength): $this!" }
-        return this
     }
 
     private fun getCurrentUserLanguage() = when (LocaleContextHolder.getLocale().language) {
@@ -223,7 +226,11 @@ class DispatchService {
         val day = substring(4, 6)
         val month = substring(2, 4)
         val year = substring(0, 2)
-        val yearPrefix = if (formYear.substring(2).toInt() > year.toInt()) formYear.substring(0, 2) else formYear.substring(0, 2).toInt().minus(1).toString()
+        val yearPrefix = if (formYear.substring(2).toInt() > year.toInt()) {
+            formYear.substring(0, 2)
+        } else {
+            formYear.substring(0, 2).toInt().minus(1).toString()
+        }
         return "$day-$month-$yearPrefix$year"
     }
 }

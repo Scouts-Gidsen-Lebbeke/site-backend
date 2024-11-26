@@ -11,7 +11,8 @@ data class DeclarationFormDTO(
     val activity1: ActivityRegistration,
     val activity2: ActivityRegistration?,
     val activity3: ActivityRegistration?,
-    val activity4: ActivityRegistration?
+    val activity4: ActivityRegistration?,
+    val rate: Double
 ) {
     val year: String
         get() = activity1.start.year.toString()
@@ -21,6 +22,10 @@ data class DeclarationFormDTO(
         get() = user.userData.addresses.first { it.postalAdress }
     val parent: Contact
         get() = user.userData.contacts.first { it.nis != null }
+    val totalPrice: Double
+        get() = activity1.price + (activity2?.price ?: 0.0) + (activity3?.price ?: 0.0) + (activity4?.price ?: 0.0)
+
+    fun dailyPrice(activity: ActivityRegistration?) = activity?.price?.div(activity.calculateDays())?.takeIf { it > rate }
 }
 
 val ID_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
