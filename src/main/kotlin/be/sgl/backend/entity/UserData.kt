@@ -15,7 +15,7 @@ class UserData : Auditable() {
     lateinit var user: User
     var memberId: String? = null
     var birthdate: LocalDate = LocalDate.now()
-    var email: String? = null
+    lateinit var email: String
     var mobile: String? = null
     var nis: String? = null
     var accountNo: String? = null

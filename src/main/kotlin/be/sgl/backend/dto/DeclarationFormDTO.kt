@@ -12,12 +12,13 @@ data class DeclarationFormDTO(
     val activity2: ActivityRegistration?,
     val activity3: ActivityRegistration?,
     val activity4: ActivityRegistration?,
-    val rate: Double
+    val rate: Double,
+    private val index: Int
 ) {
     val year: String
         get() = activity1.start.year.toString()
     val id: String
-        get() = "${user.name[0]}${user.firstName[0]}${user.userData.birthdate.format(ID_DATE_FORMAT)}-$year"
+        get() = "${user.name[0]}${user.firstName[0]}${user.userData.birthdate.format(ID_DATE_FORMAT)}-$year-${index + 1}"
     val address: Address
         get() = user.userData.addresses.first { it.postalAdress }
     val parent: Contact

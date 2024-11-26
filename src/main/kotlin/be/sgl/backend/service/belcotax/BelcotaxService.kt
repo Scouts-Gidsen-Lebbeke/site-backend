@@ -31,14 +31,14 @@ class BelcotaxService {
     @Autowired
     private lateinit var mailService: MailService
 
-    fun getDispatchForFiscalYearAndRate(fiscalYear: Int?, rate: Double): Verzendingen {
+    fun getDispatchForFiscalYearAndRate(fiscalYear: Int?, rate: Double?): Verzendingen {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
         val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
         val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, rate) }
         return dispatchService.createDispatch(fetchOwner(), fetchCertifier(), forms)
     }
 
-    fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double): List<ByteArray> {
+    fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double?): List<ByteArray> {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
         val user = userDataProvider.getUserWithAllData(username)
         val activities = registrationRepository.getByUserAndStartBetweenOrderByStart(user, beginOfYear, endOfYear).filter(::relevantActivity)
@@ -47,19 +47,25 @@ class BelcotaxService {
         return activities.asForms(user, rate).map { formService.createForm(owner, certifier, it) }
     }
 
-    fun sendFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double) {
+    fun getFormsForFiscalYearAndRate(fiscalYear: Int?, rate: Double?): Map<User, List<ByteArray>> {
+        val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
+        val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
+        val owner = fetchOwner()
+        val certifier = fetchCertifier()
+        return activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, rate) }
+            .groupBy(DeclarationFormDTO::user) { formService.createForm(owner, certifier, it) }
+    }
+
+    fun mailFormsToUser(fiscalYear: Int?, user: User, forms: List<ByteArray>) {
         val year = fiscalYear ?: (LocalDate.now().year - 1)
-        val user = userDataProvider.getUserWithAllData(username)
-        val forms = getFormsForUserFiscalYearAndRate(username, year, rate)
         val params = mapOf("member.first.name" to user.firstName, "fiscal-year" to year)
-        val email = user.userData.email ?: throw IncompleteConfigurationException("No email configured, not able to send forms!")
-        mailService.builder()
+        val mailBuilder = mailService.builder()
             .from(fetchOwner().getEmail() ?: throw IncompleteConfigurationException("No organization email configured, not able to send forms!"))
-            .to(email)
+            .to(user.userData.email)
             .subject("Fiscaal attest kinderopvang $year")
             .template("declaration-form-confirmation.html", params)
-            .addAttachment()
-            .send()
+        forms.forEach { mailBuilder.addAttachment(it, "", "application/pdf") }
+        mailBuilder.send()
     }
 
     private fun getPeriod(fiscalYear: Int?): Pair<LocalDateTime, LocalDateTime> {
@@ -74,8 +80,8 @@ class BelcotaxService {
         return userData.getAge(registration.start) < (if (userData.hasHandicap) 21 else 14)
     }
 
-    private fun List<ActivityRegistration>.asForms(user: User, rate: Double) = chunked(4).map {
-        DeclarationFormDTO(user, it[0], it.getOrNull(1), it.getOrNull(2), it.getOrNull(3), rate)
+    private fun List<ActivityRegistration>.asForms(user: User, rate: Double?) = chunked(4).mapIndexed { index, it ->
+        DeclarationFormDTO(user, it[0], it.getOrNull(1), it.getOrNull(2), it.getOrNull(3), rate ?: 14.4, index)
     }
 
     private fun fetchOwner() = organizationRepository.getByType(OrganizationType.OWNER)
