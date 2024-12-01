@@ -1,17 +1,18 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.calendar
 
+import be.sgl.backend.entity.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
-class MembershipPeriod : Auditable() {
+class CalendarPeriod : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
-    lateinit var start: LocalDate
-    lateinit var end: LocalDate
-    var price: Double = 0.0
+    lateinit var name: String
+    var start = LocalDateTime.now()
+    var end = LocalDateTime.now()
 }

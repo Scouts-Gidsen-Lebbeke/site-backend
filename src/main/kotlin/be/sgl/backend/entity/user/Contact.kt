@@ -1,6 +1,7 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.user
 
-import be.sgl.backend.entity.enum.ContactRole
+import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType

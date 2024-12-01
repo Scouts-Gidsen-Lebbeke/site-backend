@@ -1,9 +1,9 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
-import be.sgl.backend.entity.ActivityRegistration
-import be.sgl.backend.entity.User
-import be.sgl.backend.entity.enum.OrganizationType
+import be.sgl.backend.entity.activity.ActivityRegistration
+import be.sgl.backend.entity.user.User
+import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.repository.ActivityRegistrationRepository
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.service.MailService

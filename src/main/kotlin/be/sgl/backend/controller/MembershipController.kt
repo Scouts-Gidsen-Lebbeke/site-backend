@@ -1,6 +1,7 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.config.security.LevelSecurityService
+import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.service.MembershipService
 import io.swagger.v3.oas.annotations.Operation
@@ -37,7 +38,7 @@ class MembershipController {
     }
 
     @GetMapping("/period/{periodId}")
-    @PreAuthorize("@levelSecurityService.isStaff()")
+    @OnlyStaff
     fun getAllMembershipsForCurrentPeriod(@PathVariable periodId: Int?): ResponseEntity<List<MembershipDTO>> {
         // TODO
         return ResponseEntity.ok(emptyList())

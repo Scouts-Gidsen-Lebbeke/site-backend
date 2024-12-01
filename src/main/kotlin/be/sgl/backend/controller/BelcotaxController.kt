@@ -2,6 +2,7 @@ package be.sgl.backend.controller
 
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.LevelSecurityService
+import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.service.belcotax.BelcotaxService
 import be.sgl.backend.util.zipped
 import generated.Verzendingen
@@ -27,12 +28,10 @@ import java.util.concurrent.Executors
 class BelcotaxController {
 
     @Autowired
-    private lateinit var levelSecurityService: LevelSecurityService
-    @Autowired
     private lateinit var belcotaxService: BelcotaxService
 
     @GetMapping("/dispatch/{fiscalYear}", produces = ["application/xml"])
-    @PreAuthorize("@levelSecurityService.isAdmin()")
+    @OnlyAdmin
     @Operation(summary = "Retrieve the Belcotax dispatch xml file.")
     fun getDispatchForFiscalYear(@PathVariable fiscalYear: Int?, @RequestParam rate: Double?): ResponseEntity<Verzendingen> {
         return ResponseEntity.ok(belcotaxService.getDispatchForFiscalYearAndRate(fiscalYear, rate))
@@ -57,7 +56,7 @@ class BelcotaxController {
     }
 
     @GetMapping("/mail/{fiscalYear}")
-    @PreAuthorize("@levelSecurityService.isAdmin()")
+    @OnlyAdmin
     @Operation(summary = "Mail the Belcotax forms to all relevant users.")
     fun mailFormsForFiscalYear(@PathVariable fiscalYear: Int?, @RequestParam rate: Double?): SseEmitter {
         val emitter = SseEmitter()

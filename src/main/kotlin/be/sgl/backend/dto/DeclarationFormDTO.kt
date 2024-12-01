@@ -1,9 +1,9 @@
 package be.sgl.backend.dto
 
-import be.sgl.backend.entity.ActivityRegistration
+import be.sgl.backend.entity.activity.ActivityRegistration
 import be.sgl.backend.entity.Address
-import be.sgl.backend.entity.Contact
-import be.sgl.backend.entity.User
+import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.entity.user.User
 import java.time.format.DateTimeFormatter
 
 data class DeclarationFormDTO(

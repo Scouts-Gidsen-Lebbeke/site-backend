@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.enum
+package be.sgl.backend.entity.branch
 
 enum class BranchStatus {
     ACTIVE, MEMBER, PASSIVE, HIDDEN

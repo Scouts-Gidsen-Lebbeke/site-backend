@@ -1,19 +1,18 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.membership
 
+import be.sgl.backend.entity.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.Lob
+import java.time.LocalDate
 
 @Entity
-class Activity : Auditable() {
+class MembershipPeriod : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
-    lateinit var name: String
-    @Lob
-    lateinit var info: String
-    @Lob
-    var additionalInfo: String? = null
+    lateinit var start: LocalDate
+    lateinit var end: LocalDate
+    var price: Double = 0.0
 }

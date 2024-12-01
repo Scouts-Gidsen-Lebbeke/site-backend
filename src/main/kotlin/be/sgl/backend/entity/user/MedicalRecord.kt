@@ -1,5 +1,6 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.user
 
+import be.sgl.backend.entity.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.OneToOne

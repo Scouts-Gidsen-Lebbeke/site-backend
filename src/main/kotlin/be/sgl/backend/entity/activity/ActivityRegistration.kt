@@ -1,5 +1,7 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.activity
 
+import be.sgl.backend.entity.Auditable
+import be.sgl.backend.entity.user.User
 import be.woutschoovaerts.mollie.data.payment.PaymentStatus
 import jakarta.persistence.*
 import java.time.LocalDateTime

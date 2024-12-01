@@ -1,8 +1,9 @@
 package be.sgl.backend.config.security
 
-import be.sgl.backend.entity.enum.RoleLevel
+import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
@@ -24,3 +25,13 @@ class LevelSecurityService {
         return user.roles.any { it.role.level == level }
     }
 }
+
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@PreAuthorize("@levelSecurityService.isAdmin()")
+annotation class OnlyAdmin
+
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@PreAuthorize("@levelSecurityService.isStaff()")
+annotation class OnlyStaff

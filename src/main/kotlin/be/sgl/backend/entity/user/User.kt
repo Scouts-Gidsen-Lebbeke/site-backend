@@ -1,4 +1,4 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.user
 
 import jakarta.persistence.*
 import java.io.Serializable
@@ -21,6 +21,8 @@ class User : Serializable {
     var image: String? = null
     @OneToOne(fetch = FetchType.LAZY)
     var userData = UserData()
+    @OneToOne(fetch = FetchType.LAZY)
+    var staffData = StaffData()
     @OneToMany(fetch = FetchType.EAGER)
     val roles: MutableList<UserRole> = mutableListOf()
     @ManyToMany

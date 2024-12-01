@@ -1,6 +1,6 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.user
 
-import be.sgl.backend.entity.enum.RoleLevel
+import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.*
 
 @Entity
@@ -11,8 +11,8 @@ class Role {
     var externalId: String? = null
     var backupExternalId: String? = null
     lateinit var name: String
-    @ManyToOne
-    var branch: Branch? = null
+//    @ManyToOne
+//    var branch: Branch? = null
     @ManyToOne
     var staffBranch: Branch? = null
     var level = RoleLevel.GUEST

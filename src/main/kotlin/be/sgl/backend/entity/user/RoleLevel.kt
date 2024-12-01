@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.enum
+package be.sgl.backend.entity.user
 
 enum class RoleLevel {
     ADMIN, STAFF, MEMBER, SCOUT, GUEST

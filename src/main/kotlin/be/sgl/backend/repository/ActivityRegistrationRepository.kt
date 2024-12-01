@@ -1,7 +1,7 @@
 package be.sgl.backend.repository
 
-import be.sgl.backend.entity.ActivityRegistration
-import be.sgl.backend.entity.User
+import be.sgl.backend.entity.activity.ActivityRegistration
+import be.sgl.backend.entity.user.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime

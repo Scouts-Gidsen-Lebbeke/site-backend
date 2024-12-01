@@ -1,6 +1,6 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.organization
 
-import be.sgl.backend.entity.enum.ContactMethodType
+import be.sgl.backend.entity.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.OneToOne

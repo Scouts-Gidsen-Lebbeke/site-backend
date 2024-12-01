@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.enum
+package be.sgl.backend.entity.user
 
 enum class ContactRole {
     MOTHER, FATHER, GUARDIAN, RESPONSIBLE

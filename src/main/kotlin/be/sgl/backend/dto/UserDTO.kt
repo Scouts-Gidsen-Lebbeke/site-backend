@@ -1,6 +1,6 @@
 package be.sgl.backend.dto
 
-import be.sgl.backend.entity.enum.Sex
+import be.sgl.backend.entity.user.Sex
 import java.io.Serializable
 import java.time.LocalDate
 

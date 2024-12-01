@@ -1,7 +1,8 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.organization
 
-import be.sgl.backend.entity.enum.ContactMethodType
-import be.sgl.backend.entity.enum.OrganizationType
+import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.Auditable
+import be.sgl.backend.entity.user.User
 import jakarta.persistence.*
 
 @Entity

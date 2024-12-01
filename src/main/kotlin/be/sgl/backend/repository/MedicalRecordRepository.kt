@@ -1,7 +1,7 @@
 package be.sgl.backend.repository
 
-import be.sgl.backend.entity.MedicalRecord
-import be.sgl.backend.entity.User
+import be.sgl.backend.entity.user.MedicalRecord
+import be.sgl.backend.entity.user.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

@@ -1,7 +1,7 @@
 package be.sgl.backend.service.mapper
 
 import be.sgl.backend.dto.MembershipDTO
-import be.sgl.backend.entity.Membership
+import be.sgl.backend.entity.membership.Membership
 import org.mapstruct.Mapper
 
 @Mapper(componentModel = "spring")

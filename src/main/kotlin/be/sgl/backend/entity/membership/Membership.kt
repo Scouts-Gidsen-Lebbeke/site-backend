@@ -1,5 +1,8 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.membership
 
+import be.sgl.backend.entity.Auditable
+import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.user.User
 import be.woutschoovaerts.mollie.data.payment.PaymentStatus
 import jakarta.persistence.*
 

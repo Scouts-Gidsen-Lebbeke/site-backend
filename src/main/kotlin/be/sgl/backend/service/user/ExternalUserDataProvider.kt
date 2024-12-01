@@ -2,8 +2,9 @@ package be.sgl.backend.service.user
 
 import be.sgl.backend.config.security.BearerTokenFilter
 import be.sgl.backend.entity.*
-import be.sgl.backend.entity.enum.ContactRole
-import be.sgl.backend.entity.enum.Sex
+import be.sgl.backend.entity.user.ContactRole
+import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.entity.user.*
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.UserRepository
 import be.sgl.backend.util.Functie

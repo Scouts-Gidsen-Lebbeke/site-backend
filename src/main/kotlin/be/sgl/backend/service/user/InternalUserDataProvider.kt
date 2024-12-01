@@ -1,8 +1,8 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.MedicalRecord
-import be.sgl.backend.entity.User
-import be.sgl.backend.entity.UserRegistration
+import be.sgl.backend.entity.user.MedicalRecord
+import be.sgl.backend.entity.user.User
+import be.sgl.backend.entity.user.UserRegistration
 import be.sgl.backend.repository.MedicalRecordRepository
 import be.sgl.backend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired

@@ -6,6 +6,7 @@ import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -21,21 +22,24 @@ class NewsItemController {
     }
 
     @GetMapping("/{id}")
-    fun getNewsItems(@PathVariable id: Int): ResponseEntity<NewsItemDTO?> {
+    fun getNewsItem(@PathVariable id: Int): ResponseEntity<NewsItemDTO> {
         return ResponseEntity.ok(newsItemService.getNewsItemDTOById(id))
     }
 
     @PostMapping
+    @PreAuthorize("@levelSecurityService.isStaff()")
     fun createNewsItem(@Valid @RequestBody newsItem: NewsItemDTO): ResponseEntity<NewsItemDTO> {
         return ResponseEntity(newsItemService.saveNewsItemDTO(newsItem), HttpStatus.CREATED)
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@levelSecurityService.isStaff()")
     fun updateNewsItem(@PathVariable id: Int, @Valid @RequestBody newsItem: NewsItemDTO): ResponseEntity<NewsItemDTO> {
         return ResponseEntity.ok(newsItemService.mergeNewsItemDTOChanges(id, newsItem))
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@levelSecurityService.isStaff()")
     fun deleteNewsItem(@PathVariable id: Int): ResponseEntity<String> {
         newsItemService.deleteNewsItem(id)
         return ResponseEntity.ok("News item deleted successfully.")

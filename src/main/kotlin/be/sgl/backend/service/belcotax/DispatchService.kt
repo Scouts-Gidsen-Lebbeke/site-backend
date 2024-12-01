@@ -1,7 +1,7 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
-import be.sgl.backend.entity.Organization
+import be.sgl.backend.entity.organization.Organization
 import generated.*
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service

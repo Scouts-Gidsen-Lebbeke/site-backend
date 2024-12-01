@@ -1,7 +1,9 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.branch
 
-import be.sgl.backend.entity.enum.BranchStatus
+import be.sgl.backend.entity.Auditable
+import be.sgl.backend.entity.user.User
 import jakarta.persistence.*
+import kotlin.jvm.Transient
 
 @Entity
 class Branch : Auditable() {
@@ -20,4 +22,6 @@ class Branch : Auditable() {
     @Enumerated(EnumType.STRING)
     var status = BranchStatus.PASSIVE
     lateinit var staffTitle: String
+    @Transient
+    var staff = listOf<User>()
 }

@@ -18,7 +18,7 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException::class)
-    fun handleUserNotFoundException(ex: NotFoundException): ResponseEntity<String> {
+    fun handleNotFoundException(ex: NotFoundException): ResponseEntity<String> {
         return ResponseEntity(ex.message, HttpStatus.NOT_FOUND)
     }
 
@@ -27,7 +27,8 @@ class GlobalExceptionHandler {
         return ResponseEntity(ex.message, HttpStatus.CONFLICT)
     }
 
-    fun handleCoffeeException(): ResponseEntity<String> {
+    @ExceptionHandler(NotImplementedError::class)
+    fun handleCoffeeException(ex: NotImplementedError): ResponseEntity<String> {
         return ResponseEntity("Drink some tea", HttpStatus.I_AM_A_TEAPOT)
     }
 }
