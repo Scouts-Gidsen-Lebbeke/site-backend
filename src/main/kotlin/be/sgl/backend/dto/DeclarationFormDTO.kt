@@ -1,6 +1,6 @@
 package be.sgl.backend.dto
 
-import be.sgl.backend.entity.activity.ActivityRegistration
+import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.User

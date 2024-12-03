@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
 @RestController
-@RequestMapping("/membership")
+@RequestMapping("/memberships")
 @Tag(name = "Memberships", description = "Endpoints for managing memberships")
 class MembershipController {
 

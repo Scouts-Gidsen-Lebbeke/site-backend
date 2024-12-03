@@ -1,5 +1,6 @@
 package be.sgl.backend.entity.user
 
+import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.*
 import java.io.Serializable
 

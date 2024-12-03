@@ -1,7 +1,7 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
-import be.sgl.backend.entity.activity.ActivityRegistration
+import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.organization.Organization
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm

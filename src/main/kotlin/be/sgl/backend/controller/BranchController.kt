@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/branch")
+@RequestMapping("/branches")
 @Tag(name = "Branches", description = "Endpoints for managing branches")
 class BranchController {
 
@@ -39,7 +39,7 @@ class BranchController {
 
     @PutMapping("/{id}")
     @OnlyStaff
-    fun updateNewsItem(@PathVariable id: Int, @Valid @RequestBody branch: BranchDTO): ResponseEntity<BranchDTO> {
+    fun updateBranch(@PathVariable id: Int, @Valid @RequestBody branch: BranchDTO): ResponseEntity<BranchDTO> {
         return ResponseEntity.ok(branchService.mergeBranchDTOChanges(id, branch))
     }
 
