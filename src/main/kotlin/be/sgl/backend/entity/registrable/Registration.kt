@@ -9,7 +9,7 @@ import jakarta.persistence.MappedSuperclass
 abstract class Registration<T : Registrable> : Payment() {
     @ManyToOne
     lateinit var subscribable: T
-    var present = false
+    var completed = false
     @Lob
     var additionalData: String? = null
 }

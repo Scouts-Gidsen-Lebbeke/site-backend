@@ -141,6 +141,11 @@
             <artifactId>pdfbox</artifactId>
             <version>3.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.dashjoin</groupId>
+            <artifactId>jsonata</artifactId>
+            <version>0.9.8</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -12,6 +12,8 @@ import kotlin.math.absoluteValue
 class ActivityRegistration : Registration<Activity>() {
     @ManyToOne
     lateinit var user: User
+    @ManyToOne
+    lateinit var restriction: ActivityRestriction
     lateinit var start: LocalDateTime
     lateinit var end: LocalDateTime
 

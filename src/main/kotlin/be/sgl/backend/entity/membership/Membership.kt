@@ -25,5 +25,8 @@ class Membership : Auditable() {
     @Enumerated(EnumType.STRING)
     var status: PaymentStatus = PaymentStatus.OPEN
     var price: Double = 0.0
+    var reductionFactor: Double = 3.0
     var paymentId: String? = null
+    @OneToMany
+    var restrictions = mutableListOf<MembershipRestriction>()
 }

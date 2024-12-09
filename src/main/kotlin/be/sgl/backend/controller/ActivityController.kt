@@ -5,9 +5,6 @@ import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.dto.ActivityRegistrationDTO
-import be.sgl.backend.dto.BranchBaseDTO
-import be.sgl.backend.dto.BranchDTO
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.service.activity.ActivityService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
