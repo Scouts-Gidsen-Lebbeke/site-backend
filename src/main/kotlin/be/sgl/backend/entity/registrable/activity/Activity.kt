@@ -23,17 +23,4 @@ class Activity : Registrable() {
     var siblingReduction: Double = 0.0
     @OneToMany
     var restrictions = mutableListOf<ActivityRestriction>()
-
-    fun calculatePrice(user: User, restriction: ActivityRestriction, additionalData: String): Double {
-        var finalPrice = restriction.alternativePrice ?: price
-        val additionalPrice = readAdditionalData(additionalData)
-        if (user.userData.hasReduction) {
-            return finalPrice / reductionFactor + additionalPrice
-        }
-        finalPrice += additionalPrice
-        if (user.siblings.any { it.isSubscribed() && !it.userData.hasReduction }) {
-            return (finalPrice - siblingReduction).coerceAtLeast(0.0)
-        }
-        return finalPrice
-    }
 }

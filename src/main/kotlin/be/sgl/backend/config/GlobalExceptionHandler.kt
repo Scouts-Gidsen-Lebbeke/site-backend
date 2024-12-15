@@ -22,6 +22,11 @@ class GlobalExceptionHandler {
         return ResponseEntity(ex.message, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalStateExceptions(ex: IllegalStateException): ResponseEntity<String> {
+        return ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(IncompleteConfigurationException::class)
     fun handleIncompleteConfigurationException(ex: IncompleteConfigurationException): ResponseEntity<String> {
         return ResponseEntity(ex.message, HttpStatus.CONFLICT)

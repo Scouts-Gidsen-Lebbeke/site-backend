@@ -54,7 +54,8 @@ abstract class Registrable : Payable() {
      */
     var cancelled: Boolean = false
 
-    fun readAdditionalData(additionalData: String): Double {
+    fun readAdditionalData(additionalData: String?): Double {
+        additionalData ?: return 0.0
         return jsonata(additionalFormRule)
             .evaluate(ObjectMapper().readTree(additionalData))
             .toString().toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
