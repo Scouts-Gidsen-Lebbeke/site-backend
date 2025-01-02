@@ -23,35 +23,35 @@ jobs:
       - name: Build JAR file
         run: mvn clean package -Dmaven.test.skip
 
-      - name: Gcloud authentication
-        uses: 'google-github-actions/auth@v2'
-        with:
-          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-
-      - name: Set up Cloud SDK
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: Authenticate Docker to Google Cloud Container Registry
-        run: gcloud auth configure-docker --quiet
-
-      - name: Build and push Docker image to Google Container Registry
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
-          docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME .
-          docker push $IMAGE_NAME
-
-      - name: Deploy to Cloud Run
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_USER: ${{ secrets.DB_USER_TEST }}
-          DB_PASS: ${{ secrets.DB_PASS_TEST }}
-          DB_NAME: ${{ secrets.DB_NAME_TEST }}
-        run: |
-          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
-          gcloud run deploy site-backend \
-            --image $IMAGE_NAME \
-            --platform managed \
-            --region europe-west1 \
-            --allow-unauthenticated \
-            --update-env-vars DB_HOST=${{ env.DB_HOST }},DB_USER=${{ env.DB_USER }},DB_PASS=${{ env.DB_PASS }},DB_NAME=${{ env.DB_NAME }}
+#      - name: Gcloud authentication
+#        uses: 'google-github-actions/auth@v2'
+#        with:
+#          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+#
+#      - name: Set up Cloud SDK
+#        uses: 'google-github-actions/setup-gcloud@v2'
+#
+#      - name: Authenticate Docker to Google Cloud Container Registry
+#        run: gcloud auth configure-docker --quiet
+#
+#      - name: Build and push Docker image to Google Container Registry
+#        run: |
+#          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
+#          docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME .
+#          docker push $IMAGE_NAME
+#
+#      - name: Deploy to Cloud Run
+#        env:
+#          DB_HOST: ${{ secrets.DB_HOST_TEST }}
+#          DB_USER: ${{ secrets.DB_USER_TEST }}
+#          DB_PASS: ${{ secrets.DB_PASS_TEST }}
+#          DB_NAME: ${{ secrets.DB_NAME_TEST }}
+#        run: |
+#          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT }}/site-backend
+#          gcloud run deploy site-backend \
+#            --image $IMAGE_NAME \
+#            --platform managed \
+#            --region europe-west1 \
+#            --allow-unauthenticated \
+#            --update-env-vars DB_HOST=${{ env.DB_HOST }},DB_USER=${{ env.DB_USER }},DB_PASS=${{ env.DB_PASS }},DB_NAME=${{ env.DB_NAME }}
