@@ -12,4 +12,8 @@ abstract class Registration<T : Registrable> : Payment() {
     var completed = false
     @Lob
     var additionalData: String? = null
+
+    override fun getDescription(): String {
+        return subscribable.name
+    }
 }

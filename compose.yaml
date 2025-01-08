@@ -1,0 +1,23 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    command: start-dev --hostname=localhost
+    environment:
+      DB_VENDOR: mariadb
+      DB_ADDR: host.docker.internal
+      DB_PORT: 3306
+      DB_DATABASE: keycloak
+      DB_USER: root
+      DB_PASSWORD: local-sql
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KEYCLOAK_IMPORT: /opt/keycloak/realms/default-realm.json
+    ports:
+      - "8090:8080"
+  smtp:
+    image: mailhog/mailhog
+    container_name: smtp
+    ports:
+      - "1025:1025"
+      - "8025:8025"

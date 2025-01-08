@@ -52,4 +52,8 @@ class ActivityRestriction : Auditable() {
      * For the other named options, the alternative limit is then discarded if their total exceeds the branch limit.
      */
     var alternativeLimit: Int? = null
+
+    fun isBranchLimit(): Boolean {
+        return alternativePrice == null && alternativeStart == null && alternativeEnd == null && name == null
+    }
 }

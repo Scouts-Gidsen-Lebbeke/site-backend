@@ -1,6 +1,7 @@
 package be.sgl.backend.dto
 
 import be.sgl.backend.entity.registrable.RegistrableStatus
+import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import jakarta.validation.constraints.*
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -71,3 +72,23 @@ class ActivityResultDTO(
     var totalPrice: Double,
     var status: RegistrableStatus
 ) : ActivityBaseDTO(name, start, end)
+
+/**
+ * DTO for user feedback about the current activity:
+ *  - First of all, the activity should be open for registrations. This check should be happened on activity retrieval.
+ *  - The user can only register if he hasn't already a paid registration.
+ *  - If the user has a pending registration, it should be finished before creating another one.
+ *  - The user can only register when he has an active branch membership.
+ *  - When he has an active branch, it should have a matching restriction, meaning not both of the options are empty.
+ *  - When an option is present for this member, it should be part of the open options (otherwise the limit is reached).
+ *  - When it has one or more valid restrictions, its medical info should be present.
+ *  - When its medical info is existing, it should still be up to date (according to the up-to-date flag).
+ */
+data class ActivityRegistrationStatus(
+    val currentRegistration: ActivityRegistrationDTO?,
+    val activeMembership: Boolean,
+    val openOptions: List<ActivityRestrictionDTO>,
+    val closedOptions: List<ActivityRestrictionDTO>,
+    val medicsDate: LocalDateTime?,
+    val medicalsUpToDate: Boolean
+)

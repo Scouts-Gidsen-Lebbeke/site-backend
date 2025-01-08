@@ -8,11 +8,13 @@ import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.service.activity.ActivityService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -62,11 +64,20 @@ class ActivityController {
         return ResponseEntity.ok("Activity deactivated successfully.")
     }
 
-    @PostMapping("/{id}/register")
-    fun registerCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
+    @PostMapping("/{id}/register/{restrictionId}")
+    fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails,
+                            @RequestBody data: String, request: HttpServletRequest): ResponseEntity<Unit> {
+        request.requestURI + "/updatePayment"
+        val checkoutUrl = activityService.createPaymentForActivity(id, restrictionId, userDetails.username, data)
         val headers = HttpHeaders()
-        headers.location = URI("https://mysite.com/checkout")
+        headers.location = URI(checkoutUrl)
         return ResponseEntity(headers, HttpStatus.FOUND)
+    }
+
+    @PostMapping("/{id}/register/{restrictionId}/updatePayment")
+    @PreAuthorize("permitAll()")
+    fun updatePayment(@PathVariable id: Int, @PathVariable restrictionId: Int): ResponseEntity<Unit> {
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/{id}/registrations")

@@ -12,4 +12,6 @@ abstract class Payment : Auditable() {
     var status: PaymentStatus = PaymentStatus.OPEN
     var price: Double = 0.0
     var paymentId: String? = null
+
+    abstract fun getDescription(): String
 }

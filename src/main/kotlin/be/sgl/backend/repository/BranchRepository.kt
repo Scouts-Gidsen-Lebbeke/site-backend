@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface BranchRepository : JpaRepository<Branch, Int> {
-    fun getByStatusIn(statuses: Collection<BranchStatus>): List<Branch>
-    fun getBranchesWithCalendar() = getByStatusIn(listOf(ACTIVE))
-    fun getPaidBranches() = getByStatusIn(listOf(ACTIVE, MEMBER))
-    fun getVisibleBranches() = getByStatusIn(listOf(ACTIVE, MEMBER, PASSIVE))
+    fun getByStatusIn(vaerstatuses: Collection<BranchStatus>): List<Branch>
+    // fun getBranchesWithCalendar() = getByStatusIn(listOf(ACTIVE))
+    // fun getPaidBranches() = getByStatusIn(listOf(ACTIVE, MEMBER))
+    // fun getVisibleBranches() = getByStatusIn(listOf(ACTIVE, MEMBER, PASSIVE))
 }

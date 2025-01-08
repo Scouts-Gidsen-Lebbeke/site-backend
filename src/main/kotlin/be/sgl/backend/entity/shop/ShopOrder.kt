@@ -8,9 +8,11 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.ManyToOne
 
 @Entity
-class Order : Payment() {
+class ShopOrder : Payment() {
     @ManyToOne
     var user: User? = null
+    @ManyToOne
+    lateinit var shop: Shop
     lateinit var name: String
     lateinit var firstName: String
     lateinit var email: String
@@ -19,4 +21,8 @@ class Order : Payment() {
     var deliveryOption = DeliveryOption.PICKUP
     var deliveryDetails: String? = null
     var remarks: String? = null
+
+    override fun getDescription(): String {
+        return "${shop.name} #$id"
+    }
 }

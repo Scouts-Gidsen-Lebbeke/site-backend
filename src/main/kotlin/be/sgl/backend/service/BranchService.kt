@@ -4,6 +4,7 @@ import be.sgl.backend.dto.BranchBaseDTO
 import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.entity.branch.BranchStatus.*
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.UserRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
@@ -28,11 +29,11 @@ class BranchService {
     }
 
     fun getBranchesWithCalendar(): List<BranchBaseDTO> {
-        return branchRepository.getBranchesWithCalendar().map(mapper::toBaseDto)
+        return branchRepository.getByStatusIn(listOf(ACTIVE)).map(mapper::toBaseDto)
     }
 
     fun getVisibleBranches(): List<BranchBaseDTO> {
-        return branchRepository.getVisibleBranches().map(mapper::toBaseDto)
+        return branchRepository.getByStatusIn(listOf(ACTIVE, MEMBER, PASSIVE)).map(mapper::toBaseDto)
     }
 
     fun getAllBranches(): List<BranchBaseDTO> {

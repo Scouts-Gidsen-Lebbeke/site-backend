@@ -5,8 +5,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>3.4.0</version>
+        <relativePath/>
     </parent>
     <groupId>be.sgl</groupId>
     <artifactId>site-backend</artifactId>
@@ -14,11 +14,12 @@
     <name>site-backend</name>
     <description>site-backend</description>
     <url/>
-    <licenses>
-        <license/>
-    </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <name>Robin Keppens</name>
+            <email>webmaster@scoutslebbeke.be</email>
+            <organization>Scouts &amp; Gidsen Lebbeke</organization>
+        </developer>
     </developers>
     <scm>
         <connection/>
@@ -30,12 +31,19 @@
         <java.version>21</java.version>
         <kotlin.version>1.9.25</kotlin.version>
         <org.mapstruct.version>1.6.2</org.mapstruct.version>
+        <org.keycloak.version>25.0.3</org.keycloak.version>
+        <mysql.version>8.0.33</mysql.version>
+        <org.apache.pdfbox.version>3.0.3</org.apache.pdfbox.version>
+        <org.springdoc.version>2.6.0</org.springdoc.version>
+        <mollie.version>4.4.3</mollie.version>
+        <jsonata.version>0.9.8</jsonata.version>
+        <jaxb.maven.plugin.version>3.2.0</jaxb.maven.plugin.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-boot-starter</artifactId>
-            <version>25.0.3</version>
+            <version>${org.keycloak.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,22 +96,23 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>8.0.0.Final</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
+            <version>${mysql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -119,32 +128,30 @@
         <dependency>
             <groupId>be.woutschoovaerts</groupId>
             <artifactId>mollie</artifactId>
-            <version>4.4.3</version>
+            <version>${mollie.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version>
+            <version>${org.springdoc.version}</version>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>3.0.3</version>
+            <version>${org.apache.pdfbox.version}</version>
         </dependency>
         <dependency>
             <groupId>com.dashjoin</groupId>
             <artifactId>jsonata</artifactId>
-            <version>0.9.8</version>
+            <version>${jsonata.version}</version>
         </dependency>
 
         <dependency>
@@ -213,7 +220,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>${jaxb.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -225,7 +232,6 @@
                     <sources>
                         <source>${project.basedir}/src/main/resources/xsd/Belcotax-2023.xsd</source>
                     </sources>
-                    <!--outputDirectory>${project.basedir}/target/generated-sources/jaxb</outputDirectory-->
                 </configuration>
             </plugin>
         </plugins>

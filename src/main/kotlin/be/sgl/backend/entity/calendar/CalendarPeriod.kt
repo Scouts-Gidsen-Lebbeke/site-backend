@@ -5,7 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 @Entity
 class CalendarPeriod : Auditable() {
@@ -13,6 +13,6 @@ class CalendarPeriod : Auditable() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
     lateinit var name: String
-    var start = LocalDateTime.now()
-    var end = LocalDateTime.now()
+    var start = LocalDate.now()
+    var end = LocalDate.now()
 }

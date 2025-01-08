@@ -21,7 +21,7 @@ class UserRole() : Auditable() {
     lateinit var startDate: LocalDate
     var endDate: LocalDate? = null
 
-    constructor(user: User, role: Role, startDate: LocalDate, endDate: LocalDate?) : this() {
+    constructor(user: User, role: Role, startDate: LocalDate, endDate: LocalDate? = null) : this() {
         this.user = user
         this.role = role
         this.startDate = startDate

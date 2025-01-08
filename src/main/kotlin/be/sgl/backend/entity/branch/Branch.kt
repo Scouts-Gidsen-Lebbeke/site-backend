@@ -21,7 +21,7 @@ class Branch : Auditable() {
     lateinit var image: String
     @Enumerated(EnumType.STRING)
     var status = BranchStatus.PASSIVE
-    lateinit var staffTitle: String
+    var staffTitle: String? = null
     @Transient
     var staff = listOf<User>()
 }

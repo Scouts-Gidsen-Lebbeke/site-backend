@@ -2,7 +2,7 @@ package be.sgl.backend.service.activity
 
 import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.dto.ActivityRegistrationDTO
-import be.sgl.backend.entity.registrable.RegistrableStatus
+import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
@@ -14,10 +14,11 @@ import be.sgl.backend.repository.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
 import be.sgl.backend.service.exception.RestrictionNotFoundException
 import be.sgl.backend.service.mapper.ActivityMapper
+import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-
+import java.time.LocalDateTime
 
 @Service
 class ActivityService {
@@ -32,6 +33,8 @@ class ActivityService {
     private lateinit var restrictionRepository: ActivityRestrictionRepository
     @Autowired
     private lateinit var activityMapper: ActivityMapper
+    @Autowired
+    private lateinit var checkoutProvider: CheckoutProvider
 
     fun getAllActivities(): List<ActivityDTO> {
         return activityRepository.findAll().map(activityMapper::toDto)
@@ -47,6 +50,7 @@ class ActivityService {
 
     fun saveActivityDTO(dto: ActivityDTO): ActivityDTO {
         validateActivityDTO(dto)
+        check(LocalDateTime.now() < dto.closed) { "New activities should still have the possibility to register!" }
         val newActivity = activityMapper.toEntity(dto)
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
@@ -55,56 +59,56 @@ class ActivityService {
     }
 
     private fun validateActivityDTO(dto: ActivityDTO) {
+        check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
+        check(dto.closed < dto.start) { "The start date of an activity should be after the closure of registrations!" }
         check(dto.start < dto.end) { "The start date of an activity should be before its end date!" }
-        check(dto.closed < dto.start) { "The start date of an activity should be after the closure of subscriptions!" }
     }
 
     fun mergeActivityDTOChanges(id: Int, dto: ActivityDTO): ActivityDTO {
         validateActivityDTO(dto)
         val activity = getActivityById(id)
-        if (activity.getStatus() == RegistrableStatus.NOT_YET_OPEN) {
+        // update this first, maybe the status alters
+        activity.closed = dto.closed
+        check(activity.getStatus() != CANCELLED) { "A cancelled activity cannot be edited anymore!" }
+        check(activity.getStatus() != STARTED) { "A started activity cannot be edited anymore!" }
+        check(activity.getStatus() != COMPLETED) { "A completed activity cannot be edited anymore!" }
+        check(activity.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
+        if (activity.getStatus() == NOT_YET_OPEN) {
+            // price and user data collection can only be altered is no registration was possible yet
             activity.reductionFactor = dto.reductionFactor
             activity.siblingReduction = dto.siblingReduction
+            activity.price = dto.price
+            activity.additionalForm = dto.additionalForm
+            activity.additionalFormRule = dto.additionalFormRule
+            check(dto.cancellable || !activity.cancellable) { "A previously cancellable activity cannot be made uncancellable!" }
+            activity.cancellable = dto.cancellable
+            // Core activity data that is used in certificates, should never be changed when registrations opened
+            activity.name = dto.name
+            activity.start = dto.start
+            activity.end = dto.end
+            // One can only delay or advance the registration period when it wasn't open yet
+            activity.open = dto.open
+            restrictionRepository.deleteAll(activity.restrictions)
+            activity.restrictions = dto.restrictions.map(activityMapper::toEntity).toMutableList()
+            activity.validateRestrictions()
+        } else {
+            val updatedRestrictions = dto.restrictions.map(activityMapper::toEntity).toMutableList()
+            for (existing in activity.restrictions) {
+                val updated = updatedRestrictions.find { it.id == existing.id }
+                check(updated != null) { "Existing activity restrictions cannot be removed once the activity has started!" }
+                check(updated.alternativePrice == existing.alternativePrice) { "The price of started activity cannot be altered once the activity has started!" }
+            }
+            activity.restrictions.addAll(restrictionRepository.saveAll(updatedRestrictions))
+            val registrationCount = registrationRepository.getBySubscribable(activity).count()
+            check(dto.limit == null || registrationCount < dto.limit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
-        synchronizeRestrictions(activity, dto.restrictions.map(activityMapper::toEntity))
-        activity.start = dto.start
-        activity.end = dto.end
-        activity.price = dto.price
-        activity.limit = dto.limit
-        activity.address = activityMapper.toEntity(dto.address)
-        activity.additionalForm = dto.additionalForm
-        activity.additionalFormRule = dto.additionalFormRule
-        activity.cancellable = dto.cancellable
+        activity.registrationLimit = dto.limit
+        //activity.address = activityMapper.toEntity(dto.address)
         activity.sendConfirmation = dto.sendConfirmation
         activity.sendCompleteConfirmation = dto.sendCompleteConfirmation
         activity.communicationCC = dto.communicationCC
-        activity.name = dto.name
         activity.description = dto.description
-        activity.open = dto.open
-        activity.closed = dto.closed
         return activityMapper.toDto(activityRepository.save(activity))
-    }
-
-    private fun synchronizeRestrictions(existingActivity: Activity, updatedRestrictions: List<ActivityRestriction>) {
-        // Remove restrictions that are no longer present
-        existingActivity.restrictions.removeIf { existingRestriction ->
-            updatedRestrictions.stream().noneMatch { updatedRestriction ->
-                existingRestriction.id ==  updatedRestriction.id
-            }
-        }
-        for (updatedRestriction in updatedRestrictions) {
-            val existingRestrictionOpt = existingActivity.restrictions.firstOrNull { it.id == updatedRestriction.id }
-
-            if (existingRestrictionOpt != null) {
-                // Update existing restriction
-                val existingRestriction: ActivityRestriction = existingRestrictionOpt.get()
-                existingRestriction.setRestrictionType(updatedRestriction.getRestrictionType())
-            } else {
-                // Add new restriction
-                updatedRestriction.activity = existingActivity
-                existingActivity.restrictions.add(updatedRestriction)
-            }
-        }
     }
 
     private fun hasRegistrations(activity: Activity): Boolean {
@@ -127,14 +131,36 @@ class ActivityService {
         return registrationRepository.getByUser(user).map(activityMapper::toDto)
     }
 
-    fun registerForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): ActivityRegistrationDTO {
+    fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {
         val user = userDataProvider.getUser(username)
         val activity = getActivityById(id)
         val restriction = getActivityRestrictionById(restrictionId)
+        validateActivityLimits(restriction)
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
         var registration = ActivityRegistration(user, restriction, finalPrice, additionalData)
         registration = registrationRepository.save(registration)
-        return activityMapper.toDto(registration)
+        //val checkoutUrl = checkoutProvider.createCheckoutUrl(user, registration)
+        registrationRepository.save(registration)
+        //return checkoutUrl
+        return ""
+    }
+
+    /**
+     * Check the presence of a global activity limit, a restriction limit and a branch limit.
+     */
+    private fun validateActivityLimits(restriction: ActivityRestriction) {
+        restriction.activity.registrationLimit?.let {
+            val registrationCount = registrationRepository.getBySubscribable(restriction.activity).count()
+            check(registrationCount < it) { "The limit for this activity is reached!" }
+        }
+        restriction.alternativeLimit?.let {
+            val restrictionCount = registrationRepository.getByRestriction(restriction).count()
+            check(restrictionCount < it) { "The limit for this restriction is reached!" }
+        }
+        restrictionRepository.findAllByBranch(restriction.branch).find { it.isBranchLimit() }?.let {
+            val branchCount = registrationRepository.getByBranch(restriction.branch).count()
+            check(branchCount < it.alternativeLimit!!) { "The limit for this branch is reached!" }
+        }
     }
 
     private fun calculatePriceForActivity(user: User, activity: Activity, restriction: ActivityRestriction, additionalData: String?): Double {

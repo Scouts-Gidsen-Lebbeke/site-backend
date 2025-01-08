@@ -22,7 +22,7 @@ abstract class Registrable : Payable() {
      */
     var end: LocalDateTime = LocalDateTime.now()
     var price = 0.0
-    var limit: Int? = null
+    var registrationLimit: Int? = null
     @OneToOne
     lateinit var address: Address
     @Lob
