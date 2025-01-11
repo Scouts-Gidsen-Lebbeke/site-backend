@@ -1,12 +1,13 @@
 package be.sgl.backend.dto
 
 import be.sgl.backend.entity.registrable.RegistrableStatus
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 import java.io.Serializable
 import java.time.LocalDateTime
 
 // DTO for a list overview of activities
+@Schema(description = "Basic information about an activity.")
 open class ActivityBaseDTO(
     @NotBlank(message = "{NotBlank.activity.name}")
     @Size(max = 50, message = "{Size.activity.name}")
@@ -18,6 +19,7 @@ open class ActivityBaseDTO(
 ) : Serializable
 
 // DTO for registration page and CRUD
+@Schema(description = "The complete activity configuration.")
 class ActivityDTO(
     name: String,
     start: LocalDateTime,
@@ -54,6 +56,7 @@ class ActivityDTO(
     var restrictions: List<ActivityRestrictionDTO>
 ) : ActivityBaseDTO(name, start, end)
 
+@Schema(description = "A limitation on the activity registration ability for a branch.")
 data class ActivityRestrictionDTO(
     var branch: BranchBaseDTO,
     var name: String?,

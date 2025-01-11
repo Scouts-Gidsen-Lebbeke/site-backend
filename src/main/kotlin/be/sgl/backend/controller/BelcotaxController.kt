@@ -1,8 +1,8 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.LevelSecurityService
 import be.sgl.backend.config.security.OnlyAdmin
+import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.service.belcotax.BelcotaxService
 import be.sgl.backend.util.zipped
 import generated.Verzendingen
@@ -12,13 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.util.concurrent.Executors
 
@@ -38,7 +33,7 @@ class BelcotaxController {
     }
 
     @GetMapping("/form/{fiscalYear}")
-    @PreAuthorize("isAuthenticated()")
+    @OnlyAuthenticated
     @Operation(summary = "Retrieve the Belcotax forms for the current user.")
     fun getUserFormsForFiscalYear(@PathVariable fiscalYear: Int?, @RequestParam rate: Double?, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ByteArray> {
         val forms = belcotaxService.getFormsForUserFiscalYearAndRate(userDetails.username, fiscalYear, rate)

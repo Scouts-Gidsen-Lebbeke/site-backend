@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/branches")
-@Tag(name = "Branches", description = "Endpoints for managing branches")
+@Tag(name = "Branches", description = "Endpoints for managing branches.")
 class BranchController {
 
     @Autowired

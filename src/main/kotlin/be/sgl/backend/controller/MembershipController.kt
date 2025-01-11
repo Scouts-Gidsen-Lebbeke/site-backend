@@ -21,7 +21,7 @@ import java.net.URI
 
 @RestController
 @RequestMapping("/memberships")
-@Tag(name = "Memberships", description = "Endpoints for managing memberships")
+@Tag(name = "Memberships", description = "Endpoints for managing membership periods and creating memberships for users.")
 class MembershipController {
 
     @Autowired

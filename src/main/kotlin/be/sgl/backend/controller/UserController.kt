@@ -1,24 +1,57 @@
 package be.sgl.backend.controller
 
+import be.sgl.backend.config.BadRequestResponse
 import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.config.security.OnlyAdmin
+import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.dto.UserDTO
 import be.sgl.backend.service.user.UserService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "Users", description = "Endpoints for managing users.")
 class UserController {
 
     @Autowired
     lateinit var userService: UserService
 
-    @GetMapping
+    @GetMapping("/profile")
+    @OnlyAuthenticated
+    @Operation(
+        summary = "Get the current user",
+        description = "Returns basic user data for the current user.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDTO::class))]),
+            ApiResponse(responseCode = "401", description = "User is not logged in", content = [Content(schema = Schema(hidden = true))]),
+        ]
+    )
     fun getProfile(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<UserDTO> {
         return ResponseEntity.ok(userService.getProfile(userDetails.username))
+    }
+
+    @GetMapping("/{username}/profile")
+    @OnlyAdmin
+    @Operation(
+        summary = "Get a specific user",
+        description = "Returns basic user data for the user with the specified username.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDTO::class))]),
+            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
+        ]
+    )
+    fun getProfile(@PathVariable username: String): ResponseEntity<UserDTO> {
+        return ResponseEntity.ok(userService.getProfile(username))
     }
 }
