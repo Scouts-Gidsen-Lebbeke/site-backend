@@ -5,11 +5,12 @@ import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.*
 
 @Entity
-class StaffData : Auditable() {
+class StaffData() : Auditable() {
     @Id
     val id: Int? = null
     @OneToOne
-    @PrimaryKeyJoinColumn
+    @MapsId
+    @JoinColumn(name = "id")
     lateinit var user: User
     var totem: String? = null
     var about: String? = null
@@ -18,4 +19,8 @@ class StaffData : Auditable() {
     @MapKeyJoinColumn(name = "branch_id")
     @Column(name = "nickname")
     var nicknames: Map<Branch, String> = mutableMapOf()
+
+    constructor(user: User) : this() {
+        this.user = user
+    }
 }

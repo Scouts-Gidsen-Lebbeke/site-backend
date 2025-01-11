@@ -9,6 +9,7 @@ import be.sgl.backend.entity.user.UserRole
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.UserRepository
+import be.sgl.backend.repository.UserRoleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
@@ -26,6 +27,8 @@ class DataLoader {
     private lateinit var roleRepository: RoleRepository
     @Autowired
     private lateinit var userRepository: UserRepository
+    @Autowired
+    private lateinit var userRoleRepository: UserRoleRepository
 
     @Bean
     fun loadData() = CommandLineRunner {
@@ -51,12 +54,12 @@ class DataLoader {
             createRole("Jinleiding", "d5f75b320b812440010b812555d2039f", jins, RoleLevel.STAFF),
             createRole("Groepsleiding", "d5f75b320b812440010b8125558e0391", staff, RoleLevel.STAFF)
         ))
-        userRepository.save(User().apply {
-            firstName = "admin"
+        val rootUser = userRepository.save(User().apply {
+            firstName = "root"
             name = "user"
             username = "admin"
-            roles.add(UserRole(this, adminRole, LocalDate.now()))
         })
+        userRoleRepository.save(UserRole(rootUser, adminRole, LocalDate.now()))
     }
 
     private fun createRole(name: String, externalId: String, staffBranch: Branch? = null, level: RoleLevel = RoleLevel.GUEST) = Role().apply {

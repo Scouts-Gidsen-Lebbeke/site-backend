@@ -8,11 +8,12 @@ import java.time.LocalDateTime
 import java.time.Period
 
 @Entity
-class UserData : Auditable() {
+class UserData() : Auditable() {
     @Id
     val id: Int? = null
     @OneToOne
-    @PrimaryKeyJoinColumn
+    @MapsId
+    @JoinColumn(name = "id")
     lateinit var user: User
     var memberId: String? = null
     var birthdate: LocalDate = LocalDate.now()
@@ -27,6 +28,10 @@ class UserData : Auditable() {
     val addresses: MutableList<Address> = mutableListOf()
     @OneToMany
     val contacts: MutableList<Contact> = mutableListOf()
+
+    constructor(user: User) : this() {
+        this.user = user
+    }
 
     fun getAge(referenceDate: LocalDateTime = LocalDateTime.now()): Int {
         return Period.between(birthdate, referenceDate.toLocalDate()).years

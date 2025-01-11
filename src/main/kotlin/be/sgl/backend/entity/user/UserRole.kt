@@ -22,6 +22,7 @@ class UserRole() : Auditable() {
     var endDate: LocalDate? = null
 
     constructor(user: User, role: Role, startDate: LocalDate, endDate: LocalDate? = null) : this() {
+        this.id = UserRoleId(user.id, role.id)
         this.user = user
         this.role = role
         this.startDate = startDate

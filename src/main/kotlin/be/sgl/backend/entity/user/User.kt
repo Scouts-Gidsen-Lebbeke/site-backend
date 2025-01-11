@@ -1,6 +1,5 @@
 package be.sgl.backend.entity.user
 
-import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.*
 import java.io.Serializable
 
@@ -20,11 +19,11 @@ class User : Serializable {
     lateinit var name: String
     lateinit var firstName: String
     var image: String? = null
-    @OneToOne(fetch = FetchType.LAZY)
-    var userData = UserData()
-    @OneToOne(fetch = FetchType.LAZY)
-    var staffData = StaffData()
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
+    var userData = UserData(this)
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
+    var staffData = StaffData(this)
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val roles: MutableList<UserRole> = mutableListOf()
     @ManyToMany
     @JoinTable(name = "sibling_relation")
