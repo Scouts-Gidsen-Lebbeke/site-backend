@@ -25,6 +25,8 @@ class User : Serializable {
     var staffData = StaffData(this)
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val roles: MutableList<UserRole> = mutableListOf()
+    val level: RoleLevel
+        get() = roles.maxOfOrNull { it.role.level } ?: RoleLevel.GUEST
     @ManyToMany
     @JoinTable(name = "sibling_relation")
     val siblings: MutableList<User> = mutableListOf()

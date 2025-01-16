@@ -1,5 +1,6 @@
 package be.sgl.backend.dto
 
+import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.entity.user.Sex
 import java.io.Serializable
 import java.time.LocalDate
@@ -8,7 +9,8 @@ open class UserDTO(
     val username: String,
     val name: String,
     val firstName: String,
-    val image: String?
+    val image: String?,
+    val level: RoleLevel
 ) : Serializable
 
 class StaffDTO(
@@ -17,8 +19,9 @@ class StaffDTO(
     username: String,
     name: String,
     firstName: String,
-    image: String?
-) : UserDTO(username, name, firstName, image)
+    image: String?,
+    level: RoleLevel
+) : UserDTO(username, name, firstName, image, level)
 
 class ExtendedUserDTO(
     val memberId: String?,
@@ -33,5 +36,6 @@ class ExtendedUserDTO(
     username: String,
     name: String,
     firstName: String,
-    image: String?
-) : UserDTO(username, name, firstName, image)
+    image: String?,
+    level: RoleLevel
+) : UserDTO(username, name, firstName, image, level)

@@ -1,11 +1,11 @@
 package be.sgl.backend.entity.user
 
 enum class RoleLevel {
-    ADMIN,
-    STAFF,
-    @Deprecated("Use the presence of an active membership")
-    MEMBER,
+    GUEST,
     @Deprecated("Use the login validity")
     SCOUT,
-    GUEST
+    @Deprecated("Use the presence of an active membership")
+    MEMBER,
+    STAFF,
+    ADMIN
 }

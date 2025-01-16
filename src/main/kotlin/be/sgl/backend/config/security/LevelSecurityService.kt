@@ -21,7 +21,7 @@ class LevelSecurityService {
     private fun currentUserHasRoleWithLevel(level: RoleLevel): Boolean {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = userDataProvider.getUser(authentication?.name ?: return false)
-        return user.roles.any { it.role.level == level }
+        return user.level >= level
     }
 }
 
