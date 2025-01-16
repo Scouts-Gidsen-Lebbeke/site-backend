@@ -6,11 +6,11 @@ import be.sgl.backend.entity.user.UserRegistration
 import be.sgl.backend.repository.MedicalRecordRepository
 import be.sgl.backend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 
 @Service
-@Primary
+@Conditional(InternalOrganizationCondition::class)
 class InternalUserDataProvider : UserDataProvider {
 
     @Autowired

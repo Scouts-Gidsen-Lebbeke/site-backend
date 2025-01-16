@@ -12,16 +12,17 @@ import be.sgl.backend.util.Lid
 import org.apache.http.HttpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
-@ConditionalOnProperty(name = ["external.organization.id"], matchIfMissing = false)
+@Conditional(ExternalOrganizationCondition::class)
 class ExternalUserDataProvider : UserDataProvider {
 
     @Autowired
@@ -56,8 +57,8 @@ class ExternalUserDataProvider : UserDataProvider {
     private fun translateFunction(user: User, function: Functie): UserRole? {
         if (function.groep != externalOrganizationId) return null
         val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
-        val endDate = function.einde?.let { LocalDate.parse(it) }
-        return UserRole(user, role, LocalDate.parse(function.begin), endDate)
+        val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
+        return UserRole(user, role, LocalDate.parse(function.begin, DateTimeFormatter.ISO_OFFSET_DATE_TIME), endDate)
     }
 
     override fun getUserWithAllData(username: String): User {
