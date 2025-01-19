@@ -1,5 +1,7 @@
 package be.sgl.backend.util
 
+import be.sgl.backend.entity.Address
+
 // Put all the nasty SGV entities together and don't let the nastiness leak out
 data class Lid(
     val id: String, // only used at user creation
@@ -51,6 +53,20 @@ data class Adres(
     val status: String?, // ignored
 )
 
+fun Adres.asAddress(): Address {
+    val address = Address()
+    address.externalId = id
+    address.street = straat
+    address.number = nummer.toInt()
+    address.subPremise = bus
+    address.zipcode = postcode
+    address.town = gemeente
+    address.country = land
+    address.description = omschrijving
+    address.postalAdress = postadres
+    return address
+}
+
 data class Contact(
     val id: String, // ignored
     val voornaam: String,
@@ -69,3 +85,14 @@ data class Functie(
 )
 
 data class GroepseigenVelden(val waarden: Map<String, String?>)
+
+data class Groep(
+    val id: String, // ignored
+    val groepsnummer: String,
+    val naam: String,
+    val adressen: List<Adres>?,
+    val opgericht: String?,
+    val email: String?,
+    val website: String?,
+    val vrijeInfo: String?
+)

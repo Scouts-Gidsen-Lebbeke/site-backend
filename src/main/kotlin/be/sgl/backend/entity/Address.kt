@@ -15,7 +15,7 @@ class Address : Auditable() {
     var number: Int = -1
     var subPremise: String? = null
     lateinit var zipcode: String
-    lateinit var city: String
+    lateinit var town: String
     lateinit var country: String
     var description: String? = null
     var postalAdress: Boolean = false

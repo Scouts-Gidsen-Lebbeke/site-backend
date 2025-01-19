@@ -1,6 +1,7 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.security.LevelSecurityService
+import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.service.MembershipService
@@ -11,12 +12,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.*
 import java.net.URI
 
 @RestController
@@ -25,27 +22,42 @@ import java.net.URI
 class MembershipController {
 
     @Autowired
-    private lateinit var levelSecurityService: LevelSecurityService
-    @Autowired
     private lateinit var membershipService: MembershipService
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @OnlyAuthenticated
     @Operation(summary = "Get all memberships for the current user")
     fun getAllMembershipsForCurrentUser(): ResponseEntity<List<MembershipDTO>> {
         // TODO
         return ResponseEntity.ok(emptyList())
     }
 
-    @GetMapping("/period/{periodId}")
+    @GetMapping("/current")
+    @OnlyAuthenticated
+    @Operation(summary = "Get all memberships for the current user")
+    fun getCurrentMembershipsForCurrentUser(): ResponseEntity<List<MembershipDTO>> {
+        // TODO
+        return ResponseEntity.ok(emptyList())
+    }
+
+    @GetMapping("/branch/{branchId}")
     @OnlyStaff
-    fun getAllMembershipsForCurrentPeriod(@PathVariable periodId: Int?): ResponseEntity<List<MembershipDTO>> {
+    fun getAllMembershipsForBranchAndCurrentPeriod(@PathVariable(required = false) branchId: Int?): ResponseEntity<List<MembershipDTO>> {
         // TODO
         return ResponseEntity.ok(emptyList())
     }
 
     @PostMapping
-    fun createMembershipForCurrentUserAndPeriod(@RequestParam branchId: Int): ResponseEntity<Unit> {
+    @OnlyAuthenticated
+    fun createMembershipForCurrentUserAndCurrentPeriod(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
+        val headers = HttpHeaders()
+        headers.location = URI("https://mysite.com/checkout")
+        return ResponseEntity(headers, HttpStatus.FOUND)
+    }
+
+    @PostMapping("/user/{userId}")
+    @OnlyStaff
+    fun createMembershipForUserAndCurrentPeriod(@PathVariable userId: String): ResponseEntity<Unit> {
         val headers = HttpHeaders()
         headers.location = URI("https://mysite.com/checkout")
         return ResponseEntity(headers, HttpStatus.FOUND)
@@ -53,7 +65,7 @@ class MembershipController {
 
     @PostMapping("/updatePayment")
     @PreAuthorize("permitAll()")
-    fun updatePayment(@RequestParam id: String): ResponseEntity<Unit> {
+    fun updatePayment(@RequestBody paymentId: Int): ResponseEntity<Unit> {
         return ResponseEntity.ok().build()
     }
 }

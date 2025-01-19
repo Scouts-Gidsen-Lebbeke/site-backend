@@ -1,5 +1,6 @@
 package be.sgl.backend.service.activity
 
+import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
@@ -36,12 +37,12 @@ class ActivityService {
     @Autowired
     private lateinit var checkoutProvider: CheckoutProvider
 
-    fun getAllActivities(): List<ActivityDTO> {
-        return activityRepository.findAll().map(activityMapper::toDto)
+    fun getAllActivities(): List<ActivityBaseDTO> {
+        return activityRepository.findAll().map(activityMapper::toBaseDto)
     }
 
-    fun getVisibleActivities(): List<ActivityDTO> {
-        TODO("Not yet implemented")
+    fun getVisibleActivities(): List<ActivityBaseDTO> {
+        return activityRepository.findAllByEndAfterOrderByStart(LocalDateTime.now()).map(activityMapper::toBaseDto)
     }
 
     fun getActivityDTOById(id: Int): ActivityDTO? {
@@ -96,13 +97,13 @@ class ActivityService {
             for (existing in activity.restrictions) {
                 val updated = updatedRestrictions.find { it.id == existing.id }
                 check(updated != null) { "Existing activity restrictions cannot be removed once the activity has started!" }
-                check(updated.alternativePrice == existing.alternativePrice) { "The price of started activity cannot be altered once the activity has started!" }
+                check(updated.alternativePrice == existing.alternativePrice) { "The price cannot be altered once the activity has started!" }
             }
             activity.restrictions.addAll(restrictionRepository.saveAll(updatedRestrictions))
             val registrationCount = registrationRepository.getBySubscribable(activity).count()
-            check(dto.limit == null || registrationCount < dto.limit!!) { "The registration limit cannot be lowered below the current registration count!" }
+            check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
-        activity.registrationLimit = dto.limit
+        activity.registrationLimit = dto.registrationLimit
         //activity.address = activityMapper.toEntity(dto.address)
         activity.sendConfirmation = dto.sendConfirmation
         activity.sendCompleteConfirmation = dto.sendCompleteConfirmation

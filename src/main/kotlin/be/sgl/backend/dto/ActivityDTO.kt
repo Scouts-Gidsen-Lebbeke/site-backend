@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 // DTO for a list overview of activities
 @Schema(description = "Basic information about an activity.")
 open class ActivityBaseDTO(
+    val id: Int?,
     @NotBlank(message = "{NotBlank.activity.name}")
     @Size(max = 50, message = "{Size.activity.name}")
     val name: String,
@@ -21,6 +22,7 @@ open class ActivityBaseDTO(
 // DTO for registration page and CRUD
 @Schema(description = "The complete activity configuration.")
 class ActivityDTO(
+    id: Int?,
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
@@ -33,8 +35,8 @@ class ActivityDTO(
     @NotNull(message = "{NotNull.activity.price}")
     @PositiveOrZero(message = "{PositiveOrZero.activity.price}")
     var price: Double,
-    @Positive(message = "{Positive.activity.limit}")
-    var limit: Int?,
+    @Positive(message = "{Positive.activity.registrationLimit}")
+    var registrationLimit: Int?,
     @NotNull(message = "{NotNull.activity.address}")
     var address: AddressDTO,
     var additionalForm: String?,
@@ -54,7 +56,7 @@ class ActivityDTO(
     var siblingReduction: Double,
     @NotEmpty(message = "{NotNull.activity.restrictions}")
     var restrictions: List<ActivityRestrictionDTO>
-) : ActivityBaseDTO(name, start, end)
+) : ActivityBaseDTO(id, name, start, end)
 
 @Schema(description = "A limitation on the activity registration ability for a branch.")
 data class ActivityRestrictionDTO(
@@ -68,13 +70,14 @@ data class ActivityRestrictionDTO(
 
 // DTO for statistics list overview
 class ActivityResultDTO(
+    id: Int?,
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
     var registrationCount: Int,
     var totalPrice: Double,
     var status: RegistrableStatus
-) : ActivityBaseDTO(name, start, end)
+) : ActivityBaseDTO(id, name, start, end)
 
 /**
  * DTO for user feedback about the current activity:

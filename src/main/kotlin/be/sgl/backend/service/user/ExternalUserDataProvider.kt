@@ -1,7 +1,6 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.security.BearerTokenFilter
-import be.sgl.backend.entity.*
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.*
@@ -9,6 +8,7 @@ import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.UserRepository
 import be.sgl.backend.util.Functie
 import be.sgl.backend.util.Lid
+import be.sgl.backend.util.asAddress
 import org.apache.http.HttpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -76,19 +76,7 @@ class ExternalUserDataProvider : UserDataProvider {
             user.userData.accountNo = it.persoonsgegevens.rekeningnummer
             user.userData.birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
             user.userData.memberId = it.verbondsgegevens.lidnummer
-            user.userData.addresses.addAll(it.adressen.map { a ->
-                val address = Address()
-                address.externalId = a.id
-                address.street = a.straat
-                address.number = a.nummer.toInt()
-                address.subPremise = a.bus
-                address.zipcode = a.postcode
-                address.city = a.gemeente
-                address.country = a.land
-                address.description = a.omschrijving
-                address.postalAdress = a.postadres
-                address
-            })
+            user.userData.addresses.addAll(it.adressen.map { a -> a.asAddress() } )
             user.userData.contacts.addAll(it.contacten.map { c ->
                 val contact = Contact()
                 contact.name = c.achternaam

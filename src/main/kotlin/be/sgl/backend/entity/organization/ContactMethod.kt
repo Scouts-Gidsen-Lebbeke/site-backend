@@ -7,7 +7,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
-class ContactMethod : Auditable() {
+class ContactMethod() : Auditable() {
     @Id
     val id: Int? = null
     @OneToOne
@@ -15,4 +15,10 @@ class ContactMethod : Auditable() {
     lateinit var organization: Organization
     var type = ContactMethodType.LINK
     lateinit var value: String
+
+    constructor(organization: Organization, type: ContactMethodType, value: String) : this() {
+        this.organization = organization
+        this.type = type
+        this.value = value
+    }
 }

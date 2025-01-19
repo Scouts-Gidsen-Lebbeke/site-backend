@@ -7,6 +7,7 @@ class AddressDTO(
     val number: Int,
     val subPremise: String?,
     val zipcode: String,
-    val city: String,
-    val country: String
+    val town: String,
+    val country: String,
+    val description: String?
 ) : Serializable

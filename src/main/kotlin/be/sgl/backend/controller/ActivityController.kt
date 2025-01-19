@@ -5,6 +5,7 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.service.activity.ActivityService
@@ -42,7 +43,7 @@ class ActivityController {
             ApiResponse(responseCode = "401", description = "User has no admin role", content = [Content(schema = Schema(hidden = true))])
         ]
     )
-    fun getAllActivities(): ResponseEntity<List<ActivityDTO>> {
+    fun getAllActivities(): ResponseEntity<List<ActivityBaseDTO>> {
         return ResponseEntity.ok(activityService.getAllActivities())
     }
 
@@ -54,7 +55,7 @@ class ActivityController {
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(type = "array", implementation = ActivityDTO::class))])
         ]
     )
-    fun getVisibleActivities(): ResponseEntity<List<ActivityDTO>> {
+    fun getVisibleActivities(): ResponseEntity<List<ActivityBaseDTO>> {
         return ResponseEntity.ok(activityService.getVisibleActivities())
     }
 

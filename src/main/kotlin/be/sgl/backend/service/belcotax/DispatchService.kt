@@ -36,7 +36,7 @@ class DispatchService {
         } else {
             dispatch.v0027Postcodebuitenl = zipcode.assertLength("organization zipcode", 12)
         }
-        dispatch.v0017Gemeente = owner.address.city.assertMaxLength("organization town", 27)
+        dispatch.v0017Gemeente = owner.address.town.assertMaxLength("organization town", 27)
         dispatch.v0018Telefoonnummer = owner.getMobile()?.assertMaxLength("organization phone number", 12)
         // dispatch.v0019Faxnummer => outdated
         dispatch.v0020Identificatie = "BConv86" // Identify as their shitty mapping application
@@ -133,7 +133,7 @@ class DispatchService {
         } else {
             f2112Buitenlandspostnummer = formDTO.address.zipcode.assertLength("zipcode for $f2010Referentie", 12)
         }
-        f2017Gemeente = formDTO.address.city.assertMaxLength("town for $f2010Referentie", 27)
+        f2017Gemeente = formDTO.address.town.assertMaxLength("town for $f2010Referentie", 27)
         f2018Landwoonplaats = formDTO.address.country.toCountryCode()
         // f2019Burgerlijkstand => Not used for this form
         // f2020Echtgenote => Not used for this form
@@ -175,7 +175,7 @@ class DispatchService {
         f862140Childmunicipality = f2017Gemeente // This should be correct for 99.9% of all cases
         f862144Enddate2 = formDTO.activity2?.end?.asBelcotaxDate()
         f862153Nnchild = formDTO.user.userData.nis.assertLength("child nis number for $f2010Referentie", 11)
-        f862154Certifiermunicipality = certifier.address.city.assertMaxLength("certifier town", 27)
+        f862154Certifiermunicipality = certifier.address.town.assertMaxLength("certifier town", 27)
         f862155Certifiername = certifier.name.escaped().assertMaxLength("certifier name", 41)
         f862156Certifieradres = certifier.address.getStreetAdress().assertMaxLength("certifier street address", 32)
         f862157Begindate3 = formDTO.activity3?.start?.asBelcotaxDate()
