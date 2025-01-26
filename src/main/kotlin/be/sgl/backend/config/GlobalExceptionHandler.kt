@@ -1,5 +1,7 @@
 package be.sgl.backend.config
 
+import be.sgl.backend.service.exception.ImageException
+import be.sgl.backend.service.exception.ImageUploadException
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import be.sgl.backend.service.exception.NotFoundException
 import io.swagger.v3.oas.annotations.media.Schema
@@ -31,6 +33,11 @@ class GlobalExceptionHandler {
     @ExceptionHandler(IncompleteConfigurationException::class)
     fun handleIncompleteConfigurationException(ex: IncompleteConfigurationException): ResponseEntity<String> {
         return ResponseEntity(ex.message, CONFLICT)
+    }
+
+    @ExceptionHandler(ImageException::class)
+    fun handleImageUploadException(ex: ImageException): ResponseEntity<String> {
+        return ResponseEntity(ex.message, INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(NotImplementedError::class)
