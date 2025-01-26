@@ -34,8 +34,16 @@ class MembershipController {
 
     @GetMapping("/current")
     @OnlyAuthenticated
-    @Operation(summary = "Get all memberships for the current user")
+    @Operation(summary = "Get the current membership for the current user")
     fun getCurrentMembershipsForCurrentUser(): ResponseEntity<List<MembershipDTO>> {
+        // TODO
+        return ResponseEntity.ok(emptyList())
+    }
+
+    @GetMapping("/user/{userId}/current")
+    @OnlyStaff
+    @Operation(summary = "Get the current memberships for the given user")
+    fun getCurrentMembershipsForUser(@PathVariable userId: String): ResponseEntity<List<MembershipDTO>> {
         // TODO
         return ResponseEntity.ok(emptyList())
     }
