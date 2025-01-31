@@ -29,12 +29,11 @@ class ImageService {
         }
     }
 
-    fun delete(directory: String, fileName: String): Boolean {
+    fun delete(directory: String, fileName: String) {
         try {
             val filePath = Paths.get(IMAGE_BASE_PATH, directory, fileName)
             check(Files.exists(filePath)) { "Image $fileName does not exist." }
             Files.delete(filePath)
-            return true
         } catch (e: IOException) {
             throw ImageDeleteException(fileName, directory)
         }

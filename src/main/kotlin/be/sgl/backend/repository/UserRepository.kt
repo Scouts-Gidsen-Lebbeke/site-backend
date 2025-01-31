@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRepository : JpaRepository<User, Long> {
+interface UserRepository : JpaRepository<User, Int> {
     fun getUserByUsernameEquals(username: String): User
     @Query("from User u join fetch u.userData where u.username = :username")
     fun getUserByUsernameEqualsAndUserData(username: String): User

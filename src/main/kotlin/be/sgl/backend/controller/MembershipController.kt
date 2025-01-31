@@ -4,6 +4,7 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.MembershipDTO
+import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.service.MembershipService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -71,9 +72,18 @@ class MembershipController {
         return ResponseEntity(headers, HttpStatus.FOUND)
     }
 
+    @PostMapping("/register")
+    @PreAuthorize("permitAll()")
+    fun createMembershipForNewUser(@RequestBody userRegistrationDTO: UserRegistrationDTO): ResponseEntity<Unit> {
+        val headers = HttpHeaders()
+        headers.location = URI(membershipService.createMembershipForNewUser(userRegistrationDTO))
+        return ResponseEntity(headers, HttpStatus.FOUND)
+    }
+
     @PostMapping("/updatePayment")
     @PreAuthorize("permitAll()")
-    fun updatePayment(@RequestBody paymentId: Int): ResponseEntity<Unit> {
+    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
+        membershipService.updatePayment(paymentId)
         return ResponseEntity.ok().build()
     }
 }

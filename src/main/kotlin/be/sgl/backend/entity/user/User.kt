@@ -9,7 +9,7 @@ import java.io.Serializable
         Index(name = "idx_username", columnList = "username", unique = true),
     ]
 )
-class User : Serializable {
+class User() : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
@@ -30,6 +30,15 @@ class User : Serializable {
     @ManyToMany
     @JoinTable(name = "sibling_relation")
     val siblings: MutableList<User> = mutableListOf()
+
+    constructor(registration: UserRegistration) : this() {
+        this.name = registration.name
+        this.firstName = registration.firstName
+        userData.email = registration.email
+        userData.sex = registration.sex
+        userData.
+        userData.addresses.add(registration.address)
+    }
 
     fun getFullName(): String {
         return "$firstName $name"

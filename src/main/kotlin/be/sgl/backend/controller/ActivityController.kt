@@ -150,8 +150,8 @@ class ActivityController {
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(schema = Schema(hidden = true))])
         ]
     )
-    fun updatePayment(@RequestBody paymentId: Int): ResponseEntity<Unit> {
-        // TODO
+    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
+        activityService.updatePayment(paymentId)
         return ResponseEntity.ok().build()
     }
 

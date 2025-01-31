@@ -38,11 +38,16 @@ class ExternalUserDataProvider : UserDataProvider {
 
     private val cache = ConcurrentHashMap<String, Mono<Lid>>()
 
-    override fun createRegistration(registration: UserRegistration): User {
+    override fun registerUser(registration: UserRegistration): User {
+
         TODO("Not yet implemented")
     }
 
     override fun acceptRegistration(registration: UserRegistration): User {
+        TODO("Not yet implemented")
+    }
+
+    override fun denyRegistration(registration: UserRegistration) {
         TODO("Not yet implemented")
     }
 
@@ -94,6 +99,22 @@ class ExternalUserDataProvider : UserDataProvider {
             })
         }
         return user
+    }
+
+    override fun updateUser(user: User): User {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteUser(username: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun addRole(user: User, role: Role) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteRole(user: User, role: Role) {
+        TODO("Not yet implemented")
     }
 
     override fun getMedicalRecord(user: User): MedicalRecord? {
