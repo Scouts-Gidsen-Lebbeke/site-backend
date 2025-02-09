@@ -1,6 +1,5 @@
 package be.sgl.backend.entity
 
-import be.woutschoovaerts.mollie.data.payment.PaymentStatus
 import jakarta.persistence.*
 
 @MappedSuperclass

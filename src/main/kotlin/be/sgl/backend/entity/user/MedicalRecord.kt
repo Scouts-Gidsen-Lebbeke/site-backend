@@ -1,10 +1,8 @@
 package be.sgl.backend.entity.user
 
 import be.sgl.backend.entity.Auditable
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.OneToOne
-import jakarta.persistence.PrimaryKeyJoinColumn
+import jakarta.persistence.*
+import java.time.LocalDate.now
 
 @Entity
 class MedicalRecord : Auditable() {
@@ -19,7 +17,19 @@ class MedicalRecord : Auditable() {
     var allergies: String? = null
     var activityRestrictions: String? = null
     var familyRemarks: String? = null
+    var socialRemarks: String? = null
     var diseases: String? = null
     var medications: String? = null
     var physician: String? = null
+    var physicianContact: String? = null
+    @Enumerated(EnumType.STRING)
+    var bloodGroup = BloodGroup.UNKNOWN
+
+    val isUpToDate: Boolean
+        get() = lastModifiedDate?.let { now().minusYears(1).isBefore(it.toLocalDate()) } ?: false
+    val needsConfirmation: Boolean
+        get() = foodAnomalies != null || allergies != null || activityRestrictions != null || familyRemarks != null
+                || socialRemarks != null || diseases != null || medications != null
+    val needsCertificate: Boolean
+        get() = medications != null
 }

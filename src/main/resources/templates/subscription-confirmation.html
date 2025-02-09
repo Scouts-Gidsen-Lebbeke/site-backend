@@ -5,7 +5,7 @@
     We hebben de betaling van jouw lidgeld (€ ${membership.price}) voor dit werkingsjaar (${membership.period.name})
     bij de ${membership.branch.name} goed ontvangen, je bent nu volledig ingeschreven!
     Indien je een inschrijvingsbewijs nodig hebt van deze inschrijving, kan je dat steeds terugvinden onder
-    <a th:href="${membership.overview.url}" target="_blank">Mijn lidmaatschap</a> op onze website.
+    <a th:href="@{|${@environment.getProperty('app.base.url')}/profile/membership|}" target="_blank">Mijn lidmaatschap</a> op onze website.
 </p>
 <p>
     Stevige linker,<br/>

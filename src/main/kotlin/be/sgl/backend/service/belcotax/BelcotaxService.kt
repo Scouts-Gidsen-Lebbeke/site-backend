@@ -40,7 +40,7 @@ class BelcotaxService {
 
     fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int?, rate: Double?): List<ByteArray> {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
-        val user = userDataProvider.getUserWithAllData(username)
+        val user = userDataProvider.getUser(username)
         val activities = registrationRepository.getByUserAndStartBetweenOrderByStart(user, beginOfYear, endOfYear).filter(::relevantActivity)
         val owner = fetchOwner()
         val certifier = fetchCertifier()
@@ -60,7 +60,6 @@ class BelcotaxService {
         val year = fiscalYear ?: (LocalDate.now().year - 1)
         val params = mapOf("member.first.name" to user.firstName, "fiscal-year" to year)
         val mailBuilder = mailService.builder()
-            .from(fetchOwner().getEmail() ?: throw IncompleteConfigurationException("No organization email configured, not able to send forms!"))
             .to(user.userData.email)
             .subject("Fiscaal attest kinderopvang $year")
             .template("declaration-form-confirmation.html", params)
@@ -77,7 +76,7 @@ class BelcotaxService {
 
     private fun relevantActivity(registration: ActivityRegistration): Boolean {
         val userData = registration.user.userData
-        return userData.getAge(registration.start) < (if (userData.hasHandicap) 21 else 14)
+        return userData.getAge(registration.start.toLocalDate()) < (if (userData.hasHandicap) 21 else 14)
     }
 
     private fun List<ActivityRegistration>.asForms(user: User, rate: Double?) = chunked(4).mapIndexed { index, it ->

@@ -41,10 +41,10 @@ class MembershipController {
         return ResponseEntity.ok(emptyList())
     }
 
-    @GetMapping("/user/{userId}/current")
+    @GetMapping("/user/{username}/current")
     @OnlyStaff
     @Operation(summary = "Get the current memberships for the given user")
-    fun getCurrentMembershipsForUser(@PathVariable userId: String): ResponseEntity<List<MembershipDTO>> {
+    fun getCurrentMembershipsForUser(@PathVariable username: String): ResponseEntity<List<MembershipDTO>> {
         // TODO
         return ResponseEntity.ok(emptyList())
     }
@@ -60,15 +60,15 @@ class MembershipController {
     @OnlyAuthenticated
     fun createMembershipForCurrentUserAndCurrentPeriod(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
         val headers = HttpHeaders()
-        headers.location = URI("https://mysite.com/checkout")
+        headers.location = URI(membershipService.createMembershipForExistingUser(userDetails.username))
         return ResponseEntity(headers, HttpStatus.FOUND)
     }
 
-    @PostMapping("/user/{userId}")
+    @PostMapping("/user/{username}")
     @OnlyStaff
-    fun createMembershipForUserAndCurrentPeriod(@PathVariable userId: String): ResponseEntity<Unit> {
+    fun createMembershipForUserAndCurrentPeriod(@PathVariable username: String): ResponseEntity<Unit> {
         val headers = HttpHeaders()
-        headers.location = URI("https://mysite.com/checkout")
+        headers.location = URI(membershipService.createMembershipForExistingUser(username))
         return ResponseEntity(headers, HttpStatus.FOUND)
     }
 

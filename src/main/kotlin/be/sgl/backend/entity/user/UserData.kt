@@ -4,7 +4,6 @@ import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.Auditable
 import jakarta.persistence.*
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Period
 
 @Entity
@@ -24,7 +23,8 @@ class UserData() : Auditable() {
     var sex = Sex.UNKNOWN
     var hasReduction = false
     var hasHandicap = false
-    @OneToMany(fetch = FetchType.EAGER)
+    var ageDeviation = 0
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val addresses: MutableList<Address> = mutableListOf()
     @OneToMany
     val contacts: MutableList<Contact> = mutableListOf()
@@ -33,7 +33,7 @@ class UserData() : Auditable() {
         this.user = user
     }
 
-    fun getAge(referenceDate: LocalDateTime = LocalDateTime.now()): Int {
-        return Period.between(birthdate, referenceDate.toLocalDate()).years
+    fun getAge(referenceDate: LocalDate = LocalDate.now()): Int {
+        return Period.between(birthdate, referenceDate).years
     }
 }

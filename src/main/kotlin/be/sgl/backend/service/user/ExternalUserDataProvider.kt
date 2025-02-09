@@ -1,14 +1,10 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.security.BearerTokenFilter
-import be.sgl.backend.entity.user.ContactRole
-import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.*
-import be.sgl.backend.repository.RoleRepository
-import be.sgl.backend.repository.UserRepository
-import be.sgl.backend.util.Functie
-import be.sgl.backend.util.Lid
-import be.sgl.backend.util.asAddress
+import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.util.*
+import mu.KotlinLogging
 import org.apache.http.HttpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -19,16 +15,14 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.ConcurrentHashMap
+import kotlin.reflect.KFunction1
 
 @Service
 @Conditional(ExternalOrganizationCondition::class)
-class ExternalUserDataProvider : UserDataProvider {
+class ExternalUserDataProvider : UserDataProvider() {
 
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    private lateinit var roleRepository: RoleRepository
+    private val logger = KotlinLogging.logger {}
+
     @Autowired
     private lateinit var webClientBuilder: WebClient.Builder
     @Value("\${rest.ga.url}")
@@ -36,45 +30,46 @@ class ExternalUserDataProvider : UserDataProvider {
     @Value("\${external.organization.id}")
     private lateinit var externalOrganizationId: String
 
-    private val cache = ConcurrentHashMap<String, Mono<Lid>>()
-
-    override fun registerUser(registration: UserRegistration): User {
-
-        TODO("Not yet implemented")
-    }
-
-    override fun acceptRegistration(registration: UserRegistration): User {
-        TODO("Not yet implemented")
-    }
-
-    override fun denyRegistration(registration: UserRegistration) {
-        TODO("Not yet implemented")
+    override fun acceptRegistration(user: User) {
+        logger.debug { "Accepting registration for user ${user.id}..." }
+        val address = user.userData.addresses.first()
+        createExternalRegistration(LidAanvraag(
+            externalOrganizationId,
+            Persoonsgegevens(
+               user.userData.sex.code,
+               user.userData.mobile,
+               user.userData.hasHandicap,
+               user.userData.hasReduction,
+                null
+            ),
+            user.firstName,
+            user.name,
+            user.userData.birthdate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            user.userData.email,
+            Adres(
+                null,
+                address.country,
+                address.zipcode,
+                address.town,
+                address.street,
+                null,
+                address.number.toString(),
+                address.subPremise,
+                null,
+                true,
+                null,
+                "normaal"
+            )
+        ))
+        logger.debug { "External registration finished: request created and ready to be approved!" }
     }
 
     override fun getUser(username: String): User {
         val user = userRepository.getUserByUsernameEquals(username)
-        getExternalData(user.externalId)?.let {
+        getExternalData<Lid>(user.externalId, ::getExternalMemberData)?.let {
             user.roles.addAll(it.functies.mapNotNull { f -> translateFunction(user, f) })
-        }
-        return user
-    }
-
-    private fun translateFunction(user: User, function: Functie): UserRole? {
-        if (function.groep != externalOrganizationId) return null
-        val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
-        val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
-        return UserRole(user, role, LocalDate.parse(function.begin, DateTimeFormatter.ISO_OFFSET_DATE_TIME), endDate)
-    }
-
-    override fun getUserWithAllData(username: String): User {
-        val user = getUser(username)
-        getExternalData(user.externalId)?.let {
             user.userData.email = it.email
-            user.userData.sex = when(it.persoonsgegevens.geslacht) {
-                "M" -> Sex.MALE
-                "V" -> Sex.FEMALE
-                else -> Sex.UNKNOWN
-            }
+            user.userData.sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
             user.userData.mobile = it.persoonsgegevens.gsm
             user.userData.hasHandicap = it.persoonsgegevens.beperking
             user.userData.hasReduction = it.persoonsgegevens.verminderdlidgeld
@@ -92,7 +87,7 @@ class ExternalUserDataProvider : UserDataProvider {
                     "voogd" -> ContactRole.GUARDIAN
                     else -> ContactRole.RESPONSIBLE
                 }
-                contact.address = user.userData.addresses.firstOrNull { it.externalId == c.id }
+                contact.address = user.userData.addresses.firstOrNull { a -> a.externalId == c.id }
                 contact.mobile = c.gsm
                 contact.email = c.email
                 contact
@@ -101,41 +96,96 @@ class ExternalUserDataProvider : UserDataProvider {
         return user
     }
 
+    private fun translateFunction(user: User, function: Functie): UserRole? {
+        if (function.groep != externalOrganizationId) return null
+        val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
+        val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
+        if (endDate != null && endDate < LocalDate.now()) return null
+        return UserRole(user, role, LocalDate.parse(function.begin, DateTimeFormatter.ISO_OFFSET_DATE_TIME), endDate)
+    }
+
     override fun updateUser(user: User): User {
         TODO("Not yet implemented")
     }
 
-    override fun deleteUser(username: String) {
-        TODO("Not yet implemented")
+    override fun startRole(user: User, role: Role) {
+        if (user.roles.none { it.role == role }) {
+            logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
+            return
+        }
+        val newRole = UserRole(user, role)
+        val externalRole = role.externalId
+        if (externalRole == null) {
+            logger.error { "Trying to end a non-externally linked role ${role.name}!" }
+            return
+        }
+        val functionList = mutableListOf(
+            Functie(externalOrganizationId, externalRole, newRole.startDate.asExternalDate() ?: return, null)
+        )
+        if (role.backupExternalId != null) {
+            logger.debug { "${user.username} has a back-up external id, also adding this role." }
+            functionList.add(
+                Functie(externalOrganizationId, role.backupExternalId!!, newRole.startDate.asExternalDate() ?: return, null)
+            )
+        }
+        postExternalMemberData(user.externalId!!, LidFuncties(functionList))
+        user.roles.add(newRole)
     }
 
-    override fun addRole(user: User, role: Role) {
-        TODO("Not yet implemented")
+    override fun endRole(user: User, role: Role) {
+        val userRole = user.roles.find { it.role == role }
+        if (userRole == null) {
+            logger.warn { "${user.username} never had the role ${role.name}! Ending aborted." }
+            return
+        }
+        val externalRole = role.externalId
+        if (externalRole == null) {
+            logger.error { "Trying to end a non-externally linked role ${role.name}!" }
+            return
+        }
+        userRole.endDate = LocalDate.now()
+        val functionList = mutableListOf(
+            Functie(externalOrganizationId, externalRole, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
+        )
+        if (role.backupExternalId != null) {
+            logger.debug { "${user.username} has a back-up external id, also removing this role." }
+            functionList.add(
+                Functie(externalOrganizationId, role.backupExternalId!!, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
+            )
+        }
+        postExternalMemberData(user.externalId!!, LidFuncties(functionList))
+        user.roles.remove(userRole)
     }
 
-    override fun deleteRole(user: User, role: Role) {
-        TODO("Not yet implemented")
+    private fun <T> getExternalData(externalId: String?, call: KFunction1<String, Mono<T>>): T? {
+        if (externalId == null) {
+            logger.error { "External data call for null id!" }
+            return null
+        }
+        return call(externalId).block()
     }
 
-    override fun getMedicalRecord(user: User): MedicalRecord? {
-        TODO("Not yet implemented")
-    }
-
-    override fun updateMedicalRecord(medicalRecord: MedicalRecord) {
-        TODO("Not yet implemented")
-    }
-
-    private fun getExternalData(externalId: String?): Lid? {
-        return cache.computeIfAbsent(externalId ?: return null, ::callWebClient).block()
-    }
-
-    private fun callWebClient(externalId: String) = webClientBuilder
+    private fun authorizedCall() = webClientBuilder
         .baseUrl(restGAUrl)
         .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer ${BearerTokenFilter.getToken()}")
         .build()
-        .get()
+
+    private fun getExternalMemberData(externalId: String) = authorizedCall().get()
         .uri { it.path("/lid/{id}").build(externalId) }
         .retrieve()
         .bodyToMono(Lid::class.java)
         .cache(Duration.ofSeconds(5))
+
+    private fun postExternalMemberData(externalId: String, data: Any) = authorizedCall().post()
+        .uri { it.path("/lid/{id}").build(externalId) }
+        .bodyValue(data)
+        .retrieve()
+
+    private fun createExternalRegistration(registration: LidAanvraag) = webClientBuilder
+        .baseUrl(restGAUrl)
+        .build()
+        .post()
+        .uri("/lid/aanvraag")
+        .bodyValue(registration)
+        .retrieve()
 }

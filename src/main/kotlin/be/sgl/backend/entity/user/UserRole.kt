@@ -18,10 +18,10 @@ class UserRole() : Auditable() {
     @ManyToOne
     @JoinColumn
     lateinit var role: Role
-    lateinit var startDate: LocalDate
+    var startDate: LocalDate? = null
     var endDate: LocalDate? = null
 
-    constructor(user: User, role: Role, startDate: LocalDate, endDate: LocalDate? = null) : this() {
+    constructor(user: User, role: Role, startDate: LocalDate = LocalDate.now(), endDate: LocalDate? = null) : this() {
         this.id = UserRoleId(user.id, role.id)
         this.user = user
         this.role = role

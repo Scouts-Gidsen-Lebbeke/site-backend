@@ -1,10 +1,7 @@
 package be.sgl.backend.entity.membership
 
 import be.sgl.backend.entity.Auditable
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
@@ -15,4 +12,11 @@ class MembershipPeriod : Auditable() {
     lateinit var start: LocalDate
     lateinit var end: LocalDate
     var price: Double = 0.0
+    var registrationLimit: Int? = null
+    var reductionFactor: Double = 3.0
+    var siblingReduction: Double = 0.0
+    @OneToMany
+    var restrictions = mutableListOf<MembershipRestriction>()
+
+    override fun toString() = "$start - $end"
 }

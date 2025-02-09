@@ -1,9 +1,11 @@
 package be.sgl.backend.service
 
+import be.sgl.backend.entity.organization.OrganizationType
+import be.sgl.backend.repository.OrganizationRepository
+import be.sgl.backend.service.exception.IncompleteConfigurationException
 import jakarta.mail.util.ByteArrayDataSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
@@ -18,6 +20,8 @@ class MailService {
     private lateinit var mailSender: JavaMailSender
     @Autowired
     private lateinit var templateEngine: SpringTemplateEngine
+    @Autowired
+    private lateinit var organizationRepository: OrganizationRepository
 
     fun builder(): MailBuilder {
         return MailBuilder()
@@ -30,7 +34,7 @@ class MailService {
 
     inner class MailBuilder {
 
-        private lateinit var from: String
+        private var from: String? = null
         private val to = mutableListOf<String>()
         private lateinit var subject: String
         private lateinit var body: String
@@ -38,6 +42,13 @@ class MailService {
         private val attachments = mutableListOf<Attachment>()
 
         fun from(from: String) = apply { this.from = from }
+
+        private fun fromDefault(): String {
+            val organization = organizationRepository.getByType(OrganizationType.OWNER)
+                ?: throw IncompleteConfigurationException("No organization configured!")
+            return organization.getEmail()
+                ?: throw IncompleteConfigurationException("No organization email configured, not able to send forms!")
+        }
 
         fun to(vararg to: String) = apply { this.to.addAll(to) }
 
@@ -61,7 +72,8 @@ class MailService {
             try {
                 val mimeMessage = mailSender.createMimeMessage()
                 val helper = MimeMessageHelper(mimeMessage, true)
-                helper.setFrom(from)
+                from ?: fromDefault()
+                helper.setFrom(from ?: fromDefault())
                 to.forEach(helper::addTo)
                 helper.setSubject(subject)
                 helper.setText(body, true)
