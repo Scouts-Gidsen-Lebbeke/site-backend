@@ -83,5 +83,5 @@ jobs:
               podman stop backend || true
               podman rm backend || true
             fi
-            podman run -d --name backend -p 9292:80 ghcr.io/${{ env.OWNER_LC }}/backend:latest
+            podman run -d --name backend -p 9293:80 ghcr.io/${{ env.OWNER_LC }}/backend:latest
           EOF
