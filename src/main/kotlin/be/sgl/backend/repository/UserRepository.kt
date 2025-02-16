@@ -12,4 +12,5 @@ interface UserRepository : JpaRepository<User, Int> {
     @Query("select distinct u from User u join fetch u.staffData join u.roles ur join ur.role r where r.staffBranch = :branch")
     fun getStaffForBranch(branch: Branch): List<User>
     fun deleteByUsername(username: String)
+    fun findByNameAndFirstNameAndEmail(name: String, firstName: String, email: String): User?
 }

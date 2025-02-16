@@ -29,6 +29,11 @@ class InternalUserDataProvider : UserDataProvider() {
         return userRepository.getUserByUsernameEquals(username)
     }
 
+    override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
+        logger.debug { "Trying to find user with name $firstName $name and email $email..." }
+        return userRepository.findByNameAndFirstNameAndEmail(name, firstName, email)
+    }
+
     override fun updateUser(user: User): User {
         logger.debug { "Updating user data for ${user.username}..." }
         return userRepository.save(user)

@@ -44,6 +44,11 @@ class MollieCheckout : CheckoutProvider {
         return paymentResponse.links.checkout.href
     }
 
+    override fun getCheckoutUrl(payment: Payment): String {
+        checkNotNull(payment.paymentId)
+        return mollieApiClient.payments().getPayment(payment.paymentId).links.checkout.href
+    }
+
     override fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus {
         val payment =  mollieApiClient.payments().getPayment(paymentId)
         if (!payment.amountRefunded.isEmpty || !payment.amountChargedBack.isEmpty) {

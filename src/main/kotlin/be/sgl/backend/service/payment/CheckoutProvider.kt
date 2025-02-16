@@ -6,6 +6,6 @@ import be.sgl.backend.entity.user.User
 
 interface CheckoutProvider {
     fun createCheckoutUrl(user: User, payment: Payment, domain: String): String
-
+    fun getCheckoutUrl(payment: Payment): String
     fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus
 }

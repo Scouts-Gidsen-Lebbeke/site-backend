@@ -40,8 +40,8 @@ abstract class UserDataProvider {
         val user = User()
         user.name = registrationDTO.name
         user.firstName = registrationDTO.firstName
+        user.email = registrationDTO.email
         user.userData.birthdate = registrationDTO.birthdate
-        user.userData.email = registrationDTO.email
         user.userData.mobile = registrationDTO.mobile
         user.userData.sex = registrationDTO.sex
         user.userData.hasReduction = registrationDTO.hasReduction
@@ -66,6 +66,8 @@ abstract class UserDataProvider {
     }
 
     abstract fun getUser(username: String) : User
+
+    abstract fun findByNameAndEmail(name: String, firstName: String, email: String) : User?
 
     abstract fun updateUser(user: User): User
 

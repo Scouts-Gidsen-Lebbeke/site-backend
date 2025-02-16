@@ -15,8 +15,7 @@ class UserData() : Auditable() {
     @JoinColumn(name = "id")
     lateinit var user: User
     var memberId: String? = null
-    var birthdate: LocalDate = LocalDate.now()
-    lateinit var email: String
+    lateinit var birthdate: LocalDate
     var mobile: String? = null
     var nis: String? = null
     var accountNo: String? = null

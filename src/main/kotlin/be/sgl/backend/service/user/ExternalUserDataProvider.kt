@@ -45,7 +45,7 @@ class ExternalUserDataProvider : UserDataProvider() {
             user.firstName,
             user.name,
             user.userData.birthdate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-            user.userData.email,
+            user.email,
             Adres(
                 null,
                 address.country,
@@ -68,7 +68,6 @@ class ExternalUserDataProvider : UserDataProvider() {
         val user = userRepository.getUserByUsernameEquals(username)
         getExternalData<Lid>(user.externalId, ::getExternalMemberData)?.let {
             user.roles.addAll(it.functies.mapNotNull { f -> translateFunction(user, f) })
-            user.userData.email = it.email
             user.userData.sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
             user.userData.mobile = it.persoonsgegevens.gsm
             user.userData.hasHandicap = it.persoonsgegevens.beperking

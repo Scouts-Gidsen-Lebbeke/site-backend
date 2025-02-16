@@ -94,4 +94,8 @@ class ActivityRegistrationService {
     private fun getActivityRestrictionById(id: Int): ActivityRestriction {
         return restrictionRepository.findById(id).orElseThrow { RestrictionNotFoundException() }
     }
+
+    fun updatePayment(paymentId: String) {
+        TODO("Not yet implemented")
+    }
 }

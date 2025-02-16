@@ -60,7 +60,7 @@ class BelcotaxService {
         val year = fiscalYear ?: (LocalDate.now().year - 1)
         val params = mapOf("member.first.name" to user.firstName, "fiscal-year" to year)
         val mailBuilder = mailService.builder()
-            .to(user.userData.email)
+            .to(user.email)
             .subject("Fiscaal attest kinderopvang $year")
             .template("declaration-form-confirmation.html", params)
         forms.forEach { mailBuilder.addAttachment(it, "", "application/pdf") }

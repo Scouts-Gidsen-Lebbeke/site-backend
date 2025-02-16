@@ -37,10 +37,14 @@ annotation class Nis(
 class NisValidator : ConstraintValidator<Nis, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
         value ?: return true
-        return value.matches(Regex("[0-9.\\s-]*")) && checksum(value.replace(Regex("[.\\s-]"), ""))
+        if (!value.matches(Regex("[0-9.\\s-]*"))) {
+            return false
+        }
+        val nis = value.replace(Regex("[.\\s-]"), "")
+        val base = nis.substring(0, 9).toLong()
+        val check = nis.substring(9, 11).toLong()
+        return checksum(base, check) || checksum("2$base".toLong(), check)
     }
 
-    private fun checksum(str: String): Boolean {
-        return
-    }
+    private fun checksum(base: Long, check: Long) = 97 - (base % 97) == check
 }
