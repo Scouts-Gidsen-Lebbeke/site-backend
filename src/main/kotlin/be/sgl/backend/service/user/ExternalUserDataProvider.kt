@@ -65,42 +65,11 @@ class ExternalUserDataProvider : UserDataProvider() {
     }
 
     override fun getUser(username: String): User {
-        val user = userRepository.getUserByUsernameEquals(username)
-        getExternalData<Lid>(user.externalId, ::getExternalMemberData)?.let {
-            user.roles.addAll(it.functies.mapNotNull { f -> translateFunction(user, f) })
-            user.userData.sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
-            user.userData.mobile = it.persoonsgegevens.gsm
-            user.userData.hasHandicap = it.persoonsgegevens.beperking
-            user.userData.hasReduction = it.persoonsgegevens.verminderdlidgeld
-            user.userData.accountNo = it.persoonsgegevens.rekeningnummer
-            user.userData.birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
-            user.userData.memberId = it.verbondsgegevens.lidnummer
-            user.userData.addresses.addAll(it.adressen.map { a -> a.asAddress() } )
-            user.userData.contacts.addAll(it.contacten.map { c ->
-                val contact = Contact()
-                contact.name = c.achternaam
-                contact.firstName = c.voornaam
-                contact.role = when(c.rol) {
-                    "vader" -> ContactRole.FATHER
-                    "moeder" -> ContactRole.MOTHER
-                    "voogd" -> ContactRole.GUARDIAN
-                    else -> ContactRole.RESPONSIBLE
-                }
-                contact.address = user.userData.addresses.firstOrNull { a -> a.externalId == c.id }
-                contact.mobile = c.gsm
-                contact.email = c.email
-                contact
-            })
-        }
-        return user
+        return userRepository.getUserByUsernameEquals(username).withExternalData()
     }
 
-    private fun translateFunction(user: User, function: Functie): UserRole? {
-        if (function.groep != externalOrganizationId) return null
-        val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
-        val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
-        if (endDate != null && endDate < LocalDate.now()) return null
-        return UserRole(user, role, LocalDate.parse(function.begin, DateTimeFormatter.ISO_OFFSET_DATE_TIME), endDate)
+    override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
+        return userRepository.findByNameAndFirstNameAndEmail(name, firstName, email)?.withExternalData()
     }
 
     override fun updateUser(user: User): User {
@@ -156,12 +125,49 @@ class ExternalUserDataProvider : UserDataProvider() {
         user.roles.remove(userRole)
     }
 
+    private fun User.withExternalData() = apply {
+        getExternalData<Lid>(externalId, ::getExternalMemberData)?.let {
+            roles.addAll(it.functies.mapNotNull { f -> translateFunction(this, f) })
+            userData.sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
+            userData.mobile = it.persoonsgegevens.gsm
+            userData.hasHandicap = it.persoonsgegevens.beperking
+            userData.hasReduction = it.persoonsgegevens.verminderdlidgeld
+            userData.accountNo = it.persoonsgegevens.rekeningnummer
+            userData.birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
+            userData.memberId = it.verbondsgegevens.lidnummer
+            userData.addresses.addAll(it.adressen.map { a -> a.asAddress() } )
+            userData.contacts.addAll(it.contacten.map { c ->
+                val contact = Contact()
+                contact.name = c.achternaam
+                contact.firstName = c.voornaam
+                contact.role = when(c.rol) {
+                    "vader" -> ContactRole.FATHER
+                    "moeder" -> ContactRole.MOTHER
+                    "voogd" -> ContactRole.GUARDIAN
+                    else -> ContactRole.RESPONSIBLE
+                }
+                contact.address = userData.addresses.firstOrNull { a -> a.externalId == c.id }
+                contact.mobile = c.gsm
+                contact.email = c.email
+                contact
+            })
+        }
+    }
+
     private fun <T> getExternalData(externalId: String?, call: KFunction1<String, Mono<T>>): T? {
         if (externalId == null) {
             logger.error { "External data call for null id!" }
             return null
         }
         return call(externalId).block()
+    }
+
+    private fun translateFunction(user: User, function: Functie): UserRole? {
+        if (function.groep != externalOrganizationId) return null
+        val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
+        val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
+        if (endDate != null && endDate < LocalDate.now()) return null
+        return UserRole(user, role, LocalDate.parse(function.begin, DateTimeFormatter.ISO_OFFSET_DATE_TIME), endDate)
     }
 
     private fun authorizedCall() = webClientBuilder

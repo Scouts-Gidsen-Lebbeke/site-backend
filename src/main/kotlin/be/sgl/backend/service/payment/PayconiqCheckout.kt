@@ -13,6 +13,10 @@ class PayconiqCheckout : CheckoutProvider {
         TODO("Not yet implemented")
     }
 
+    override fun getCheckoutUrl(payment: Payment): String {
+        TODO("Not yet implemented")
+    }
+
     override fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus {
         TODO("Not yet implemented")
     }
