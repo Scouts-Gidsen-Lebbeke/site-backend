@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration
 class PaymentConfig {
 
     @Bean
-    @ConditionalOnProperty(name = ["mollie.api.key"])
-    fun mollieApiClient(@Value("\${mollie.api.key}") apiKey: String): Client {
+    @ConditionalOnProperty(name = ["organization.api-key.mollie"])
+    fun mollieApiClient(@Value("\${organization.api-key.mollie}") apiKey: String): Client {
         return ClientBuilder().withApiKey(apiKey).build()
     }
 }

@@ -27,7 +27,7 @@ class ExternalUserDataProvider : UserDataProvider() {
     private lateinit var webClientBuilder: WebClient.Builder
     @Value("\${rest.ga.url}")
     private lateinit var restGAUrl: String
-    @Value("\${external.organization.id}")
+    @Value("\${organization.external.id}")
     private lateinit var externalOrganizationId: String
 
     override fun acceptRegistration(user: User) {

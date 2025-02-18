@@ -10,20 +10,18 @@ import be.woutschoovaerts.mollie.data.payment.PaymentRequest
 import be.woutschoovaerts.mollie.data.payment.PaymentStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Primary
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.*
 
 @Service
-@Primary
-@ConditionalOnProperty(name = ["mollie.api.key"])
+@ConditionalOnBean(Client::class)
 class MollieCheckout : CheckoutProvider {
 
     @Autowired
     private lateinit var mollieApiClient: Client
-    @Value("\${app.base.url}")
+    @Value("\${spring.application.base-url}")
     private lateinit var baseUrl: String
 
     override fun createCheckoutUrl(user: User, payment: Payment, domain: String): String {

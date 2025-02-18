@@ -6,7 +6,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata
 
 open class InternalOrganizationCondition : Condition {
     override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
-        return context.environment.getProperty("external.organization.id").isNullOrBlank()
+        return context.environment.getProperty("organization.external.id").isNullOrBlank()
     }
 }
 

@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: site-backend
+    base-url: # TODO: pass as an environment variable
+  datasource:
+    url: # TODO: pass as an environment variable
+    username: # TODO: pass as an environment variable
+    password: # TODO: pass as an environment variable
+  messages:
+    fallback-to-system-locale: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.auth-server-url}realms/${keycloak.realm}
+  mail:
+    host: # TODO: pass as an environment variable
+    port: # TODO: pass as an environment variable
+    username: # TODO: pass as an environment variable
+    password: # TODO: pass as an environment variable
+    alert:
+      enabled: true
+      recipient: webmaster@scoutslebbeke.be
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+rest:
+  ga:
+    url: https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga
+
+keycloak:
+  resource: # TODO: pass as an environment variable
+  realm: scouts
+  auth-server-url: https://login.scoutsengidsenvlaanderen.be/
+  public-client: true
+  principal-attribute: preferred_username
+  bearer-only: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /
+    tags-sorter: alpha
+  show-actuator: true
+
+organization:
+  external:
+    id: # Pass as an environment variable if external (GA) user data should be used
+  api-key:
+    maps: # Not currently used
+    mollie: # Pass as an environment variable if Mollie payments should be enabled
+    payconiq: # Pass as an environment variable if Payconiq payments should be enabled (ignored if Mollie is present)

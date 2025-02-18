@@ -1,0 +1,29 @@
+spring:
+  application:
+    environment: local
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  mail:
+    host: localhost
+    port: 1025
+    alert:
+      enabled: false
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+# unstable and on demand
+#rest:
+#  ga:
+#    url: https://ga-staging.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga
+
+keycloak:
+  resource: master-realm
+  realm: master
+  auth-server-url: http://localhost:8090/
+
+logging:
+  level:
+    root: INFO
+    be.sgl.backend: TRACE

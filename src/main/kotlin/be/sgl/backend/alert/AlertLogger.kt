@@ -13,11 +13,13 @@ class AlertLogger {
 
     @Autowired
     private lateinit var mailService: MailService
-    @Value("\${mail.alert.recipient}")
+    @Value("\${spring.mail.alert.enabled}")
+    private var enabled: Boolean = true
+    @Value("\${spring.mail.alert.recipient}")
     private lateinit var mailRecipient: String
-    @Value("\${app.environment}")
+    @Value("\${spring.application.environment}")
     private lateinit var environment: String
-    @Value("\${app.base.url}")
+    @Value("\${spring.application.base-url}")
     private lateinit var host: String
 
     fun alert(code: AlertCode, message: () -> String) {
@@ -25,6 +27,9 @@ class AlertLogger {
     }
 
     fun alert(code: AlertCode, message: String) {
+        if (!enabled) {
+            logger.error { "Skipped raising $code alert: $message" }
+        }
         logger.error { "Raising $code alert: $message" }
         mailService.builder()
             .to(mailRecipient)
