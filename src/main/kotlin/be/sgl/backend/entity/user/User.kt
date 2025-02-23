@@ -1,7 +1,10 @@
 package be.sgl.backend.entity.user
 
+import be.sgl.backend.entity.Address
 import jakarta.persistence.*
 import java.io.Serializable
+import java.time.LocalDate
+import java.time.Period
 
 @Entity
 @Table(
@@ -13,24 +16,39 @@ class User : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
+
     var username: String? = null
     var externalId: String? = null
     var customerId: String? = null
+    var memberId: String? = null
+
     lateinit var name: String
     lateinit var firstName: String
     lateinit var email: String
+    lateinit var birthdate: LocalDate
+    var ageDeviation = 0
+    var sex = Sex.UNKNOWN
+
     var image: String? = null
-
-    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
-    var userData = UserData(this)
-
-    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
-    var staffData = StaffData(this)
+    var mobile: String? = null
+    var nis: String? = null
+    var accountNo: String? = null
+    var hasReduction = false
+    var hasHandicap = false
 
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    val addresses: MutableList<Address> = mutableListOf()
+
+    @OneToMany
+    val contacts: MutableList<Contact> = mutableListOf()
+
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     val roles: MutableList<UserRole> = mutableListOf()
     val level: RoleLevel
         get() = roles.maxOfOrNull { it.role.level } ?: RoleLevel.GUEST
+
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
+    var staffData = StaffData(this)
 
     @ManyToMany
     @JoinTable(name = "sibling_relation")
@@ -38,5 +56,9 @@ class User : Serializable {
 
     fun getFullName(): String {
         return "$firstName $name"
+    }
+
+    fun getAge(referenceDate: LocalDate = LocalDate.now()): Int {
+        return Period.between(birthdate, referenceDate).years
     }
 }

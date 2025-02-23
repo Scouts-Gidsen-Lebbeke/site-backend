@@ -144,7 +144,7 @@ class MembershipService {
     }
 
     private fun determineCurrentBranchForUser(user: User, period: MembershipPeriod): Branch? {
-        val age = user.userData.getAge(period.end.with(lastDayOfYear())) + user.userData.ageDeviation
-        return branchRepository.getPossibleBranchesForSexAndAge(user.userData.sex, age).firstOrNull()
+        val age = user.getAge(period.end.with(lastDayOfYear())) + user.ageDeviation
+        return branchRepository.getPossibleBranchesForSexAndAge(user.sex, age).firstOrNull()
     }
 }

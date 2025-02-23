@@ -75,8 +75,7 @@ class BelcotaxService {
     }
 
     private fun relevantActivity(registration: ActivityRegistration): Boolean {
-        val userData = registration.user.userData
-        return userData.getAge(registration.start.toLocalDate()) < (if (userData.hasHandicap) 21 else 14)
+        return registration.user.getAge(registration.start.toLocalDate()) < if (registration.user.hasHandicap) 21 else 14
     }
 
     private fun List<ActivityRegistration>.asForms(user: User, rate: Double?) = chunked(4).mapIndexed { index, it ->

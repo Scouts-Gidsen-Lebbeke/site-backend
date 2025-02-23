@@ -9,8 +9,8 @@ import be.sgl.backend.repository.ActivityRegistrationRepository
 import be.sgl.backend.repository.ActivityRepository
 import be.sgl.backend.repository.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
-import be.sgl.backend.service.mapper.ActivityMapper
-import be.sgl.backend.service.mapper.AddressMapper
+import be.sgl.backend.mapper.ActivityMapper
+import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

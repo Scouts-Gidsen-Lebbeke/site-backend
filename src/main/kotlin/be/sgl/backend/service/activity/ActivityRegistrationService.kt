@@ -10,7 +10,7 @@ import be.sgl.backend.repository.ActivityRepository
 import be.sgl.backend.repository.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
 import be.sgl.backend.service.exception.RestrictionNotFoundException
-import be.sgl.backend.service.mapper.ActivityMapper
+import be.sgl.backend.mapper.ActivityMapper
 import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,7 +31,6 @@ class ActivityRegistrationService {
     private lateinit var activityMapper: ActivityMapper
     @Autowired
     private lateinit var checkoutProvider: CheckoutProvider
-
 
     fun getAllRegistrationsForActivity(id: Int): List<ActivityRegistrationDTO> {
         val activity = getActivityById(id)
@@ -77,11 +76,11 @@ class ActivityRegistrationService {
     private fun calculatePriceForActivity(user: User, activity: Activity, restriction: ActivityRestriction, additionalData: String?): Double {
         var finalPrice = restriction.alternativePrice ?: activity.price
         val additionalPrice = activity.readAdditionalData(additionalData)
-        if (user.userData.hasReduction) {
+        if (user.hasReduction) {
             return finalPrice / activity.reductionFactor + additionalPrice
         }
         finalPrice += additionalPrice
-        if (user.siblings.any { !it.userData.hasReduction && registrationRepository.existsBySubscribableAndUser(activity, it) }) {
+        if (user.siblings.any { !it.hasReduction && registrationRepository.existsBySubscribableAndUser(activity, it) }) {
             return (finalPrice - activity.siblingReduction).coerceAtLeast(0.0)
         }
         return finalPrice

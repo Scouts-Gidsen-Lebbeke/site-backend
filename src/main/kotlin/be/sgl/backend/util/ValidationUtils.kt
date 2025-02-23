@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Payload
 import jakarta.validation.constraintvalidation.SupportedValidationTarget
 import jakarta.validation.constraintvalidation.ValidationTarget
+import java.util.Locale
 import kotlin.reflect.KClass
 
 @Constraint(validatedBy = [PhoneNumberValidator::class])
@@ -47,4 +48,19 @@ class NisValidator : ConstraintValidator<Nis, String> {
     }
 
     private fun checksum(base: Long, check: Long) = 97 - (base % 97) == check
+}
+
+@Constraint(validatedBy = [CountryCodeValidator::class])
+@Target(AnnotationTarget.FIELD)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class CountryCode(
+    val message: String = "{CountryCode.message}",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
+)
+
+class CountryCodeValidator : ConstraintValidator<CountryCode, String> {
+    override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
+        return value == null || Locale.getISOCountries().contains(value.uppercase())
+    }
 }

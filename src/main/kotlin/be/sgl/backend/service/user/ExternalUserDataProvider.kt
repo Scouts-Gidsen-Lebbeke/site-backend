@@ -32,19 +32,19 @@ class ExternalUserDataProvider : UserDataProvider() {
 
     override fun acceptRegistration(user: User) {
         logger.debug { "Accepting registration for user ${user.id}..." }
-        val address = user.userData.addresses.first()
+        val address = user.addresses.first()
         createExternalRegistration(LidAanvraag(
             externalOrganizationId,
             Persoonsgegevens(
-               user.userData.sex.code,
-               user.userData.mobile,
-               user.userData.hasHandicap,
-               user.userData.hasReduction,
+               user.sex.code,
+               user.mobile,
+               user.hasHandicap,
+               user.hasReduction,
                 null
             ),
             user.firstName,
             user.name,
-            user.userData.birthdate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            user.birthdate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             user.email,
             Adres(
                 null,
@@ -128,15 +128,15 @@ class ExternalUserDataProvider : UserDataProvider() {
     private fun User.withExternalData() = apply {
         getExternalData<Lid>(externalId, ::getExternalMemberData)?.let {
             roles.addAll(it.functies.mapNotNull { f -> translateFunction(this, f) })
-            userData.sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
-            userData.mobile = it.persoonsgegevens.gsm
-            userData.hasHandicap = it.persoonsgegevens.beperking
-            userData.hasReduction = it.persoonsgegevens.verminderdlidgeld
-            userData.accountNo = it.persoonsgegevens.rekeningnummer
-            userData.birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
-            userData.memberId = it.verbondsgegevens.lidnummer
-            userData.addresses.addAll(it.adressen.map { a -> a.asAddress() } )
-            userData.contacts.addAll(it.contacten.map { c ->
+            sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
+            mobile = it.persoonsgegevens.gsm
+            hasHandicap = it.persoonsgegevens.beperking
+            hasReduction = it.persoonsgegevens.verminderdlidgeld
+            accountNo = it.persoonsgegevens.rekeningnummer
+            birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
+            memberId = it.verbondsgegevens.lidnummer
+            addresses.addAll(it.adressen.map { a -> a.asAddress() } )
+            contacts.addAll(it.contacten.map { c ->
                 val contact = Contact()
                 contact.name = c.achternaam
                 contact.firstName = c.voornaam
@@ -146,7 +146,7 @@ class ExternalUserDataProvider : UserDataProvider() {
                     "voogd" -> ContactRole.GUARDIAN
                     else -> ContactRole.RESPONSIBLE
                 }
-                contact.address = userData.addresses.firstOrNull { a -> a.externalId == c.id }
+                contact.address = addresses.firstOrNull { a -> a.externalId == c.id }
                 contact.mobile = c.gsm
                 contact.email = c.email
                 contact

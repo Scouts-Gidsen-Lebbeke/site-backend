@@ -8,7 +8,7 @@ import be.sgl.backend.repository.MedicalRecordRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.UserRepository
 import be.sgl.backend.repository.UserRoleRepository
-import be.sgl.backend.service.mapper.AddressMapper
+import be.sgl.backend.mapper.AddressMapper
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -41,12 +41,12 @@ abstract class UserDataProvider {
         user.name = registrationDTO.name
         user.firstName = registrationDTO.firstName
         user.email = registrationDTO.email
-        user.userData.birthdate = registrationDTO.birthdate
-        user.userData.mobile = registrationDTO.mobile
-        user.userData.sex = registrationDTO.sex
-        user.userData.hasReduction = registrationDTO.hasReduction
-        user.userData.hasHandicap = registrationDTO.hasHandicap
-        user.userData.addresses.add(addressMapper.toEntity(registrationDTO.address))
+        user.birthdate = registrationDTO.birthdate
+        user.mobile = registrationDTO.mobile
+        user.sex = registrationDTO.sex
+        user.hasReduction = registrationDTO.hasReduction
+        user.hasHandicap = registrationDTO.hasHandicap
+        user.addresses.add(addressMapper.toEntity(registrationDTO.address))
         return userRepository.save(user)
     }
 

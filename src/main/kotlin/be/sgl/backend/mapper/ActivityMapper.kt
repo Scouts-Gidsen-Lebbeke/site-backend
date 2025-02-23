@@ -1,4 +1,4 @@
-package be.sgl.backend.service.mapper
+package be.sgl.backend.mapper
 
 import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO

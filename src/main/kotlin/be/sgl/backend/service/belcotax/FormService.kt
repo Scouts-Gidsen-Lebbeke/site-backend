@@ -32,7 +32,7 @@ class FormService {
             "certifierTown" to certifier.address.town,
             "name" to form.user.name,
             "firstName" to form.user.firstName,
-            "birthDate" to form.user.userData.birthdate,
+            "birthDate" to form.user.birthdate,
             "street" to form.parent.address?.street,
             "nr" to "${form.parent.address?.number}${form.parent.address?.subPremise}",
             "zip" to form.parent.address?.zipcode,

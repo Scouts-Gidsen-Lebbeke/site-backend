@@ -72,7 +72,6 @@ class MailService {
             try {
                 val mimeMessage = mailSender.createMimeMessage()
                 val helper = MimeMessageHelper(mimeMessage, true)
-                from ?: fromDefault()
                 helper.setFrom(from ?: fromDefault())
                 to.forEach(helper::addTo)
                 helper.setSubject(subject)
