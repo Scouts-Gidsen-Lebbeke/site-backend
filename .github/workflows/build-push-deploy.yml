@@ -74,7 +74,6 @@ jobs:
       - name: Deploy Docker Container
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
-            cd scoutslebbeke
             
             podman login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
 
