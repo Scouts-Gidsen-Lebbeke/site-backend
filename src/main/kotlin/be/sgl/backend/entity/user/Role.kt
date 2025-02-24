@@ -11,8 +11,6 @@ class Role {
     var externalId: String? = null
     var backupExternalId: String? = null
     lateinit var name: String
-//    @ManyToOne
-//    var branch: Branch? = null
     @ManyToOne
     var staffBranch: Branch? = null
     var level = RoleLevel.GUEST

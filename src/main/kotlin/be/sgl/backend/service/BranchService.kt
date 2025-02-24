@@ -8,7 +8,7 @@ import be.sgl.backend.entity.branch.BranchStatus.*
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.UserRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
-import be.sgl.backend.service.mapper.BranchMapper
+import be.sgl.backend.mapper.BranchMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

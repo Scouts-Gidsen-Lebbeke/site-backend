@@ -14,7 +14,7 @@ class MembershipRestriction : Auditable() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
     @ManyToOne
-    lateinit var membership: Membership
+    lateinit var period: MembershipPeriod
     @ManyToOne
     lateinit var branch: Branch
     var alternativePrice: Double? = null

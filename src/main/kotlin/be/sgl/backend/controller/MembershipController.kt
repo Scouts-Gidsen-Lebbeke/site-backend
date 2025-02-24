@@ -4,6 +4,7 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.MembershipDTO
+import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.service.MembershipService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -34,8 +35,16 @@ class MembershipController {
 
     @GetMapping("/current")
     @OnlyAuthenticated
-    @Operation(summary = "Get all memberships for the current user")
+    @Operation(summary = "Get the current membership for the current user")
     fun getCurrentMembershipsForCurrentUser(): ResponseEntity<List<MembershipDTO>> {
+        // TODO
+        return ResponseEntity.ok(emptyList())
+    }
+
+    @GetMapping("/user/{username}/current")
+    @OnlyStaff
+    @Operation(summary = "Get the current memberships for the given user")
+    fun getCurrentMembershipsForUser(@PathVariable username: String): ResponseEntity<List<MembershipDTO>> {
         // TODO
         return ResponseEntity.ok(emptyList())
     }
@@ -51,21 +60,30 @@ class MembershipController {
     @OnlyAuthenticated
     fun createMembershipForCurrentUserAndCurrentPeriod(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
         val headers = HttpHeaders()
-        headers.location = URI("https://mysite.com/checkout")
+        headers.location = URI(membershipService.createMembershipForExistingUser(userDetails.username))
         return ResponseEntity(headers, HttpStatus.FOUND)
     }
 
-    @PostMapping("/user/{userId}")
+    @PostMapping("/user/{username}")
     @OnlyStaff
-    fun createMembershipForUserAndCurrentPeriod(@PathVariable userId: String): ResponseEntity<Unit> {
+    fun createMembershipForUserAndCurrentPeriod(@PathVariable username: String): ResponseEntity<Unit> {
         val headers = HttpHeaders()
-        headers.location = URI("https://mysite.com/checkout")
+        headers.location = URI(membershipService.createMembershipForExistingUser(username))
+        return ResponseEntity(headers, HttpStatus.FOUND)
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("permitAll()")
+    fun createMembershipForNewUser(@RequestBody userRegistrationDTO: UserRegistrationDTO): ResponseEntity<Unit> {
+        val headers = HttpHeaders()
+        headers.location = URI(membershipService.createMembershipForNewUser(userRegistrationDTO))
         return ResponseEntity(headers, HttpStatus.FOUND)
     }
 
     @PostMapping("/updatePayment")
     @PreAuthorize("permitAll()")
-    fun updatePayment(@RequestBody paymentId: Int): ResponseEntity<Unit> {
+    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
+        membershipService.updatePayment(paymentId)
         return ResponseEntity.ok().build()
     }
 }

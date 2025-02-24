@@ -1,9 +1,9 @@
 package be.sgl.backend
 
+import be.sgl.backend.util.IntegrationTest
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
+@IntegrationTest
 class SiteBackendApplicationTests {
 
     @Test

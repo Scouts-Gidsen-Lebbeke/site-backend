@@ -174,7 +174,7 @@ class DispatchService {
         f862139Childpostnr = f2016Postcodebelgisch ?: f2112Buitenlandspostnummer // This should be correct for 99.9% of all cases
         f862140Childmunicipality = f2017Gemeente // This should be correct for 99.9% of all cases
         f862144Enddate2 = formDTO.activity2?.end?.asBelcotaxDate()
-        f862153Nnchild = formDTO.user.userData.nis.assertLength("child nis number for $f2010Referentie", 11)
+        f862153Nnchild = formDTO.user.nis.assertLength("child nis number for $f2010Referentie", 11)
         f862154Certifiermunicipality = certifier.address.town.assertMaxLength("certifier town", 27)
         f862155Certifiername = certifier.name.escaped().assertMaxLength("certifier name", 41)
         f862156Certifieradres = certifier.address.getStreetAdress().assertMaxLength("certifier street address", 32)
@@ -182,7 +182,7 @@ class DispatchService {
         f862158Enddate3 = formDTO.activity3?.end?.asBelcotaxDate()
         f862161Begindate4 = formDTO.activity4?.start?.asBelcotaxDate()
         f862162Enddate4 = formDTO.activity4?.end?.asBelcotaxDate()
-        f862163Childbirthdate = formDTO.user.userData.birthdate.asBelcotaxDate()
+        f862163Childbirthdate = formDTO.user.birthdate.asBelcotaxDate()
         // f862164Beginvaliditycertification => Not required, and assume the organisation is certified the whole year
         // f862171Endvaliditycertification => Not required, and assume the organisation is certified the whole year
     }

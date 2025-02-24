@@ -1,0 +1,11 @@
+spring:
+  application:
+    environment: prod
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    be.sgl.backend: WARN
+

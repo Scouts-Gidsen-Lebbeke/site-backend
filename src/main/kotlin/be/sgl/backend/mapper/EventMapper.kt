@@ -1,4 +1,4 @@
-package be.sgl.backend.service.mapper
+package be.sgl.backend.mapper
 
 import be.sgl.backend.dto.EventBaseDTO
 import be.sgl.backend.dto.EventDTO

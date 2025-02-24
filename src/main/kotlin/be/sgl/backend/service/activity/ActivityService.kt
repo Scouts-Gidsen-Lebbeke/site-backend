@@ -2,20 +2,15 @@ package be.sgl.backend.service.activity
 
 import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO
-import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.registrable.activity.ActivityRestriction
-import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.ActivityRegistrationRepository
 import be.sgl.backend.repository.ActivityRepository
 import be.sgl.backend.repository.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
-import be.sgl.backend.service.exception.RestrictionNotFoundException
-import be.sgl.backend.service.mapper.ActivityMapper
-import be.sgl.backend.service.payment.CheckoutProvider
+import be.sgl.backend.mapper.ActivityMapper
+import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -35,7 +30,7 @@ class ActivityService {
     @Autowired
     private lateinit var activityMapper: ActivityMapper
     @Autowired
-    private lateinit var checkoutProvider: CheckoutProvider
+    private lateinit var addressMapper: AddressMapper
 
     fun getAllActivities(): List<ActivityBaseDTO> {
         return activityRepository.findAll().map(activityMapper::toBaseDto)
@@ -57,12 +52,6 @@ class ActivityService {
             restriction.activity = newActivity
         }
         return activityMapper.toDto(activityRepository.save(newActivity))
-    }
-
-    private fun validateActivityDTO(dto: ActivityDTO) {
-        check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
-        check(dto.closed < dto.start) { "The start date of an activity should be after the closure of registrations!" }
-        check(dto.start < dto.end) { "The start date of an activity should be before its end date!" }
     }
 
     fun mergeActivityDTOChanges(id: Int, dto: ActivityDTO): ActivityDTO {
@@ -104,7 +93,7 @@ class ActivityService {
             check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
         activity.registrationLimit = dto.registrationLimit
-        //activity.address = activityMapper.toEntity(dto.address)
+        activity.address = addressMapper.toEntity(dto.address)
         activity.sendConfirmation = dto.sendConfirmation
         activity.sendCompleteConfirmation = dto.sendCompleteConfirmation
         activity.communicationCC = dto.communicationCC
@@ -112,76 +101,23 @@ class ActivityService {
         return activityMapper.toDto(activityRepository.save(activity))
     }
 
+    fun deleteActivity(id: Int) {
+        val activity = getActivityById(id)
+        check(hasRegistrations(activity)) { "This activity has registrations and cannot be deleted anymore!" }
+        activityRepository.deleteById(id)
+    }
+
+    private fun validateActivityDTO(dto: ActivityDTO) {
+        check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
+        check(dto.closed < dto.start) { "The start date of an activity should be after the closure of registrations!" }
+        check(dto.start < dto.end) { "The start date of an activity should be before its end date!" }
+    }
+
     private fun hasRegistrations(activity: Activity): Boolean {
         return registrationRepository.existsBySubscribable(activity)
     }
 
-    fun deleteActivity(id: Int) {
-        val activity = getActivityById(id)
-        check(hasRegistrations(activity)) { "This activity has registrations and cannot be deleted anymore!" }
-        registrationRepository.deleteById(id)
-    }
-
-    fun getAllRegistrationsForActivity(id: Int): List<ActivityRegistrationDTO> {
-        val activity = getActivityById(id)
-        return registrationRepository.getBySubscribable(activity).map(activityMapper::toDto)
-    }
-
-    fun getAllRegistrationsForUser(username: String): List<ActivityRegistrationDTO> {
-        val user = userDataProvider.getUser(username)
-        return registrationRepository.getByUser(user).map(activityMapper::toDto)
-    }
-
-    fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {
-        val user = userDataProvider.getUser(username)
-        val activity = getActivityById(id)
-        val restriction = getActivityRestrictionById(restrictionId)
-        validateActivityLimits(restriction)
-        val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
-        var registration = ActivityRegistration(user, restriction, finalPrice, additionalData)
-        registration = registrationRepository.save(registration)
-        //val checkoutUrl = checkoutProvider.createCheckoutUrl(user, registration)
-        registrationRepository.save(registration)
-        //return checkoutUrl
-        return ""
-    }
-
-    /**
-     * Check the presence of a global activity limit, a restriction limit and a branch limit.
-     */
-    private fun validateActivityLimits(restriction: ActivityRestriction) {
-        restriction.activity.registrationLimit?.let {
-            val registrationCount = registrationRepository.getBySubscribable(restriction.activity).count()
-            check(registrationCount < it) { "The limit for this activity is reached!" }
-        }
-        restriction.alternativeLimit?.let {
-            val restrictionCount = registrationRepository.getByRestriction(restriction).count()
-            check(restrictionCount < it) { "The limit for this restriction is reached!" }
-        }
-        restrictionRepository.findAllByBranch(restriction.branch).find { it.isBranchLimit() }?.let {
-            val branchCount = registrationRepository.getByBranch(restriction.branch).count()
-            check(branchCount < it.alternativeLimit!!) { "The limit for this branch is reached!" }
-        }
-    }
-
-    private fun calculatePriceForActivity(user: User, activity: Activity, restriction: ActivityRestriction, additionalData: String?): Double {
-        var finalPrice = restriction.alternativePrice ?: activity.price
-        val additionalPrice = activity.readAdditionalData(additionalData)
-        if (user.userData.hasReduction) {
-            return finalPrice / activity.reductionFactor + additionalPrice
-        }
-        finalPrice += additionalPrice
-        if (user.siblings.any { !it.userData.hasReduction && registrationRepository.existsBySubscribableAndUser(activity, it) }) {
-            return (finalPrice - activity.siblingReduction).coerceAtLeast(0.0)
-        }
-        return finalPrice
-    }
-
     private fun getActivityById(id: Int): Activity {
         return activityRepository.findById(id).orElseThrow { ActivityNotFoundException() }
-    }
-
-    private fun getActivityRestrictionById(id: Int): ActivityRestriction {
-        return restrictionRepository.findById(id).orElseThrow { RestrictionNotFoundException() }
     }
 }

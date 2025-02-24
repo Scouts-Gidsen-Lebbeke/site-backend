@@ -1,6 +1,8 @@
 package be.sgl.backend.util
 
 import be.sgl.backend.entity.Address
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 // Put all the nasty SGV entities together and don't let the nastiness leak out
 data class Lid(
@@ -15,6 +17,10 @@ data class Lid(
     val email: String,
     val functies: List<Functie>,
     val groepseigenVelden: Map<String, GroepseigenVelden>,
+)
+
+data class LidFuncties(
+    val functies: List<Functie>
 )
 
 data class Persoonsgegevens(
@@ -39,7 +45,7 @@ data class Verbondsgegevens(
 )
 
 data class Adres(
-    val id: String,
+    val id: String?,
     val land: String,
     val postcode: String,
     val gemeente: String,
@@ -96,3 +102,23 @@ data class Groep(
     val website: String?,
     val vrijeInfo: String?
 )
+
+data class LidAanvraag(
+    val groepsnummer: String,
+    val persoonsgegevens: Persoonsgegevens,
+    val voornaam: String,
+    val achternaam: String,
+    val geboortedatum: String,
+    val email: String,
+    val adres: Adres
+)
+
+data class Steekkaart(
+    val gegevens: GroepseigenGegevens
+)
+
+data class GroepseigenGegevens(
+    val waarden: Map<String, String?>
+)
+
+fun LocalDate?.asExternalDate() = this?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)

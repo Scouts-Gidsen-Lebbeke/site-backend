@@ -1,0 +1,15 @@
+spring:
+  application:
+    environment: qa
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+# unstable and on demand
+#rest:
+#  ga:
+#    url: https://ga-staging.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga
+
+logging:
+  level:
+    be.sgl.backend: INFO

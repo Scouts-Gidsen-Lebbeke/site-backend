@@ -4,7 +4,7 @@ import be.sgl.backend.dto.NewsItemDTO
 import be.sgl.backend.entity.NewsItem
 import be.sgl.backend.repository.NewsItemRepository
 import be.sgl.backend.service.exception.NewsItemNotFoundException
-import be.sgl.backend.service.mapper.NewsItemMapper
+import be.sgl.backend.mapper.NewsItemMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

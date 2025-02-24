@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.branch
 
 import be.sgl.backend.entity.Auditable
+import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.*
 import kotlin.jvm.Transient
@@ -14,6 +15,8 @@ class Branch : Auditable() {
     lateinit var email: String
     var minimumAge = 0
     var maximumAge: Int? = null
+    @Enumerated(EnumType.STRING)
+    var sex: Sex? = null
     @Lob
     var description: String? = null
     @Lob

@@ -8,6 +8,7 @@ import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.dto.ActivityRegistrationDTO
+import be.sgl.backend.service.activity.ActivityRegistrationService
 import be.sgl.backend.service.activity.ActivityService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -32,6 +33,8 @@ class ActivityController {
 
     @Autowired
     private lateinit var activityService: ActivityService
+    @Autowired
+    private lateinit var registrationService: ActivityRegistrationService
 
     @GetMapping
     @OnlyAdmin
@@ -135,7 +138,7 @@ class ActivityController {
     fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails,
                             @RequestBody data: String, request: HttpServletRequest): ResponseEntity<Unit> {
         request.requestURI + "/updatePayment"
-        val checkoutUrl = activityService.createPaymentForActivity(id, restrictionId, userDetails.username, data)
+        val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, userDetails.username, data)
         val headers = HttpHeaders()
         headers.location = URI(checkoutUrl)
         return ResponseEntity(headers, HttpStatus.FOUND)
@@ -150,8 +153,8 @@ class ActivityController {
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(schema = Schema(hidden = true))])
         ]
     )
-    fun updatePayment(@RequestBody paymentId: Int): ResponseEntity<Unit> {
-        // TODO
+    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
+        registrationService.updatePayment(paymentId)
         return ResponseEntity.ok().build()
     }
 
@@ -167,6 +170,6 @@ class ActivityController {
         ]
     )
     fun getAllRegistrationsForActivity(@PathVariable id: Int): ResponseEntity<List<ActivityRegistrationDTO>> {
-        return ResponseEntity.ok(activityService.getAllRegistrationsForActivity(id))
+        return ResponseEntity.ok(registrationService.getAllRegistrationsForActivity(id))
     }
 }

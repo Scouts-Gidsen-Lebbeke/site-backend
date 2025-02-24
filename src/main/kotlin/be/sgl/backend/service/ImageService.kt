@@ -2,7 +2,6 @@ package be.sgl.backend.service
 
 import be.sgl.backend.service.exception.ImageDeleteException
 import be.sgl.backend.service.exception.ImageUploadException
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -17,7 +16,7 @@ class ImageService {
     fun upload(directory: String, image: MultipartFile): String {
         try {
             check(image.contentType?.startsWith("image/") != true) { "Only image files are allowed." }
-            check(image.size > MAX_FILE_SIZE) { "File size exceeds maximum (50 MB)." }
+            check(image.size > MAX_FILE_SIZE) { "File size exceeds maximum ($MAX_FILE_SIZE MB)." }
             val fileName: String = UUID.randomUUID().toString() + "." + image.name.substringAfterLast('.', "")
             val filePath = Paths.get(IMAGE_BASE_PATH, directory, fileName)
             Files.createDirectories(filePath.parent)
@@ -30,12 +29,11 @@ class ImageService {
         }
     }
 
-    fun delete(directory: String, fileName: String): Boolean {
+    fun delete(directory: String, fileName: String) {
         try {
             val filePath = Paths.get(IMAGE_BASE_PATH, directory, fileName)
             check(Files.exists(filePath)) { "Image $fileName does not exist." }
             Files.delete(filePath)
-            return true
         } catch (e: IOException) {
             throw ImageDeleteException(fileName, directory)
         }

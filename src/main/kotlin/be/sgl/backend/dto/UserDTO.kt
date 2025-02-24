@@ -2,40 +2,40 @@ package be.sgl.backend.dto
 
 import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.entity.user.Sex
-import java.io.Serializable
+import be.sgl.backend.util.Nis
+import be.sgl.backend.util.PhoneNumber
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 import java.time.LocalDate
 
-open class UserDTO(
+data class UserDTO(
     val username: String,
+    @NotBlank
     val name: String,
+    @NotBlank
     val firstName: String,
+    @Email
+    @NotBlank
+    val email: String,
     val image: String?,
-    val level: RoleLevel
-) : Serializable
-
-class StaffDTO(
-    val nickname: String?,
-    val totem: String?,
-    username: String,
-    name: String,
-    firstName: String,
-    image: String?,
-    level: RoleLevel
-) : UserDTO(username, name, firstName, image, level)
-
-class ExtendedUserDTO(
+    val level: RoleLevel,
     val memberId: String?,
     val birthdate: LocalDate,
-    val email: String?,
+    @PhoneNumber
     val mobile: String?,
+    @Nis
     val nis: String?,
     val accountNo: String?,
     val sex: Sex,
     val hasReduction: Boolean,
-    val address: AddressDTO,
-    username: String,
-    name: String,
-    firstName: String,
-    image: String?,
-    level: RoleLevel
-) : UserDTO(username, name, firstName, image, level)
+    val addresses: List<AddressDTO>,
+    val contacts: List<ContactDTO>
+)
+
+data class StaffDTO(
+    val name: String,
+    val firstName: String,
+    val image: String?,
+    val nickname: String?,
+    val totem: String?,
+)
