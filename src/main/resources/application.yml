@@ -24,6 +24,9 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+      mail.smtp.ssl.protocols: TLSv1.2
+      mail.smtp.ssl.trust: ${spring.mail.host}
+      mail.smtp.timeout: 8000
 
 rest:
   ga:
