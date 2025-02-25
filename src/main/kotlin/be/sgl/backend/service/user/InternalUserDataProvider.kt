@@ -24,9 +24,14 @@ class InternalUserDataProvider : UserDataProvider() {
         logger.debug { "Internal registration finished: username ${user.username} created for user ${user.id}!" }
     }
 
+    override fun findUser(username: String): User? {
+        logger.debug { "Fetching user data for $username..." }
+        return userRepository.findByUsername(username)
+    }
+
     override fun getUser(username: String): User {
         logger.debug { "Fetching user data for $username..." }
-        return userRepository.getUserByUsernameEquals(username)
+        return userRepository.getByUsername(username)
     }
 
     override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {

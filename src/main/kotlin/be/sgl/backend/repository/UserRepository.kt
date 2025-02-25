@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserRepository : JpaRepository<User, Int> {
-    fun getUserByUsernameEquals(username: String): User
+    fun findByUsername(username: String): User?
+    fun getByUsername(username: String): User
     @Query("select distinct u from User u join fetch u.staffData join u.roles ur join ur.role r where r.staffBranch = :branch")
     fun getStaffForBranch(branch: Branch): List<User>
     fun deleteByUsername(username: String)
