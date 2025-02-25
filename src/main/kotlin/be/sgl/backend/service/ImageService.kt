@@ -29,7 +29,8 @@ class ImageService {
         }
     }
 
-    fun delete(directory: String, fileName: String) {
+    fun delete(directory: String, fileName: String?) {
+        fileName ?: return
         try {
             val filePath = Paths.get(IMAGE_BASE_PATH, directory, fileName)
             check(Files.exists(filePath)) { "Image $fileName does not exist." }
@@ -40,7 +41,7 @@ class ImageService {
     }
 
     fun replace(directory: String, oldFileName: String?, image: MultipartFile): String {
-        oldFileName?.let { delete(directory, oldFileName) }
+        delete(directory, oldFileName)
         return upload(directory, image)
     }
 
