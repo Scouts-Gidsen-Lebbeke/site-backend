@@ -1,6 +1,10 @@
 spring:
   application:
     environment: local
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3308/mydatabase
+    username: myuser
+    password: secret
   jpa:
     hibernate:
       ddl-auto: create-drop

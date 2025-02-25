@@ -5,6 +5,16 @@ services:
     image: ghcr.io/scouts-gidsen-lebbeke/backend:latest
     container_name: backend
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_APPLICATION_BASE_URL=localhost
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - KEYCLOAK_RESOURCE=${KEYCLOAK_RESOURCE}
+      - JPA_HIBERNATE_DDL-AUTO=update
     network_mode: host
     restart: always

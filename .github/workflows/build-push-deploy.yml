@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - production
+env:
+  SPRING_DATASOURCE_URL: ${{ secrets.PROD_DB_URL }}
+  SPRING_DATASOURCE_USERNAME: ${{ secrets.PROD_DB_USER }}
+  SPRING_DATASOURCE_PASSWORD: ${{ secrets.PROD_DB_PASS }}
+  SPRING_MAIL_HOST: localhost
+  SPRING_MAIL_USERNAME: todo
+  SPRING_MAIL_PASSWORD: todo
+  KEYCLOAK_RESOURCE: todo
 
 jobs:
   build-and-push:
