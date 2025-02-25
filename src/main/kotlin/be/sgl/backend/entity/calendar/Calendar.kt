@@ -3,10 +3,15 @@ package be.sgl.backend.entity.calendar
 import be.sgl.backend.entity.Auditable
 import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.*
-import org.hibernate.annotations.SQLRestriction
 
 @Entity
-class Calendar : Auditable() {
+@Table(
+    uniqueConstraints = [UniqueConstraint(columnNames = ["period_id", "branch_id"])],
+    indexes = [
+        Index(name = "idx_period", columnList = "period_id")
+    ]
+)
+class Calendar() : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
@@ -18,7 +23,16 @@ class Calendar : Auditable() {
     var intro: String? = null
     @Lob
     var outro: String? = null
-    @OneToMany
-    @SQLRestriction("calendar_id = {alias}.calendar_id OR calendar_period_id = {alias}.period_id")
+    @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @JoinTable(
+        name = "calendar_items",
+        joinColumns = [JoinColumn(name = "calendar_id")],
+        inverseJoinColumns = [JoinColumn(name = "item_id")]
+    )
     var items: MutableList<CalendarItem> = mutableListOf()
+
+    constructor(period: CalendarPeriod, branch: Branch) : this() {
+        this.period = period
+        this.branch = branch
+    }
 }

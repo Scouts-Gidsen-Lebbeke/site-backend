@@ -1,12 +1,174 @@
 package be.sgl.backend.service
 
+import be.sgl.backend.dto.CalendarDTO
+import be.sgl.backend.dto.CalendarItemWithCalendarsDTO
+import be.sgl.backend.dto.CalendarPeriodDTO
+import be.sgl.backend.entity.calendar.Calendar
+import be.sgl.backend.entity.calendar.CalendarItem
+import be.sgl.backend.entity.calendar.CalendarPeriod
+import be.sgl.backend.mapper.AddressMapper
+import be.sgl.backend.mapper.CalendarMapper
+import be.sgl.backend.repository.BranchRepository
+import be.sgl.backend.repository.CalendarItemRepository
+import be.sgl.backend.repository.CalendarPeriodRepository
 import be.sgl.backend.repository.CalendarRepository
+import be.sgl.backend.service.exception.CalendarItemNotFoundException
+import be.sgl.backend.service.exception.CalendarNotFoundException
+import be.sgl.backend.service.exception.CalendarPeriodNotFoundException
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.time.DayOfWeek
+import java.time.LocalDate
 
 @Service
+@Transactional
 class CalendarService {
 
     @Autowired
+    private lateinit var imageService: ImageService
+    @Autowired
+    private lateinit var periodRepository: CalendarPeriodRepository
+    @Autowired
     private lateinit var calendarRepository: CalendarRepository
+    @Autowired
+    private lateinit var itemRepository: CalendarItemRepository
+    @Autowired
+    private lateinit var mapper: CalendarMapper
+    @Autowired
+    private lateinit var addressMapper: AddressMapper
+    @Autowired
+    private lateinit var branchRepository: BranchRepository
+
+    fun getAllCalendarPeriods(): List<CalendarPeriodDTO> {
+        return periodRepository.findAll().map(mapper::toDto)
+    }
+
+    fun saveCalendarPeriodDTO(dto: CalendarPeriodDTO): CalendarPeriodDTO {
+        verifyNoOverlaps(periodRepository.getOverlappingPeriods(dto.start, dto.end))
+        val period = periodRepository.save(mapper.toEntity(dto))
+        branchRepository.getBranchesWithCalendar().forEach {
+            calendarRepository.save(Calendar(period, it))
+        }
+        return mapper.toDto(period)
+    }
+
+    fun mergeCalendarPeriodDTOChanges(id: Int, dto: CalendarPeriodDTO): CalendarPeriodDTO {
+        val period = getPeriodById(id)
+        verifyNoOverlaps(periodRepository.getOverlappingPeriods(dto.start, dto.end).filter { it.id == id })
+        period.name = dto.name
+        period.start = dto.start
+        period.end = dto.end
+        return mapper.toDto(periodRepository.save(mapper.toEntity(dto)))
+    }
+
+    fun deleteCalendarPeriod(id: Int) {
+        val period = getPeriodById(id)
+        calendarRepository.getCalendarsByPeriod(period).forEach {
+            it.items.forEach { item -> imageService.delete(ITEM_IMAGE_DIR, item.image) }
+            calendarRepository.delete(it)
+        }
+        periodRepository.delete(period)
+    }
+
+    fun getCurrentCalendars(): List<CalendarDTO> {
+        return calendarRepository.getCurrentCalendars().map(mapper::toDto)
+    }
+
+    fun getCalendarsByPeriod(periodId: Int): List<CalendarDTO> {
+        val period = getPeriodById(periodId)
+        return calendarRepository.getCalendarsByPeriod(period).map(mapper::toDto)
+    }
+
+    fun getCalendarDTOById(id: Int, withDefaults: Boolean): CalendarDTO {
+        val calendar = getCalendarById(id)
+        if (withDefaults) {
+            for ((i, sunday) in getSundaysBetween(calendar.period.start, calendar.period.end).withIndex()) {
+                if (calendar.items.count { it.end < sunday.atTime(23, 59) } <= i) {
+                    calendar.items.add(CalendarItem(
+                        sunday.atTime(14, 0),
+                        sunday.atTime(17, 0),
+                        "Nog in te vullen",
+                        "Nog in te vullen",
+                        calendar
+                    ))
+                }
+            }
+        }
+        return mapper.toDto(calendar)
+    }
+
+    private fun getSundaysBetween(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
+        val sundays = mutableListOf<LocalDate>()
+        var current = startDate.with(DayOfWeek.SUNDAY)
+        if (current.isBefore(startDate)) {
+            current = current.plusWeeks(1)
+        }
+        while (!current.isAfter(endDate)) {
+            sundays.add(current)
+            current = current.plusWeeks(1)
+        }
+        return sundays
+    }
+
+    fun mergeCalendarDTOChanges(id: Int, calendarDTO: CalendarDTO): CalendarDTO {
+        val calendar = getCalendarById(id)
+        calendar.intro = calendarDTO.intro
+        calendar.outro = calendarDTO.outro
+        return mapper.toDto(calendarRepository.save(calendar))
+    }
+
+    fun getCalendarItemDTOById(id: Int): CalendarItemWithCalendarsDTO {
+        return mapper.toDto(getItemById(id))
+    }
+
+    fun saveCalendarItemDTO(dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
+        return mapper.toDto(itemRepository.save(mapper.toEntity(dto)))
+    }
+
+    fun mergeCalendarItemDTOChanges(id: Int, dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
+        val item = getItemById(id)
+        item.start = dto.start
+        item.end = dto.end
+        item.title = dto.title
+        item.content = dto.content
+        item.closed = dto.closed
+        check(dto.calendars.isNotEmpty()) { "A calendar item should be linked with at least one calendar!" }
+        item.calendars = dto.calendars.map(mapper::toEntity).toMutableList()
+        item.address = dto.address?.let { addressMapper.toEntity(it) }
+        return mapper.toDto(itemRepository.save(mapper.toEntity(dto)))
+    }
+
+    fun uploadCalendarItemImage(id: Int, image: MultipartFile) {
+        val item = getItemById(id)
+        item.image = imageService.replace(ITEM_IMAGE_DIR, item.image, image)
+        itemRepository.save(item)
+    }
+
+    fun deleteCalendarItem(id: Int) {
+        val item = getItemById(id)
+        imageService.delete(ITEM_IMAGE_DIR, item.image)
+        itemRepository.delete(item)
+    }
+
+    private fun getPeriodById(id: Int): CalendarPeriod {
+        return periodRepository.findById(id).orElseThrow { CalendarPeriodNotFoundException() }
+    }
+
+    private fun getCalendarById(id: Int): Calendar {
+        return calendarRepository.findById(id).orElseThrow { CalendarNotFoundException() }
+    }
+
+    private fun getItemById(id: Int): CalendarItem {
+        return itemRepository.findById(id).orElseThrow { CalendarItemNotFoundException() }
+    }
+
+    private fun verifyNoOverlaps(overlaps: List<CalendarPeriod>) {
+        check(overlaps.isEmpty()) { "Calendar period overlaps with existing periods: ${overlaps.joinToString { it.name }}" }
+    }
+
+    companion object {
+        const val ITEM_IMAGE_DIR = "calendar"
+    }
 }
