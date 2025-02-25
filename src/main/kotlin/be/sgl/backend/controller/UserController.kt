@@ -39,6 +39,15 @@ class UserController {
     }
 
     @PostMapping("/profile-picture")
+    @Operation(
+        summary = "Upload the profile picture to the current user",
+        description = "Deletes the current profile picture if existing, uploads and links the new one.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "401", description = "User is not logged in", content = [Content(schema = Schema(hidden = true))]),
+            ApiResponse(responseCode = "500", description = "Image upload error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
     fun uploadProfilePicture(@RequestParam("file") file: MultipartFile, @AuthenticationPrincipal userDetails: CustomUserDetails) {
         userService.uploadProfilePicture(userDetails.username, file)
     }
