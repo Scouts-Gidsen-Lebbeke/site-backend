@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/scouts-gidsen-lebbeke/backend:latest
+    container_name: backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+    network_mode: host
+    restart: always
