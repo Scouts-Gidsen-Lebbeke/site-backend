@@ -86,8 +86,8 @@ class ActivityController {
             ApiResponse(responseCode = "401", description = "User has no admin role", content = [Content(schema = Schema(hidden = true))])
         ]
     )
-    fun createActivity(@Valid @RequestBody branch: ActivityDTO): ResponseEntity<ActivityDTO> {
-        return ResponseEntity(activityService.saveActivityDTO(branch), HttpStatus.CREATED)
+    fun createActivity(@Valid @RequestBody activityDTO: ActivityDTO): ResponseEntity<ActivityDTO> {
+        return ResponseEntity(activityService.saveActivityDTO(activityDTO), HttpStatus.CREATED)
     }
 
     @PutMapping("/{id}")
@@ -102,8 +102,8 @@ class ActivityController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun updateActivity(@PathVariable id: Int, @Valid @RequestBody activity: ActivityDTO): ResponseEntity<ActivityDTO> {
-        return ResponseEntity.ok(activityService.mergeActivityDTOChanges(id, activity))
+    fun updateActivity(@PathVariable id: Int, @Valid @RequestBody activityDTO: ActivityDTO): ResponseEntity<ActivityDTO> {
+        return ResponseEntity.ok(activityService.mergeActivityDTOChanges(id, activityDTO))
     }
 
     @DeleteMapping("/{id}")
@@ -120,7 +120,7 @@ class ActivityController {
     )
     fun deleteActivity(@PathVariable id: Int): ResponseEntity<String> {
         activityService.deleteActivity(id)
-        return ResponseEntity.ok("Activity deactivated successfully.")
+        return ResponseEntity.ok("Activity deleted successfully.")
     }
 
     @PostMapping("/{id}/register/{restrictionId}")

@@ -1,5 +1,6 @@
 package be.sgl.backend.controller
 
+import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.NewsItemDTO
 import be.sgl.backend.service.NewsItemService
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -7,7 +8,6 @@ import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -29,19 +29,19 @@ class NewsItemController {
     }
 
     @PostMapping
-    @PreAuthorize("@levelSecurityService.isStaff()")
+    @OnlyStaff
     fun createNewsItem(@Valid @RequestBody newsItem: NewsItemDTO): ResponseEntity<NewsItemDTO> {
         return ResponseEntity(newsItemService.saveNewsItemDTO(newsItem), HttpStatus.CREATED)
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@levelSecurityService.isStaff()")
+    @OnlyStaff
     fun updateNewsItem(@PathVariable id: Int, @Valid @RequestBody newsItem: NewsItemDTO): ResponseEntity<NewsItemDTO> {
         return ResponseEntity.ok(newsItemService.mergeNewsItemDTOChanges(id, newsItem))
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@levelSecurityService.isStaff()")
+    @OnlyStaff
     fun deleteNewsItem(@PathVariable id: Int): ResponseEntity<String> {
         newsItemService.deleteNewsItem(id)
         return ResponseEntity.ok("News item deleted successfully.")

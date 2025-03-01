@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.calendar
 
 import be.sgl.backend.entity.Auditable
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -12,7 +13,10 @@ class CalendarPeriod : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
+    @Column(nullable = false)
     lateinit var name: String
-    var start = LocalDate.now()
-    var end = LocalDate.now()
+    @Column(nullable = false)
+    lateinit var start: LocalDate
+    @Column(nullable = false)
+    lateinit var end: LocalDate
 }

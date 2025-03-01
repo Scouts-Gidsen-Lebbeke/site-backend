@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class NewsItemService {
+
     @Autowired
     private lateinit var mapper: NewsItemMapper
     @Autowired

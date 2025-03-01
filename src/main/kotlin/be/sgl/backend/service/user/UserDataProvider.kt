@@ -65,7 +65,9 @@ abstract class UserDataProvider {
         userRepository.delete(user)
     }
 
-    abstract fun getUser(username: String) : User
+    abstract fun findUser(username: String): User?
+
+    abstract fun getUser(username: String): User
 
     abstract fun findByNameAndEmail(name: String, firstName: String, email: String) : User?
 

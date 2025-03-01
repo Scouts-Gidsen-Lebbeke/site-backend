@@ -29,11 +29,11 @@ class BranchService {
     }
 
     fun getBranchesWithCalendar(): List<BranchBaseDTO> {
-        return branchRepository.getByStatusIn(listOf(ACTIVE)).map(mapper::toBaseDto)
+        return branchRepository.getBranchesWithCalendar().map(mapper::toBaseDto)
     }
 
     fun getVisibleBranches(): List<BranchBaseDTO> {
-        return branchRepository.getByStatusIn(listOf(ACTIVE, MEMBER, PASSIVE)).map(mapper::toBaseDto)
+        return branchRepository.getVisibleBranches().map(mapper::toBaseDto)
     }
 
     fun getAllBranches(): List<BranchBaseDTO> {

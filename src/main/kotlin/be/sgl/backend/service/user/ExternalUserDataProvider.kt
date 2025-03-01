@@ -4,6 +4,7 @@ import be.sgl.backend.config.security.BearerTokenFilter
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.util.*
+import jakarta.persistence.EntityManager
 import mu.KotlinLogging
 import org.apache.http.HttpHeaders
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +24,8 @@ class ExternalUserDataProvider : UserDataProvider() {
 
     private val logger = KotlinLogging.logger {}
 
+    @Autowired
+    private lateinit var entityManager: EntityManager
     @Autowired
     private lateinit var webClientBuilder: WebClient.Builder
     @Value("\${rest.ga.url}")
@@ -64,8 +67,12 @@ class ExternalUserDataProvider : UserDataProvider() {
         logger.debug { "External registration finished: request created and ready to be approved!" }
     }
 
+    override fun findUser(username: String): User? {
+        return userRepository.findByUsername(username)?.withExternalData()
+    }
+
     override fun getUser(username: String): User {
-        return userRepository.getUserByUsernameEquals(username).withExternalData()
+        return userRepository.getByUsername(username).withExternalData()
     }
 
     override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
@@ -152,6 +159,7 @@ class ExternalUserDataProvider : UserDataProvider() {
                 contact
             })
         }
+        entityManager.detach(this)
     }
 
     private fun <T> getExternalData(externalId: String?, call: KFunction1<String, Mono<T>>): T? {
