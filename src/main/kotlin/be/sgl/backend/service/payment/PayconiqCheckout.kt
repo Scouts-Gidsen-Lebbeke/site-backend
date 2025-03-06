@@ -3,11 +3,11 @@ package be.sgl.backend.service.payment
 import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
 import be.sgl.backend.entity.user.User
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import be.sgl.backend.util.WhenNotBlank
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnProperty(name = ["payconiq.api.key"])
+@WhenNotBlank("payconiq.api.key")
 class PayconiqCheckout : CheckoutProvider {
     override fun createCheckoutUrl(user: User, payment: Payment, domain: String): String {
         TODO("Not yet implemented")

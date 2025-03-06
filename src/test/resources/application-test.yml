@@ -1,9 +1,12 @@
 spring:
   application:
     base-url: localhost
+    environment: test
   mail:
     host: localhost
     port: 1025
+    alert:
+      enabled: false
     properties:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
