@@ -21,3 +21,23 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: local-sql
+      MYSQL_DATABASE: keycloak
+    ports:
+      - "3306:3306"
+
+  mysql:
+    container_name: 'mysql'
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=verysecret'
+      - 'MYSQL_USER=myuser'
+    ports:
+      - '3308:3306'

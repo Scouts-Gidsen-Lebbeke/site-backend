@@ -58,7 +58,8 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --tag ghcr.io/${{ env.OWNER_LC }}/backend:latest \
-            --push .
+            --push . \
+            --build-arg SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
 
   deploy:
     needs: build-and-push

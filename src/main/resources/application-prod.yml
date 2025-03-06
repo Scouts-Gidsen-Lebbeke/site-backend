@@ -7,5 +7,5 @@ spring:
 
 logging:
   level:
-    be.sgl.backend: WARN
+    be.sgl.backend: INFO
 
