@@ -1,9 +1,9 @@
 package be.sgl.backend.config
 
+import be.sgl.backend.util.WhenNotBlank
 import be.woutschoovaerts.mollie.Client
 import be.woutschoovaerts.mollie.ClientBuilder
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 class PaymentConfig {
 
     @Bean
-    @ConditionalOnProperty(name = ["organization.api-key.mollie"])
+    @WhenNotBlank("organization.api-key.mollie")
     fun mollieApiClient(@Value("\${organization.api-key.mollie}") apiKey: String): Client {
         return ClientBuilder().withApiKey(apiKey).build()
     }
