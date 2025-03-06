@@ -1,0 +1,6 @@
+CREATE DATABASE IF NOT EXISTS application;
+CREATE DATABASE IF NOT EXISTS keycloak;
+
+GRANT ALL PRIVILEGES ON application.* TO 'user'@'%';
+GRANT ALL PRIVILEGES ON keycloak.* TO 'user'@'%';
+FLUSH PRIVILEGES;
