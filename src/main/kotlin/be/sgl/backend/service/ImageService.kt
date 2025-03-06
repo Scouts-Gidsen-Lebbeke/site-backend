@@ -1,11 +1,13 @@
 package be.sgl.backend.service
 
 import be.sgl.backend.service.exception.ImageDeleteException
+import be.sgl.backend.service.exception.ImageMoveException
 import be.sgl.backend.service.exception.ImageUploadException
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -13,40 +15,62 @@ import java.util.*
 @Service
 class ImageService {
 
-    fun upload(directory: String, image: MultipartFile): String {
+    fun upload(directory: ImageDirectory, image: MultipartFile): Path {
         try {
             check(image.contentType?.startsWith("image/") != true) { "Only image files are allowed." }
             check(image.size > MAX_FILE_SIZE) { "File size exceeds maximum ($MAX_FILE_SIZE MB)." }
-            val fileName: String = UUID.randomUUID().toString() + "." + image.name.substringAfterLast('.', "")
-            val filePath = Paths.get(IMAGE_BASE_PATH, directory, fileName)
+            val fileName = UUID.randomUUID().toString() + "." + image.name.substringAfterLast('.', "")
+            val filePath = Paths.get(IMAGE_BASE_PATH, directory.path, fileName)
             Files.createDirectories(filePath.parent)
             image.inputStream.use {
                 Files.copy(it, filePath, StandardCopyOption.REPLACE_EXISTING)
             }
-            return fileName
+            return filePath
         } catch (e: IOException) {
-            throw ImageUploadException(image.name, directory)
+            throw ImageUploadException(image.name, directory.path)
         }
     }
 
-    fun delete(directory: String, fileName: String?) {
+    fun delete(directory: ImageDirectory, fileName: String?) {
         fileName ?: return
         try {
-            val filePath = Paths.get(IMAGE_BASE_PATH, directory, fileName)
+            val filePath = Paths.get(IMAGE_BASE_PATH, directory.path, fileName)
             check(Files.exists(filePath)) { "Image $fileName does not exist." }
             Files.delete(filePath)
         } catch (e: IOException) {
-            throw ImageDeleteException(fileName, directory)
+            throw ImageDeleteException(fileName, directory.path)
         }
     }
 
-    fun replace(directory: String, oldFileName: String?, image: MultipartFile): String {
+    fun replace(directory: ImageDirectory, oldFileName: String?, image: MultipartFile): Path {
         delete(directory, oldFileName)
         return upload(directory, image)
+    }
+
+    fun move(fileName: String, sourceDir: ImageDirectory, targetDir: ImageDirectory): Path {
+        try {
+            val sourceFile = Paths.get(IMAGE_BASE_PATH, sourceDir.path, fileName).toFile()
+            if (!sourceFile.exists() || !sourceFile.isFile) {
+                throw ImageMoveException(fileName, sourceDir.path, targetDir.path)
+            }
+            val targetFile = Paths.get(IMAGE_BASE_PATH, targetDir.path, fileName)
+            sourceFile.copyTo(targetFile.toFile(), overwrite = true)
+            return targetFile
+        } catch (e: IOException) {
+            throw ImageMoveException(fileName, sourceDir.path, targetDir.path)
+        }
     }
 
     companion object {
         private const val MAX_FILE_SIZE = (50 * 1024 * 1024).toLong()
         const val IMAGE_BASE_PATH = "images"
+    }
+
+    enum class ImageDirectory(val path: String) {
+        TEMPORARY("tmp"),
+        NEWS_ITEMS("news"),
+        CALENDAR_ITEMS("calendar"),
+        PROFILE_PICTURE("profile"),
+        BACKGROUND("background")
     }
 }
