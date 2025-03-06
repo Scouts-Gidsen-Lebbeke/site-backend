@@ -7,6 +7,7 @@ import be.sgl.backend.service.exception.NewsItemNotFoundException
 import be.sgl.backend.mapper.NewsItemMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import be.sgl.backend.service.ImageService.ImageDirectory.*
 
 @Service
 class NewsItemService {
@@ -15,6 +16,8 @@ class NewsItemService {
     private lateinit var mapper: NewsItemMapper
     @Autowired
     private lateinit var newsItemRepository: NewsItemRepository
+    @Autowired
+    private lateinit var imageService: ImageService
 
     fun getVisibleItems(): List<NewsItemDTO> {
         return newsItemRepository.getNewsItemByVisibleTrue().map(mapper::toDto)
@@ -25,21 +28,27 @@ class NewsItemService {
     }
 
     fun saveNewsItemDTO(dto: NewsItemDTO): NewsItemDTO {
-        return mapper.toDto(newsItemRepository.save(mapper.toEntity(dto)))
+        val item = mapper.toEntity(dto)
+        item.image?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
+        return mapper.toDto(newsItemRepository.save(item))
     }
 
     fun mergeNewsItemDTOChanges(id: Int, dto: NewsItemDTO): NewsItemDTO {
         val item = getNewsItemById(id)
         item.title = dto.title
         item.content = dto.content
+        if (item.image != dto.image) {
+            item.image?.let { imageService.delete(NEWS_ITEMS, it) }
+            dto.image?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
+        }
         item.image = dto.image
         return mapper.toDto(newsItemRepository.save(item))
     }
 
     fun deleteNewsItem(id: Int) {
-        val newsItem = getNewsItemById(id)
-        newsItem.visible = false
-        newsItemRepository.save(newsItem)
+        val item = getNewsItemById(id)
+        item.image?.let { imageService.delete(NEWS_ITEMS, it) }
+        newsItemRepository.delete(item)
     }
 
     private fun getNewsItemById(id: Int): NewsItem {

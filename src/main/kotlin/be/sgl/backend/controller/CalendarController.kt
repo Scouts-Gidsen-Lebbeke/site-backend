@@ -190,23 +190,6 @@ class CalendarController {
         return ResponseEntity.ok(calendarService.mergeCalendarItemDTOChanges(id, calendarItemDTO))
     }
 
-    @PostMapping("/items/{id}/image")
-    @OnlyStaff
-    @Operation(
-        summary = "Upload an image for an existing calendar item",
-        description = "Deletes the current calendar item image if existing, uploads and links the new one.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
-            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
-            ApiResponse(responseCode = "500", description = "Image upload error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
-        ]
-    )
-    fun uploadCalendarItemImage(@PathVariable id: Int, @RequestParam("file") file: MultipartFile): ResponseEntity<String> {
-        calendarService.uploadCalendarItemImage(id, file)
-        return ResponseEntity.ok("Calendar item image uploaded successfully.")
-    }
-
     @DeleteMapping("/items/{id}")
     @OnlyStaff
     @Operation(

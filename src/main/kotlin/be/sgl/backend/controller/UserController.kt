@@ -45,11 +45,11 @@ class UserController {
         responses = [
             ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
             ApiResponse(responseCode = "401", description = "User is not logged in", content = [Content(schema = Schema(hidden = true))]),
-            ApiResponse(responseCode = "500", description = "Image upload error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+            ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun uploadProfilePicture(@RequestParam("file") file: MultipartFile, @AuthenticationPrincipal userDetails: CustomUserDetails) {
-        userService.uploadProfilePicture(userDetails.username, file)
+    fun uploadProfilePicture(@RequestParam("file") file: MultipartFile, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<String> {
+        return ResponseEntity.ok(userService.uploadProfilePicture(userDetails.username, file))
     }
 
     @GetMapping("/{username}/profile")

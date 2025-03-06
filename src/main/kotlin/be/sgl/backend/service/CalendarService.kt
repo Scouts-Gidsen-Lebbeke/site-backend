@@ -12,13 +12,13 @@ import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.CalendarItemRepository
 import be.sgl.backend.repository.CalendarPeriodRepository
 import be.sgl.backend.repository.CalendarRepository
+import be.sgl.backend.service.ImageService.ImageDirectory.*
 import be.sgl.backend.service.exception.CalendarItemNotFoundException
 import be.sgl.backend.service.exception.CalendarNotFoundException
 import be.sgl.backend.service.exception.CalendarPeriodNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -66,7 +66,7 @@ class CalendarService {
     fun deleteCalendarPeriod(id: Int) {
         val period = getPeriodById(id)
         calendarRepository.getCalendarsByPeriod(period).forEach {
-            it.items.forEach { item -> imageService.delete(ITEM_IMAGE_DIR, item.image) }
+            it.items.forEach(::deleteCalendarItem)
             calendarRepository.delete(it)
         }
         periodRepository.delete(period)
@@ -124,7 +124,9 @@ class CalendarService {
     }
 
     fun saveCalendarItemDTO(dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
-        return mapper.toDto(itemRepository.save(mapper.toEntity(dto)))
+        val item = mapper.toEntity(dto)
+        item.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
+        return mapper.toDto(itemRepository.save(item))
     }
 
     fun mergeCalendarItemDTOChanges(id: Int, dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
@@ -137,18 +139,20 @@ class CalendarService {
         check(dto.calendars.isNotEmpty()) { "A calendar item should be linked with at least one calendar!" }
         item.calendars = dto.calendars.map(mapper::toEntity).toMutableList()
         item.address = dto.address?.let { addressMapper.toEntity(it) }
+        if (item.image != dto.image) {
+            item.image?.let { imageService.delete(CALENDAR_ITEMS, it) }
+            dto.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
+        }
+        item.image = dto.image
         return mapper.toDto(itemRepository.save(mapper.toEntity(dto)))
     }
 
-    fun uploadCalendarItemImage(id: Int, image: MultipartFile) {
-        val item = getItemById(id)
-        item.image = imageService.replace(ITEM_IMAGE_DIR, item.image, image)
-        itemRepository.save(item)
+    fun deleteCalendarItem(id: Int) {
+        deleteCalendarItem(getItemById(id))
     }
 
-    fun deleteCalendarItem(id: Int) {
-        val item = getItemById(id)
-        imageService.delete(ITEM_IMAGE_DIR, item.image)
+    private fun deleteCalendarItem(item: CalendarItem) {
+        item.image?.let { imageService.delete(CALENDAR_ITEMS, it) }
         itemRepository.delete(item)
     }
 
@@ -166,9 +170,5 @@ class CalendarService {
 
     private fun verifyNoOverlaps(overlaps: List<CalendarPeriod>) {
         check(overlaps.isEmpty()) { "Calendar period overlaps with existing periods: ${overlaps.joinToString { it.name }}" }
-    }
-
-    companion object {
-        const val ITEM_IMAGE_DIR = "calendar"
     }
 }
