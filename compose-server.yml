@@ -9,6 +9,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_APPLICATION_BASE_URL=localhost
-      - JPA_HIBERNATE_DDL-AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
     network_mode: host
     restart: always
