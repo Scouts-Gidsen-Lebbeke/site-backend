@@ -4,14 +4,6 @@ on:
   push:
     branches:
       - production
-env:
-  SPRING_DATASOURCE_URL: ${{ secrets.PROD_DB_URL }}
-  SPRING_DATASOURCE_USERNAME: ${{ secrets.PROD_DB_USER }}
-  SPRING_DATASOURCE_PASSWORD: ${{ secrets.PROD_DB_PASS }}
-  SPRING_MAIL_HOST: localhost
-  SPRING_MAIL_USERNAME: todo
-  SPRING_MAIL_PASSWORD: todo
-  KEYCLOAK_RESOURCE: todo
 
 jobs:
   build-and-push:
@@ -58,8 +50,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --tag ghcr.io/${{ env.OWNER_LC }}/backend:latest \
-            --push . \
-            --build-arg SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+            --push .
 
   deploy:
     needs: build-and-push
@@ -83,9 +74,19 @@ jobs:
           echo "${{ secrets.PROD_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Copy Compose File to Server
+      - name: Create .env file
         run: |
-          scp -o StrictHostKeyChecking=no compose-server.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/backend/compose.yml
+          echo "SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }}" > .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_DB_PASS }}" >> .env
+          echo "SPRING_MAIL_HOST=localhost" >> .env
+          echo "SPRING_MAIL_USERNAME=todo" >> .env
+          echo "SPRING_MAIL_PASSWORD=todo" >> .env
+          echo "KEYCLOAK_RESOURCE=todo" >> .env
+
+      - name: Copy Files to Server
+        run: |
+          scp -o StrictHostKeyChecking=no .env compose-server.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/backend/
 
       - name: Deploy Using Docker Compose
         run: |
@@ -96,5 +97,5 @@ jobs:
             cd /home/${{ secrets.PROD_USER }}/backend
           
             podman compose down
-            podman compose up -d
+            podman compose --env-file .env up -d
           EOF
