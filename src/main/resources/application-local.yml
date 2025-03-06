@@ -5,10 +5,11 @@ spring:
     url: jdbc:mysql://127.0.0.1:3308/mydatabase
     username: myuser
     password: secret
+    dialect: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: create-drop
-  mail:
+mail:
     host: localhost
     port: 1025
     alert:

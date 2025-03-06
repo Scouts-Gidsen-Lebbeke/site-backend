@@ -2,6 +2,8 @@ spring:
   application:
     environment: prod
   jpa:
+    datasource:
+      dialect: com.mysql.cj.jdbc.Driver
     hibernate:
       ddl-auto: validate
 

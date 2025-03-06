@@ -1,5 +1,3 @@
-version: '3.8'
-
 #Dont forget to build maven firstly.
 services:
   backend:
