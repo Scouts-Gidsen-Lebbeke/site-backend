@@ -16,13 +16,3 @@ services:
       - KEYCLOAK_RESOURCE=todo
     network_mode: host
     restart: always
-  mysql:
-    container_name: 'mysql'
-    image: 'mysql:8.0.33'
-    environment:
-      - MYSQL_DATABASE=mydatabase
-      - MYSQL_PASSWORD=secret
-      - MYSQL_ROOT_PASSWORD=verysecret
-      - MYSQL_USER=myuser
-    ports:
-      - 3308:3306
