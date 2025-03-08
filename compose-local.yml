@@ -1,4 +1,3 @@
-#Dont forget to build maven firstly.
 services:
   backend:
     build: .
@@ -6,13 +5,27 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SPRING_APPLICATION_BASE_URL=localhost
-      - SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3308/mydatabase
-      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/application
+      - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=secret
       - SPRING_MAIL_HOST=localhost
       - SPRING_MAIL_PORT=1025
       - SPRING_MAIL_USERNAME=todo
       - SPRING_MAIL_PASSWORD=todo
       - KEYCLOAK_RESOURCE=todo
-    network_mode: host
+    depends_on:
+      - mariadb
     restart: always
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: local-sql
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: application
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d

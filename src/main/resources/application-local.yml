@@ -1,6 +1,10 @@
 spring:
   application:
     environment: local
+  datasource:
+    url: jdbc:mariadb://localhost:3308/application
+    username: user
+    password: secret
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -27,3 +31,7 @@ logging:
   level:
     root: INFO
     be.sgl.backend: TRACE
+
+organization:
+  api-key:
+    mollie: "invalid-key"
