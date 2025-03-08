@@ -83,6 +83,7 @@ jobs:
           echo "SPRING_MAIL_USERNAME=todo" >> .env
           echo "SPRING_MAIL_PASSWORD=todo" >> .env
           echo "KEYCLOAK_RESOURCE=todo" >> .env
+          echo "ORGANIZATION_API-KEY_MOLLIE=todo" >> .env          
 
       - name: Copy Files to Server
         run: |
