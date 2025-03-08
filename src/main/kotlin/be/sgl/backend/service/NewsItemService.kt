@@ -8,6 +8,7 @@ import be.sgl.backend.mapper.NewsItemMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import be.sgl.backend.service.ImageService.ImageDirectory.*
+import be.sgl.backend.util.nullIfBlank
 
 @Service
 class NewsItemService {
@@ -29,6 +30,7 @@ class NewsItemService {
 
     fun saveNewsItemDTO(dto: NewsItemDTO): NewsItemDTO {
         val item = mapper.toEntity(dto)
+        item.image = item.image.nullIfBlank()
         item.image?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
         return mapper.toDto(newsItemRepository.save(item))
     }
@@ -37,11 +39,11 @@ class NewsItemService {
         val item = getNewsItemById(id)
         item.title = dto.title
         item.content = dto.content
-        if (item.image != dto.image) {
+        if (item.image != dto.image.nullIfBlank()) {
             item.image?.let { imageService.delete(NEWS_ITEMS, it) }
-            dto.image?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
+            dto.image.nullIfBlank()?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
+            item.image = dto.image.nullIfBlank()
         }
-        item.image = dto.image
         return mapper.toDto(newsItemRepository.save(item))
     }
 

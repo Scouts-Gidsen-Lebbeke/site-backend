@@ -26,7 +26,7 @@ class NewsItemController {
     @GetMapping
     @Operation(
         summary = "Get all visible news items",
-        description = "Returns a list of all visible news items activities.",
+        description = "Returns a list of all visible news items, ordered by most recent.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(type = "array", implementation = NewsItemDTO::class))])
         ]

@@ -11,15 +11,17 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.*
+import kotlin.io.path.createDirectories
 
 @Service
 class ImageService {
 
     fun upload(directory: ImageDirectory, image: MultipartFile): Path {
         try {
-            check(image.contentType?.startsWith("image/") != true) { "Only image files are allowed." }
-            check(image.size > MAX_FILE_SIZE) { "File size exceeds maximum ($MAX_FILE_SIZE MB)." }
-            val fileName = UUID.randomUUID().toString() + "." + image.name.substringAfterLast('.', "")
+            check(image.contentType?.startsWith("image/") == true) { "Only image files are allowed." }
+            check(image.size < MAX_FILE_SIZE) { "File size exceeds maximum ($MAX_FILE_SIZE MB)." }
+            val extension = image.originalFilename?.substringAfterLast('.', "") ?: ""
+            val fileName = UUID.randomUUID().toString() + "." + extension
             val filePath = Paths.get(IMAGE_BASE_PATH, directory.path, fileName)
             Files.createDirectories(filePath.parent)
             image.inputStream.use {
@@ -53,8 +55,9 @@ class ImageService {
             if (!sourceFile.exists() || !sourceFile.isFile) {
                 throw ImageMoveException(fileName, sourceDir.path, targetDir.path)
             }
-            val targetFile = Paths.get(IMAGE_BASE_PATH, targetDir.path, fileName)
+            val targetFile = Paths.get(IMAGE_BASE_PATH, targetDir.path, fileName).createDirectories()
             sourceFile.copyTo(targetFile.toFile(), overwrite = true)
+            Files.delete(sourceFile.toPath())
             return targetFile
         } catch (e: IOException) {
             throw ImageMoveException(fileName, sourceDir.path, targetDir.path)
