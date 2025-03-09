@@ -16,6 +16,7 @@ import be.sgl.backend.service.ImageService.ImageDirectory.*
 import be.sgl.backend.service.exception.CalendarItemNotFoundException
 import be.sgl.backend.service.exception.CalendarNotFoundException
 import be.sgl.backend.service.exception.CalendarPeriodNotFoundException
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -40,6 +41,8 @@ class CalendarService {
     private lateinit var addressMapper: AddressMapper
     @Autowired
     private lateinit var branchRepository: BranchRepository
+    @Autowired
+    private lateinit var entityManager: EntityManager
 
     fun getAllCalendarPeriods(): List<CalendarPeriodDTO> {
         return periodRepository.findAll().map(mapper::toDto)
@@ -86,16 +89,13 @@ class CalendarService {
         if (withDefaults) {
             for ((i, sunday) in getSundaysBetween(calendar.period.start, calendar.period.end).withIndex()) {
                 if (calendar.items.count { it.end < sunday.atTime(23, 59) } <= i) {
-                    calendar.items.add(CalendarItem(
-                        sunday.atTime(14, 0),
-                        sunday.atTime(17, 0),
-                        "Nog in te vullen",
-                        "Nog in te vullen",
-                        calendar
-                    ))
+                    val newItem = CalendarItem.defaultItem(sunday, calendar)
+                    calendar.items.add(newItem)
                 }
             }
         }
+        calendar.items.sortBy { it.start }
+        entityManager.detach(calendar) // new items get persisted otherwise
         return mapper.toDto(calendar)
     }
 
@@ -120,13 +120,13 @@ class CalendarService {
     }
 
     fun getCalendarItemDTOById(id: Int): CalendarItemWithCalendarsDTO {
-        return mapper.toDto(getItemById(id))
+        return mapper.toDtoWithCalendars(getItemById(id))
     }
 
     fun saveCalendarItemDTO(dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
         val item = mapper.toEntity(dto)
         item.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
-        return mapper.toDto(itemRepository.save(item))
+        return mapper.toDtoWithCalendars(itemRepository.save(item))
     }
 
     fun mergeCalendarItemDTOChanges(id: Int, dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
@@ -144,7 +144,7 @@ class CalendarService {
             dto.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
         }
         item.image = dto.image
-        return mapper.toDto(itemRepository.save(mapper.toEntity(dto)))
+        return mapper.toDtoWithCalendars(itemRepository.save(mapper.toEntity(dto)))
     }
 
     fun deleteCalendarItem(id: Int) {
