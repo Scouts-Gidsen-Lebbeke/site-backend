@@ -10,7 +10,8 @@ import org.mapstruct.Mapper
 interface CalendarMapper {
     fun toDto(calendar: Calendar): CalendarDTO
     fun toEntity(dto: CalendarBaseDTO): Calendar
-    fun toDto(calendarItem: CalendarItem): CalendarItemWithCalendarsDTO
+    fun toDto(calendarItem: CalendarItem): CalendarItemDTO
+    fun toDtoWithCalendars(calendarItem: CalendarItem): CalendarItemWithCalendarsDTO
     fun toEntity(dto: CalendarItemDTO): CalendarItem
     fun toDto(calendarPeriod: CalendarPeriod): CalendarPeriodDTO
     fun toEntity(dto: CalendarPeriodDTO): CalendarPeriod

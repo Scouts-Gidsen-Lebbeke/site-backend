@@ -3,7 +3,6 @@ package be.sgl.backend.service
 import be.sgl.backend.dto.BranchBaseDTO
 import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.branch.BranchStatus.*
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.UserRepository
@@ -59,7 +58,7 @@ class BranchService {
 
     fun deactivateBranch(id: Int) {
         val branch = getBranchById(id)
-        branch.status = BranchStatus.PASSIVE
+        branch.status = PASSIVE
         branchRepository.save(branch)
     }
 

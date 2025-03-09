@@ -3,6 +3,7 @@ package be.sgl.backend.entity.calendar
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.Auditable
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -32,5 +33,12 @@ class CalendarItem() : Auditable() {
         this.title = title
         this.content = content
         this.calendars.add(calendar)
+    }
+
+    companion object {
+        fun defaultItem(sunday: LocalDate, calendar: Calendar): CalendarItem {
+            return CalendarItem(sunday.atTime(14, 0), sunday.atTime(17, 0),
+                "Nog in te vullen", "Nog in te vullen", calendar)
+        }
     }
 }
