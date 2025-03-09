@@ -54,4 +54,17 @@ class SecurityConfig {
             }
         }
     }
+
+    @Bean
+    @Profile("prod", "qa")
+    fun prodCorsConfigurer(): WebMvcConfigurer {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**")
+                    .allowedOrigins("http://*.scoutslebbeke.be", "https://*.scoutslebbeke.be")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                    .allowedHeaders("*")
+            }
+        }
+    }
 }
