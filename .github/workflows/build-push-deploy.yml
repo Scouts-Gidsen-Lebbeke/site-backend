@@ -80,11 +80,14 @@ jobs:
           echo "SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }}" > .env
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_DB_USER }}" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_DB_PASS }}" >> .env
-          echo "SPRING_MAIL_HOST=localhost" >> .env
-          echo "SPRING_MAIL_USERNAME=todo" >> .env
-          echo "SPRING_MAIL_PASSWORD=todo" >> .env
-          echo "KEYCLOAK_RESOURCE=todo" >> .env
-          echo "ORGANIZATION_API-KEY_MOLLIE=todo" >> .env          
+          echo "SPRING_MAIL_HOST=${{ secrets.PROD_MAIL_HOST }}" >> .env
+          echo "SPRING_MAIL_PORT=${{ secrets.PROD_MAIL_PORT }}" >> .env
+          echo "SPRING_MAIL_USERNAME=${{ secrets.PROD_MAIL_USERNAME }}" >> .env
+          echo "SPRING_MAIL_PASSWORD=${{ secrets.PROD_MAIL_PASSWORD }}" >> .env
+          echo "KEYCLOAK_RESOURCE=${{ secrets.KC_RESOURCE }}" >> .env
+          echo "ORGANIZATION_EXTERNAL_ID=${{ secrets.EXTERNAL_ID }}" >> .env
+          echo "ORGANIZATION_API-KEY_MOLLIE=${{ secrets.MOLLIE_API_KEY_PROD }}" >> .env  
+          echo "ORGANIZATION_API-KEY_MAPS=${{ secrets.MAPS_API_KEY }}" >> .env  
 
       - name: Copy Files to Server
         run: |
