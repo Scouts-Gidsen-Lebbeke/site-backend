@@ -2,21 +2,24 @@ package be.sgl.backend.entity.organization
 
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.Auditable
-import be.sgl.backend.entity.user.User
 import jakarta.persistence.*
 
 @Entity
+@Table(
+    indexes = [
+        Index(name = "idx_type", columnList = "type", unique = true)
+    ]
+)
 class Organization : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
-    var externalId: String? = null
     lateinit var name: String
     var type = OrganizationType.OWNER
     var kbo: String? = null
     @ManyToOne
     lateinit var address: Address
-    @OneToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "organization", cascade = [(CascadeType.ALL)])
     val contactMethods: MutableList<ContactMethod> = mutableListOf()
     var image: String? = null
     var description: String? = null
@@ -27,9 +30,5 @@ class Organization : Auditable() {
 
     fun getMobile(): String? {
         return contactMethods.firstOrNull { it.type == ContactMethodType.MOBILE }?.value
-    }
-
-    fun getRepresentative(): User {
-        return User()
     }
 }

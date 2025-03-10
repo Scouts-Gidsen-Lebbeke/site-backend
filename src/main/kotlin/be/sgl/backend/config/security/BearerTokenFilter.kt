@@ -1,17 +1,16 @@
 package be.sgl.backend.config.security
 
-import be.sgl.backend.service.user.ExternalOrganizationCondition
+import be.sgl.backend.util.ForExternalOrganization
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
 import mu.KotlinLogging
-import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 
 @Component
-@Conditional(ExternalOrganizationCondition::class)
+@ForExternalOrganization
 class BearerTokenFilter : Filter {
 
     companion object {

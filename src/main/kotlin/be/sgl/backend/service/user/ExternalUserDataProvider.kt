@@ -9,7 +9,6 @@ import mu.KotlinLogging
 import org.apache.http.HttpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -19,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.reflect.KFunction1
 
 @Service
-@Conditional(ExternalOrganizationCondition::class)
+@ForExternalOrganization
 class ExternalUserDataProvider : UserDataProvider() {
 
     private val logger = KotlinLogging.logger {}
@@ -97,10 +96,10 @@ class ExternalUserDataProvider : UserDataProvider() {
         val functionList = mutableListOf(
             Functie(externalOrganizationId, externalRole, newRole.startDate.asExternalDate() ?: return, null)
         )
-        if (role.backupExternalId != null) {
+        role.backupExternalId?.let {
             logger.debug { "${user.username} has a back-up external id, also adding this role." }
             functionList.add(
-                Functie(externalOrganizationId, role.backupExternalId!!, newRole.startDate.asExternalDate() ?: return, null)
+                Functie(externalOrganizationId, it, newRole.startDate.asExternalDate() ?: return, null)
             )
         }
         postExternalMemberData(user.externalId!!, LidFuncties(functionList))
@@ -122,10 +121,10 @@ class ExternalUserDataProvider : UserDataProvider() {
         val functionList = mutableListOf(
             Functie(externalOrganizationId, externalRole, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
         )
-        if (role.backupExternalId != null) {
+        role.backupExternalId?.let {
             logger.debug { "${user.username} has a back-up external id, also removing this role." }
             functionList.add(
-                Functie(externalOrganizationId, role.backupExternalId!!, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
+                Functie(externalOrganizationId, it, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
             )
         }
         postExternalMemberData(user.externalId!!, LidFuncties(functionList))

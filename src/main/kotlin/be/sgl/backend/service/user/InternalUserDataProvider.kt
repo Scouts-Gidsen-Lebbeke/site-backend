@@ -3,15 +3,15 @@ package be.sgl.backend.service.user
 import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.entity.user.UserRole
+import be.sgl.backend.util.ForInternalOrganization
 import mu.KotlinLogging
-import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 
 /**
  * The 'easy' way of managing user data. Everything is kept internally.
  */
 @Service
-@Conditional(InternalOrganizationCondition::class)
+@ForInternalOrganization
 class InternalUserDataProvider : UserDataProvider() {
 
     private val logger = KotlinLogging.logger {}

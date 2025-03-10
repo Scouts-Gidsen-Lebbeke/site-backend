@@ -64,7 +64,7 @@ class ActivityService {
         check(activity.getStatus() != COMPLETED) { "A completed activity cannot be edited anymore!" }
         check(activity.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
         if (activity.getStatus() == NOT_YET_OPEN) {
-            // price and user data collection can only be altered is no registration was possible yet
+            // price and user data collection can only be altered if no registration was possible yet
             activity.reductionFactor = dto.reductionFactor
             activity.siblingReduction = dto.siblingReduction
             activity.price = dto.price

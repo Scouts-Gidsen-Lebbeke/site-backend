@@ -20,6 +20,7 @@ import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -204,26 +205,35 @@ class ActivityController {
         return ResponseEntity.ok(registrationService.getAllRegistrationsForActivity(id))
     }
 
-    @GetMapping("/registrations/{id}")
-    fun getRegistration(@PathVariable id: Int): ResponseEntity<ActivityRegistrationDTO> {
+    @GetMapping("/registrations")
+    fun getAllRegistrationsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<List<ActivityRegistrationDTO>> {
         TODO()
     }
 
-    @PutMapping("/registrations/{id}")
+    @GetMapping("/registrations/{registrationId}")
+    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO> {
+        TODO()
+    }
+
+    @PutMapping("/registrations/{registrationId}")
     @OnlyStaff
-    fun markPresent(@RequestParam present: Boolean): ResponseEntity<Unit> {
+    fun markPresent(@PathVariable registrationId: Int, @RequestParam present: Boolean): ResponseEntity<Unit> {
         TODO()
     }
 
-    @DeleteMapping("/registrations/{id}")
+    @DeleteMapping("/registrations/{registrationId}")
     @OnlyAuthenticated
-    fun deleteRegistration(@PathVariable id: Int): ResponseEntity<Unit> {
+    fun cancelRegistration(@PathVariable registrationId: Int): ResponseEntity<Unit> {
         TODO()
     }
 
-    @GetMapping("/registrations/{id}/certificate")
+    @GetMapping("/registrations/{registrationId}/certificate")
     @OnlyAuthenticated
-    fun getCertificateForRegistration(@PathVariable id: Int): ResponseEntity<ByteArray> {
-        TODO()
+    fun getCertificateForRegistration(@PathVariable registrationId: Int): ResponseEntity<ByteArray> {
+        val form = registrationService.getCertificateForRegistration(registrationId)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"form.pdf\"")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(form)
     }
 }

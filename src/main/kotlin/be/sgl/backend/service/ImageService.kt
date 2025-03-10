@@ -74,6 +74,7 @@ class ImageService {
         NEWS_ITEMS("news"),
         CALENDAR_ITEMS("calendar"),
         PROFILE_PICTURE("profile"),
-        BACKGROUND("background")
+        BACKGROUND("background"),
+        ORGANIZATION("organization")
     }
 }

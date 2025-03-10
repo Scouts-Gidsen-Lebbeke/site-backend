@@ -1,20 +1,24 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.organization.Organization
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm
-import org.slf4j.LoggerFactory
-import org.springframework.core.io.ClassPathResource
+import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import be.sgl.backend.entity.user.User
+import be.sgl.backend.service.SettingService
+import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.util.fillForm
+import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.io.ByteArrayOutputStream
 import java.time.format.DateTimeFormatter
 
 @Service
 class FormService {
 
-    private val log = LoggerFactory.getLogger(FormService::class.java)
+    @Autowired
+    private lateinit var settingService: SettingService
+    @Autowired
+    private lateinit var userDataProvider: UserDataProvider
 
     fun createForm(owner: Organization, certifier: Organization, form: DeclarationFormDTO): ByteArray {
         val formData = mapOf(
@@ -69,28 +73,10 @@ class FormService {
             "period4Price" to form.activity4?.price.pricePrecision(),
             "totalPrice" to form.totalPrice.pricePrecision(),
             "location" to owner.address.town,
-            "authorizer" to owner.getRepresentative().getFullName(),
-            "authorizationRole" to "Verantwoordelijke"
+            "authorizer" to getRepresentative().getFullName(),
+            "authorizationRole" to settingService.getRepresentativeTitle()
         )
-        val resultStream = ByteArrayOutputStream()
-        Loader.loadPDF(ClassPathResource("forms/form28186.pdf").contentAsByteArray).use { document ->
-            val acroForm = document.documentCatalog.acroForm
-            fillFormFields(acroForm, formData)
-            acroForm.flatten()
-            document.save(resultStream)
-        }
-        return resultStream.toByteArray()
-    }
-
-    private fun fillFormFields(acroForm: PDAcroForm, data: Map<String, Any?>) {
-        for ((fieldName, value) in data) {
-            val field = acroForm.getField(fieldName)
-            if (field == null) {
-                log.error("Field with name '$fieldName' not found in the PDF form.")
-                continue
-            }
-            field.setValue(value?.toString())
-        }
+        return fillForm("forms/form28186.pdf", formData)
     }
 
     private fun ActivityRegistration?.asPeriod(): String? {
@@ -100,4 +86,8 @@ class FormService {
     }
 
     private fun Double?.pricePrecision() = this?.let { String.format("%.2f", it) }
+
+    private fun getRepresentative(): User {
+        return userDataProvider.getUser(settingService.getRepresentativeUsername())
+    }
 }

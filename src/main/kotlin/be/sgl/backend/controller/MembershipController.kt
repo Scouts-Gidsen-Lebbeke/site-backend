@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -28,32 +29,44 @@ class MembershipController {
     @GetMapping
     @OnlyAuthenticated
     @Operation(summary = "Get all memberships for the current user")
-    fun getAllMembershipsForCurrentUser(): ResponseEntity<List<MembershipDTO>> {
-        // TODO
-        return ResponseEntity.ok(emptyList())
+    fun getAllMembershipsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<List<MembershipDTO>> {
+        return ResponseEntity.ok(membershipService.getAllMembershipsForUser(userDetails.username))
     }
 
     @GetMapping("/current")
     @OnlyAuthenticated
     @Operation(summary = "Get the current membership for the current user")
-    fun getCurrentMembershipsForCurrentUser(): ResponseEntity<List<MembershipDTO>> {
-        // TODO
-        return ResponseEntity.ok(emptyList())
+    fun getCurrentMembershipsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MembershipDTO?> {
+        return ResponseEntity.ok(membershipService.getCurrentMembershipForUser(userDetails.username))
     }
 
     @GetMapping("/user/{username}/current")
     @OnlyStaff
-    @Operation(summary = "Get the current memberships for the given user")
-    fun getCurrentMembershipsForUser(@PathVariable username: String): ResponseEntity<List<MembershipDTO>> {
-        // TODO
-        return ResponseEntity.ok(emptyList())
+    @Operation(summary = "Get the current membership for the given user")
+    fun getCurrentMembershipForUser(@PathVariable username: String): ResponseEntity<MembershipDTO?> {
+        return ResponseEntity.ok(membershipService.getCurrentMembershipForUser(username))
     }
 
     @GetMapping("/branch/{branchId}")
     @OnlyStaff
     fun getAllMembershipsForBranchAndCurrentPeriod(@PathVariable(required = false) branchId: Int?): ResponseEntity<List<MembershipDTO>> {
-        // TODO
-        return ResponseEntity.ok(emptyList())
+        return ResponseEntity.ok(membershipService.getCurrentMembershipsForBranch(branchId))
+    }
+
+    @GetMapping("/{id}")
+    @OnlyAuthenticated
+    fun getMembershipById(@PathVariable id: Int): ResponseEntity<MembershipDTO> {
+        return ResponseEntity.ok(membershipService.getMembershipDTOById(id))
+    }
+
+    @GetMapping("/{id}/certificate")
+    @OnlyAuthenticated
+    fun getCertificateForMembership(@PathVariable id: Int): ResponseEntity<ByteArray> {
+        val form = membershipService.getCertificateForMembership(id)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"form.pdf\"")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(form)
     }
 
     @PostMapping

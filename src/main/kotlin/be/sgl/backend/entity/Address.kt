@@ -23,4 +23,8 @@ class Address : Auditable() {
     fun getStreetAdress(): String {
         return "$street $number${subPremise ?: ""}"
     }
+
+    override fun toString(): String {
+        return "${getStreetAdress()}, $zipcode $town ($country)"
+    }
 }

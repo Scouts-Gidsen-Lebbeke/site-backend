@@ -1,5 +1,7 @@
 package be.sgl.backend.controller
 
+import be.sgl.backend.config.BadRequestResponse
+import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.dto.OrganizationDTO
 import be.sgl.backend.service.organization.OrganizationService
 import io.swagger.v3.oas.annotations.Operation
@@ -7,11 +9,11 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/organizations")
@@ -32,5 +34,51 @@ class OrganizationController {
     )
     fun getOwner(): ResponseEntity<OrganizationDTO> {
         return ResponseEntity.ok(organizationService.getOwner())
+    }
+
+    @GetMapping("/certifier")
+    @Operation(
+        summary = "Get the certifying organization",
+        description = "Returns the certifying organization of the owner.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(implementation = OrganizationDTO::class))]),
+            ApiResponse(responseCode = "409", description = "Not configured", content = [Content(schema = Schema(hidden = true))])
+        ]
+    )
+    fun getCertifier(): ResponseEntity<OrganizationDTO> {
+        return ResponseEntity.ok(organizationService.getCertifier())
+    }
+
+    @PostMapping
+    @OnlyAdmin
+    @Operation(
+        summary = "Create a new organization",
+        description = "Creates an organization with the provided request body and returns it. Only one organization of each type can be created.",
+        responses = [
+            ApiResponse(responseCode = "201", description = "Organization created", content = [Content(mediaType = "application/json", schema = Schema(implementation = OrganizationDTO::class))]),
+            ApiResponse(responseCode = "400", description = "Bad organization format", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
+            ApiResponse(responseCode = "401", description = "User has no admin role", content = [Content(schema = Schema(hidden = true))]),
+            ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
+    fun createOrganization(@Valid @RequestBody organization: OrganizationDTO): ResponseEntity<OrganizationDTO> {
+        return ResponseEntity(organizationService.saveOrganizationDTO(organization), HttpStatus.CREATED)
+    }
+
+    @PutMapping("/{id}")
+    @OnlyAdmin
+    @Operation(
+        summary = "Update an existing organization",
+        description = "Updates an organization, identified with the given id, with the provided request body and returns it.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Organization updated", content = [Content(mediaType = "application/json", schema = Schema(implementation = OrganizationDTO::class))]),
+            ApiResponse(responseCode = "400", description = "Bad organization format", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
+            ApiResponse(responseCode = "401", description = "User has no admin role", content = [Content(schema = Schema(hidden = true))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
+    fun updateOrganization(@PathVariable id: Int, @Valid @RequestBody organization: OrganizationDTO): ResponseEntity<OrganizationDTO> {
+        return ResponseEntity.ok(organizationService.mergeOrganizationDTOChanges(id, organization))
     }
 }

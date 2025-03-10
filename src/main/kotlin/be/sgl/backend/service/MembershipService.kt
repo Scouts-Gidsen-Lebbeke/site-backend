@@ -2,21 +2,29 @@ package be.sgl.backend.service
 
 import be.sgl.backend.alert.AlertCode
 import be.sgl.backend.alert.AlertLogger
+import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.entity.SimplifiedPaymentStatus
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.mapper.MembershipMapper
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.MembershipPeriodRepository
 import be.sgl.backend.repository.MembershipRepository
+import be.sgl.backend.service.exception.BranchNotFoundException
+import be.sgl.backend.service.exception.MembershipNotFoundException
+import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.util.base64Encoded
+import be.sgl.backend.util.fillForm
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters.lastDayOfYear
 
 @Service
@@ -30,15 +38,63 @@ class MembershipService {
     @Autowired
     private lateinit var membershipPeriodRepository: MembershipPeriodRepository
     @Autowired
+    private lateinit var mapper: MembershipMapper
+    @Autowired
     private lateinit var userDataProvider: UserDataProvider
     @Autowired
     private lateinit var checkoutProvider: CheckoutProvider
+    @Autowired
+    private lateinit var organizationProvider: OrganizationProvider
     @Autowired
     private lateinit var branchRepository: BranchRepository
     @Autowired
     private lateinit var mailService: MailService
     @Autowired
     private lateinit var alertLogger: AlertLogger
+
+    fun getAllMembershipsForUser(username: String): List<MembershipDTO> {
+        val user = userDataProvider.getUser(username)
+        return membershipRepository.getMembershipsByUser(user).map(mapper::toDto)
+    }
+
+    fun getCurrentMembershipForUser(username: String): MembershipDTO? {
+        val user = userDataProvider.getUser(username)
+        return membershipRepository.getCurrentByUser(user)?.run(mapper::toDto)
+    }
+
+    fun getCurrentMembershipsForBranch(branchId: Int?): List<MembershipDTO> {
+        if (branchId == null) {
+            return membershipRepository.getCurrent().map(mapper::toDto)
+        }
+        val branch = getBranchById(branchId)
+        return membershipRepository.getCurrentByBranch(branch).map(mapper::toDto)
+    }
+
+    fun getMembershipDTOById(id: Int): MembershipDTO {
+        return mapper.toDto(getMembershipById(id))
+    }
+
+    fun getCertificateForMembership(id: Int): ByteArray {
+        val membership = getMembershipById(id)
+        val owner = organizationProvider.getOwner()
+        val formData = mapOf(
+            "name" to membership.user.firstName,
+            "first_name" to membership.user.firstName,
+            "birth_date" to membership.user.birthdate,
+            "nis_nr" to membership.user.nis,
+            "address" to membership.user.getHomeAddress(),
+            "membership_period" to membership.period,
+            "amount" to "€ ${membership.price}",
+            "payment_date" to membership.createdDate,
+            "organization_name" to owner.name,
+            "organization_address" to owner.address,
+            "organization_email" to owner.getEmail(),
+            "signature_date" to LocalDate.now(),
+            "signatory" to "", // TODO
+            "id" to "${membership.period.id}-#${membership.id}".base64Encoded()
+        )
+        return fillForm("forms/membership.pdf", formData, "signature.png")
+    }
 
     fun createMembershipForExistingUser(username: String): String {
         logger.debug { "New membership creation request for user $username..." }
@@ -146,5 +202,13 @@ class MembershipService {
     private fun determineCurrentBranchForUser(user: User, period: MembershipPeriod): Branch? {
         val age = user.getAge(period.end.with(lastDayOfYear())) + user.ageDeviation
         return branchRepository.getPossibleBranchesForSexAndAge(user.sex, age).firstOrNull()
+    }
+
+    private fun getMembershipById(id: Int): Membership {
+        return membershipRepository.findById(id).orElseThrow { MembershipNotFoundException() }
+    }
+
+    private fun getBranchById(id: Int): Branch {
+        return branchRepository.findById(id).orElseThrow { BranchNotFoundException() }
     }
 }

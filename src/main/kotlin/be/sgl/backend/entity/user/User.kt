@@ -61,4 +61,8 @@ class User : Serializable {
     fun getAge(referenceDate: LocalDate = LocalDate.now()): Int {
         return Period.between(birthdate, referenceDate).years
     }
+
+    fun getHomeAddress(): Address? {
+        return addresses.find { it.postalAdress }
+    }
 }

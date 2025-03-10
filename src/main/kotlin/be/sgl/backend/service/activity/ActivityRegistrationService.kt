@@ -11,10 +11,15 @@ import be.sgl.backend.repository.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
 import be.sgl.backend.service.exception.RestrictionNotFoundException
 import be.sgl.backend.mapper.ActivityMapper
+import be.sgl.backend.service.exception.RegistrationNotFoundException
+import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.util.base64Encoded
+import be.sgl.backend.util.fillForm
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class ActivityRegistrationService {
@@ -27,6 +32,8 @@ class ActivityRegistrationService {
     private lateinit var registrationRepository: ActivityRegistrationRepository
     @Autowired
     private lateinit var restrictionRepository: ActivityRestrictionRepository
+    @Autowired
+    private lateinit var organizationProvider: OrganizationProvider
     @Autowired
     private lateinit var activityMapper: ActivityMapper
     @Autowired
@@ -96,5 +103,29 @@ class ActivityRegistrationService {
 
     fun updatePayment(paymentId: String) {
         TODO("Not yet implemented")
+    }
+
+    fun getCertificateForRegistration(id: Int): ByteArray {
+        val registration = registrationRepository.findById(id).orElseThrow { RegistrationNotFoundException() }
+        val owner = organizationProvider.getOwner()
+        val formData = mapOf(
+            "name" to registration.user.firstName,
+            "first_name" to registration.user.firstName,
+            "birth_date" to registration.user.birthdate,
+            "nis_nr" to registration.user.nis,
+            "address" to registration.user.getHomeAddress(),
+            "activity_name" to registration.subscribable.name,
+            "period" to "${registration.start} - ${registration.end}",
+            "days" to registration.calculateDays(),
+            "amount" to "€ ${registration.price}",
+            "payment_date" to registration.createdDate,
+            "organization_name" to owner.name,
+            "organization_address" to owner.address,
+            "organization_email" to owner.getEmail(),
+            "signature_date" to LocalDate.now(),
+            "signatory" to "", // TODO
+            "id" to "${registration.subscribable.id}-#${registration.id}".base64Encoded()
+        )
+        return fillForm("forms/participation.pdf", formData, "signature.png")
     }
 }

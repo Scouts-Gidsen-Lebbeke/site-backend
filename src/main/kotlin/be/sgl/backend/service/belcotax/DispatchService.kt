@@ -2,7 +2,11 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.organization.Organization
+import be.sgl.backend.entity.user.User
+import be.sgl.backend.service.SettingService
+import be.sgl.backend.service.user.UserDataProvider
 import generated.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -11,6 +15,11 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class DispatchService {
+
+    @Autowired
+    private lateinit var settingService: SettingService
+    @Autowired
+    private lateinit var userDataProvider: UserDataProvider
 
     /**
      * Given the [owner] and [certifier] [Organization]s, generate the dispatch for the listed [forms]
@@ -40,7 +49,7 @@ class DispatchService {
         dispatch.v0018Telefoonnummer = owner.getMobile()?.assertMaxLength("organization phone number", 12)
         // dispatch.v0019Faxnummer => outdated
         dispatch.v0020Identificatie = "BConv86" // Identify as their shitty mapping application
-        dispatch.v0021Contactpersoon = owner.getRepresentative().getFullName().assertMaxLength("representative", 34)
+        dispatch.v0021Contactpersoon = getRepresentative().getFullName().assertMaxLength("representative", 34)
         dispatch.v0022Taalcode = getCurrentUserLanguage()
         dispatch.v0023Emailadres = owner.getEmail()?.assertMaxLength("organization phone number", 44)
         dispatch.v0024Nationaalnr = owner.kbo.assertLength("organization national number", 10)
@@ -232,5 +241,9 @@ class DispatchService {
             formYear.substring(0, 2).toInt().minus(1).toString()
         }
         return "$day-$month-$yearPrefix$year"
+    }
+
+    private fun getRepresentative(): User {
+        return userDataProvider.getUser(settingService.getRepresentativeUsername())
     }
 }

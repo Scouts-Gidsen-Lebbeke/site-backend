@@ -1,5 +1,6 @@
 package be.sgl.backend.controller
 
+import be.sgl.backend.config.BadRequestResponse
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.service.ImageService
 import io.swagger.v3.oas.annotations.Operation
@@ -31,6 +32,7 @@ class ImageController {
         description = "Uploads the image to the temporary folder and returns its file location.",
         responses = [
             ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "400", description = "Bad image format", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
             ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )

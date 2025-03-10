@@ -19,6 +19,7 @@ class Contact : Auditable() {
     var mobile: String? = null
     var email: String? = null
     var nis: String? = null
+    var taxable = false
     @ManyToOne
     var address: Address? = null
 }

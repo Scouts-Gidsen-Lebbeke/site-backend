@@ -50,7 +50,7 @@ class NewsItemController {
     @PostMapping
     @OnlyStaff
     @Operation(
-        summary = "Create a news item item",
+        summary = "Create a new news item",
         description = "Creates a news item with the provided request body and returns it.",
         responses = [
             ApiResponse(responseCode = "201", description = "News item created", content = [Content(mediaType = "application/json", schema = Schema(implementation = NewsItemDTO::class))]),

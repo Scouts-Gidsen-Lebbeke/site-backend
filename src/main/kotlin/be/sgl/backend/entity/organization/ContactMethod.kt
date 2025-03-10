@@ -1,18 +1,16 @@
 package be.sgl.backend.entity.organization
 
 import be.sgl.backend.entity.Auditable
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.OneToOne
-import jakarta.persistence.PrimaryKeyJoinColumn
+import jakarta.persistence.*
 
 @Entity
 class ContactMethod() : Auditable() {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
-    @OneToOne
-    @PrimaryKeyJoinColumn
+    @ManyToOne
     lateinit var organization: Organization
+    @Enumerated(EnumType.STRING)
     var type = ContactMethodType.LINK
     lateinit var value: String
 

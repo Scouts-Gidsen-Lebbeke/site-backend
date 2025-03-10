@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine
 import java.io.File
+import java.io.InputStream
 
 @Service
 class MailService {
@@ -52,6 +53,8 @@ class MailService {
 
         fun to(vararg to: String) = apply { this.to.addAll(to) }
 
+        fun cc(vararg cc: String) = apply { this.cc.addAll(cc) }
+
         fun subject(subject: String) = apply { this.subject = subject }
 
         fun body(body: String) = apply { this.body = body }
@@ -68,11 +71,17 @@ class MailService {
             attachments.add(ByteArrayAttachment(name, content, mimeType))
         }
 
+        fun addAttachment(content: InputStream, name: String) = apply {
+            attachments.add(InputStreamAttachment(name, content))
+        }
+
         fun send() {
             try {
                 val mimeMessage = mailSender.createMimeMessage()
                 val helper = MimeMessageHelper(mimeMessage, true)
-                helper.setFrom(from ?: fromDefault())
+                val fromAddress = from ?: fromDefault()
+                helper.setFrom(fromAddress)
+                helper.setReplyTo(fromAddress)
                 to.forEach(helper::addTo)
                 helper.setSubject(subject)
                 helper.setText(body, true)
@@ -98,6 +107,12 @@ class MailService {
     class ByteArrayAttachment(name: String, private val content: ByteArray, private val mimeType: String) : Attachment(name) {
         override fun addAttachment(helper: MimeMessageHelper) {
             helper.addAttachment(name, ByteArrayDataSource(content, mimeType))
+        }
+    }
+
+    class InputStreamAttachment(name: String, private val file: InputStream) : Attachment(name) {
+        override fun addAttachment(helper: MimeMessageHelper) {
+            helper.addAttachment(name, ByteArrayDataSource(file, "application/octet-stream"))
         }
     }
 }

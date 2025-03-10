@@ -16,3 +16,7 @@ spring:
 logging:
   level:
     be.slg.backend: DEBUG
+
+server:
+  servlet:
+    context-path: /api

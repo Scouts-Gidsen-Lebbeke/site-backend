@@ -29,6 +29,7 @@ class AlertLogger {
     fun alert(code: AlertCode, message: String) {
         if (!enabled) {
             logger.error { "Skipped raising $code alert: $message" }
+            return
         }
         logger.error { "Raising $code alert: $message" }
         mailService.builder()

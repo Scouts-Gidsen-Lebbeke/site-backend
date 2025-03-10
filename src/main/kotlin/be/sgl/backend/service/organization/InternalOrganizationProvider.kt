@@ -4,13 +4,12 @@ import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
-import be.sgl.backend.service.user.InternalOrganizationCondition
+import be.sgl.backend.util.ForInternalOrganization
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 
 @Service
-@Conditional(InternalOrganizationCondition::class)
+@ForInternalOrganization
 class InternalOrganizationProvider : OrganizationProvider {
 
     @Autowired

@@ -38,12 +38,11 @@ annotation class Nis(
 class NisValidator : ConstraintValidator<Nis, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
         value ?: return true
-        if (!value.matches(Regex("[0-9.\\s-]*"))) {
+        if (!value.matches(Regex("[0-9]{11}"))) {
             return false
         }
-        val nis = value.replace(Regex("[.\\s-]"), "")
-        val base = nis.substring(0, 9).toLong()
-        val check = nis.substring(9, 11).toLong()
+        val base = value.substring(0, 9).toLong()
+        val check = value.substring(9, 11).toLong()
         return checksum(base, check) || checksum("2$base".toLong(), check)
     }
 
@@ -62,5 +61,21 @@ annotation class CountryCode(
 class CountryCodeValidator : ConstraintValidator<CountryCode, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
         return value == null || Locale.getISOCountries().contains(value.uppercase())
+    }
+}
+
+@Constraint(validatedBy = [KboValidator::class])
+@Target(AnnotationTarget.FIELD)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Kbo(
+    val message: String = "{Kbo.message}",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
+)
+
+@SupportedValidationTarget(ValidationTarget.PARAMETERS)
+class KboValidator : ConstraintValidator<Kbo, String> {
+    override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
+        return value?.matches(Regex("^0[0-9]{9}\$")) ?: true
     }
 }
