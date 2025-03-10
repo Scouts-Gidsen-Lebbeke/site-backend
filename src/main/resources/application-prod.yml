@@ -7,6 +7,10 @@ spring:
     hibernate:
       ddl-auto: validate
 
+server:
+  servlet:
+    context-path: /api
+
 logging:
   level:
     be.sgl.backend: INFO
