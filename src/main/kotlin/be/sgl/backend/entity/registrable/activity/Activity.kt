@@ -2,8 +2,8 @@ package be.sgl.backend.entity.registrable.activity
 
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.Registrable
-import be.sgl.backend.entity.user.User
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.OneToMany
 
 /**
@@ -22,7 +22,7 @@ class Activity : Registrable() {
      * This reduction has no effect on members that are entitled to reduction.
      */
     var siblingReduction: Double = 0.0
-    @OneToMany
+    @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER)
     var restrictions = mutableListOf<ActivityRestriction>()
 
     fun getRestrictionsForBranch(branch: Branch): List<ActivityRestriction> {

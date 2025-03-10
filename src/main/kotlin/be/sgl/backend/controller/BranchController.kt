@@ -21,9 +21,21 @@ class BranchController {
     lateinit var branchService: BranchService
 
     @GetMapping
+    @Operation(summary = "Get all branches")
+    fun getAllBranches(): ResponseEntity<List<BranchBaseDTO>> {
+        return ResponseEntity.ok(branchService.getAllBranches())
+    }
+
+    @GetMapping("/visible")
     @Operation(summary = "Get all visible branches")
     fun getVisibleBranches(): ResponseEntity<List<BranchBaseDTO>> {
         return ResponseEntity.ok(branchService.getVisibleBranches())
+    }
+
+    @GetMapping("/with-calendar")
+    @Operation(summary = "Get all branches with an activity calendar")
+    fun getBranchesWithCalendar(): ResponseEntity<List<BranchBaseDTO>> {
+        return ResponseEntity.ok(branchService.getBranchesWithCalendar())
     }
 
     @GetMapping("/{id}")

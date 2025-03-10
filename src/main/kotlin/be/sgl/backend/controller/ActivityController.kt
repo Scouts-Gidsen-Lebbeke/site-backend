@@ -123,6 +123,18 @@ class ActivityController {
         return ResponseEntity.ok("Activity deleted successfully.")
     }
 
+    @GetMapping("/{id}/status")
+    @OnlyAuthenticated
+    fun getRegistrationStatusForCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<String> {
+        TODO()
+    }
+
+    @GetMapping("/{id}/user/{username}/status")
+    @OnlyStaff
+    fun getRegistrationStatusForUser(@PathVariable id: Int, @PathVariable username: String): ResponseEntity<String> {
+        TODO()
+    }
+
     @PostMapping("/{id}/register/{restrictionId}")
     @OnlyAuthenticated
     @Operation(
@@ -137,8 +149,27 @@ class ActivityController {
     )
     fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails,
                             @RequestBody data: String, request: HttpServletRequest): ResponseEntity<Unit> {
-        request.requestURI + "/updatePayment"
         val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, userDetails.username, data)
+        val headers = HttpHeaders()
+        headers.location = URI(checkoutUrl)
+        return ResponseEntity(headers, HttpStatus.FOUND)
+    }
+
+    @PostMapping("/{id}/user/{username}/register/{restrictionId}")
+    @OnlyAuthenticated
+    @Operation(
+        summary = "Register the given user to the given activity",
+        description = "Creates a registration to the given activity for the given user (if allowed) and redirects to the payment url.",
+        responses = [
+            ApiResponse(responseCode = "302", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "400", description = "Registration isn't possible", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
+            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
+    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int,
+                            @RequestBody data: String, request: HttpServletRequest): ResponseEntity<Unit> {
+        val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, username, data)
         val headers = HttpHeaders()
         headers.location = URI(checkoutUrl)
         return ResponseEntity(headers, HttpStatus.FOUND)
@@ -171,5 +202,28 @@ class ActivityController {
     )
     fun getAllRegistrationsForActivity(@PathVariable id: Int): ResponseEntity<List<ActivityRegistrationDTO>> {
         return ResponseEntity.ok(registrationService.getAllRegistrationsForActivity(id))
+    }
+
+    @GetMapping("/registrations/{id}")
+    fun getRegistration(@PathVariable id: Int): ResponseEntity<ActivityRegistrationDTO> {
+        TODO()
+    }
+
+    @PutMapping("/registrations/{id}")
+    @OnlyStaff
+    fun markPresent(@RequestParam present: Boolean): ResponseEntity<Unit> {
+        TODO()
+    }
+
+    @DeleteMapping("/registrations/{id}")
+    @OnlyAuthenticated
+    fun deleteRegistration(@PathVariable id: Int): ResponseEntity<Unit> {
+        TODO()
+    }
+
+    @GetMapping("/registrations/{id}/certificate")
+    @OnlyAuthenticated
+    fun getCertificateForRegistration(@PathVariable id: Int): ResponseEntity<ByteArray> {
+        TODO()
     }
 }

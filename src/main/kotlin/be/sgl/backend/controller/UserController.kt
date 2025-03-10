@@ -65,4 +65,9 @@ class UserController {
     fun getProfile(@PathVariable username: String): ResponseEntity<UserDTO> {
         return ResponseEntity.ok(userService.getProfile(username))
     }
+
+    @GetMapping("/search")
+    fun findUser(@RequestParam query: String): ResponseEntity<List<UserDTO>> {
+        TODO()
+    }
 }
