@@ -17,8 +17,7 @@ class CalendarItem() : Auditable() {
     lateinit var end: LocalDateTime
     @Column(nullable = false)
     lateinit var title: String
-    @Lob
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 1000)
     lateinit var content: String
     var image: String? = null
     @ManyToMany(mappedBy = "items")
