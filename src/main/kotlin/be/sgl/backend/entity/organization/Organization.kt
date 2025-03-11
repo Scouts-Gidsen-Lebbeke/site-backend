@@ -22,7 +22,7 @@ class Organization : Auditable() {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "organization", cascade = [(CascadeType.ALL)])
     val contactMethods: MutableList<ContactMethod> = mutableListOf()
     var image: String? = null
-    @Column(length = 500)
+    @Column(length = 1000)
     var description: String? = null
 
     fun getEmail(): String? {
