@@ -8,6 +8,7 @@ import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.dto.ActivityRegistrationDTO
+import be.sgl.backend.dto.ActivityRegistrationStatus
 import be.sgl.backend.service.activity.ActivityRegistrationService
 import be.sgl.backend.service.activity.ActivityService
 import io.swagger.v3.oas.annotations.Operation
@@ -126,14 +127,14 @@ class ActivityController {
 
     @GetMapping("/{id}/status")
     @OnlyAuthenticated
-    fun getRegistrationStatusForCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<String> {
-        TODO()
+    fun getRegistrationStatusForCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ActivityRegistrationStatus> {
+        return ResponseEntity.ok(registrationService.getStatusForActivityAndUser(id, userDetails.username))
     }
 
     @GetMapping("/{id}/user/{username}/status")
     @OnlyStaff
-    fun getRegistrationStatusForUser(@PathVariable id: Int, @PathVariable username: String): ResponseEntity<String> {
-        TODO()
+    fun getRegistrationStatusForUser(@PathVariable id: Int, @PathVariable username: String): ResponseEntity<ActivityRegistrationStatus> {
+        return ResponseEntity.ok(registrationService.getStatusForActivityAndUser(id, username))
     }
 
     @PostMapping("/{id}/register/{restrictionId}")

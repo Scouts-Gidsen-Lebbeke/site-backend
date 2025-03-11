@@ -2,9 +2,7 @@ package be.sgl.backend.entity.registrable.activity
 
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.Registrable
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.OneToMany
+import jakarta.persistence.*
 
 /**
  * An [Activity] is a physical event for which only members linked to a configured [ActivityRestriction] can apply.
@@ -26,7 +24,7 @@ class Activity : Registrable() {
     var restrictions = mutableListOf<ActivityRestriction>()
 
     fun getRestrictionsForBranch(branch: Branch): List<ActivityRestriction> {
-        return restrictions.filter { it.branch == branch }
+        return restrictions.filter { it.branch == branch  && it.isBranchLimit() }
     }
 
     fun validateRestrictions() {

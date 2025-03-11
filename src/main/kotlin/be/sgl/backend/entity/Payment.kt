@@ -9,6 +9,7 @@ abstract class Payment : Auditable() {
     val id: Int? = null
     var paid: Boolean = false
     var price: Double = 0.0
+    @Column(unique = true)
     var paymentId: String? = null
 
     abstract fun getDescription(): String

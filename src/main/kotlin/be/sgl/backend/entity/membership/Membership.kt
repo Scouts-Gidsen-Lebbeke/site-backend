@@ -4,16 +4,9 @@ import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.Entity
-import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
 
 @Entity
-@Table(
-    indexes = [
-        Index(name = "idx_payment_id", columnList = "payment_id", unique = true)
-    ]
-)
 class Membership() : Payment() {
     @ManyToOne
     lateinit var user: User

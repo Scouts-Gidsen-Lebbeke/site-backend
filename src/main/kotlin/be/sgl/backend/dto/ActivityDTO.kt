@@ -91,10 +91,10 @@ class ActivityResultDTO(
  *  - When its medical info is existing, it should still be up to date (according to the up-to-date flag).
  */
 data class ActivityRegistrationStatus(
-    val currentRegistration: ActivityRegistrationDTO?,
-    val activeMembership: Boolean,
-    val openOptions: List<ActivityRestrictionDTO>,
-    val closedOptions: List<ActivityRestrictionDTO>,
-    val medicsDate: LocalDateTime?,
-    val medicalsUpToDate: Boolean
+    val currentRegistration: ActivityRegistrationDTO? = null,
+    val activeMembership: Boolean = true,
+    val openOptions: List<ActivityRestrictionDTO> = emptyList(),
+    val closedOptions: List<ActivityRestrictionDTO> = emptyList(),
+    val medicsDate: LocalDateTime? = null,
+    val medicalsUpToDate: Boolean = false
 )

@@ -150,7 +150,7 @@ class MembershipService {
 
     fun updatePayment(paymentId: String) {
         logger.debug { "Update payment request for membership with paymentId $paymentId..." }
-        val membership = membershipRepository.getMembershipByPaymentId(paymentId)
+        val membership = membershipRepository.getByPaymentId(paymentId)
         if (membership == null) {
             logger.warn { "Membership with paymentId $paymentId not found!" }
             return
