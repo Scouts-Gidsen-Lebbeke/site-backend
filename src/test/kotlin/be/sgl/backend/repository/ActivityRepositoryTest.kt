@@ -1,5 +1,6 @@
 package be.sgl.backend.repository
 
+import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.util.IntegrationTest
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired

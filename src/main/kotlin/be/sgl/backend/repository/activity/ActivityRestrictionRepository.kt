@@ -1,4 +1,4 @@
-package be.sgl.backend.repository
+package be.sgl.backend.repository.activity
 
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction

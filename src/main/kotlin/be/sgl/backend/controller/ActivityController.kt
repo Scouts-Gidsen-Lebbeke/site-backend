@@ -125,6 +125,31 @@ class ActivityController {
         return ResponseEntity.ok("Activity deleted successfully.")
     }
 
+    @GetMapping("/{id}/registrations")
+    @OnlyStaff
+    @Operation(
+        summary = "Get all registrations for the given activity",
+        description = "Returns a list of all valid (i.e. paid and not cancelled) registrations for the given activity.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(type = "array", implementation = ActivityRegistrationDTO::class))]),
+            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
+    fun getAllRegistrationsForActivity(@PathVariable id: Int): ResponseEntity<List<ActivityRegistrationDTO>> {
+        return ResponseEntity.ok(registrationService.getAllRegistrationsForActivity(id))
+    }
+
+    @GetMapping("/registrations")
+    fun getAllRegistrationsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<List<ActivityRegistrationDTO>> {
+        return ResponseEntity.ok(registrationService.getAllRegistrationsForUser(userDetails.username))
+    }
+
+    @GetMapping("/registrations/{registrationId}")
+    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO> {
+        return ResponseEntity.ok(registrationService.getActivityRegistrationDTOById(registrationId))
+    }
+
     @GetMapping("/{id}/status")
     @OnlyAuthenticated
     fun getRegistrationStatusForCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ActivityRegistrationStatus> {
@@ -189,31 +214,6 @@ class ActivityController {
     fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
         registrationService.updatePayment(paymentId)
         return ResponseEntity.ok().build()
-    }
-
-    @GetMapping("/{id}/registrations")
-    @OnlyStaff
-    @Operation(
-        summary = "Get all registrations for the given activity",
-        description = "Returns a list of all valid (i.e. paid and not cancelled) registrations for the given activity.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(type = "array", implementation = ActivityRegistrationDTO::class))]),
-            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
-        ]
-    )
-    fun getAllRegistrationsForActivity(@PathVariable id: Int): ResponseEntity<List<ActivityRegistrationDTO>> {
-        return ResponseEntity.ok(registrationService.getAllRegistrationsForActivity(id))
-    }
-
-    @GetMapping("/registrations")
-    fun getAllRegistrationsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<List<ActivityRegistrationDTO>> {
-        TODO()
-    }
-
-    @GetMapping("/registrations/{registrationId}")
-    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO> {
-        TODO()
     }
 
     @PutMapping("/registrations/{registrationId}")

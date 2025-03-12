@@ -3,7 +3,7 @@ package be.sgl.backend.service.belcotax
 import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.ActivityRegistrationRepository
+import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.service.MailService
 import be.sgl.backend.service.SettingService
 import be.sgl.backend.service.organization.OrganizationProvider

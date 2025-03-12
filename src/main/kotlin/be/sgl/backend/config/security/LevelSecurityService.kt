@@ -20,6 +20,7 @@ class LevelSecurityService {
 
     private fun currentUserHasRoleWithLevel(level: RoleLevel): Boolean {
         val authentication = SecurityContextHolder.getContext().authentication
+        // TODO: if a user without a known (but valid) login logs in, we get NPEs all over the place
         val user = userDataProvider.findUser(authentication?.name ?: return false) ?: return false
         return user.level >= level
     }

@@ -4,10 +4,10 @@ import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.entity.user.MedicalRecord
 import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.MedicalRecordRepository
+import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.repository.RoleRepository
-import be.sgl.backend.repository.UserRepository
-import be.sgl.backend.repository.UserRoleRepository
+import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.repository.user.UserRoleRepository
 import be.sgl.backend.mapper.AddressMapper
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired

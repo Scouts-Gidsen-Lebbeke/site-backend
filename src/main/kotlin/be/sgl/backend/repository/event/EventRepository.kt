@@ -1,4 +1,4 @@
-package be.sgl.backend.repository
+package be.sgl.backend.repository.event
 
 import be.sgl.backend.entity.registrable.event.Event
 import org.springframework.data.jpa.repository.JpaRepository

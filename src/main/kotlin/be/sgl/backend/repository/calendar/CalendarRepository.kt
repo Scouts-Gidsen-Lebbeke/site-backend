@@ -1,4 +1,4 @@
-package be.sgl.backend.repository
+package be.sgl.backend.repository.calendar
 
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarPeriod

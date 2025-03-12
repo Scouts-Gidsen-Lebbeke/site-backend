@@ -5,13 +5,12 @@ import be.sgl.backend.dto.ActivityDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
-import be.sgl.backend.repository.ActivityRegistrationRepository
-import be.sgl.backend.repository.ActivityRepository
-import be.sgl.backend.repository.ActivityRestrictionRepository
+import be.sgl.backend.repository.activity.ActivityRegistrationRepository
+import be.sgl.backend.repository.activity.ActivityRepository
+import be.sgl.backend.repository.activity.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
 import be.sgl.backend.mapper.ActivityMapper
 import be.sgl.backend.mapper.AddressMapper
-import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -20,38 +19,36 @@ import java.time.LocalDateTime
 class ActivityService {
 
     @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
     private lateinit var activityRepository: ActivityRepository
     @Autowired
     private lateinit var registrationRepository: ActivityRegistrationRepository
     @Autowired
     private lateinit var restrictionRepository: ActivityRestrictionRepository
     @Autowired
-    private lateinit var activityMapper: ActivityMapper
+    private lateinit var mapper: ActivityMapper
     @Autowired
     private lateinit var addressMapper: AddressMapper
 
     fun getAllActivities(): List<ActivityBaseDTO> {
-        return activityRepository.findAll().map(activityMapper::toBaseDto)
+        return activityRepository.findAll().map(mapper::toBaseDto)
     }
 
     fun getVisibleActivities(): List<ActivityBaseDTO> {
-        return activityRepository.findAllByEndAfterOrderByStart(LocalDateTime.now()).map(activityMapper::toBaseDto)
+        return activityRepository.findAllByEndAfterOrderByStart(LocalDateTime.now()).map(mapper::toBaseDto)
     }
 
-    fun getActivityDTOById(id: Int): ActivityDTO? {
-        return activityMapper.toDto(getActivityById(id))
+    fun getActivityDTOById(id: Int): ActivityDTO {
+        return mapper.toDto(getActivityById(id))
     }
 
     fun saveActivityDTO(dto: ActivityDTO): ActivityDTO {
         validateActivityDTO(dto)
         check(LocalDateTime.now() < dto.closed) { "New activities should still have the possibility to register!" }
-        val newActivity = activityMapper.toEntity(dto)
+        val newActivity = mapper.toEntity(dto)
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
         }
-        return activityMapper.toDto(activityRepository.save(newActivity))
+        return mapper.toDto(activityRepository.save(newActivity))
     }
 
     fun mergeActivityDTOChanges(id: Int, dto: ActivityDTO): ActivityDTO {
@@ -79,10 +76,10 @@ class ActivityService {
             // One can only delay or advance the registration period when it wasn't open yet
             activity.open = dto.open
             restrictionRepository.deleteAll(activity.restrictions)
-            activity.restrictions = dto.restrictions.map(activityMapper::toEntity).toMutableList()
+            activity.restrictions = dto.restrictions.map(mapper::toEntity).toMutableList()
             activity.validateRestrictions()
         } else {
-            val updatedRestrictions = dto.restrictions.map(activityMapper::toEntity).toMutableList()
+            val updatedRestrictions = dto.restrictions.map(mapper::toEntity).toMutableList()
             for (existing in activity.restrictions) {
                 val updated = updatedRestrictions.find { it.id == existing.id }
                 check(updated != null) { "Existing activity restrictions cannot be removed once the activity has started!" }
@@ -98,7 +95,7 @@ class ActivityService {
         activity.sendCompleteConfirmation = dto.sendCompleteConfirmation
         activity.communicationCC = dto.communicationCC
         activity.description = dto.description
-        return activityMapper.toDto(activityRepository.save(activity))
+        return mapper.toDto(activityRepository.save(activity))
     }
 
     fun deleteActivity(id: Int) {

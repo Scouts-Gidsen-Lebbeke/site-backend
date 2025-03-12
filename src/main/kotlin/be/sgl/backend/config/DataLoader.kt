@@ -8,8 +8,8 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.entity.user.UserRole
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.RoleRepository
-import be.sgl.backend.repository.UserRepository
-import be.sgl.backend.repository.UserRoleRepository
+import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.repository.user.UserRoleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean

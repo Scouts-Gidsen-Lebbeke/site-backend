@@ -9,9 +9,9 @@ import be.sgl.backend.entity.calendar.CalendarPeriod
 import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.mapper.CalendarMapper
 import be.sgl.backend.repository.BranchRepository
-import be.sgl.backend.repository.CalendarItemRepository
-import be.sgl.backend.repository.CalendarPeriodRepository
-import be.sgl.backend.repository.CalendarRepository
+import be.sgl.backend.repository.calendar.CalendarItemRepository
+import be.sgl.backend.repository.calendar.CalendarPeriodRepository
+import be.sgl.backend.repository.calendar.CalendarRepository
 import be.sgl.backend.service.ImageService.ImageDirectory.*
 import be.sgl.backend.service.exception.CalendarItemNotFoundException
 import be.sgl.backend.service.exception.CalendarNotFoundException

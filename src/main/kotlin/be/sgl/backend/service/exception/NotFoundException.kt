@@ -22,7 +22,7 @@ class ActivityNotFoundException : NotFoundException("Activity not found")
 
 class RestrictionNotFoundException : NotFoundException("Restriction not found")
 
-class RegistrationNotFoundException : NotFoundException("Registration not found")
+class ActivityRegistrationNotFoundException : NotFoundException("Registration not found")
 
 class EventNotFoundException : NotFoundException("Event not found")
 

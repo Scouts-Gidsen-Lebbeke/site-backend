@@ -1,4 +1,4 @@
-package be.sgl.backend.repository
+package be.sgl.backend.repository.membership
 
 import be.sgl.backend.entity.membership.MembershipPeriod
 import org.springframework.data.jpa.repository.JpaRepository

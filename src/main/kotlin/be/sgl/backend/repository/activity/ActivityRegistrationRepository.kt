@@ -1,16 +1,18 @@
-package be.sgl.backend.repository
+package be.sgl.backend.repository.activity
 
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.repository.PaymentRepository
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 
 @Repository
-interface ActivityRegistrationRepository : PaymentRepository<ActivityRegistration> {
+interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, Int>, PaymentRepository<ActivityRegistration> {
     fun getByStartBetweenOrderByStart(begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
     fun getByUserAndStartBetweenOrderByStart(user: User, begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
     fun getBySubscribable(subscribable: Activity): List<ActivityRegistration>
@@ -18,7 +20,7 @@ interface ActivityRegistrationRepository : PaymentRepository<ActivityRegistratio
     fun getByUser(user: User): List<ActivityRegistration>
     fun existsBySubscribableAndUser(subscribable: Activity, user: User): Boolean
     fun getByRestriction(restriction: ActivityRestriction): List<ActivityRegistration>
-    @Query("from ActivityRegistration where restriction.branch = :branch")
-    fun getByBranch(branch: Branch): List<ActivityRegistration>
+    @Query("from ActivityRegistration where subscribable = :activity and restriction.branch = :branch")
+    fun getByActivityAndBranch(activity: Activity, branch: Branch): List<ActivityRegistration>
     fun getByUserAndSubscribable(user: User, subscribable: Activity): ActivityRegistration?
 }

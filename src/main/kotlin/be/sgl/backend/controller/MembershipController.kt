@@ -49,7 +49,7 @@ class MembershipController {
 
     @GetMapping("/branch/{branchId}")
     @OnlyStaff
-    fun getAllMembershipsForBranchAndCurrentPeriod(@PathVariable(required = false) branchId: Int?): ResponseEntity<List<MembershipDTO>> {
+    fun getAllMembershipsForBranch(@PathVariable(required = false) branchId: Int?): ResponseEntity<List<MembershipDTO>> {
         return ResponseEntity.ok(membershipService.getCurrentMembershipsForBranch(branchId))
     }
 
@@ -59,19 +59,9 @@ class MembershipController {
         return ResponseEntity.ok(membershipService.getMembershipDTOById(id))
     }
 
-    @GetMapping("/{id}/certificate")
-    @OnlyAuthenticated
-    fun getCertificateForMembership(@PathVariable id: Int): ResponseEntity<ByteArray> {
-        val form = membershipService.getCertificateForMembership(id)
-        return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"form.pdf\"")
-            .contentType(MediaType.APPLICATION_PDF)
-            .body(form)
-    }
-
     @PostMapping
     @OnlyAuthenticated
-    fun createMembershipForCurrentUserAndCurrentPeriod(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
+    fun createMembershipForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
         val headers = HttpHeaders()
         headers.location = URI(membershipService.createMembershipForExistingUser(userDetails.username))
         return ResponseEntity(headers, HttpStatus.FOUND)
@@ -79,7 +69,7 @@ class MembershipController {
 
     @PostMapping("/user/{username}")
     @OnlyStaff
-    fun createMembershipForUserAndCurrentPeriod(@PathVariable username: String): ResponseEntity<Unit> {
+    fun createMembershipForUser(@PathVariable username: String): ResponseEntity<Unit> {
         val headers = HttpHeaders()
         headers.location = URI(membershipService.createMembershipForExistingUser(username))
         return ResponseEntity(headers, HttpStatus.FOUND)
@@ -98,5 +88,15 @@ class MembershipController {
     fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
         membershipService.updatePayment(paymentId)
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/{id}/certificate")
+    @OnlyAuthenticated
+    fun getCertificateForMembership(@PathVariable id: Int): ResponseEntity<ByteArray> {
+        val form = membershipService.getCertificateForMembership(id)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"form.pdf\"")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(form)
     }
 }
