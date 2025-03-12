@@ -11,4 +11,4 @@ services:
     network_mode: host
     restart: always
     volumes:
-      - ./images:/images
+      - ./images:/images:rw,z
