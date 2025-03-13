@@ -174,8 +174,7 @@ class ActivityController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails,
-                            @RequestBody data: String, request: HttpServletRequest): ResponseEntity<Unit> {
+    fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails, @RequestBody data: String): ResponseEntity<Unit> {
         val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, userDetails.username, data)
         val headers = HttpHeaders()
         headers.location = URI(checkoutUrl)
@@ -194,8 +193,7 @@ class ActivityController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int,
-                            @RequestBody data: String, request: HttpServletRequest): ResponseEntity<Unit> {
+    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int, @RequestBody data: String): ResponseEntity<Unit> {
         val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, username, data)
         val headers = HttpHeaders()
         headers.location = URI(checkoutUrl)

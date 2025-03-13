@@ -15,7 +15,8 @@ import java.time.LocalDateTime
 interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, Int>, PaymentRepository<ActivityRegistration> {
     fun getByStartBetweenOrderByStart(begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
     fun getByUserAndStartBetweenOrderByStart(user: User, begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
-    fun getBySubscribable(subscribable: Activity): List<ActivityRegistration>
+    @Query("from ActivityRegistration where subscribable = :activity and paid")
+    fun getPaidRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
     fun existsBySubscribable(subscribable: Activity): Boolean
     fun getByUser(user: User): List<ActivityRegistration>
     fun existsBySubscribableAndUser(subscribable: Activity, user: User): Boolean

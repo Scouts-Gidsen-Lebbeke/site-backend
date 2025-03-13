@@ -47,7 +47,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     fun getAllRegistrationsForActivity(id: Int): List<ActivityRegistrationDTO> {
         val activity = getActivityById(id)
-        return paymentRepository.getBySubscribable(activity).map(mapper::toDto)
+        return paymentRepository.getPaidRegistrationsByActivity(activity).map(mapper::toDto)
     }
 
     fun getAllRegistrationsForUser(username: String): List<ActivityRegistrationDTO> {
@@ -95,7 +95,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
         var registration = ActivityRegistration(user, restriction, finalPrice, additionalData)
         registration = paymentRepository.save(registration)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(user, registration, "activity")
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(user.customerId, registration, "activities")
         paymentRepository.save(registration)
         return checkoutUrl
     }
@@ -115,7 +115,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     private fun isGlobalLimitReached(activity: Activity): Boolean {
         val globalLimit = activity.registrationLimit ?: return false
-        return paymentRepository.getBySubscribable(activity).count() < globalLimit
+        return paymentRepository.getPaidRegistrationsByActivity(activity).count() < globalLimit
     }
 
     private fun isRestrictionLimitReached(restriction: ActivityRestriction): Boolean {

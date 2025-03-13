@@ -3,9 +3,7 @@ package be.sgl.backend.entity.registrable.activity
 import be.sgl.backend.entity.registrable.Registration
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.Entity
-import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue

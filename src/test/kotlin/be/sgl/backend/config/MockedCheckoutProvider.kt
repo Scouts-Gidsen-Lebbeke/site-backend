@@ -2,14 +2,13 @@ package be.sgl.backend.config
 
 import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
-import be.sgl.backend.entity.user.User
 import be.sgl.backend.service.payment.CheckoutProvider
 import org.springframework.stereotype.Service
 
 @Service
 class MockedCheckoutProvider : CheckoutProvider {
 
-    override fun createCheckoutUrl(user: User, payment: Payment, domain: String): String {
+    override fun createCheckoutUrl(customer: String?, payment: Payment, domain: String): String {
         payment.paymentId = SimplifiedPaymentStatus.PAID.name
         return DEFAULT_CHECKOUT_URL
     }

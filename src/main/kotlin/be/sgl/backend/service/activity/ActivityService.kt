@@ -86,7 +86,7 @@ class ActivityService {
                 check(updated.alternativePrice == existing.alternativePrice) { "The price cannot be altered once the activity has started!" }
             }
             activity.restrictions.addAll(restrictionRepository.saveAll(updatedRestrictions))
-            val registrationCount = registrationRepository.getBySubscribable(activity).count()
+            val registrationCount = registrationRepository.getPaidRegistrationsByActivity(activity).count()
             check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
         activity.registrationLimit = dto.registrationLimit

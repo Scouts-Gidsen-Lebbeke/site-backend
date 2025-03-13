@@ -1,4 +1,4 @@
-package be.sgl.backend.service
+package be.sgl.backend.service.event
 
 import be.sgl.backend.dto.EventBaseDTO
 import be.sgl.backend.dto.EventDTO

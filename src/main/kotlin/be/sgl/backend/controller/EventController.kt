@@ -1,10 +1,13 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.config.BadRequestResponse
+import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.dto.EventBaseDTO
-import be.sgl.backend.dto.EventDTO
-import be.sgl.backend.service.EventService
+import be.sgl.backend.config.security.OnlyAuthenticated
+import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.dto.*
+import be.sgl.backend.service.event.EventRegistrationService
+import be.sgl.backend.service.event.EventService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -12,9 +15,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import java.net.URI
 
 @RestController
 @RequestMapping("/events")
@@ -23,6 +30,8 @@ class EventController {
 
     @Autowired
     private lateinit var eventService: EventService
+    @Autowired
+    private lateinit var registrationService: EventRegistrationService
 
     @GetMapping
     @OnlyAdmin
@@ -109,5 +118,69 @@ class EventController {
     fun deleteEvent(@PathVariable id: Int): ResponseEntity<String> {
         eventService.deleteEvent(id)
         return ResponseEntity.ok("Event deleted successfully.")
+    }
+
+    @GetMapping("/{id}/registrations")
+    @OnlyStaff
+    @Operation(
+        summary = "Get all registrations for the given event",
+        description = "Returns a list of all valid (i.e. paid and not cancelled) registrations for the given event.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(type = "array", implementation = EventRegistrationDTO::class))]),
+            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
+    fun getAllRegistrationsForActivity(@PathVariable id: Int): ResponseEntity<List<EventRegistrationDTO>> {
+        return ResponseEntity.ok(registrationService.getAllRegistrationsForEvent(id))
+    }
+
+    @GetMapping("/registrations/{registrationId}")
+    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<EventRegistrationDTO> {
+        return ResponseEntity.ok(registrationService.getEventRegistrationDTOById(registrationId))
+    }
+
+    @PostMapping("/{id}/register")
+    @PreAuthorize("permitAll()")
+    @Operation(
+        summary = "Create a registration for the given event",
+        description = "Creates a registration for the event with the given id and data and redirects to the payment url.",
+        responses = [
+            ApiResponse(responseCode = "302", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "400", description = "Registration isn't possible", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+        ]
+    )
+    fun registerCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails?, @Valid @RequestBody attempt: EventRegistrationAttemptData): ResponseEntity<Unit> {
+        val checkoutUrl = registrationService.createPaymentForEvent(id, attempt, userDetails?.username)
+        val headers = HttpHeaders()
+        headers.location = URI(checkoutUrl)
+        return ResponseEntity(headers, HttpStatus.FOUND)
+    }
+
+    @PostMapping("/updatePayment")
+    @PreAuthorize("permitAll()")
+    @Operation(
+        summary = "Trigger a payment update request",
+        description = "Retrieves the payment based on the provided id and updates the payment status of the linked event. This call never fails (except on server errors), to avoid exposing payment data.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(schema = Schema(hidden = true))])
+        ]
+    )
+    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
+        registrationService.updatePayment(paymentId)
+        return ResponseEntity.ok().build()
+    }
+
+    @PutMapping("/registrations/{registrationId}")
+    @OnlyStaff
+    fun markPresent(@PathVariable registrationId: Int, @RequestParam present: Boolean): ResponseEntity<Unit> {
+        TODO()
+    }
+
+    @DeleteMapping("/registrations/{registrationId}")
+    @OnlyAuthenticated
+    fun cancelRegistration(@PathVariable registrationId: Int): ResponseEntity<Unit> {
+        TODO()
     }
 }
