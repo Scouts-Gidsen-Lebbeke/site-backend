@@ -65,13 +65,14 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         paymentRepository.getByUserAndSubscribable(user, activity)?.let {
             return ActivityRegistrationStatus(mapper.toDto(it))
         }
+        // TODO: passive branch memberships
         val membership = membershipRepository.getCurrentByUser(user) ?: return ActivityRegistrationStatus(activeMembership = false)
         val relevantRestrictions = activity.getRestrictionsForBranch(membership.branch)
         if (isGlobalLimitReached(activity) || isBranchLimitReached(activity, membership.branch)) {
             val closedOptions = relevantRestrictions.map(mapper::toDto)
             return ActivityRegistrationStatus(closedOptions = closedOptions)
         }
-        val (closed, open) = restrictionRepository.findAllByBranch(membership.branch).partition(::isRestrictionLimitReached)
+        val (closed, open) = relevantRestrictions.partition(::isRestrictionLimitReached)
         val medicalRecord = userDataProvider.getMedicalRecord(user)
         return ActivityRegistrationStatus(
             openOptions = open.map(mapper::toDto),
