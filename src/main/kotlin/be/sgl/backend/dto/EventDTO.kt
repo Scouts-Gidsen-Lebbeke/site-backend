@@ -50,6 +50,7 @@ class EventDTO(
     var sendCompleteConfirmation: Boolean,
     @Email(message = "{Email.event.communicationCC}")
     var communicationCC: String?,
+    var needsMobile: Boolean
 ) : EventBaseDTO(id, name, start, end)
 
 // DTO for statistics list overview

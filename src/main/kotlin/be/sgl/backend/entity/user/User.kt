@@ -22,9 +22,13 @@ class User : Serializable {
     var customerId: String? = null
     var memberId: String? = null
 
+    @Column(nullable = false)
     lateinit var name: String
+    @Column(nullable = false)
     lateinit var firstName: String
+    //@Column(nullable = false)
     lateinit var email: String
+    //@Column(nullable = false)
     lateinit var birthdate: LocalDate
     var ageDeviation = 0
     var sex = Sex.UNKNOWN
