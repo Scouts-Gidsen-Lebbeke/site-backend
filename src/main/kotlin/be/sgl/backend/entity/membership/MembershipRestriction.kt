@@ -18,5 +18,5 @@ class MembershipRestriction : Auditable() {
     @ManyToOne
     lateinit var branch: Branch
     var alternativePrice: Double? = null
-    var registrationLimit: Double? = null
+    var registrationLimit: Int? = null
 }
