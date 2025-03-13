@@ -57,7 +57,7 @@ abstract class Registrable : Payable() {
     fun readAdditionalData(additionalData: String?): Double {
         additionalData ?: return 0.0
         return jsonata(additionalFormRule)
-            .evaluate(ObjectMapper().readTree(additionalData))
+            .evaluate(ObjectMapper().readerFor(List::class.java).readValue(additionalData))
             .toString().toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
     }
 }

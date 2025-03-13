@@ -151,7 +151,7 @@ class EventController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun registerCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails?, @Valid @RequestBody attempt: EventRegistrationAttemptData): ResponseEntity<Unit> {
+    fun register(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails?, @Valid @RequestBody attempt: EventRegistrationAttemptData): ResponseEntity<Unit> {
         val checkoutUrl = registrationService.createPaymentForEvent(id, attempt, userDetails?.username)
         val headers = HttpHeaders()
         headers.location = URI(checkoutUrl)

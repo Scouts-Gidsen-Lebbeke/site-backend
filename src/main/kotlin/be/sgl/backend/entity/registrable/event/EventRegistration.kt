@@ -15,13 +15,14 @@ class EventRegistration() : Registration<Event>() {
     lateinit var email: String
     var mobile: String? = null
 
-    constructor(attempt: EventRegistrationAttemptData, price: Double, user: User?) : this() {
+    constructor(event: Event, attempt: EventRegistrationAttemptData, price: Double, user: User?) : this() {
+        this.price = price
+        this.subscribable = event
+        this.additionalData = attempt.additionalData
         this.user = user
         this.name = attempt.name
         this.firstName = attempt.firstName
         this.email = attempt.email
         this.mobile = attempt.email
-        this.price = price
-        this.additionalData = attempt.additionalData
     }
 }

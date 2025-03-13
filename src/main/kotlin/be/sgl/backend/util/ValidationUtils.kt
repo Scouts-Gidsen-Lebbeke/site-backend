@@ -18,7 +18,7 @@ annotation class PhoneNumber(
     val payload: Array<KClass<out Payload>> = [],
 )
 
-@SupportedValidationTarget(ValidationTarget.PARAMETERS)
+@SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class PhoneNumberValidator : ConstraintValidator<PhoneNumber, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
         return value?.matches(Regex("^[0-9]{9,10}\$")) ?: true
@@ -34,7 +34,7 @@ annotation class Nis(
     val payload: Array<KClass<out Payload>> = [],
 )
 
-@SupportedValidationTarget(ValidationTarget.PARAMETERS)
+@SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class NisValidator : ConstraintValidator<Nis, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
         value ?: return true
@@ -58,6 +58,7 @@ annotation class CountryCode(
     val payload: Array<KClass<out Payload>> = [],
 )
 
+@SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class CountryCodeValidator : ConstraintValidator<CountryCode, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
         return value == null || Locale.getISOCountries().contains(value.uppercase())
@@ -73,7 +74,7 @@ annotation class Kbo(
     val payload: Array<KClass<out Payload>> = [],
 )
 
-@SupportedValidationTarget(ValidationTarget.PARAMETERS)
+@SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class KboValidator : ConstraintValidator<Kbo, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
         return value?.matches(Regex("^0[0-9]{9}\$")) ?: true

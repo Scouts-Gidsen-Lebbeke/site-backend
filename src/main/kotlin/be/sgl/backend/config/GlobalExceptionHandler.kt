@@ -3,6 +3,7 @@ package be.sgl.backend.config
 import be.sgl.backend.service.exception.ImageException
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import be.sgl.backend.service.exception.NotFoundException
+import be.woutschoovaerts.mollie.exception.MollieException
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
@@ -16,7 +17,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<BadRequestResponse> {
         val errors = ex.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }
-        return ResponseEntity(BadRequestResponse(BAD_REQUEST.value(), "Validation error(s)", errors), BAD_REQUEST)
+        return ResponseEntity(BadRequestResponse("Validation error(s)", errors), BAD_REQUEST)
     }
 
     @ExceptionHandler(NotFoundException::class)
@@ -26,7 +27,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException::class)
     fun handleIllegalStateExceptions(ex: IllegalStateException): ResponseEntity<BadRequestResponse> {
-        return ResponseEntity(BadRequestResponse(BAD_REQUEST.value(), ex.message), BAD_REQUEST)
+        return ResponseEntity(BadRequestResponse(ex.message), BAD_REQUEST)
     }
 
     @ExceptionHandler(IncompleteConfigurationException::class)
@@ -43,12 +44,16 @@ class GlobalExceptionHandler {
     fun handleCoffeeException(ex: NotImplementedError): ResponseEntity<String> {
         return ResponseEntity("Drink some tea", I_AM_A_TEAPOT)
     }
+
+    @ExceptionHandler(MollieException::class)
+    fun handleMollieException(ex: MollieException): ResponseEntity<BadRequestResponse> {
+        return ResponseEntity(BadRequestResponse(ex.message, ex.details), BAD_REQUEST)
+    }
 }
 
 @Schema(description = "Wrapper for all validation errors.")
 data class BadRequestResponse(
-    val status: Int,
     val message: String?,
-    val errors: Map<String, String>? = null
+    val errors: Map<String, Any>? = null
 )
 

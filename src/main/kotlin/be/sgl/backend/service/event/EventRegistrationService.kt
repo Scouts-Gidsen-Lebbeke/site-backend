@@ -45,7 +45,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         val user = username?.let { userDataProvider.findUser(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
         val finalPrice = calculatePriceForEvent(event, attempt.additionalData)
-        var registration = EventRegistration(attempt, finalPrice, user)
+        var registration = EventRegistration(event, attempt, finalPrice, user)
         registration = paymentRepository.save(registration)
         val checkoutUrl = checkoutProvider.createCheckoutUrl(user?.customerId, registration, "events")
         paymentRepository.save(registration)
