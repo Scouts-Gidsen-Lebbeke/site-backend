@@ -23,6 +23,6 @@ class EventRegistration() : Registration<Event>() {
         this.name = attempt.name
         this.firstName = attempt.firstName
         this.email = attempt.email
-        this.mobile = attempt.email
+        this.mobile = attempt.mobile
     }
 }

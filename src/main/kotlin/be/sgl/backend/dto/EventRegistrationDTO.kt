@@ -3,7 +3,6 @@ package be.sgl.backend.dto
 import be.sgl.backend.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import java.time.LocalDateTime
 
 data class EventRegistrationDTO(
     val id: Int?,
@@ -13,9 +12,7 @@ data class EventRegistrationDTO(
     val name: String,
     val firstName: String,
     val email: String,
-    val mobile: String?,
-    val start: LocalDateTime,
-    val end: LocalDateTime
+    val mobile: String?
 )
 
 data class EventRegistrationAttemptData(

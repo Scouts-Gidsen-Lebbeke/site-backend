@@ -26,7 +26,7 @@ class EventService {
     }
 
     fun getVisibleEvents(): List<EventBaseDTO> {
-        return eventRepository.findAllByEndAfterOrderByStart(LocalDateTime.now()).map(mapper::toBaseDto)
+        return eventRepository.findAllVisibleEvents().map(mapper::toBaseDto)
     }
 
     fun getEventDTOById(id: Int): EventDTO {
