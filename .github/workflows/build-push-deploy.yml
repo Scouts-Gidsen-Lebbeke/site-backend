@@ -76,7 +76,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "SPRING_APPLICATION_BASE-URL=${{ variables.APPL_BASE_URL }}" >> .env
+          echo "SPRING_APPLICATION_BASE-URL=${{ vars.APPL_BASE_URL }}" >> .env
           echo "SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }}" >> .env
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_DB_USER }}" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_DB_PASS }}" >> .env
