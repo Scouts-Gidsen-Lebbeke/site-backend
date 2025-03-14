@@ -1,6 +1,7 @@
 package be.sgl.backend.config.security
 
 import be.sgl.backend.config.CustomUserDetails
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -19,6 +20,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig {
+
+    @Value("\${spring.application.base-url}")
+    private lateinit var baseUrl: String
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
@@ -51,6 +56,18 @@ class SecurityConfig {
                     .allowedOrigins("*")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
+            }
+        }
+    }
+
+    @Bean
+    @Profile("prod", "qa")
+    fun prodCorsConfigurer(): WebMvcConfigurer {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**")
+                    .allowedOrigins(baseUrl)
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             }
         }
     }
