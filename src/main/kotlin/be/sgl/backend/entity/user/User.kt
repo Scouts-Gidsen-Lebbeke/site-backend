@@ -26,11 +26,12 @@ class User : Serializable {
     lateinit var name: String
     @Column(nullable = false)
     lateinit var firstName: String
-    //@Column(nullable = false)
+    @Column(nullable = false)
     lateinit var email: String
-    //@Column(nullable = false)
+    @Column(nullable = false)
     lateinit var birthdate: LocalDate
     var ageDeviation = 0
+    @Column(nullable = false)
     var sex = Sex.UNKNOWN
 
     var image: String? = null
