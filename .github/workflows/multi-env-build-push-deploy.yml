@@ -158,7 +158,7 @@ jobs:
       - name: Copy Files to Production Server
         run: |
           scp -o StrictHostKeyChecking=no .env ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/backend/
-          scp -o StrictHostKeyChecking=no compose-server.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/backend/compose.yml
+          scp -o StrictHostKeyChecking=no compose-prod.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/backend/compose.yml
 
       - name: Deploy to Production Server
         run: |
