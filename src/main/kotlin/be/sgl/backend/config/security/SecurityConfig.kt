@@ -31,6 +31,8 @@ class SecurityConfig {
             .authorizeHttpRequests { authorizeRequests ->
                 authorizeRequests
                     .requestMatchers(HttpMethod.POST, "/events/updatePayment").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/activities/updatePayment").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/memberships/updatePayment").permitAll()
                     .requestMatchers(HttpMethod.POST, "/**").authenticated()
                     .requestMatchers(HttpMethod.PUT, "/**").authenticated()
                     .requestMatchers(HttpMethod.PATCH, "/**").authenticated()

@@ -146,7 +146,7 @@ class ActivityController {
     }
 
     @GetMapping("/registrations/{registrationId}")
-    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO> {
+    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO?> {
         return ResponseEntity.ok(registrationService.getActivityRegistrationDTOById(registrationId))
     }
 
@@ -166,41 +166,35 @@ class ActivityController {
     @OnlyAuthenticated
     @Operation(
         summary = "Register the current user to the given activity",
-        description = "Creates a registration to the given activity for the current user (if allowed) and redirects to the payment url.",
+        description = "Creates a registration to the given activity for the current user (if allowed) and returns the payment url.",
         responses = [
-            ApiResponse(responseCode = "302", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
             ApiResponse(responseCode = "400", description = "Registration isn't possible", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
             ApiResponse(responseCode = "401", description = "User is not logged in", content = [Content(schema = Schema(hidden = true))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails, @RequestBody data: String): ResponseEntity<Unit> {
-        val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, userDetails.username, data)
-        val headers = HttpHeaders()
-        headers.location = URI(checkoutUrl)
-        return ResponseEntity(headers, HttpStatus.FOUND)
+    fun registerCurrentUser(@PathVariable id: Int, @PathVariable restrictionId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails, @RequestBody data: String): ResponseEntity<String> {
+        return ResponseEntity.ok(registrationService.createPaymentForActivity(id, restrictionId, userDetails.username, data))
     }
 
     @PostMapping("/{id}/user/{username}/register/{restrictionId}")
     @OnlyAuthenticated
     @Operation(
         summary = "Register the given user to the given activity",
-        description = "Creates a registration to the given activity for the given user (if allowed) and redirects to the payment url.",
+        description = "Creates a registration to the given activity for the given user (if allowed) and returns the payment url.",
         responses = [
-            ApiResponse(responseCode = "302", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
             ApiResponse(responseCode = "400", description = "Registration isn't possible", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
             ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int, @RequestBody data: String): ResponseEntity<Unit> {
-        val checkoutUrl = registrationService.createPaymentForActivity(id, restrictionId, username, data)
-        val headers = HttpHeaders()
-        headers.location = URI(checkoutUrl)
-        return ResponseEntity(headers, HttpStatus.FOUND)
+    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int, @RequestBody data: String): ResponseEntity<String> {
+        return ResponseEntity.ok(registrationService.createPaymentForActivity(id, restrictionId, username, data))
     }
 
-    @PostMapping("/updatePayment")
+    @PostMapping("/updatePayment", consumes = [MediaType.TEXT_PLAIN_VALUE])
     @PreAuthorize("permitAll()")
     @Operation(
         summary = "Trigger a payment update request",
