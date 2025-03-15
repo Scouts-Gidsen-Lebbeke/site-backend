@@ -2,6 +2,7 @@ package be.sgl.backend.service.activity
 
 import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.dto.ActivityRegistrationStatus
+import be.sgl.backend.dto.Customer
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
@@ -95,7 +96,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
         var registration = ActivityRegistration(user, restriction, finalPrice, additionalData)
         registration = paymentRepository.save(registration)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(user.customerId, registration, "activities")
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), registration, "activities")
         paymentRepository.save(registration)
         return checkoutUrl
     }

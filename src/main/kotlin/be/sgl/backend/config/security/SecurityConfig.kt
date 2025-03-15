@@ -27,9 +27,10 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
-            //.csrf { it.disable() }
+            .csrf { it.disable() }
             .authorizeHttpRequests { authorizeRequests ->
                 authorizeRequests
+                    .requestMatchers(HttpMethod.POST, "/events/updatePayment").permitAll()
                     .requestMatchers(HttpMethod.POST, "/**").authenticated()
                     .requestMatchers(HttpMethod.PUT, "/**").authenticated()
                     .requestMatchers(HttpMethod.PATCH, "/**").authenticated()

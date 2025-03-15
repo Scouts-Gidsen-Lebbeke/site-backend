@@ -15,8 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -136,7 +136,7 @@ class EventController {
     }
 
     @GetMapping("/registrations/{registrationId}")
-    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<EventRegistrationDTO> {
+    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<EventRegistrationDTO?> {
         return ResponseEntity.ok(registrationService.getEventRegistrationDTOById(registrationId))
     }
 
@@ -144,21 +144,18 @@ class EventController {
     @PreAuthorize("permitAll()")
     @Operation(
         summary = "Create a registration for the given event",
-        description = "Creates a registration for the event with the given id and data and redirects to the payment url.",
+        description = "Creates a registration for the event with the given id and data and returns the payment url.",
         responses = [
-            ApiResponse(responseCode = "302", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
             ApiResponse(responseCode = "400", description = "Registration isn't possible", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
-    fun register(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails?, @Valid @RequestBody attempt: EventRegistrationAttemptData): ResponseEntity<Unit> {
-        val checkoutUrl = registrationService.createPaymentForEvent(id, attempt, userDetails?.username)
-        val headers = HttpHeaders()
-        headers.location = URI(checkoutUrl)
-        return ResponseEntity(headers, HttpStatus.FOUND)
+    fun register(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails?, @Valid @RequestBody attempt: EventRegistrationAttemptData): ResponseEntity<String> {
+        return ResponseEntity.ok(registrationService.createPaymentForEvent(id, attempt, userDetails?.username))
     }
 
-    @PostMapping("/updatePayment")
+    @PostMapping("/updatePayment", consumes = [MediaType.TEXT_PLAIN_VALUE])
     @PreAuthorize("permitAll()")
     @Operation(
         summary = "Trigger a payment update request",

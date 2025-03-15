@@ -4,6 +4,7 @@ import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
 import be.sgl.backend.repository.PaymentRepository
 import be.sgl.backend.service.payment.CheckoutProvider
+import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.repository.JpaRepository
@@ -18,7 +19,8 @@ abstract class PaymentService<T : Payment, R> where R : PaymentRepository<T>, R 
     @Autowired
     protected lateinit var mailService: MailService
 
-    fun updatePayment(paymentId: String) {
+    @Transactional
+    open fun updatePayment(paymentId: String) {
         logger.debug { "Update payment request for payment $paymentId..." }
         val payment = paymentRepository.getByPaymentId(paymentId)
         if (payment == null) {

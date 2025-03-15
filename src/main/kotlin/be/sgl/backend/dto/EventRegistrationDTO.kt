@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank
 data class EventRegistrationDTO(
     val id: Int?,
     val price: Double,
+    val paid: Boolean,
     val completed: Boolean,
     val additionalData: String?,
     val name: String,

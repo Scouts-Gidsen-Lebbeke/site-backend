@@ -1,5 +1,6 @@
 package be.sgl.backend.service.event
 
+import be.sgl.backend.dto.Customer
 import be.sgl.backend.dto.EventRegistrationAttemptData
 import be.sgl.backend.dto.EventRegistrationDTO
 import be.sgl.backend.entity.registrable.event.Event
@@ -35,8 +36,8 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         return paymentRepository.getPaidRegistrationsByEvent(event).map(mapper::toDto)
     }
 
-    fun getEventRegistrationDTOById(id: Int) : EventRegistrationDTO {
-        return mapper.toDto(getRegistrationById(id))
+    fun getEventRegistrationDTOById(id: Int) : EventRegistrationDTO? {
+        return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
     }
 
     fun createPaymentForEvent(id: Int, attempt: EventRegistrationAttemptData, username: String?): String {
@@ -47,7 +48,8 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         val finalPrice = calculatePriceForEvent(event, attempt.additionalData)
         var registration = EventRegistration(event, attempt, finalPrice, user)
         registration = paymentRepository.save(registration)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(user?.customerId, registration, "events")
+        val customer = user?.let { Customer(it) } ?: Customer("${registration.firstName} ${registration.name}", registration.email)
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(customer, registration, "events")
         paymentRepository.save(registration)
         return checkoutUrl
     }
@@ -66,10 +68,10 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
             ?.let { ObjectMapper().readValue(it, Map::class.java) }
             ?: emptyMap<String, Any>()
         val params = mapOf(
-            "customer.full.name" to "${payment.firstName} ${payment.name}",
-            "event.price" to payment.price,
-            "event.name" to payment.subscribable.name,
-            "event.additional.data" to additionalDataMap
+            "name" to "${payment.firstName} ${payment.name}",
+            "price" to payment.price,
+            "eventName" to payment.subscribable.name,
+            "additionalData" to additionalDataMap
         )
         mailService.builder()
             .to(payment.email)

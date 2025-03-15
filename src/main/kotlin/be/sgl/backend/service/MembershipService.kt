@@ -2,6 +2,7 @@ package be.sgl.backend.service
 
 import be.sgl.backend.alert.AlertCode
 import be.sgl.backend.alert.AlertLogger
+import be.sgl.backend.dto.Customer
 import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.entity.branch.Branch
@@ -115,7 +116,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
         }
         val price = branchRestriction?.alternativePrice ?: currentPeriod.price
         val membership = Membership(user, currentPeriod, branch, price)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(user.customerId, membership, "memberships")
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships")
         paymentRepository.save(membership)
         return checkoutUrl
     }

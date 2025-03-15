@@ -1,13 +1,19 @@
+<!--/*@thymesVar id="customer" type="java.lang.String"*/-->
+<!--/*@thymesVar id="price" type="java.lang.Double"*/-->
+<!--/*@thymesVar id="eventName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="additionalData" type="java.util.Map"*/-->
+<!--/*@thymesVar id="entry" type="java.util.Map.Entry"*/-->
 <p>
-    Dag ${customer.full.name},
+    Dag <span th:text="${customer}"></span>,
 </p>
 <p>
-    We hebben de betaling (€ ${event.price}) goed ontvangen, dus hierbij bevestigen we jouw registratie voor ${event.name}.
+    We hebben de betaling (€ <span th:text="${#numbers.formatDecimal(price, 2, 2)}"></span>) goed ontvangen,
+    dus hierbij bevestigen we jouw registratie voor <span th:text="${eventName}"></span>.
 </p>
-<p th:if="${event.additional.data}">
+<p th:if="${additionalData}">
     Hieronder een overzicht van de ontvangen gegevens:
     <ul>
-        <li th:each="entry : ${event.additional.data}" th:text="${entry.key + ': ' + entry.value}"></li>
+        <li th:each="entry : ${additionalData}" th:text="${entry.key + ': ' + entry.value}"></li>
     </ul>
 </p>
 <p>

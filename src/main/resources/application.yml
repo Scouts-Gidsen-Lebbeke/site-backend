@@ -2,6 +2,7 @@ spring:
   application:
     name: site-backend
     base-url: # TODO: pass as an environment variable
+    public-base-url: ${spring.application.base-url}
   datasource:
     url: # TODO: pass as an environment variable
     username: # TODO: pass as an environment variable
