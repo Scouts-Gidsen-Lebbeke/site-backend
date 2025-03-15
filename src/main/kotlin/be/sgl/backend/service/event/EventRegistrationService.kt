@@ -49,7 +49,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         var registration = EventRegistration(event, attempt, finalPrice, user)
         registration = paymentRepository.save(registration)
         val customer = user?.let { Customer(it) } ?: Customer("${registration.firstName} ${registration.name}", registration.email)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(customer, registration, "events")
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(customer, registration, "events", event.id)
         paymentRepository.save(registration)
         return checkoutUrl
     }

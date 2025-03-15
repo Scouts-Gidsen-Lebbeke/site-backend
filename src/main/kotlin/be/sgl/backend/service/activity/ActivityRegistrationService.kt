@@ -96,7 +96,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
         var registration = ActivityRegistration(user, restriction, finalPrice, additionalData)
         registration = paymentRepository.save(registration)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), registration, "activities")
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), registration, "activities", activity.id)
         paymentRepository.save(registration)
         return checkoutUrl
     }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 @Service
 class MockedCheckoutProvider : CheckoutProvider {
 
-    override fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String): String {
+    override fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String, payableId: Int?): String {
         payment.paymentId = SimplifiedPaymentStatus.PAID.name
         return DEFAULT_CHECKOUT_URL
     }

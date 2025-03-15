@@ -1,13 +1,9 @@
 package be.sgl.backend.util
 
-import java.net.URLEncoder
+import java.net.URLEncoder.encode
 
-fun appendRequestParameter(url: String, name: String, value: Any): String {
-    val encodedName = URLEncoder.encode(name, "UTF-8")
-    val encodedValue = URLEncoder.encode(value.toString(), "UTF-8")
-    return if (url.contains("?")) {
-        "$url&$encodedName=$encodedValue"
-    } else {
-        "$url?$encodedName=$encodedValue"
+fun appendRequestParameters(url: String, vararg params: Pair<String, Any?>): String {
+    return params.joinToString("&", if (url.contains("?")) "$url&" else "$url?") {
+        "${encode(it.first, "UTF-8")}=${encode(it.second.toString(), "UTF-8")}"
     }
 }

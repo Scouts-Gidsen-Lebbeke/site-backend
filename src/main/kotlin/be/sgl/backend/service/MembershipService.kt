@@ -116,7 +116,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
         }
         val price = branchRestriction?.alternativePrice ?: currentPeriod.price
         val membership = Membership(user, currentPeriod, branch, price)
-        val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships")
+        val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships", currentPeriod.id)
         paymentRepository.save(membership)
         return checkoutUrl
     }

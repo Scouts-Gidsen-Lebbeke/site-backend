@@ -5,7 +5,7 @@ import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
 
 interface CheckoutProvider {
-    fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String): String
+    fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String, payableId: Int?): String
     fun getCheckoutUrl(payment: Payment): String
     fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus
 }
