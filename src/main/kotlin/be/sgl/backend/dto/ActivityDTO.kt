@@ -60,12 +60,13 @@ class ActivityDTO(
 
 @Schema(description = "A limitation on the activity registration ability for a branch.")
 data class ActivityRestrictionDTO(
-    var branch: BranchBaseDTO,
-    var name: String?,
-    var alternativeStart: LocalDateTime?,
-    var alternativeEnd: LocalDateTime?,
-    var alternativePrice: Double?,
-    var alternativeLimit: Int?
+    val id: Int?,
+    val branch: BranchBaseDTO,
+    val name: String?,
+    val alternativeStart: LocalDateTime?,
+    val alternativeEnd: LocalDateTime?,
+    val alternativePrice: Double?,
+    val alternativeLimit: Int?
 )
 
 // DTO for statistics list overview

@@ -55,6 +55,7 @@ abstract class Registrable : Payable() {
     var cancelled: Boolean = false
 
     fun readAdditionalData(additionalData: String?): Double {
+        additionalFormRule ?: return 0.0
         additionalData ?: return 0.0
         return jsonata(additionalFormRule)
             .evaluate(ObjectMapper().readerFor(Map::class.java).readValue(additionalData))

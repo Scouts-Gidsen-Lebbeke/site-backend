@@ -69,7 +69,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         paymentRepository.getByUserAndSubscribable(user, activity)?.let {
             return ActivityRegistrationStatus(mapper.toDto(it))
         }
-        val relevantBranch = getRelevantBranchForUser(user) ?: return ActivityRegistrationStatus(activeMembership = false)
+        val relevantBranch = getRelevantBranchForUser(activity, user) ?: return ActivityRegistrationStatus(activeMembership = false)
         val relevantRestrictions = activity.getRestrictionsForBranch(relevantBranch)
         if (isGlobalLimitReached(activity) || isBranchLimitReached(activity, relevantBranch)) {
             val closedOptions = relevantRestrictions.map(mapper::toDto)
@@ -85,17 +85,19 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         )
     }
 
-    private fun getRelevantBranchForUser(user: User): Branch? {
+    private fun getRelevantBranchForUser(activity: Activity, user: User): Branch? {
         val membership = membershipRepository.getCurrentByUser(user)
-        val passiveBranch = branchRepository.getPassiveBranches().firstOrNull { it.matchesUser(user) }
-        return membership?.branch ?: passiveBranch
+        if (membership != null && activity.getRestrictionsForBranch(membership.branch).isNotEmpty()) {
+            return membership.branch
+        }
+        return branchRepository.getPassiveBranches().firstOrNull { it.matchesUser(user) }
     }
 
     fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {
         val user = userDataProvider.getUser(username)
         val activity = getActivityById(id)
-        checkNotNull(paymentRepository.getByUserAndSubscribable(user, activity)) { "Registration for user ${user.username} already exists!" }
-        checkNotNull(getRelevantBranchForUser(user)) { "User ${user.username} has no active membership!" }
+        check(paymentRepository.getByUserAndSubscribable(user, activity) == null) { "Registration for user ${user.username} already exists!" }
+        checkNotNull(getRelevantBranchForUser(activity, user)) { "User ${user.username} has no active membership!" }
         val restriction = getActivityRestrictionById(restrictionId)
         check(!isGlobalLimitReached(restriction.activity)) { "The limit for this activity is reached!" }
         check(!isRestrictionLimitReached(restriction)) { "The limit for this restriction is reached!" }
@@ -103,7 +105,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         // not yet active
         // check(userDataProvider.getMedicalRecord(user)?.isUpToDate == true) { "User ${user.username} has no active medical record!" }
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
-        var registration = ActivityRegistration(user, restriction, finalPrice, additionalData)
+        var registration = ActivityRegistration(activity, user, restriction, finalPrice, additionalData)
         registration = paymentRepository.save(registration)
         val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), registration, "activities", activity.id)
         paymentRepository.save(registration)
