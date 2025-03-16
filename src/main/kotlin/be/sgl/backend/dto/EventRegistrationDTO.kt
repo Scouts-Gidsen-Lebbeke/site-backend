@@ -4,6 +4,7 @@ import be.sgl.backend.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 
+// read-only, no validation
 data class EventRegistrationDTO(
     val id: Int?,
     val price: Double,
@@ -17,14 +18,15 @@ data class EventRegistrationDTO(
 )
 
 data class EventRegistrationAttemptData(
-    @NotBlank
+    @NotBlank(message = "{NotBlank.event.registration.name}")
     val name: String,
-    @NotBlank
+    @NotBlank(message = "{NotBlank.event.registration.firstName}")
     val firstName: String,
-    @NotBlank
-    @Email
+    @NotBlank(message = "{NotBlank.event.registration.email}")
+    @Email(message = "{Email.event.registration.email}")
     val email: String,
-    @PhoneNumber
+    @NotBlank(message = "{NotBlank.event.registration.mobile}")
+    @PhoneNumber(message = "{PhoneNumber.event.registration.mobile}")
     val mobile: String?,
     val additionalData: String?
 )

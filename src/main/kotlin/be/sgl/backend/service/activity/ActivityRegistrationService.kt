@@ -157,6 +157,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     fun getCertificateForRegistration(id: Int): ByteArray {
         val registration = getRegistrationById(id)
+        check(registration.completed) { "A certificate can only be generated for a completed activity!" }
         val owner = organizationProvider.getOwner()
         val formData = mapOf(
             "name" to registration.user.firstName,

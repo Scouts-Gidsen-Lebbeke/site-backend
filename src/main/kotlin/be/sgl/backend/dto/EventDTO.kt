@@ -42,11 +42,8 @@ class EventDTO(
     var additionalForm: String?,
     @Size(max = 255, message = "{Size.event.additionalFormRule}")
     var additionalFormRule: String?,
-    @NotNull(message = "{NotNull.event.cancellable}")
     var cancellable: Boolean,
-    @NotNull(message = "{NotNull.event.sendConfirmation}")
     var sendConfirmation: Boolean,
-    @NotNull(message = "{NotNull.event.sendCompleteConfirmation}")
     var sendCompleteConfirmation: Boolean,
     @Email(message = "{Email.event.communicationCC}")
     var communicationCC: String?,

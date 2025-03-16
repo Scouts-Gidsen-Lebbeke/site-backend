@@ -21,7 +21,7 @@ annotation class PhoneNumber(
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class PhoneNumberValidator : ConstraintValidator<PhoneNumber, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        return value?.matches(Regex("^[0-9]{9,10}\$")) ?: true
+        return value.nullIfBlank()?.matches(Regex("^[0-9]{9,10}\$")) ?: true
     }
 }
 
@@ -77,6 +77,6 @@ annotation class Kbo(
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class KboValidator : ConstraintValidator<Kbo, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        return value?.matches(Regex("^0[0-9]{9}\$")) ?: true
+        return value.nullIfBlank()?.matches(Regex("^0[0-9]{9}\$")) ?: true
     }
 }

@@ -159,6 +159,11 @@
             <artifactId>kotlin-logging-jvm</artifactId>
             <version>${kotlin.logging.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.wimdeblauwe</groupId>
+            <artifactId>error-handling-spring-boot-starter</artifactId>
+            <version>4.5.0</version>
+        </dependency>
 
         <!-- Testing dependencies -->
         <dependency>

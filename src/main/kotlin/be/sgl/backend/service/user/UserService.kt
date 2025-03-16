@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
+import java.nio.file.Path
 
 @Service
 class UserService {
@@ -22,11 +23,11 @@ class UserService {
         return mapper.toDto(userDataProvider.getUser(username))
     }
 
-    fun uploadProfilePicture(username: String, image: MultipartFile): String {
+    fun uploadProfilePicture(username: String, image: MultipartFile): Path {
         val user = userDataProvider.getUser(username)
         val path = imageService.replace(PROFILE_PICTURE, user.image, image)
         user.image = path.fileName.toString()
         userDataProvider.updateUser(user)
-        return path.toString()
+        return path
     }
 }
