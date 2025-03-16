@@ -16,6 +16,7 @@ import be.sgl.backend.service.exception.RestrictionNotFoundException
 import be.sgl.backend.mapper.ActivityMapper
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
+import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.service.PaymentService
 import be.sgl.backend.service.exception.ActivityRegistrationNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
@@ -42,6 +43,8 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
     private lateinit var membershipRepository: MembershipRepository
     @Autowired
     private lateinit var branchRepository: BranchRepository
+    @Autowired
+    private lateinit var siblingRepository: SiblingRepository
     @Autowired
     private lateinit var mapper: ActivityMapper
     @Autowired
@@ -119,7 +122,8 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             return finalPrice / activity.reductionFactor + additionalPrice
         }
         finalPrice += additionalPrice
-        if (user.siblings.any { !it.hasReduction && paymentRepository.existsBySubscribableAndUser(activity, it) }) {
+        val siblings = siblingRepository.getByUser(user).map { it.sibling }
+        if (siblings.any { !it.hasReduction && paymentRepository.existsBySubscribableAndUser(activity, it) }) {
             return (finalPrice - activity.siblingReduction).coerceAtLeast(0.0)
         }
         return finalPrice
@@ -141,16 +145,21 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
     }
 
     override fun handlePaymentPaid(payment: ActivityRegistration) {
+        if (!payment.subscribable.sendConfirmation) return
         val params = mapOf(
-            "member.first.name" to payment.user.firstName,
-            "activity.price" to payment.price,
-            "activity.name" to payment.subscribable.name,
+            "member" to payment.user.firstName,
+            "price" to payment.price,
+            "activityName" to payment.subscribable.name,
+            "branchName" to payment.restriction.branch.name,
+            "restrictionName" to payment.restriction.name,
+            "additionalData" to payment.getAdditionalDataMap()
         )
-        mailService.builder()
+        val mailBuilder = mailService.builder()
             .to(payment.user.email)
             .subject("Bevestiging inschrijving")
             .template("activity-confirmation.html", params)
-            .send()
+        payment.subscribable.communicationCC?.let { mailBuilder.cc(it) }
+        mailBuilder.send()
     }
 
     override fun handlePaymentRefunded(payment: ActivityRegistration) {

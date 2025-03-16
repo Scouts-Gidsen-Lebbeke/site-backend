@@ -55,10 +55,6 @@ class User : Serializable {
     @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
     var staffData = StaffData(this)
 
-    @ManyToMany
-    @JoinTable(name = "sibling_relation")
-    val siblings: MutableList<User> = mutableListOf()
-
     fun getFullName(): String {
         return "$firstName $name"
     }
