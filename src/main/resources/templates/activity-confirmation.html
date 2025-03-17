@@ -9,7 +9,7 @@
     Dag <span th:text="${member}"></span>,
 </p>
 <p>
-    We hebben de betaling (€ <span th:text="${#numbers.formatDecimal(price, 2, 2)}"></span>) goed ontvangen,
+    We hebben de betaling (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>) goed ontvangen,
     dus hierbij bevestigen we jouw inschrijving voor <span th:text="${activityName}"></span>
     bij de <span th:text="${branchName}"></span><span th:if="${restrictionName}"> (<span th:text="${restrictionName}">)</span></span>.
 </p>

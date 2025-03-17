@@ -7,7 +7,7 @@
     Dag <span th:text="${customer}"></span>,
 </p>
 <p>
-    We hebben de betaling (€ <span th:text="${#numbers.formatDecimal(price, 2, 2)}"></span>) goed ontvangen,
+    We hebben de betaling (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>) goed ontvangen,
     dus hierbij bevestigen we jouw registratie voor <span th:text="${eventName}"></span>.
 </p>
 <p th:if="${additionalData}">
