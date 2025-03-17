@@ -159,7 +159,7 @@ class EventController {
         return ResponseEntity.ok(PaymentUrl(url))
     }
 
-    @PostMapping("/updatePayment", consumes = [MediaType.TEXT_PLAIN_VALUE])
+    @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     @PreAuthorize("permitAll()")
     @CrossOrigin(origins = ["*"])
     @Operation(
@@ -169,8 +169,8 @@ class EventController {
             ApiResponse(responseCode = "200", description = "Ok")
         ]
     )
-    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
-        registrationService.updatePayment(paymentId)
+    fun updatePayment(@RequestParam id: String): ResponseEntity<Unit> {
+        registrationService.updatePayment(id)
         return ResponseEntity.ok().build()
     }
 
