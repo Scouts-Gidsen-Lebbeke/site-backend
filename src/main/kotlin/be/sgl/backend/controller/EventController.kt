@@ -39,10 +39,10 @@ class EventController {
         summary = "Get all events",
         description = "Returns a list of all events, regardless of their state.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventDTO::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventResultDTO::class))]),
         ]
     )
-    fun getAllEvents(): ResponseEntity<List<EventBaseDTO>> {
+    fun getAllEvents(): ResponseEntity<List<EventResultDTO>> {
         return ResponseEntity.ok(eventService.getAllEvents())
     }
 

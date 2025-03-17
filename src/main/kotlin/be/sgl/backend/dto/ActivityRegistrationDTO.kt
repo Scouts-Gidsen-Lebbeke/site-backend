@@ -10,6 +10,7 @@ data class ActivityRegistrationDTO(
     val completed: Boolean,
     val additionalData: String?,
     val user: UserDTO,
+    val restriction: ActivityRestrictionDTO,
     val start: LocalDateTime,
     val end: LocalDateTime
 )

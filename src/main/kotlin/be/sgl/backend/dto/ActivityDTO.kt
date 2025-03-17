@@ -1,6 +1,9 @@
 package be.sgl.backend.dto
 
 import be.sgl.backend.entity.registrable.RegistrableStatus
+import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
+import be.sgl.backend.entity.registrable.activity.Activity
+import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 import java.io.Serializable
@@ -10,12 +13,12 @@ import java.time.LocalDateTime
 @Schema(description = "Basic information about an activity.")
 open class ActivityBaseDTO(
     val id: Int?,
-    @NotBlank(message = "{NotBlank.activity.name}")
-    @Size(max = 50, message = "{Size.activity.name}")
-    val name: String,
-    @NotNull(message = "{NotNull.activity.start}")
+    @field:NotBlank(message = "{NotBlank.activity.name}")
+    @field:Size(max = 50, message = "{Size.activity.name}")
+    var name: String,
+    @field:NotNull(message = "{NotNull.activity.start}")
     var start: LocalDateTime,
-    @NotNull(message = "{NotNull.activity.end}")
+    @field:NotNull(message = "{NotNull.activity.end}")
     var end: LocalDateTime
 ) : Serializable
 
@@ -26,35 +29,35 @@ class ActivityDTO(
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
-    @NotBlank(message = "{NotBlank.activity.description}")
+    @field:NotBlank(message = "{NotBlank.activity.description}")
     var description: String,
-    @NotNull(message = "{NotNull.activity.open}")
+    @field:NotNull(message = "{NotNull.activity.open}")
     var open: LocalDateTime,
-    @NotNull(message = "{NotNull.activity.closed}")
+    @field:NotNull(message = "{NotNull.activity.closed}")
     var closed: LocalDateTime,
-    @NotNull(message = "{NotNull.activity.price}")
-    @PositiveOrZero(message = "{PositiveOrZero.activity.price}")
+    @field:NotNull(message = "{NotNull.activity.price}")
+    @field:PositiveOrZero(message = "{PositiveOrZero.activity.price}")
     var price: Double,
-    @Positive(message = "{Positive.activity.registrationLimit}")
+    @field:Positive(message = "{Positive.activity.registrationLimit}")
     var registrationLimit: Int?,
-    @NotNull(message = "{NotNull.activity.address}")
+    @field:NotNull(message = "{NotNull.activity.address}")
     var address: AddressDTO,
     var additionalForm: String?,
-    @Size(max = 255, message = "{Size.activity.additionalFormRule}")
+    @field:Size(max = 255, message = "{Size.activity.additionalFormRule}")
     var additionalFormRule: String?,
-    @NotNull(message = "{NotNull.activity.cancellable}")
+    @field:NotNull(message = "{NotNull.activity.cancellable}")
     var cancellable: Boolean,
-    @NotNull(message = "{NotNull.activity.sendConfirmation}")
+    @field:NotNull(message = "{NotNull.activity.sendConfirmation}")
     var sendConfirmation: Boolean,
-    @NotNull(message = "{NotNull.activity.sendCompleteConfirmation}")
+    @field:NotNull(message = "{NotNull.activity.sendCompleteConfirmation}")
     var sendCompleteConfirmation: Boolean,
-    @Email(message = "{Email.activity.communicationCC}")
+    @field:Email(message = "{Email.activity.communicationCC}")
     var communicationCC: String?,
-    @NotNull(message = "{NotNull.activity.reductionFactor}")
+    @field:NotNull(message = "{NotNull.activity.reductionFactor}")
     var reductionFactor: Double,
-    @NotNull(message = "{NotNull.activity.siblingReduction}")
+    @field:NotNull(message = "{NotNull.activity.siblingReduction}")
     var siblingReduction: Double,
-    @NotEmpty(message = "{NotNull.activity.restrictions}")
+    @field:NotEmpty(message = "{NotNull.activity.restrictions}")
     var restrictions: List<ActivityRestrictionDTO>
 ) : ActivityBaseDTO(id, name, start, end)
 
@@ -78,7 +81,10 @@ class ActivityResultDTO(
     var registrationCount: Int,
     var totalPrice: Double,
     var status: RegistrableStatus
-) : ActivityBaseDTO(id, name, start, end)
+) : ActivityBaseDTO(id, name, start, end) {
+    constructor(activity: Activity, registrations: List<ActivityRegistration>) :
+            this(activity.id, activity.name, activity.start, activity.end, registrations.count(), registrations.sumOf { it.price }, activity.getStatus())
+}
 
 /**
  * DTO for user feedback about the current activity:

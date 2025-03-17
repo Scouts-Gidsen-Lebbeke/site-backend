@@ -41,10 +41,10 @@ class ActivityController {
         summary = "Get all activities",
         description = "Returns a list of all activities, regardless of their state.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = ActivityDTO::class))])
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = ActivityResultDTO::class))])
         ]
     )
-    fun getAllActivities(): ResponseEntity<List<ActivityBaseDTO>> {
+    fun getAllActivities(): ResponseEntity<List<ActivityResultDTO>> {
         return ResponseEntity.ok(activityService.getAllActivities())
     }
 

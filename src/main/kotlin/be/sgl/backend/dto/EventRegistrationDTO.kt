@@ -18,15 +18,15 @@ data class EventRegistrationDTO(
 )
 
 data class EventRegistrationAttemptData(
-    @NotBlank(message = "{NotBlank.event.registration.name}")
-    val name: String,
-    @NotBlank(message = "{NotBlank.event.registration.firstName}")
-    val firstName: String,
-    @NotBlank(message = "{NotBlank.event.registration.email}")
-    @Email(message = "{Email.event.registration.email}")
-    val email: String,
-    @NotBlank(message = "{NotBlank.event.registration.mobile}")
+    @field:NotBlank(message = "{NotBlank.event.registration.name}")
+    var name: String,
+    @field:NotBlank(message = "{NotBlank.event.registration.firstName}")
+    var firstName: String,
+    @field:NotBlank(message = "{NotBlank.event.registration.email}")
+    @field:Email(message = "{Email.event.registration.email}")
+    var email: String,
+    @field:NotBlank(message = "{NotBlank.event.registration.mobile}")
     @PhoneNumber(message = "{PhoneNumber.event.registration.mobile}")
-    val mobile: String?,
-    val additionalData: String?
+    var mobile: String?,
+    var additionalData: String?
 )
