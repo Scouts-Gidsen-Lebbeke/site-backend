@@ -264,4 +264,19 @@ class ActivityController {
             .contentType(MediaType.APPLICATION_PDF)
             .body(form)
     }
+
+    @GetMapping("/registrations/{registrationId}/payment")
+    @OnlyAuthenticated
+    @Operation(
+        summary = "Get the payment url for this activity",
+        description = "Returns the payment url for the open registration identified with the given id.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_PDF_VALUE)]),
+            ApiResponse(responseCode = "400", description = "Registration is already paid", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
+    fun getPaymentUrlForRegistration(@PathVariable registrationId: Int): ResponseEntity<PaymentUrl> {
+        return ResponseEntity.ok(PaymentUrl(registrationService.getPaymentForRegistration(registrationId)))
+    }
 }

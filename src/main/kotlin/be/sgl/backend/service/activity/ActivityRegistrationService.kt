@@ -191,6 +191,12 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         return fillForm("forms/participation.pdf", formData, "signature.png")
     }
 
+    fun getPaymentForRegistration(id: Int): String {
+        val registration = getRegistrationById(id)
+        check(!registration.paid) { "This activity is already paid!" }
+        return checkoutProvider.getCheckoutUrl(registration)
+    }
+
     private fun getRegistrationById(id: Int): ActivityRegistration {
         return paymentRepository.findById(id).orElseThrow { ActivityRegistrationNotFoundException() }
     }
