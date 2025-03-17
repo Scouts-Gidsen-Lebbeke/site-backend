@@ -84,6 +84,7 @@ class MembershipController {
     }
 
     @PostMapping("/updatePayment")
+    @CrossOrigin(origins = ["*"])
     @PreAuthorize("permitAll()")
     fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
         membershipService.updatePayment(paymentId)
