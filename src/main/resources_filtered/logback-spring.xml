@@ -10,8 +10,7 @@
         </encoder>
     </appender>
 
-    <!-- Enable GELF logging only for 'dev' and 'prd' profiles -->
-    <springProfile name="dev,prd">
+    <springProfile name="dev,prod">
         <appender name="GELF_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>/logs/gelf-log.json</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -44,8 +43,7 @@
     </springProfile>
 
     <!-- Profile-based logging configuration -->
-    <springProfile name="dev,prd,local">
-        <!-- Root Logger for dev/prd/local: Log to console and file -->
+    <springProfile name="dev,prod">
         <root level="info">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="GELF_FILE" />
@@ -53,7 +51,7 @@
     </springProfile>
 
     <!-- Default Root Logger (when no profile is set) -->
-    <springProfile name="!dev &amp; !prd">
+    <springProfile name="!dev &amp; !prod">
         <root level="info">
             <appender-ref ref="CONSOLE" />
         </root>
