@@ -64,20 +64,19 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     }
 
     override fun handlePaymentPaid(payment: EventRegistration) {
-        val additionalDataMap = payment.additionalData
-            ?.let { ObjectMapper().readValue(it, Map::class.java) }
-            ?: emptyMap<String, Any>()
+        if (!payment.subscribable.sendConfirmation) return
         val params = mapOf(
             "name" to "${payment.firstName} ${payment.name}",
             "price" to payment.price,
             "eventName" to payment.subscribable.name,
-            "additionalData" to additionalDataMap
+            "additionalData" to payment.getAdditionalDataMap()
         )
-        mailService.builder()
+        val mailBuilder = mailService.builder()
             .to(payment.email)
             .subject("Bevestiging inschrijving")
             .template("event-confirmation.html", params)
-            .send()
+        payment.subscribable.communicationCC?.let { mailBuilder.cc(it) }
+        mailBuilder.send()
     }
 
     override fun handlePaymentRefunded(payment: EventRegistration) {

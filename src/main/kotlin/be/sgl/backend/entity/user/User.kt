@@ -44,7 +44,7 @@ class User : Serializable {
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val addresses: MutableList<Address> = mutableListOf()
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val contacts: MutableList<Contact> = mutableListOf()
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
@@ -54,10 +54,6 @@ class User : Serializable {
 
     @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
     var staffData = StaffData(this)
-
-    @ManyToMany
-    @JoinTable(name = "sibling_relation")
-    val siblings: MutableList<User> = mutableListOf()
 
     fun getFullName(): String {
         return "$firstName $name"

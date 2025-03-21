@@ -83,10 +83,11 @@ class MembershipController {
         return ResponseEntity(headers, HttpStatus.FOUND)
     }
 
-    @PostMapping("/updatePayment")
+    @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @CrossOrigin(origins = ["*"])
     @PreAuthorize("permitAll()")
-    fun updatePayment(@RequestBody paymentId: String): ResponseEntity<Unit> {
-        membershipService.updatePayment(paymentId)
+    fun updatePayment(@RequestBody id: String): ResponseEntity<Unit> {
+        membershipService.updatePayment(id)
         return ResponseEntity.ok().build()
     }
 

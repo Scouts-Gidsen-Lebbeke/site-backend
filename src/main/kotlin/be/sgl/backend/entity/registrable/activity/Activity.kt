@@ -24,7 +24,7 @@ class Activity : Registrable() {
     var restrictions = mutableListOf<ActivityRestriction>()
 
     fun getRestrictionsForBranch(branch: Branch): List<ActivityRestriction> {
-        return restrictions.filter { it.branch == branch  && it.isBranchLimit() }
+        return restrictions.filter { it.branch == branch && !it.isBranchLimit() }
     }
 
     fun validateRestrictions() {

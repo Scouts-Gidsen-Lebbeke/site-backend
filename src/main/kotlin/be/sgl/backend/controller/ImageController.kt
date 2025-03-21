@@ -1,7 +1,7 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.BadRequestResponse
 import be.sgl.backend.config.security.OnlyAuthenticated
+import be.sgl.backend.dto.RemoteFile
 import be.sgl.backend.service.ImageService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
+import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 
 @RestController
 @RequestMapping("/image")
@@ -31,12 +33,13 @@ class ImageController {
         summary = "Upload an image",
         description = "Uploads the image to the temporary folder and returns its file location.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
-            ApiResponse(responseCode = "400", description = "Bad image format", content = [Content(mediaType = "application/json", schema = Schema(implementation = BadRequestResponse::class))]),
-            ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
+            ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = RemoteFile::class))]),
+            ApiResponse(responseCode = "400", description = "Bad image format", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun uploadCalendarItemImage(@RequestParam("file") file: MultipartFile): ResponseEntity<String> {
-        return ResponseEntity.ok(imageService.upload(TEMPORARY, file).toString())
+    fun uploadCalendarItemImage(@RequestParam("file") file: MultipartFile): ResponseEntity<RemoteFile> {
+        val uploadedFile = imageService.upload(TEMPORARY, file)
+        return ResponseEntity.ok(RemoteFile(uploadedFile))
     }
 }

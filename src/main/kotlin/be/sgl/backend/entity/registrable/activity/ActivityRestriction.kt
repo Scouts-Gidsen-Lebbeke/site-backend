@@ -54,6 +54,8 @@ class ActivityRestriction : Auditable() {
     var alternativeLimit: Int? = null
 
     fun isBranchLimit(): Boolean {
-        return alternativePrice == null && alternativeStart == null && alternativeEnd == null && name == null
+        // TODO: this should check if there are more then one first
+        return false
+        // return alternativePrice == null && alternativeStart == null && alternativeEnd == null && name == null
     }
 }

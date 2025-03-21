@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-abstract class NotFoundException(message: String) : Throwable(message)
+abstract class NotFoundException(message: String) : Exception(message)
 
 class NewsItemNotFoundException : NotFoundException("News item not found")
 
@@ -31,3 +31,5 @@ class EventRegistrationNotFoundException : NotFoundException("Event registration
 class RoleNotFoundException : NotFoundException("Role not found")
 
 class MembershipNotFoundException : NotFoundException("Membership not found")
+
+class UserNotFoundException(username: String) : NotFoundException("User $username not found")

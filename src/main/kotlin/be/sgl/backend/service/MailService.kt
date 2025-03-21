@@ -28,7 +28,7 @@ class MailService {
         return MailBuilder()
     }
 
-    private fun loadTemplate(templateName: String, placeholders: Map<String, Any>): String {
+    private fun loadTemplate(templateName: String, placeholders: Map<String, Any?>): String {
         val locale = LocaleContextHolder.getLocale()
         return templateEngine.process(templateName, Context(locale, placeholders))
     }
@@ -59,7 +59,7 @@ class MailService {
 
         fun body(body: String) = apply { this.body = body }
 
-        fun template(templateName: String, placeholders: Map<String, Any> = emptyMap()) = apply {
+        fun template(templateName: String, placeholders: Map<String, Any?> = emptyMap()) = apply {
             this.body = loadTemplate(templateName, placeholders)
         }
 

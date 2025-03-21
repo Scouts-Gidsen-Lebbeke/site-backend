@@ -2,6 +2,7 @@ package be.sgl.backend.service.activity
 
 import be.sgl.backend.dto.ActivityBaseDTO
 import be.sgl.backend.dto.ActivityDTO
+import be.sgl.backend.dto.ActivityResultDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
@@ -29,8 +30,8 @@ class ActivityService {
     @Autowired
     private lateinit var addressMapper: AddressMapper
 
-    fun getAllActivities(): List<ActivityBaseDTO> {
-        return activityRepository.findAll().map(mapper::toBaseDto)
+    fun getAllActivities(): List<ActivityResultDTO> {
+        return activityRepository.findAll().map { ActivityResultDTO(it, registrationRepository.getPaidRegistrationsByActivity(it)) }
     }
 
     fun getVisibleActivities(): List<ActivityBaseDTO> {

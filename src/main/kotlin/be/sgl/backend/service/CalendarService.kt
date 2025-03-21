@@ -136,7 +136,6 @@ class CalendarService {
         item.title = dto.title
         item.content = dto.content
         item.closed = dto.closed
-        check(dto.calendars.isNotEmpty()) { "A calendar item should be linked with at least one calendar!" }
         item.calendars = dto.calendars.map(mapper::toEntity).toMutableList()
         item.address = dto.address?.let { addressMapper.toEntity(it) }
         if (item.image != dto.image) {

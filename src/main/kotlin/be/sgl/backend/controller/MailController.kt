@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -31,7 +32,7 @@ class MailController {
         summary = "Send mails to recipients.",
         description = "Sends mails based on the provided data. Returns a feedback stream with emits for each successful email.",
         responses = [
-            ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = "text/event-stream", schema = Schema(type = "string", format = "binary"))])
+            ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = TEXT_EVENT_STREAM_VALUE, schema = Schema(type = "string", format = "binary"))])
         ]
     )
     fun sendMails(@RequestPart("file", required = false) attachment: MultipartFile?, @Valid @ModelAttribute mailDTO: MailDTO): SseEmitter {

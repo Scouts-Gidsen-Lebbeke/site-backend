@@ -57,8 +57,8 @@ class BranchController {
 
     @DeleteMapping("/{id}")
     @OnlyStaff
-    fun deactivateBranch(@PathVariable id: Int): ResponseEntity<String> {
+    fun deactivateBranch(@PathVariable id: Int): ResponseEntity<Unit> {
         branchService.deactivateBranch(id)
-        return ResponseEntity.ok("Branch deactivated successfully.")
+        return ResponseEntity.ok().build()
     }
 }

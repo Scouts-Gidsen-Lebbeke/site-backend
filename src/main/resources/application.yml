@@ -56,3 +56,14 @@ organization:
     maps: # Not currently used
     mollie: # Pass as an environment variable if Mollie payments should be enabled
     payconiq: # Pass as an environment variable if Payconiq payments should be enabled (ignored if Mollie is present)
+
+error:
+  handling:
+    search-super-class-hierarchy: true
+    http-statuses:
+      org.springframework.web.bind.MethodArgumentNotValidException: BAD_REQUEST
+      java.lang.IllegalStateException: BAD_REQUEST
+      kotlin.NotImplementedError: I_AM_A_TEAPOT
+      be.woutschoovaerts.mollie.exception.MollieException: BAD_REQUEST
+    messages:
+      kotlin.NotImplementedError: "Drink some tea."

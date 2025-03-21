@@ -3,6 +3,7 @@ package be.sgl.backend.service.user
 import be.sgl.backend.config.security.BearerTokenFilter
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.util.*
 import jakarta.persistence.EntityManager
 import mu.KotlinLogging
@@ -71,7 +72,7 @@ class ExternalUserDataProvider : UserDataProvider() {
     }
 
     override fun getUser(username: String): User {
-        return userRepository.getByUsername(username).withExternalData()
+        return userRepository.findByUsername(username)?.withExternalData() ?: throw UserNotFoundException(username)
     }
 
     override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
@@ -79,7 +80,17 @@ class ExternalUserDataProvider : UserDataProvider() {
     }
 
     override fun updateUser(user: User): User {
-        TODO("Not yet implemented")
+        val persistedUser = userRepository.getReferenceById(user.id!!)
+        persistedUser.firstName = user.firstName
+        persistedUser.name = user.name
+        persistedUser.email = user.email
+        persistedUser.birthdate = user.birthdate
+        persistedUser.image = user.image
+        persistedUser.ageDeviation = user.ageDeviation
+        persistedUser.sex = user.sex
+        userRepository.save(persistedUser)
+        // TODO: post rest to GA
+        return user
     }
 
     override fun startRole(user: User, role: Role) {

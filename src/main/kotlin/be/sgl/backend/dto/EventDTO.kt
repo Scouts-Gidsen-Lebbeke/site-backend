@@ -1,6 +1,9 @@
 package be.sgl.backend.dto
 
 import be.sgl.backend.entity.registrable.RegistrableStatus
+import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
+import be.sgl.backend.entity.registrable.event.Event
+import be.sgl.backend.entity.registrable.event.EventRegistration
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 import java.io.Serializable
@@ -42,11 +45,8 @@ class EventDTO(
     var additionalForm: String?,
     @Size(max = 255, message = "{Size.event.additionalFormRule}")
     var additionalFormRule: String?,
-    @NotNull(message = "{NotNull.event.cancellable}")
     var cancellable: Boolean,
-    @NotNull(message = "{NotNull.event.sendConfirmation}")
     var sendConfirmation: Boolean,
-    @NotNull(message = "{NotNull.event.sendCompleteConfirmation}")
     var sendCompleteConfirmation: Boolean,
     @Email(message = "{Email.event.communicationCC}")
     var communicationCC: String?,
@@ -62,4 +62,7 @@ class EventResultDTO(
     var registrationCount: Int,
     var totalPrice: Double,
     var status: RegistrableStatus
-) : EventBaseDTO(id, name, start, end)
+) : EventBaseDTO(id, name, start, end) {
+    constructor(event: Event, registrations: List<EventRegistration>) :
+            this(event.id, event.name, event.start, event.end, registrations.count(), registrations.sumOf { it.price }, event.getStatus())
+}
