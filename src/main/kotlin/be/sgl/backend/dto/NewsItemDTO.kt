@@ -6,11 +6,11 @@ import java.time.LocalDateTime
 
 data class NewsItemDTO(
     var id: Int? = null,
-    @NotBlank(message = "{NotBlank.newsItem.title}")
-    @Size(max = 50, message = "{Size.newsItem.title}")
+    @field:NotBlank(message = "{NotBlank.newsItem.title}")
+    @field:Size(max = 50, message = "{Size.newsItem.title}")
     var title: String,
-    @NotBlank(message = "{NotBlank.newsItem.content}")
-    @Size(max = 500, message = "{Size.newsItem.content}")
+    @field:NotBlank(message = "{NotBlank.newsItem.content}")
+    @field:Size(max = 500, message = "{Size.newsItem.content}")
     var content: String,
     var image: String? = null,
     var createdDate: LocalDateTime?

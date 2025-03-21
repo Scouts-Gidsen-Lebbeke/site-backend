@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.registrable
 
 import be.sgl.backend.entity.Payment
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.Lob
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MappedSuperclass
@@ -16,4 +17,6 @@ abstract class Registration<T : Registrable> : Payment() {
     override fun getDescription(): String {
         return subscribable.name
     }
+
+    fun getAdditionalDataMap() = additionalData?.let { ObjectMapper().readValue(it, Map::class.java) }
 }

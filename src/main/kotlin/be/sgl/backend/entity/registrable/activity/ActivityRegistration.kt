@@ -17,7 +17,8 @@ class ActivityRegistration() : Registration<Activity>() {
     lateinit var start: LocalDateTime
     lateinit var end: LocalDateTime
 
-    constructor(user: User, restriction: ActivityRestriction, price: Double, additionalData: String?) : this() {
+    constructor(activity: Activity, user: User, restriction: ActivityRestriction, price: Double, additionalData: String?) : this() {
+        this.subscribable = activity
         this.user = user
         this.restriction = restriction
         this.start = restriction.alternativeStart ?: restriction.activity.start

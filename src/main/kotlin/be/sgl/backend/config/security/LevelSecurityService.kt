@@ -2,6 +2,7 @@ package be.sgl.backend.config.security
 
 import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.service.user.UserDataProvider
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
@@ -30,16 +31,19 @@ class LevelSecurityService {
 @Retention(AnnotationRetention.RUNTIME)
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("@levelSecurityService.isAdmin()")
+@ApiResponse(responseCode = "403", description = "User has no admin role")
 annotation class OnlyAdmin
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("@levelSecurityService.isStaff()")
+@ApiResponse(responseCode = "403", description = "User has no staff role")
 annotation class OnlyStaff
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("isAuthenticated()")
+@ApiResponse(responseCode = "403", description = "User is not logged in")
 annotation class OnlyAuthenticated

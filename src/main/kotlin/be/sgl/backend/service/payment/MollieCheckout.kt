@@ -8,6 +8,7 @@ import be.woutschoovaerts.mollie.Client
 import be.woutschoovaerts.mollie.data.common.Amount
 import be.woutschoovaerts.mollie.data.customer.CustomerRequest
 import be.woutschoovaerts.mollie.data.customer.CustomerResponse
+import be.woutschoovaerts.mollie.data.payment.PaymentMethod
 import be.woutschoovaerts.mollie.data.payment.PaymentRequest
 import be.woutschoovaerts.mollie.data.payment.PaymentStatus
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,6 +38,7 @@ class MollieCheckout : CheckoutProvider {
                 .value(BigDecimal(payment.price))
                 .currency("EUR")
                 .build())
+            .method(Optional.of(listOf(PaymentMethod.BANCONTACT)))
             .description(payment.getDescription())
             .redirectUrl(appendRequestParameters("$baseUrl/$domain/confirmation.html", "id" to payableId, "order_id" to payment.id))
             .webhookUrl(Optional.of("$publicBaseUrl/api/$domain/updatePayment"))

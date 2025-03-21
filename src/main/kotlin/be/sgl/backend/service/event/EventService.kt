@@ -2,6 +2,7 @@ package be.sgl.backend.service.event
 
 import be.sgl.backend.dto.EventBaseDTO
 import be.sgl.backend.dto.EventDTO
+import be.sgl.backend.dto.EventResultDTO
 import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.mapper.EventMapper
@@ -9,7 +10,6 @@ import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.service.exception.EventNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class EventService {
@@ -21,8 +21,8 @@ class EventService {
     @Autowired
     private lateinit var mapper: EventMapper
 
-    fun getAllEvents(): List<EventBaseDTO> {
-        return eventRepository.findAll().map(mapper::toBaseDto)
+    fun getAllEvents(): List<EventResultDTO> {
+        return eventRepository.findAll().map { EventResultDTO(it, registrationRepository.getPaidRegistrationsByEvent(it)) }
     }
 
     fun getVisibleEvents(): List<EventBaseDTO> {

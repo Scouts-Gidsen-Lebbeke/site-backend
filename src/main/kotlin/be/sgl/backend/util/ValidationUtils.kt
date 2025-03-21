@@ -6,8 +6,11 @@ import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Payload
 import jakarta.validation.constraintvalidation.SupportedValidationTarget
 import jakarta.validation.constraintvalidation.ValidationTarget
-import java.util.Locale
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 import kotlin.reflect.KClass
+
 
 @Constraint(validatedBy = [PhoneNumberValidator::class])
 @Target(AnnotationTarget.FIELD)
@@ -21,7 +24,7 @@ annotation class PhoneNumber(
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class PhoneNumberValidator : ConstraintValidator<PhoneNumber, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        return value?.matches(Regex("^[0-9]{9,10}\$")) ?: true
+        return value.nullIfBlank()?.matches(Regex("^[0-9]{9,10}\$")) ?: true
     }
 }
 
@@ -77,6 +80,43 @@ annotation class Kbo(
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class KboValidator : ConstraintValidator<Kbo, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        return value?.matches(Regex("^0[0-9]{9}\$")) ?: true
+        return value.nullIfBlank()?.matches(Regex("^0[0-9]{9}\$")) ?: true
+    }
+}
+
+@StartBeforeEnd
+interface StartEndTime {
+    val start: LocalDateTime
+    val end: LocalDateTime
+}
+
+@StartBeforeEnd
+interface StartEndDate {
+    val start: LocalDate
+    val end: LocalDate
+}
+
+@Constraint(validatedBy = [StartEndTimeValidator::class, StartEndDateValidator::class])
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class StartBeforeEnd(
+    val message: String = "{StartBeforeEnd.message}",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
+)
+
+@SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
+class StartEndTimeValidator : ConstraintValidator<StartBeforeEnd, StartEndTime?> {
+    override fun isValid(value: StartEndTime?, context: ConstraintValidatorContext): Boolean {
+        value ?: return true
+        return value.start < value.end
+    }
+}
+
+@SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
+class StartEndDateValidator : ConstraintValidator<StartBeforeEnd, StartEndDate?> {
+    override fun isValid(value: StartEndDate?, context: ConstraintValidatorContext): Boolean {
+        value ?: return true
+        return value.start < value.end
     }
 }
