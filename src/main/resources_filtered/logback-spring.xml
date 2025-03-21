@@ -1,0 +1,61 @@
+<configuration>
+    <springProperty scope="context" name="ACTIVE_PROFILE" source="spring.profiles.active" defaultValue="unknown"/>
+    <springProperty scope="context" name="APP_VERSION" source="app.version" defaultValue="unknown"/>
+
+
+    <!-- Always log to the console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - PROFILE:${ACTIVE_PROFILE}-${APP_VERSION} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Enable GELF logging only for 'dev' and 'prd' profiles -->
+    <springProfile name="dev,prd">
+        <appender name="GELF_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/logs/gelf-log.json</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/logs/gelf-log-%d{yyyy-MM-dd}.json</fileNamePattern>
+                <maxHistory>7</maxHistory>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp />
+                    <pattern>
+                        <pattern>
+                            {
+                            "version": "1.1",
+                            "host": "${HOSTNAME}",
+                            "short_message": "%msg",
+                            "full_message": "%logger{36} - %msg%n",
+                            "timestamp": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",
+                            "level": "%level",
+                            "_thread": "%thread",
+                            "_class": "%class",
+                            "_method": "%method",
+                            "_line": "%line",
+                            "_app_version": "${APP_VERSION}"
+                            }
+                        </pattern>
+                    </pattern>
+                </providers>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <!-- Profile-based logging configuration -->
+    <springProfile name="dev,prd,local">
+        <!-- Root Logger for dev/prd/local: Log to console and file -->
+        <root level="info">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="GELF_FILE" />
+        </root>
+    </springProfile>
+
+    <!-- Default Root Logger (when no profile is set) -->
+    <springProfile name="!dev &amp; !prd">
+        <root level="info">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+</configuration>

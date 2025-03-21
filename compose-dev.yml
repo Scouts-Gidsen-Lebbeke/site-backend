@@ -12,3 +12,4 @@ services:
     restart: always
     volumes:
       - ./images:/images:rw,z
+      - ./logs:/logs:rw,z

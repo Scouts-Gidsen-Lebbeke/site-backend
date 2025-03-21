@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - dev2
       - prd
 
 jobs:
@@ -25,7 +26,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-          if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
+          if [[ ${{ github.ref }} == 'refs/heads/dev2' ]]; then
             echo "ENV_TAG=dev" >>${GITHUB_ENV}
           else
             echo "ENV_TAG=latest" >>${GITHUB_ENV}
