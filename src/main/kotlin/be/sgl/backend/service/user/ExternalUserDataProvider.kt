@@ -3,6 +3,7 @@ package be.sgl.backend.service.user
 import be.sgl.backend.config.security.BearerTokenFilter
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.util.*
 import jakarta.persistence.EntityManager
 import mu.KotlinLogging
@@ -71,7 +72,7 @@ class ExternalUserDataProvider : UserDataProvider() {
     }
 
     override fun getUser(username: String): User {
-        return userRepository.getByUsername(username).withExternalData()
+        return userRepository.findByUsername(username)?.withExternalData() ?: throw UserNotFoundException(username)
     }
 
     override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
