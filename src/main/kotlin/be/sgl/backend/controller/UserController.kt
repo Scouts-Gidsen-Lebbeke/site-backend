@@ -3,6 +3,7 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
+import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.RemoteFile
 import be.sgl.backend.dto.UserDTO
 import be.sgl.backend.service.user.UserService
@@ -42,12 +43,12 @@ class UserController {
     }
 
     @PostMapping("/profile-picture")
+    @OnlyAuthenticated
     @Operation(
         summary = "Upload the profile picture to the current user",
         description = "Deletes the current profile picture if existing, uploads and links the new one.",
         responses = [
             ApiResponse(responseCode = "200", description = "Image uploaded", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))]),
-            ApiResponse(responseCode = "401", description = "User is not logged in"),
             ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = "text/plain", schema = Schema(type = "string"))])
         ]
     )
@@ -63,7 +64,6 @@ class UserController {
         description = "Returns basic user data for the user with the specified username.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDTO::class))]),
-            ApiResponse(responseCode = "401", description = "User has no staff role", content = [Content(schema = Schema(hidden = true))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
@@ -72,7 +72,15 @@ class UserController {
     }
 
     @GetMapping("/search")
+    @OnlyStaff
+    @Operation(
+        summary = "Find a user based on name and/or first name",
+        description = "Returns a list of all matching users. Only users where the name or first name contains the query are listed.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = "application/json", schema = Schema(implementation = UserDTO::class))])
+        ]
+    )
     fun findUser(@RequestParam query: String): ResponseEntity<List<UserDTO>> {
-        TODO()
+        return ResponseEntity.ok(userService.getByQuery(query))
     }
 }

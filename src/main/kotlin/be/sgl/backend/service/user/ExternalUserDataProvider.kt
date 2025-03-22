@@ -38,16 +38,15 @@ class ExternalUserDataProvider : UserDataProvider() {
         val address = user.addresses.first()
         createExternalRegistration(LidAanvraag(
             externalOrganizationId,
-            Persoonsgegevens(
-               user.sex.code,
-               user.mobile,
-               user.hasHandicap,
-               user.hasReduction,
-                null
-            ),
+            null,
             user.firstName,
             user.name,
-            user.birthdate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            user.birthdate,
+            Persoonsgegevens(
+                user.sex.code,
+                user.mobile,
+                null
+            ),
             user.email,
             Adres(
                 null,
@@ -62,7 +61,8 @@ class ExternalUserDataProvider : UserDataProvider() {
                 true,
                 null,
                 "normaal"
-            )
+            ),
+            user.hasReduction
         ))
         logger.debug { "External registration finished: request created and ready to be approved!" }
     }
@@ -147,10 +147,10 @@ class ExternalUserDataProvider : UserDataProvider() {
             roles.addAll(it.functies.mapNotNull { f -> translateFunction(this, f) })
             sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
             mobile = it.persoonsgegevens.gsm
-            hasHandicap = it.persoonsgegevens.beperking
-            hasReduction = it.persoonsgegevens.verminderdlidgeld
+            hasHandicap = it.vgagegevens.beperking
+            hasReduction = it.vgagegevens.verminderdlidgeld
             accountNo = it.persoonsgegevens.rekeningnummer
-            birthdate = LocalDate.parse(it.vgagegevens.geboortedatum)
+            birthdate = it.vgagegevens.geboortedatum
             memberId = it.verbondsgegevens.lidnummer
             addresses.addAll(it.adressen.map { a -> a.asAddress() } )
             contacts.addAll(it.contacten.map { c ->
