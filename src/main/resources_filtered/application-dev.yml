@@ -1,22 +1,17 @@
 spring:
   application:
-    environment: dev
+    environment: prod
   jpa:
+    datasource:
+      dialect: com.mysql.cj.jdbc.Driver
     hibernate:
-      ddl-auto: update
-  mail:
-    alert:
-      enabled: false
-
-# unstable and on demand
-#rest:
-#  ga:
-#    url: https://ga-staging.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga
-
-logging:
-  level:
-    be.slg.backend: DEBUG
+      ddl-auto: validate
 
 server:
   servlet:
     context-path: /api
+
+logging:
+  level:
+    be.sgl.backend: INFO
+
