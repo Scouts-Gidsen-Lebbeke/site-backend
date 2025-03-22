@@ -10,7 +10,7 @@
         </encoder>
     </appender>
 
-    <springProfile name="dev,prod">
+    <springProfile name="dev | prod">
         <appender name="GELF_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>/logs/gelf-log.json</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -43,7 +43,7 @@
     </springProfile>
 
     <!-- Profile-based logging configuration -->
-    <springProfile name="dev,prod">
+    <springProfile name="dev | prod">
         <root level="info">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="GELF_FILE" />
