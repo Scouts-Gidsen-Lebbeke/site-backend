@@ -4,19 +4,19 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.MembershipDTO
+import be.sgl.backend.dto.PaymentUrl
 import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.service.MembershipService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
-import java.net.URI
 
 @RestController
 @RequestMapping("/memberships")
@@ -61,26 +61,23 @@ class MembershipController {
 
     @PostMapping
     @OnlyAuthenticated
-    fun createMembershipForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
-        val headers = HttpHeaders()
-        headers.location = URI(membershipService.createMembershipForExistingUser(userDetails.username))
-        return ResponseEntity(headers, HttpStatus.FOUND)
+    fun createMembershipForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<PaymentUrl> {
+        val url = membershipService.createMembershipForExistingUser(userDetails.username)
+        return ResponseEntity.ok(PaymentUrl(url))
     }
 
     @PostMapping("/user/{username}")
     @OnlyStaff
-    fun createMembershipForUser(@PathVariable username: String): ResponseEntity<Unit> {
-        val headers = HttpHeaders()
-        headers.location = URI(membershipService.createMembershipForExistingUser(username))
-        return ResponseEntity(headers, HttpStatus.FOUND)
+    fun createMembershipForUser(@PathVariable username: String): ResponseEntity<PaymentUrl> {
+        val url = membershipService.createMembershipForExistingUser(username)
+        return ResponseEntity.ok(PaymentUrl(url))
     }
 
     @PostMapping("/register")
     @PreAuthorize("permitAll()")
-    fun createMembershipForNewUser(@RequestBody userRegistrationDTO: UserRegistrationDTO): ResponseEntity<Unit> {
-        val headers = HttpHeaders()
-        headers.location = URI(membershipService.createMembershipForNewUser(userRegistrationDTO))
-        return ResponseEntity(headers, HttpStatus.FOUND)
+    fun createMembershipForNewUser(@Valid @RequestBody userRegistrationDTO: UserRegistrationDTO): ResponseEntity<PaymentUrl> {
+        val url = membershipService.createMembershipForNewUser(userRegistrationDTO)
+        return ResponseEntity.ok(PaymentUrl(url))
     }
 
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
