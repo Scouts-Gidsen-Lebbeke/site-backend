@@ -120,8 +120,7 @@ jobs:
         with:
           cf_zone: ${{ secrets.CF_ZONE }}
           cf_auth: ${{ secrets.CF_TOKEN }}
-          hosts: |
-            dev.scoutslebbeke.be
+          hosts: dev.scoutslebbeke.be
 
   deploy-prod:
     needs: build-and-push
