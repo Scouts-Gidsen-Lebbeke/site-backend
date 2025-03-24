@@ -118,8 +118,8 @@ jobs:
       - name: Cloudflare Cache Purge
         uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
         with:
-          cfZone: ${{ secrets.CF_ZONE }}
-          cfToken: ${{ secrets.CF_TOKEN }}
+          cf_zone: ${{ secrets.CF_ZONE }}
+          cf_auth: ${{ secrets.CF_TOKEN }}
           hosts: |
             dev.scoutslebbeke.be
 
@@ -182,5 +182,5 @@ jobs:
       - name: Cloudflare Cache Purge
         uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
         with:
-          cfZone: ${{ secrets.CF_ZONE }}
-          cfToken: ${{ secrets.CF_TOKEN }}
+          cf_zone: ${{ secrets.CF_ZONE }}
+          cf_auth: ${{ secrets.CF_TOKEN }}
