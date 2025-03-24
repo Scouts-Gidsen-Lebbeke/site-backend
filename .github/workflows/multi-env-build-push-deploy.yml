@@ -114,6 +114,8 @@ jobs:
           
             docker compose down
             docker compose up -d
+          
+            docker image prune -f
           EOF
       - name: Cloudflare Cache Purge
         uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
@@ -177,6 +179,8 @@ jobs:
           
             podman compose down
             podman compose --env-file .env up -d
+          
+            podman image prune -f
           EOF
       - name: Cloudflare Cache Purge
         uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
