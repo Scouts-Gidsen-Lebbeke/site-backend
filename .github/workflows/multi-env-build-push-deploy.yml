@@ -25,10 +25,10 @@ jobs:
       - name: Set environment variables
         run: |
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-          if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "ENV_TAG=dev" >>${GITHUB_ENV}
-          else
+          if [[ ${{ github.ref }} == 'refs/heads/prd' ]]; then
             echo "ENV_TAG=latest" >>${GITHUB_ENV}
+          else
+            echo "ENV_TAG=dev" >>${GITHUB_ENV}
           fi
         env:
           OWNER: '${{ github.repository_owner }}'
