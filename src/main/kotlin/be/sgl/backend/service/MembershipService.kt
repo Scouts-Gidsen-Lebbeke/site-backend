@@ -115,7 +115,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             check(branchCount < it) { "This branch already has its maximum number of members!" }
         }
         val price = branchRestriction?.alternativePrice ?: currentPeriod.price
-        val membership = Membership(user, currentPeriod, branch, price)
+        val membership = paymentRepository.save(Membership(user, currentPeriod, branch, price))
         val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships", currentPeriod.id)
         paymentRepository.save(membership)
         return checkoutUrl

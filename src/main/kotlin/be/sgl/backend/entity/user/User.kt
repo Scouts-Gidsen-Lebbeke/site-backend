@@ -44,7 +44,7 @@ class User : Serializable {
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val addresses: MutableList<Address> = mutableListOf()
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val contacts: MutableList<Contact> = mutableListOf()
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)

@@ -14,4 +14,6 @@ interface UserRepository : JpaRepository<User, Int> {
     fun getStaffForBranch(branch: Branch): List<User>
     fun deleteByUsername(username: String)
     fun findByNameAndFirstNameAndEmail(name: String, firstName: String, email: String): User?
+    @Query("from User where name like concat('%', :param, '%') or firstName like concat('%', :param, '%')")
+    fun findByQuery(query: String): List<User>
 }

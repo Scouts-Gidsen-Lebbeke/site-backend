@@ -30,4 +30,8 @@ class UserService {
         userDataProvider.updateUser(user)
         return path
     }
+
+    fun getByQuery(query: String): List<UserDTO> {
+        return userDataProvider.findByQuery(query).map(mapper::toDto)
+    }
 }

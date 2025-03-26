@@ -26,15 +26,17 @@ data class LidFuncties(
 data class Persoonsgegevens(
     val geslacht: String?,
     val gsm: String?,
-    val beperking: Boolean,
-    val verminderdlidgeld: Boolean,
     val rekeningnummer: String?
 )
 
 data class Vgagegevens(
     val voornaam: String, // only used at user creation
     val achternaam: String, // only used at user creation
-    val geboortedatum: String
+    val geboortedatum: LocalDate,
+    val beperking: Boolean,
+    val individueleSteekkaartDatumAangepast: LocalDate, // ignored
+    val verhoogdekinderbijslag: Boolean, // ignored
+    val verminderdlidgeld: Boolean
 )
 
 data class Verbondsgegevens(
@@ -105,12 +107,14 @@ data class Groep(
 
 data class LidAanvraag(
     val groepsnummer: String,
-    val persoonsgegevens: Persoonsgegevens,
+    val opmerkingen: String?,
     val voornaam: String,
     val achternaam: String,
-    val geboortedatum: String,
+    val geboortedatum: LocalDate,
+    val persoonsgegevens: Persoonsgegevens,
     val email: String,
-    val adres: Adres
+    val adres: Adres,
+    val verminderdlidgeld: Boolean,
 )
 
 data class Steekkaart(

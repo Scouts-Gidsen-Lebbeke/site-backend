@@ -62,6 +62,7 @@ organization:
 
 error:
   handling:
+    search-super-class-hierarchy: true
     http-statuses:
       org.springframework.web.bind.MethodArgumentNotValidException: BAD_REQUEST
       java.lang.IllegalStateException: BAD_REQUEST

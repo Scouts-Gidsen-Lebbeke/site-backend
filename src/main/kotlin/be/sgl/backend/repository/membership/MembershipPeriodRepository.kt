@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MembershipPeriodRepository : JpaRepository<MembershipPeriod, Int> {
-    @Query("from MembershipPeriod where now() between :start and :end")
+    @Query("from MembershipPeriod where now() between start and end")
     fun getActivePeriod(): MembershipPeriod
 }

@@ -71,6 +71,11 @@ abstract class UserDataProvider {
 
     abstract fun findByNameAndEmail(name: String, firstName: String, email: String) : User?
 
+    fun findByQuery(query: String): List<User> {
+        logger.debug { "Trying to find users by query $query..." }
+        return userRepository.findByQuery(query)
+    }
+
     abstract fun updateUser(user: User): User
 
     open fun deleteUser(username: String) {
