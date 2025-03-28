@@ -28,6 +28,9 @@
         <url>https://github.com/Scouts-Gidsen-Lebbeke/site-backend.git</url>
     </scm>
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.version>${project.version}</project.version>
         <java.version>21</java.version>
         <kotlin.version>2.1.10</kotlin.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
@@ -38,6 +41,7 @@
         <mollie.version>4.5.1</mollie.version>
         <jsonata.version>0.9.8</jsonata.version>
         <kotlin.logging.version>3.0.5</kotlin.logging.version>
+        <logstash.logback.version>7.3</logstash.logback.version>
         <jaxb.maven.plugin.version>3.2.0</jaxb.maven.plugin.version>
     </properties>
     <dependencies>
@@ -150,15 +154,22 @@
             <artifactId>jsonata</artifactId>
             <version>${jsonata.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.wimdeblauwe</groupId>
+            <artifactId>error-handling-spring-boot-starter</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+
         <dependency>
             <groupId>io.github.microutils</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
             <version>${kotlin.logging.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.wimdeblauwe</groupId>
-            <artifactId>error-handling-spring-boot-starter</artifactId>
-            <version>4.5.0</version>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash.logback.version}</version>
         </dependency>
 
         <!-- Testing dependencies -->
@@ -185,6 +196,22 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources_filtered</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>

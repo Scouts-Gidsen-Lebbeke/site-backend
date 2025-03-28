@@ -1,0 +1,17 @@
+spring:
+  application:
+    environment: prod
+  jpa:
+    datasource:
+      dialect: com.mysql.cj.jdbc.Driver
+    hibernate:
+      ddl-auto: validate
+
+server:
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    be.sgl.backend: INFO
+

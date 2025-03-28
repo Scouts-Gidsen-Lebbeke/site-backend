@@ -25,10 +25,10 @@ jobs:
       - name: Set environment variables
         run: |
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-          if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "ENV_TAG=dev" >>${GITHUB_ENV}
-          else
+          if [[ ${{ github.ref }} == 'refs/heads/prd' ]]; then
             echo "ENV_TAG=latest" >>${GITHUB_ENV}
+          else
+            echo "ENV_TAG=dev" >>${GITHUB_ENV}
           fi
         env:
           OWNER: '${{ github.repository_owner }}'
@@ -113,7 +113,15 @@ jobs:
           
             docker compose down
             docker compose up -d
+          
+            docker image prune -f
           EOF
+      - name: Cloudflare Cache Purge
+        uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
+        with:
+          cf_zone: ${{ secrets.CF_ZONE }}
+          cf_auth: ${{ secrets.CF_TOKEN }}
+#          hosts: dev.scoutslebbeke.be          #doesn't work lol
 
   deploy-prod:
     needs: build-and-push
@@ -170,4 +178,11 @@ jobs:
           
             podman compose down
             podman compose --env-file .env up -d
+          
+            podman image prune -f
           EOF
+      - name: Cloudflare Cache Purge
+        uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
+        with:
+          cf_zone: ${{ secrets.CF_ZONE }}
+          cf_auth: ${{ secrets.CF_TOKEN }}
