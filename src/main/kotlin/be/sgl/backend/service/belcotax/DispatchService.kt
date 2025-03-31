@@ -4,6 +4,7 @@ import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.service.SettingService
+import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
 import generated.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,20 +18,21 @@ import java.time.format.DateTimeFormatter
 class DispatchService {
 
     @Autowired
-    private lateinit var settingService: SettingService
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
+    private lateinit var organizationProvider: OrganizationProvider
 
     /**
-     * Given the [owner] and [certifier] [Organization]s, generate the dispatch for the listed [forms]
-     * in the official [Verzendingen] format. Only the validity relevant for this specific dispatch is enforced.
+     * Generate the dispatch for the listed [forms] in the official [Verzendingen] format.
+     * Only the validity relevant for this specific dispatch is enforced.
      * This means that some things are NOT checked here:
      *  - The logical grouping of declarations on members in chunks of four.
      *  - The age restriction of participating members.
      *  - The validity of nis numbers (both on organization level and on user level).
      */
-    fun createDispatch(owner: Organization, certifier: Organization, forms: List<DeclarationFormDTO>, previous: String? = null) : Verzendingen {
+    fun createDispatch(forms: List<DeclarationFormDTO>, previous: String? = null) : Verzendingen {
         check(forms.isNotEmpty()) { "At least one declaration should be present!" }
+        val owner = organizationProvider.getOwner()
+        val representative = organizationProvider.getRepresentative()
+        val certifier = organizationProvider.getCertifier()
         val dispatch = Verzending()
         dispatch.v0002Inkomstenjaar = forms.first().year
         dispatch.v0010Bestandtype = "BELCOTAX"
@@ -49,7 +51,7 @@ class DispatchService {
         dispatch.v0018Telefoonnummer = owner.getMobile()?.assertMaxLength("organization phone number", 12)
         // dispatch.v0019Faxnummer => outdated
         dispatch.v0020Identificatie = "BConv86" // Identify as their shitty mapping application
-        dispatch.v0021Contactpersoon = getRepresentative().getFullName().assertMaxLength("representative", 34)
+        dispatch.v0021Contactpersoon = representative.user.getFullName().assertMaxLength("representative", 34)
         dispatch.v0022Taalcode = getCurrentUserLanguage()
         dispatch.v0023Emailadres = owner.getEmail()?.assertMaxLength("organization phone number", 44)
         dispatch.v0024Nationaalnr = owner.kbo.assertLength("organization national number", 10)
@@ -241,9 +243,5 @@ class DispatchService {
             formYear.substring(0, 2).toInt().minus(1).toString()
         }
         return "$day-$month-$yearPrefix$year"
-    }
-
-    private fun getRepresentative(): User {
-        return userDataProvider.getUser(settingService.getRepresentativeUsername())
     }
 }

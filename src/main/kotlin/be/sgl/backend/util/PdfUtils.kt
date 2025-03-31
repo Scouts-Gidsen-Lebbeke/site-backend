@@ -5,8 +5,9 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayOutputStream
+import java.io.File
 
-fun fillForm(formName: String, formData: Map<String, Any?>, stamp: String? = null): ByteArray {
+fun fillForm(formName: String, formData: Map<String, Any?>, stamp: File? = null): ByteArray {
     val resultStream = ByteArrayOutputStream()
     Loader.loadPDF(ClassPathResource(formName).contentAsByteArray).use { document ->
         val acroForm = document.documentCatalog.acroForm
@@ -14,7 +15,7 @@ fun fillForm(formName: String, formData: Map<String, Any?>, stamp: String? = nul
             acroForm.getField(fieldName)?.setValue(value?.toString())
         }
         stamp?.let {
-            val image = PDImageXObject.createFromByteArray(document, ClassPathResource(it).contentAsByteArray, it)
+            val image = PDImageXObject.createFromByteArray(document, it.readBytes(), it.name)
             val lastPage = document.getPage(document.numberOfPages - 1)
             val scale = 0.25f * lastPage.mediaBox.width / image.width
             val width = image.width * scale

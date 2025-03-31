@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component
 class BearerTokenFilter : Filter {
 
     companion object {
+
         private val logger = KotlinLogging.logger {}
         private val tokenHolder = ThreadLocal<String?>()
 
         fun getToken(): String? {
-            logger.info { "Fetching token..." }
             val token = tokenHolder.get()
-            logger.info { "Fetched token: ${token?.take(20)}" }
+            logger.debug { "Fetched token: ${token?.take(20)}" }
             return token
         }
     }

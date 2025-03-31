@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank
 import java.time.LocalDate
 
 data class UserDTO(
-    val username: String,
+    val username: String?,
     @NotBlank
     val name: String,
     @NotBlank

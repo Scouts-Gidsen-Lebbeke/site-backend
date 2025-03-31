@@ -21,9 +21,12 @@ class SettingService {
         return getOrCreateDefault("REPRESENTATIVE_TITLE", "Vertegenwoordiger")
     }
 
-    fun getRepresentativeUsername(): String {
-        return settingRepository.findById("REPRESENTATIVE_USERNAME").map { it.value }
-            .orElseThrow { IncompleteConfigurationException("No representative configured for organization!") }
+    fun getRepresentativeUsername(): String? {
+        return settingRepository.findByIdOrNull("REPRESENTATIVE_USERNAME")?.value
+    }
+
+    fun getSignatureFile(): String? {
+        return settingRepository.findByIdOrNull("REPRESENTATIVE_SIGNATURE")?.value
     }
 
     private fun getOrCreateDefault(id: String, default: Any): String {

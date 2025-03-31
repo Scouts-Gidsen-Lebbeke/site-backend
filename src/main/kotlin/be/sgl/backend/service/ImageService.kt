@@ -5,6 +5,7 @@ import be.sgl.backend.service.exception.ImageMoveException
 import be.sgl.backend.service.exception.ImageUploadException
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -62,6 +63,10 @@ class ImageService {
         } catch (e: IOException) {
             throw ImageMoveException(fileName, sourceDir.path, targetDir.path)
         }
+    }
+
+    fun get(fileName: String, sourceDir: ImageDirectory): File? {
+        return Paths.get(IMAGE_BASE_PATH, sourceDir.path, fileName).toFile().takeIf { it.exists() && it.isFile }
     }
 
     companion object {

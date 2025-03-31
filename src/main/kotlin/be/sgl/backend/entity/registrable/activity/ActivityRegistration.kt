@@ -28,6 +28,6 @@ class ActivityRegistration() : Registration<Activity>() {
     }
 
     fun calculateDays(): Int {
-        return ChronoUnit.DAYS.between(start, end).absoluteValue.toInt()
+        return (end.toLocalDate().toEpochDay() - start.toLocalDate().toEpochDay()).toInt() + 1
     }
 }

@@ -20,8 +20,8 @@ interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, I
     fun existsBySubscribable(subscribable: Activity): Boolean
     fun getByUser(user: User): List<ActivityRegistration>
     fun existsBySubscribableAndUser(subscribable: Activity, user: User): Boolean
-    fun getByRestriction(restriction: ActivityRestriction): List<ActivityRegistration>
-    @Query("from ActivityRegistration where subscribable = :activity and restriction.branch = :branch")
-    fun getByActivityAndBranch(activity: Activity, branch: Branch): List<ActivityRegistration>
+    fun countByRestriction(restriction: ActivityRestriction): Int
+    @Query("select count(*) from ActivityRegistration where subscribable = :activity and restriction.branch = :branch")
+    fun countByActivityAndBranch(activity: Activity, branch: Branch): Int
     fun getByUserAndSubscribable(user: User, subscribable: Activity): ActivityRegistration?
 }

@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service
 @Service
 @WhenNotBlank("payconiq.api.key")
 class PayconiqCheckout : CheckoutProvider {
+
+    override fun createRedirectUrl(payment: Payment, domain: String, payableId: Int?): String {
+        TODO("Not yet implemented")
+    }
+
     override fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String, payableId: Int?): String {
         TODO("Not yet implemented")
     }

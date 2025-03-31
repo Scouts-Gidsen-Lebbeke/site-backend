@@ -6,7 +6,6 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.service.MailService
 import be.sgl.backend.service.SettingService
-import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
 import generated.Verzendingen
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,8 +20,6 @@ class BelcotaxService {
     @Autowired
     private lateinit var userDataProvider: UserDataProvider
     @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
-    @Autowired
     private lateinit var registrationRepository: ActivityRegistrationRepository
     @Autowired
     private lateinit var dispatchService: DispatchService
@@ -35,7 +32,7 @@ class BelcotaxService {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
         val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
         val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, fiscalYear) }
-        return dispatchService.createDispatch(organizationProvider.getOwner(), organizationProvider.getCertifier(), forms)
+        return dispatchService.createDispatch(forms)
     }
 
     fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int): List<ByteArray> {
@@ -43,18 +40,14 @@ class BelcotaxService {
         val user = userDataProvider.getUser(username)
         val activities = registrationRepository.getByUserAndStartBetweenOrderByStart(user, beginOfYear, endOfYear).filter(::relevantActivity)
         check(activities.isNotEmpty()) { "No relevant activities found for $username" }
-        val owner = organizationProvider.getOwner()
-        val certifier = organizationProvider.getCertifier()
-        return activities.asForms(user, fiscalYear).map { formService.createForm(owner, certifier, it) }
+        return activities.asForms(user, fiscalYear).map(formService::createForm)
     }
 
     fun getFormsForFiscalYearAndRate(fiscalYear: Int): Map<User, List<ByteArray>> {
         val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
         val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
-        val owner = organizationProvider.getOwner()
-        val certifier = organizationProvider.getCertifier()
         return activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, fiscalYear) }
-            .groupBy(DeclarationFormDTO::user) { formService.createForm(owner, certifier, it) }
+            .groupBy(DeclarationFormDTO::user, formService::createForm)
     }
 
     fun mailFormsToUser(fiscalYear: Int, user: User, forms: List<ByteArray>) {

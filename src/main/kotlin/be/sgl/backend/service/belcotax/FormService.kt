@@ -5,8 +5,11 @@ import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.service.SettingService
+import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.util.belgian
 import be.sgl.backend.util.fillForm
+import be.sgl.backend.util.pricePrecision
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,11 +19,12 @@ import java.time.format.DateTimeFormatter
 class FormService {
 
     @Autowired
-    private lateinit var settingService: SettingService
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
+    private lateinit var organizationProvider: OrganizationProvider
 
-    fun createForm(owner: Organization, certifier: Organization, form: DeclarationFormDTO): ByteArray {
+    fun createForm(form: DeclarationFormDTO): ByteArray {
+        val owner = organizationProvider.getOwner()
+        val representative = organizationProvider.getRepresentative()
+        val certifier = organizationProvider.getCertifier()
         val formData = mapOf(
             "instanceName" to owner.name,
             "instanceKBO" to owner.kbo,
@@ -73,21 +77,14 @@ class FormService {
             "period4Price" to form.activity4?.price.pricePrecision(),
             "totalPrice" to form.totalPrice.pricePrecision(),
             "location" to owner.address.town,
-            "authorizer" to getRepresentative().getFullName(),
-            "authorizationRole" to settingService.getRepresentativeTitle()
+            "authorizer" to representative.user.getFullName(),
+            "authorizationRole" to representative.title
         )
         return fillForm("forms/form28186.pdf", formData)
     }
 
     private fun ActivityRegistration?.asPeriod(): String? {
         this ?: return null
-        val format = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        return "${start.format(format)} - ${end.format(format)}"
-    }
-
-    private fun Double?.pricePrecision() = this?.let { String.format("%.2f", it) }
-
-    private fun getRepresentative(): User {
-        return userDataProvider.getUser(settingService.getRepresentativeUsername())
+        return "${start.belgian()} - ${end.belgian()}"
     }
 }

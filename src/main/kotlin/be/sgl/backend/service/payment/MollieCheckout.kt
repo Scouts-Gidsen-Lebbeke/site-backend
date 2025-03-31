@@ -29,6 +29,10 @@ class MollieCheckout : CheckoutProvider {
     @Value("\${spring.application.public-base-url}")
     private lateinit var publicBaseUrl: String
 
+    override fun createRedirectUrl(payment: Payment, domain: String, payableId: Int?): String {
+        return appendRequestParameters("$baseUrl/$domain/confirmation.html", "id" to payableId, "order_id" to payment.id)
+    }
+
     override fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String, payableId: Int?): String {
         checkNotNull(payment.id)
         val customerId = customer.id ?: createCustomer(customer).id
@@ -40,7 +44,7 @@ class MollieCheckout : CheckoutProvider {
                 .build())
             .method(Optional.of(listOf(PaymentMethod.BANCONTACT)))
             .description(payment.getDescription())
-            .redirectUrl(appendRequestParameters("$baseUrl/$domain/confirmation.html", "id" to payableId, "order_id" to payment.id))
+            .redirectUrl(createRedirectUrl(payment, domain, payableId))
             .webhookUrl(Optional.of("$publicBaseUrl/api/$domain/updatePayment"))
             .metadata(mapOf("order_id" to payment.id))
             .build()

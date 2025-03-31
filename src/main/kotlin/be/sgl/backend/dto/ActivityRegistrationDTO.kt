@@ -12,5 +12,7 @@ data class ActivityRegistrationDTO(
     val user: UserDTO,
     val restriction: ActivityRestrictionDTO,
     val start: LocalDateTime,
-    val end: LocalDateTime
+    val end: LocalDateTime,
+    val createdDate: LocalDateTime,
+    val subscribable: ActivityBaseDTO
 )

@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.membership
 
 import be.sgl.backend.entity.Auditable
+import be.sgl.backend.util.belgian
 import jakarta.persistence.*
 import java.time.LocalDate
 
@@ -18,5 +19,5 @@ class MembershipPeriod : Auditable() {
     @OneToMany(mappedBy = "period", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     var restrictions = mutableListOf<MembershipRestriction>()
 
-    override fun toString() = "$start - $end"
+    override fun toString() = "${start.belgian()} - ${end.belgian()}"
 }

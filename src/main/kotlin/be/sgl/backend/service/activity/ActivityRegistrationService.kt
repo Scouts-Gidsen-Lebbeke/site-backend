@@ -22,7 +22,9 @@ import be.sgl.backend.service.exception.ActivityRegistrationNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.util.base64Encoded
+import be.sgl.backend.util.belgian
 import be.sgl.backend.util.fillForm
+import be.sgl.backend.util.pricePrecision
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -53,33 +55,61 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
     private lateinit var organizationProvider: OrganizationProvider
 
     fun getAllRegistrationsForActivity(id: Int): List<ActivityRegistrationDTO> {
+        logger.info { "Fetching all registrations for activity #$id" }
         val activity = getActivityById(id)
         return paymentRepository.getPaidRegistrationsByActivity(activity).map(mapper::toDto)
     }
 
     fun getAllRegistrationsForUser(username: String): List<ActivityRegistrationDTO> {
+        logger.info { "Fetching all registrations for user $username" }
         val user = userDataProvider.getUser(username)
         return paymentRepository.getByUser(user).map(mapper::toDto)
     }
 
     fun getActivityRegistrationDTOById(id: Int) : ActivityRegistrationDTO? {
+        logger.info { "Fetching registration #$id" }
         return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
     }
 
     fun getStatusForActivityAndUser(activityId: Int, username: String): ActivityRegistrationStatus {
+        logger.info { "Checking registration status for activity #$activityId and user $username" }
         val activity = getActivityById(activityId)
         val user = userDataProvider.getUser(username)
         paymentRepository.getByUserAndSubscribable(user, activity)?.let {
+            logger.info { "User already registered (#${it.id})" }
             return ActivityRegistrationStatus(mapper.toDto(it))
         }
-        val relevantBranch = getRelevantBranchForUser(activity, user) ?: return ActivityRegistrationStatus(activeMembership = false)
-        val relevantRestrictions = activity.getRestrictionsForBranch(relevantBranch)
-        if (isGlobalLimitReached(activity) || isBranchLimitReached(activity, relevantBranch)) {
-            val closedOptions = relevantRestrictions.map(mapper::toDto)
-            return ActivityRegistrationStatus(closedOptions = closedOptions)
+        val relevantBranches = getCurrentValidBranchesForUser(user)
+        if (relevantBranches.isEmpty()) {
+            logger.info { "No active branch found for $username" }
+            return ActivityRegistrationStatus(activeMembership = false)
         }
-        val (closed, open) = relevantRestrictions.partition(::isRestrictionLimitReached)
+        val relevantRestrictions = activity.getRestrictionsForBranches(relevantBranches)
+        if (relevantRestrictions.isEmpty()) {
+            logger.info { "No applicable restrictions found for $username" }
+            return ActivityRegistrationStatus()
+        }
+        if (isGlobalLimitReached(activity)) {
+            logger.info { "Global activity limit (${activity.registrationLimit}) is reached for ${activity.name}" }
+            return ActivityRegistrationStatus(closedOptions = relevantRestrictions.map(mapper::toDto))
+        }
+        val restrictionsWithoutBranchLimit = relevantRestrictions.filter { !isBranchLimitReached(activity, it.branch) }
+        if (restrictionsWithoutBranchLimit.isEmpty()) {
+            logger.info { "Branch limit is reached for all active branches of $username" }
+            return ActivityRegistrationStatus(closedOptions = relevantRestrictions.map(mapper::toDto))
+        }
+        val (closed, open) = restrictionsWithoutBranchLimit.partition(::isRestrictionLimitReached)
+        if (open.isEmpty()) {
+            logger.info { "Limit is reached for each applicable restriction for $username" }
+            return ActivityRegistrationStatus(closedOptions = closed.map(mapper::toDto))
+        }
+        logger.info { "User has ${open.size} open activity options" }
         val medicalRecord = userDataProvider.getMedicalRecord(user)
+        if (medicalRecord == null) {
+            logger.info { "Medical record not found for $username" }
+        } else if (!medicalRecord.isUpToDate) {
+            logger.info { "Medical record for $username is older than one year" }
+        }
         return ActivityRegistrationStatus(
             openOptions = open.map(mapper::toDto),
             closedOptions = closed.map(mapper::toDto),
@@ -88,42 +118,61 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         )
     }
 
-    private fun getRelevantBranchForUser(activity: Activity, user: User): Branch? {
-        val membership = membershipRepository.getCurrentByUser(user)
-        if (membership != null && activity.getRestrictionsForBranch(membership.branch).isNotEmpty()) {
-            return membership.branch
+    private fun getCurrentValidBranchesForUser(user: User): List<Branch> {
+        logger.info { "Retrieving current valid branch(es) for ${user.username}" }
+        val activeBranch = membershipRepository.getCurrentByUser(user)?.let {
+            logger.info { "Found active membership for branch ${it.branch.name} (#${it.id})" }
+            it.branch
         }
-        return branchRepository.getPassiveBranches().firstOrNull { it.matchesUser(user) }
+        val branches = listOfNotNull(activeBranch)
+        branchRepository.getPassiveBranches().filter { it.matchesUser(user) }.forEach {
+            logger.info { "Found matching passive branch ${it.name}" }
+            branches.plus(it)
+        }
+        return branches
     }
 
     fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {
+        logger.info { "Creating a payment for activity #$id (restriction #$restrictionId) and $username" }
         val user = userDataProvider.getUser(username)
         val activity = getActivityById(id)
-        check(paymentRepository.getByUserAndSubscribable(user, activity) == null) { "Registration for user ${user.username} already exists!" }
-        checkNotNull(getRelevantBranchForUser(activity, user)) { "User ${user.username} has no active membership!" }
+        val status = getStatusForActivityAndUser(id, username)
+        check(status.currentRegistration == null) { "Registration for user ${user.username} already exists!" }
+        check(status.activeMembership) { "User ${user.username} has no active membership!" }
         val restriction = getActivityRestrictionById(restrictionId)
-        check(!isGlobalLimitReached(restriction.activity)) { "The limit for this activity is reached!" }
-        check(!isRestrictionLimitReached(restriction)) { "The limit for this restriction is reached!" }
-        check(!isBranchLimitReached(activity, restriction.branch)) { "The limit for this branch is reached!" }
+        check(status.openOptions.any { it.id == restrictionId }) { "The chosen restriction is not valid (anymore) for ${activity.name} and ${user.username}!" }
         // not yet active
-        // check(userDataProvider.getMedicalRecord(user)?.isUpToDate == true) { "User ${user.username} has no active medical record!" }
+        // check(status.medicalsUpToDate) { "User ${user.username} has no active medical record!" }
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
+        logger.info { "Calculated price for this registration is €$finalPrice" }
         var registration = ActivityRegistration(activity, user, restriction, finalPrice, additionalData)
         registration = paymentRepository.save(registration)
+        logger.info { "Created registration #${registration.id}" }
+        if (finalPrice == 0.0) {
+            logger.info { "Registration was free, returning redirect url immediately" }
+            return checkoutProvider.createRedirectUrl(registration, "activities", activity.id)
+        }
+        logger.info { "Registration is not free, linking payment via payment provider" }
         val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), registration, "activities", activity.id)
+        logger.info { "Registration linked to payment ${registration.paymentId}, saving reference" }
         paymentRepository.save(registration)
+        logger.info { "Redirecting user to payment url $checkoutUrl" }
         return checkoutUrl
     }
 
     private fun calculatePriceForActivity(user: User, activity: Activity, restriction: ActivityRestriction, additionalData: String?): Double {
+        logger.info { "Calculating price applicable to ${user.username} for activity #${activity.id} (restriction #${restriction.id})" }
         var finalPrice = restriction.alternativePrice ?: activity.price
+        logger.info { "Calculated base price is €$finalPrice" }
         val additionalPrice = activity.readAdditionalData(additionalData)
+        logger.info { "Additional cost from extra data is €$additionalPrice" }
         if (user.hasReduction) {
+            logger.info { "User is applicable for reduced tariff, dividing base price with reduction factor (${activity.reductionFactor})" }
             return finalPrice / activity.reductionFactor + additionalPrice
         }
         finalPrice += additionalPrice
-        val siblings = siblingRepository.getByUser(user).map { it.sibling }
-        if (siblings.any { !it.hasReduction && paymentRepository.existsBySubscribableAndUser(activity, it) }) {
+        siblingRepository.getByUser(user).firstOrNull { !it.sibling.hasReduction && paymentRepository.existsBySubscribableAndUser(activity, it.sibling) }?.let {
+            logger.info { "${user.username} has already subscribed sibling ${it.sibling.username}, applying sibling reduction" }
             return (finalPrice - activity.siblingReduction).coerceAtLeast(0.0)
         }
         return finalPrice
@@ -136,12 +185,12 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     private fun isRestrictionLimitReached(restriction: ActivityRestriction): Boolean {
         val restrictionLimit = restriction.alternativeLimit ?: return false
-        return paymentRepository.getByRestriction(restriction).count() < restrictionLimit
+        return paymentRepository.countByRestriction(restriction) < restrictionLimit
     }
 
     private fun isBranchLimitReached(activity: Activity, branch: Branch): Boolean {
-        val branchLimit = activity.restrictions.find { it.branch == branch && it.isBranchLimit() } ?: return false
-        return paymentRepository.getByActivityAndBranch(activity, branch).count() < branchLimit.alternativeLimit!!
+        val branchLimit = activity.getBranchLimit(branch) ?: return false
+        return paymentRepository.countByActivityAndBranch(activity, branch) < branchLimit
     }
 
     override fun handlePaymentPaid(payment: ActivityRegistration) {
@@ -168,27 +217,29 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     fun getCertificateForRegistration(id: Int): ByteArray {
         val registration = getRegistrationById(id)
+        val user = userDataProvider.getUser(registration.user.username!!)
         check(registration.completed) { "A certificate can only be generated for a completed activity!" }
         val owner = organizationProvider.getOwner()
+        val representative = organizationProvider.getRepresentative()
         val formData = mapOf(
-            "name" to registration.user.firstName,
-            "first_name" to registration.user.firstName,
-            "birth_date" to registration.user.birthdate,
-            "nis_nr" to registration.user.nis,
-            "address" to registration.user.getHomeAddress(),
+            "name" to user.name,
+            "first_name" to user.firstName,
+            "birth_date" to user.birthdate.belgian(),
+            "nis_nr" to user.nis,
+            "address" to user.getHomeAddress(),
             "activity_name" to registration.subscribable.name,
-            "period" to "${registration.start} - ${registration.end}",
+            "period" to "${registration.start.belgian()} - ${registration.end.belgian()}",
             "days" to registration.calculateDays(),
-            "amount" to "€ ${registration.price}",
-            "payment_date" to registration.createdDate,
+            "amount" to "€ ${registration.price.pricePrecision()}",
+            "payment_date" to registration.createdDate?.belgian(),
             "organization_name" to owner.name,
             "organization_address" to owner.address,
             "organization_email" to owner.getEmail(),
-            "signature_date" to LocalDate.now(),
-            "signatory" to "", // TODO
+            "signature_date" to LocalDate.now().belgian(),
+            "signatory" to representative.user.getFullName(),
             "id" to "${registration.subscribable.id}-#${registration.id}".base64Encoded()
         )
-        return fillForm("forms/participation.pdf", formData, "signature.png")
+        return fillForm("forms/participation.pdf", formData, representative.signature)
     }
 
     fun getPaymentForRegistration(id: Int): String {

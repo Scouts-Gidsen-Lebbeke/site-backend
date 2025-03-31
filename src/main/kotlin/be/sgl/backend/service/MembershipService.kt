@@ -18,7 +18,9 @@ import be.sgl.backend.service.exception.MembershipNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.util.base64Encoded
+import be.sgl.backend.util.belgian
 import be.sgl.backend.util.fillForm
+import be.sgl.backend.util.pricePrecision
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
@@ -156,24 +158,26 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     fun getCertificateForMembership(id: Int): ByteArray {
         val membership = getMembershipById(id)
+        val user = userDataProvider.getUser(membership.user.username!!)
         val owner = organizationProvider.getOwner()
+        val representative = organizationProvider.getRepresentative()
         val formData = mapOf(
-            "name" to membership.user.firstName,
-            "first_name" to membership.user.firstName,
-            "birth_date" to membership.user.birthdate,
-            "nis_nr" to membership.user.nis,
-            "address" to membership.user.getHomeAddress(),
+            "name" to user.name,
+            "first_name" to user.firstName,
+            "birth_date" to user.birthdate.belgian(),
+            "nis_nr" to user.nis,
+            "address" to user.getHomeAddress(),
             "membership_period" to membership.period,
-            "amount" to "€ ${membership.price}",
-            "payment_date" to membership.createdDate,
+            "amount" to "€ ${membership.price.pricePrecision()}",
+            "payment_date" to membership.createdDate?.belgian(),
             "organization_name" to owner.name,
             "organization_address" to owner.address,
             "organization_email" to owner.getEmail(),
-            "signature_date" to LocalDate.now(),
-            "signatory" to "", // TODO
+            "signature_date" to LocalDate.now().belgian(),
+            "signatory" to representative.user.getFullName(),
             "id" to "${membership.period.id}-#${membership.id}".base64Encoded()
         )
-        return fillForm("forms/membership.pdf", formData, "signature.png")
+        return fillForm("forms/membership.pdf", formData, representative.signature)
     }
 
     private fun getMembershipById(id: Int): Membership {

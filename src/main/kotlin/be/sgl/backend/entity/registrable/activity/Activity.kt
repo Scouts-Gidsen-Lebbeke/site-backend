@@ -23,8 +23,12 @@ class Activity : Registrable() {
     @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER)
     var restrictions = mutableListOf<ActivityRestriction>()
 
-    fun getRestrictionsForBranch(branch: Branch): List<ActivityRestriction> {
-        return restrictions.filter { it.branch == branch && !it.isBranchLimit() }
+    fun getRestrictionsForBranches(branches: List<Branch>): List<ActivityRestriction> {
+        return restrictions.filter { it.branch in branches && !it.isBranchLimit() }
+    }
+
+    fun getBranchLimit(branch: Branch): Int? {
+        return restrictions.find { it.branch == branch && it.isBranchLimit() }?.alternativeLimit
     }
 
     fun validateRestrictions() {

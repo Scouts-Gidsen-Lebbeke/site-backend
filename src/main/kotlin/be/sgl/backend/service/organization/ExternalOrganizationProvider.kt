@@ -10,6 +10,7 @@ import be.sgl.backend.util.Groep
 import be.sgl.backend.util.asAddress
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -24,6 +25,7 @@ class ExternalOrganizationProvider : InternalOrganizationProvider() {
     @Value("\${organization.external.id}")
     private lateinit var externalOrganizationId: String
 
+    @Cacheable("externalOwner")
     override fun getOwner(): Organization {
         var organization = organizationRepository.getByType(OrganizationType.OWNER)
         if (organization == null) {
