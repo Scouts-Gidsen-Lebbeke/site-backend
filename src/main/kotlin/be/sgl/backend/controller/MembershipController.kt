@@ -8,7 +8,7 @@ import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.dto.MembershipPeriodDTO
 import be.sgl.backend.dto.PaymentUrl
 import be.sgl.backend.dto.UserRegistrationDTO
-import be.sgl.backend.service.MembershipService
+import be.sgl.backend.service.membership.MembershipService
 import be.sgl.backend.service.membership.MembershipPeriodService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 

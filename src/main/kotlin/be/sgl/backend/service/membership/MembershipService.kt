@@ -1,4 +1,4 @@
-package be.sgl.backend.service
+package be.sgl.backend.service.membership
 
 import be.sgl.backend.alert.AlertCode
 import be.sgl.backend.alert.AlertLogger
@@ -13,6 +13,7 @@ import be.sgl.backend.mapper.MembershipMapper
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
+import be.sgl.backend.service.PaymentService
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.MembershipNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
@@ -24,6 +25,7 @@ import be.sgl.backend.util.pricePrecision
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters.lastDayOfYear
@@ -48,6 +50,8 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     private lateinit var organizationProvider: OrganizationProvider
     @Autowired
     private lateinit var alertLogger: AlertLogger
+    @Value("\${spring.application.base-url}")
+    private lateinit var baseUrl: String
 
     fun getAllMembershipsForUser(username: String): List<MembershipDTO> {
         val user = userDataProvider.getUser(username)
@@ -138,6 +142,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             "price" to payment.price,
             "periodName" to payment.period.toString(),
             "branchName" to payment.branch.name,
+            "baseUrl" to baseUrl
         )
         mailService.builder()
             .to(payment.user.email)
