@@ -91,7 +91,7 @@ class MembershipController {
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     @CrossOrigin(origins = ["*"])
     @Public
-    fun updatePayment(@RequestBody id: String): ResponseEntity<Unit> {
+    fun updatePayment(@RequestParam id: String): ResponseEntity<Unit> {
         membershipService.updatePayment(id)
         return ResponseEntity.ok().build()
     }
