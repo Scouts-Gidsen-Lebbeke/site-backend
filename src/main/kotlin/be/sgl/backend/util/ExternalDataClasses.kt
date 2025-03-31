@@ -34,7 +34,7 @@ data class Vgagegevens(
     val achternaam: String, // only used at user creation
     val geboortedatum: LocalDate,
     val beperking: Boolean,
-    val individueleSteekkaartDatumAangepast: LocalDate, // ignored
+    val individueleSteekkaartDatumAangepast: LocalDate?, // ignored
     val verhoogdekinderbijslag: Boolean, // ignored
     val verminderdlidgeld: Boolean
 )

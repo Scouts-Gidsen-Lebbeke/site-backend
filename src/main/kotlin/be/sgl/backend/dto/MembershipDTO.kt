@@ -14,7 +14,6 @@ class MembershipPeriodDTO(
     val registrationLimit: Int?,
     val reductionFactor: Double,
     val siblingReduction: Double,
-
     id: Int?,
     start: LocalDate,
     end: LocalDate
@@ -31,6 +30,7 @@ data class MembershipDTO(
     val id: Int?,
     val period: MembershipPeriodBaseDTO,
     val branch: BranchBaseDTO,
+    val user: UserDTO,
     val price: Double,
     val createdDate: LocalDateTime?
 )

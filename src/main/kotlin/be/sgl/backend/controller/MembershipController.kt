@@ -4,9 +4,11 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.MembershipDTO
+import be.sgl.backend.dto.MembershipPeriodDTO
 import be.sgl.backend.dto.PaymentUrl
 import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.service.MembershipService
+import be.sgl.backend.service.membership.MembershipPeriodService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -25,6 +27,8 @@ class MembershipController {
 
     @Autowired
     private lateinit var membershipService: MembershipService
+    @Autowired
+    private lateinit var membershipPeriodService: MembershipPeriodService
 
     @GetMapping
     @OnlyAuthenticated
@@ -47,7 +51,7 @@ class MembershipController {
         return ResponseEntity.ok(membershipService.getCurrentMembershipForUser(username))
     }
 
-    @GetMapping("/branch/{branchId}")
+    @GetMapping("/branch/{branchId}", "/branch")
     @OnlyStaff
     fun getAllMembershipsForBranch(@PathVariable(required = false) branchId: Int?): ResponseEntity<List<MembershipDTO>> {
         return ResponseEntity.ok(membershipService.getCurrentMembershipsForBranch(branchId))
@@ -96,5 +100,10 @@ class MembershipController {
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"form.pdf\"")
             .contentType(MediaType.APPLICATION_PDF)
             .body(form)
+    }
+
+    @GetMapping("/period/current")
+    fun getCurrentMembershipPeriod(): ResponseEntity<MembershipPeriodDTO> {
+        return ResponseEntity.ok(membershipPeriodService.getCurrentMembershipPeriod())
     }
 }
