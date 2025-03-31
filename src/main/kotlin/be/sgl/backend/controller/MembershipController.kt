@@ -3,6 +3,7 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.dto.MembershipPeriodDTO
 import be.sgl.backend.dto.PaymentUrl
@@ -41,14 +42,16 @@ class MembershipController {
     @OnlyAuthenticated
     @Operation(summary = "Get the current membership for the current user")
     fun getCurrentMembershipsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MembershipDTO?> {
-        return ResponseEntity.ok(membershipService.getCurrentMembershipForUser(userDetails.username))
+        val currentMembership = membershipService.getCurrentMembershipForUser(userDetails.username)
+        return currentMembership?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 
     @GetMapping("/user/{username}/current")
     @OnlyStaff
     @Operation(summary = "Get the current membership for the given user")
     fun getCurrentMembershipForUser(@PathVariable username: String): ResponseEntity<MembershipDTO?> {
-        return ResponseEntity.ok(membershipService.getCurrentMembershipForUser(username))
+        val currentMembership = membershipService.getCurrentMembershipForUser(username)
+        return currentMembership?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 
     @GetMapping("/branch/{branchId}", "/branch")
@@ -58,9 +61,10 @@ class MembershipController {
     }
 
     @GetMapping("/{id}")
-    @OnlyAuthenticated
-    fun getMembershipById(@PathVariable id: Int): ResponseEntity<MembershipDTO> {
-        return ResponseEntity.ok(membershipService.getMembershipDTOById(id))
+    @Public
+    fun getMembershipById(@PathVariable id: Int): ResponseEntity<MembershipDTO?> {
+        val membership = membershipService.getMembershipDTOById(id)
+        return membership?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 
     @PostMapping
@@ -78,7 +82,7 @@ class MembershipController {
     }
 
     @PostMapping("/register")
-    @PreAuthorize("permitAll()")
+    @Public
     fun createMembershipForNewUser(@Valid @RequestBody userRegistrationDTO: UserRegistrationDTO): ResponseEntity<PaymentUrl> {
         val url = membershipService.createMembershipForNewUser(userRegistrationDTO)
         return ResponseEntity.ok(PaymentUrl(url))
@@ -86,7 +90,7 @@ class MembershipController {
 
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     @CrossOrigin(origins = ["*"])
-    @PreAuthorize("permitAll()")
+    @Public
     fun updatePayment(@RequestBody id: String): ResponseEntity<Unit> {
         membershipService.updatePayment(id)
         return ResponseEntity.ok().build()
@@ -103,6 +107,7 @@ class MembershipController {
     }
 
     @GetMapping("/period/current")
+    @Public
     fun getCurrentMembershipPeriod(): ResponseEntity<MembershipPeriodDTO> {
         return ResponseEntity.ok(membershipPeriodService.getCurrentMembershipPeriod())
     }

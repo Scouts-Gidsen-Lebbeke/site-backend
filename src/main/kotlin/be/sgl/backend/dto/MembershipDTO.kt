@@ -32,5 +32,6 @@ data class MembershipDTO(
     val branch: BranchBaseDTO,
     val user: UserDTO,
     val price: Double,
+    val paid: Boolean,
     val createdDate: LocalDateTime?
 )

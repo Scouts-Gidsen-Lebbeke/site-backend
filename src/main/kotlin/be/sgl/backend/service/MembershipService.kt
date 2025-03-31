@@ -67,8 +67,8 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
         return paymentRepository.getCurrentByBranch(branch).map(mapper::toDto)
     }
 
-    fun getMembershipDTOById(id: Int): MembershipDTO {
-        return mapper.toDto(getMembershipById(id))
+    fun getMembershipDTOById(id: Int): MembershipDTO? {
+        return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
     }
 
     fun createMembershipForExistingUser(username: String): String {
@@ -134,10 +134,10 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             userDataProvider.acceptRegistration(payment.user)
         }
         val params = mapOf(
-            "member.first.name" to payment.user.firstName,
-            "membership.price" to payment.price,
-            "membership.period.name" to payment.period,
-            "membership.branch.name" to payment.branch.name,
+            "member" to payment.user.firstName,
+            "price" to payment.price,
+            "periodName" to payment.period.toString(),
+            "branchName" to payment.branch.name,
         )
         mailService.builder()
             .to(payment.user.email)

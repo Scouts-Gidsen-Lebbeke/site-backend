@@ -1,6 +1,7 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.config.security.OnlyAdmin
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.RemoteFile
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.service.ImageService.Companion.IMAGE_BASE_PATH
@@ -28,6 +29,7 @@ class BackgroundController {
     private lateinit var imageService: ImageService
 
     @GetMapping
+    @Public
     @Operation(
         summary = "Get all backgrounds",
         description = "Returns a list of all backgrounds available as static resource.",

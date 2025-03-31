@@ -4,6 +4,7 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.*
 import be.sgl.backend.service.activity.ActivityRegistrationService
 import be.sgl.backend.service.activity.ActivityService
@@ -21,7 +22,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -49,6 +49,7 @@ class ActivityController {
     }
 
     @GetMapping("/visible")
+    @Public
     @Operation(
         summary = "Get all visible activities",
         description = "Returns a list of all activities that didn't end yet or aren't cancelled, and thus should be visible for everyone.",
@@ -61,6 +62,7 @@ class ActivityController {
     }
 
     @GetMapping("/{id}")
+    @Public
     @Operation(
         summary = "Get a specific activity",
         description = "Returns the activity with the given id, regardless of its state.",
@@ -147,16 +149,18 @@ class ActivityController {
     }
 
     @GetMapping("/registrations/{registrationId}")
+    @Public
     @Operation(
         summary = "Get a specific activity registration",
         description = "Returns the registration identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = ActivityRegistrationDTO::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
     fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO?> {
-        return ResponseEntity.ok(registrationService.getActivityRegistrationDTOById(registrationId))
+        val registration = registrationService.getActivityRegistrationDTOById(registrationId)
+        return registration?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 
     @GetMapping("/{id}/status")
@@ -220,7 +224,7 @@ class ActivityController {
     }
 
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    @PreAuthorize("permitAll()")
+    @Public
     @CrossOrigin(origins = ["*"])
     @Operation(
         summary = "Trigger a payment update request",

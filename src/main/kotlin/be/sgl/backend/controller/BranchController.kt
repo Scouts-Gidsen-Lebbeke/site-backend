@@ -1,6 +1,8 @@
 package be.sgl.backend.controller
 
+import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.BranchBaseDTO
 import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.service.BranchService
@@ -21,24 +23,28 @@ class BranchController {
     lateinit var branchService: BranchService
 
     @GetMapping
+    @OnlyAdmin
     @Operation(summary = "Get all branches")
     fun getAllBranches(): ResponseEntity<List<BranchBaseDTO>> {
         return ResponseEntity.ok(branchService.getAllBranches())
     }
 
     @GetMapping("/visible")
+    @Public
     @Operation(summary = "Get all visible branches")
     fun getVisibleBranches(): ResponseEntity<List<BranchBaseDTO>> {
         return ResponseEntity.ok(branchService.getVisibleBranches())
     }
 
     @GetMapping("/with-calendar")
+    @Public
     @Operation(summary = "Get all branches with an activity calendar")
     fun getBranchesWithCalendar(): ResponseEntity<List<BranchBaseDTO>> {
         return ResponseEntity.ok(branchService.getBranchesWithCalendar())
     }
 
     @GetMapping("/{id}")
+    @Public
     fun getBranch(@PathVariable id: Int): ResponseEntity<BranchDTO> {
         return ResponseEntity.ok(branchService.getBranchDTOById(id))
     }

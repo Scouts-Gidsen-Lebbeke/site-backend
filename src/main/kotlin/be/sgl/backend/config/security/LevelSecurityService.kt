@@ -47,3 +47,8 @@ annotation class OnlyStaff
 @PreAuthorize("isAuthenticated()")
 @ApiResponse(responseCode = "403", description = "User is not logged in")
 annotation class OnlyAuthenticated
+
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@PreAuthorize("permitAll()")
+annotation class Public

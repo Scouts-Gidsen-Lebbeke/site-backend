@@ -1,6 +1,7 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.config.security.OnlyAdmin
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.OrganizationDTO
 import be.sgl.backend.service.organization.OrganizationService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
@@ -25,6 +26,7 @@ class OrganizationController {
     private lateinit var organizationService: OrganizationService
 
     @GetMapping("/owner")
+    @Public
     @Operation(
         summary = "Get the owning organization",
         description = "Returns the single organization behind this website.",
@@ -38,6 +40,7 @@ class OrganizationController {
     }
 
     @GetMapping("/certifier")
+    @Public
     @Operation(
         summary = "Get the certifying organization",
         description = "Returns the certifying organization of the owner.",

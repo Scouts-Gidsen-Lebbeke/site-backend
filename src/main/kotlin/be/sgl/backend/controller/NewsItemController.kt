@@ -1,6 +1,7 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.NewsItemDTO
 import be.sgl.backend.service.NewsItemService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
@@ -25,6 +26,7 @@ class NewsItemController {
     lateinit var newsItemService: NewsItemService
 
     @GetMapping
+    @Public
     @Operation(
         summary = "Get all visible news items",
         description = "Returns a list of all visible news items, ordered by most recent.",
@@ -37,6 +39,7 @@ class NewsItemController {
     }
 
     @GetMapping("/{id}")
+    @Public
     @Operation(
         summary = "Get a specific news item",
         description = "Returns the news item with the given id, regardless of its visibility.",

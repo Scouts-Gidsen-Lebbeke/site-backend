@@ -28,19 +28,7 @@ class SecurityConfig {
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .csrf { it.disable() }
-            .authorizeHttpRequests { authorizeRequests ->
-                authorizeRequests
-                    .requestMatchers(HttpMethod.POST, "/events/updatePayment").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/activities/updatePayment").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/memberships/updatePayment").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/memberships/register").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/events/register").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/**").authenticated()
-                    .requestMatchers(HttpMethod.PUT, "/**").authenticated()
-                    .requestMatchers(HttpMethod.PATCH, "/**").authenticated()
-                    .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
-                    .anyRequest().permitAll()
-            }
+            .authorizeHttpRequests { it.anyRequest().permitAll() }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { customizer ->
                     customizer.jwtAuthenticationConverter { jwt ->

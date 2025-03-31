@@ -4,6 +4,7 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.*
 import be.sgl.backend.service.event.EventRegistrationService
 import be.sgl.backend.service.event.EventService
@@ -19,7 +20,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -47,6 +47,7 @@ class EventController {
     }
 
     @GetMapping("/visible")
+    @Public
     @Operation(
         summary = "Get all visible events",
         description = "Returns a list of all events that didn't end yet or aren't cancelled, and thus should be visible for everyone.",
@@ -59,6 +60,7 @@ class EventController {
     }
 
     @GetMapping("/{id}")
+    @Public
     @Operation(
         summary = "Get a specific event",
         description = "Returns the event with the given id, regardless of its state.",
@@ -131,20 +133,22 @@ class EventController {
     }
 
     @GetMapping("/registrations/{registrationId}")
+    @Public
     @Operation(
         summary = "Get a specific event registration",
         description = "Returns the registration identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventRegistrationDTO::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
     fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<EventRegistrationDTO?> {
-        return ResponseEntity.ok(registrationService.getEventRegistrationDTOById(registrationId))
+        val registration = registrationService.getEventRegistrationDTOById(registrationId)
+        return registration?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 
     @PostMapping("/{id}/register")
-    @PreAuthorize("permitAll()")
+    @Public
     @Operation(
         summary = "Create a registration for the given event",
         description = "Creates a registration for the event with the given id and data and returns the payment url.",
@@ -160,7 +164,7 @@ class EventController {
     }
 
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    @PreAuthorize("permitAll()")
+    @Public
     @CrossOrigin(origins = ["*"])
     @Operation(
         summary = "Trigger a payment update request",

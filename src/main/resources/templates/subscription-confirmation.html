@@ -1,9 +1,14 @@
+<!--/*@thymesVar id="member" type="java.lang.String"*/-->
+<!--/*@thymesVar id="price" type="java.lang.Double"*/-->
+<!--/*@thymesVar id="periodName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="branchName" type="java.lang.String"*/-->
 <p>
-    Dag ${member.first.name},
+    Dag <span th:text="${member}"></span>,
 </p>
 <p>
-    We hebben de betaling van jouw lidgeld (€ ${membership.price}) voor dit werkingsjaar (${membership.period.name})
-    bij de ${membership.branch.name} goed ontvangen, je bent nu volledig ingeschreven!
+    We hebben de betaling van jouw lidgeld (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>)
+    voor dit werkingsjaar (<span th:text="${branchName}"></span>)
+    bij de <span th:text="${branchName}"></span> goed ontvangen, je bent nu volledig ingeschreven!
     Indien je een inschrijvingsbewijs nodig hebt van deze inschrijving, kan je dat steeds terugvinden onder
     <a th:href="@{|${@environment.getProperty('app.base.url')}/profile/membership|}" target="_blank">Mijn lidmaatschap</a> op onze website.
 </p>

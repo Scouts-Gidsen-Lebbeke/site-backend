@@ -2,6 +2,7 @@ package be.sgl.backend.controller
 
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.CalendarDTO
 import be.sgl.backend.dto.CalendarItemWithCalendarsDTO
 import be.sgl.backend.dto.CalendarPeriodDTO
@@ -28,6 +29,7 @@ class CalendarController {
     private lateinit var calendarService: CalendarService
 
     @GetMapping("/periods")
+    @Public
     @Operation(
         summary = "Get all calendar periods",
         description = "Returns a list of all periods.",
@@ -85,6 +87,7 @@ class CalendarController {
     }
 
     @GetMapping("/current")
+    @Public
     @Operation(
         summary = "Get all current calendars",
         description = "Returns a list of all calendars where the current date lays between its start and end date.",
@@ -111,6 +114,7 @@ class CalendarController {
     }
 
     @GetMapping("/{id}")
+    @Public
     @Operation(
         summary = "Get a specific calendar",
         description = "Returns the calendar with the given id.",
