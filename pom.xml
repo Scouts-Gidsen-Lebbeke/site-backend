@@ -41,7 +41,7 @@
         <mollie.version>4.6.0</mollie.version>
         <jsonata.version>0.9.8</jsonata.version>
         <kotlin.logging.version>3.0.5</kotlin.logging.version>
-        <logstash.logback.version>7.3</logstash.logback.version>
+        <logstash.logback.version>8.0</logstash.logback.version>
         <jaxb.maven.plugin.version>3.2.0</jaxb.maven.plugin.version>
     </properties>
     <dependencies>
