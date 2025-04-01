@@ -256,8 +256,18 @@ class ActivityController {
 
     @DeleteMapping("/registrations/{registrationId}")
     @OnlyAuthenticated
+    @Operation(
+        summary = "Refund an activity registration",
+        description = "Retrieves the registration based on the provided id and create a payment refund.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok"),
+            ApiResponse(responseCode = "400", description = "Registration isn't eligible for cancellation", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
     fun cancelRegistration(@PathVariable registrationId: Int): ResponseEntity<Unit> {
-        TODO("New flow, not yet important")
+        registrationService.cancelRegistration(registrationId)
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/registrations/{registrationId}/certificate")

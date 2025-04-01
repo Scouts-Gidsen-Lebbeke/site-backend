@@ -11,6 +11,7 @@ import be.woutschoovaerts.mollie.data.customer.CustomerResponse
 import be.woutschoovaerts.mollie.data.payment.PaymentMethod
 import be.woutschoovaerts.mollie.data.payment.PaymentRequest
 import be.woutschoovaerts.mollie.data.payment.PaymentStatus
+import be.woutschoovaerts.mollie.data.refund.RefundRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
@@ -53,6 +54,14 @@ class MollieCheckout : CheckoutProvider {
         return paymentResponse.links.checkout.href
     }
 
+    private fun createCustomer(customer: Customer): CustomerResponse {
+        val request = CustomerRequest.builder()
+            .name(Optional.of(customer.name))
+            .email(Optional.of(customer.email))
+            .build()
+        return mollieApiClient.customers().createCustomer(request)
+    }
+
     override fun getCheckoutUrl(payment: Payment): String {
         checkNotNull(payment.paymentId)
         return mollieApiClient.payments().getPayment(payment.paymentId).links.checkout.href
@@ -60,9 +69,11 @@ class MollieCheckout : CheckoutProvider {
 
     override fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus {
         val payment =  mollieApiClient.payments().getPayment(paymentId)
-        val isRefunded = payment.amountRefunded.isPresent && payment.amountRefunded.get().value != BigDecimal.ZERO.setScale(2)
-        if (isRefunded || !payment.amountChargedBack.isEmpty) {
-            return SimplifiedPaymentStatus.REFUNDED
+        if (hasRefunds(paymentId)) {
+            if (payment.amountRefunded.isPresent && payment.amountRefunded.get().value > BigDecimal.ZERO) {
+                return SimplifiedPaymentStatus.REFUNDED
+            }
+            return SimplifiedPaymentStatus.ONGOING
         }
         return when (payment.status) {
             PaymentStatus.PAID -> SimplifiedPaymentStatus.PAID
@@ -71,11 +82,19 @@ class MollieCheckout : CheckoutProvider {
         }
     }
 
-    private fun createCustomer(customer: Customer): CustomerResponse {
-        val request = CustomerRequest.builder()
-            .name(Optional.of(customer.name))
-            .email(Optional.of(customer.email))
-            .build()
-        return mollieApiClient.customers().createCustomer(request)
+    private fun hasRefunds(paymentId: String): Boolean {
+        return mollieApiClient.refunds().listRefunds(paymentId).count > 0
+    }
+
+    override fun refundPayment(payment: Payment) {
+        check(payment.paid)
+        val request = RefundRequest.builder()
+            .description(Optional.of(payment.getDescription()))
+            .amount(Amount.builder()
+                .value(BigDecimal(payment.price - 1))
+                .currency("EUR")
+                .build()
+            ).build()
+        mollieApiClient.refunds().createRefund(payment.paymentId, request)
     }
 }

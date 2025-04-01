@@ -27,6 +27,10 @@ class MockedCheckoutProvider : CheckoutProvider {
         return SimplifiedPaymentStatus.valueOf(paymentId)
     }
 
+    override fun refundPayment(payment: Payment) {
+        check(payment.paid)
+    }
+
     companion object {
         private const val DEFAULT_CHECKOUT_URL = "http://localhost:8080/checkout"
     }

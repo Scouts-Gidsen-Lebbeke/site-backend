@@ -4,6 +4,8 @@ import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.dto.ActivityRegistrationStatus
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.registrable.RegistrableStatus
+import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
@@ -212,7 +214,17 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
     }
 
     override fun handlePaymentRefunded(payment: ActivityRegistration) {
-        // TODO("send payment refunded confirmation email")
+        val params = mapOf(
+            "member" to payment.user.firstName,
+            "price" to payment.price - 1,
+            "activityName" to payment.subscribable.name,
+        )
+        val mailBuilder = mailService.builder()
+            .to(payment.user.email)
+            .subject("Annulatie inschrijving")
+            .template("cancel-activity-confirmation.html", params)
+        payment.subscribable.communicationCC?.let { mailBuilder.cc(it) }
+        mailBuilder.send()
     }
 
     fun markRegistrationAsCompleted(id: Int) {
@@ -239,6 +251,15 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             mailBuilder.send()
         }
         logger.info { "Registration #$id successfully marked as completed" }
+    }
+
+    fun cancelRegistration(id: Int) {
+        logger.info { "Cancelling activity registration #$id..." }
+        val registration = getRegistrationById(id)
+        check(registration.paid) { "Only a paid activity registration can be cancelled!" }
+        check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
+        checkoutProvider.refundPayment(registration)
+        logger.info { "Activity registration #$id successfully cancelled" }
     }
 
     fun getCertificateForRegistration(id: Int): ByteArray {

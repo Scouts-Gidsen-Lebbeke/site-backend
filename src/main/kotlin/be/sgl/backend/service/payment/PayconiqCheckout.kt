@@ -25,4 +25,8 @@ class PayconiqCheckout : CheckoutProvider {
     override fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus {
         TODO("Not yet implemented")
     }
+
+    override fun refundPayment(payment: Payment) {
+        TODO("Not yet implemented")
+    }
 }
