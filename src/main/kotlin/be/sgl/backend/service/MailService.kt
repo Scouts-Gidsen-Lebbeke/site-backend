@@ -5,6 +5,7 @@ import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import jakarta.mail.util.ByteArrayDataSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -23,13 +24,19 @@ class MailService {
     private lateinit var templateEngine: SpringTemplateEngine
     @Autowired
     private lateinit var organizationRepository: OrganizationRepository
+    @Value("\${spring.application.base-url}")
+    private lateinit var baseUrl: String
 
     fun builder(): MailBuilder {
         return MailBuilder()
     }
 
-    private fun loadTemplate(templateName: String, placeholders: Map<String, Any?>): String {
+    private fun loadTemplate(templateName: String, extraParams: Map<String, Any?>): String {
         val locale = LocaleContextHolder.getLocale()
+        val placeholders = mutableMapOf<String, Any?>(
+            "baseUrl" to baseUrl
+        )
+        placeholders.putAll(extraParams)
         return templateEngine.process(templateName, Context(locale, placeholders))
     }
 

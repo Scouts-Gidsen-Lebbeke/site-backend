@@ -178,10 +178,20 @@ class EventController {
         return ResponseEntity.ok().build()
     }
 
-    @PutMapping("/registrations/{registrationId}")
+    @PatchMapping("/registrations/{registrationId}/complete")
     @OnlyStaff
-    fun markPresent(@PathVariable registrationId: Int, @RequestParam present: Boolean): ResponseEntity<Unit> {
-        TODO("Existing flow, but never used")
+    @Operation(
+        summary = "Mark an event registration as completed",
+        description = "Retrieves the registration based on the provided id and marks it as completed. Also notifies the linked customer if configured.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok"),
+            ApiResponse(responseCode = "400", description = "Registration isn't paid", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
+    fun markCompleted(@PathVariable registrationId: Int): ResponseEntity<Unit> {
+        registrationService.markRegistrationAsCompleted(registrationId)
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/registrations/{registrationId}")

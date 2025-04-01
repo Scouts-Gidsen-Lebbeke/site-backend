@@ -50,8 +50,6 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     private lateinit var organizationProvider: OrganizationProvider
     @Autowired
     private lateinit var alertLogger: AlertLogger
-    @Value("\${spring.application.base-url}")
-    private lateinit var baseUrl: String
 
     fun getAllMembershipsForUser(username: String): List<MembershipDTO> {
         val user = userDataProvider.getUser(username)
@@ -141,8 +139,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             "member" to payment.user.firstName,
             "price" to payment.price,
             "periodName" to payment.period.toString(),
-            "branchName" to payment.branch.name,
-            "baseUrl" to baseUrl
+            "branchName" to payment.branch.name
         )
         mailService.builder()
             .to(payment.user.email)

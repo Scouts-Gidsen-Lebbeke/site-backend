@@ -73,7 +73,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         )
         val mailBuilder = mailService.builder()
             .to(payment.email)
-            .subject("Bevestiging inschrijving")
+            .subject("Bevestiging registratie")
             .template("event-confirmation.html", params)
         payment.subscribable.communicationCC?.let { mailBuilder.cc(it) }
         mailBuilder.send()
@@ -81,6 +81,32 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
 
     override fun handlePaymentRefunded(payment: EventRegistration) {
         // TODO("send payment refunded confirmation email")
+    }
+
+    fun markRegistrationAsCompleted(id: Int) {
+        logger.info { "Marking registration #$id as completed..." }
+        val registration = getRegistrationById(id)
+        check(registration.paid) { "Only a paid event can be marked as completed!" }
+        if (registration.completed) {
+            logger.warn { "Registration is already marked as completed!" }
+            return
+        }
+        registration.completed = true
+        paymentRepository.save(registration)
+        if (registration.subscribable.sendCompleteConfirmation) {
+            logger.info { "Linked event requires completion confirmation, sending mail..." }
+            val params = mapOf(
+                "customer" to "${registration.firstName} ${registration.name}",
+                "eventName" to registration.subscribable.name
+            )
+            val mailBuilder = mailService.builder()
+                .to(registration.email)
+                .subject("Afwerking registratie")
+                .template("event-completion.html", params)
+            registration.subscribable.communicationCC?.let { mailBuilder.cc(it) }
+            mailBuilder.send()
+        }
+        logger.info { "Registration #$id successfully marked as completed" }
     }
 
     private fun getRegistrationById(id: Int): EventRegistration {

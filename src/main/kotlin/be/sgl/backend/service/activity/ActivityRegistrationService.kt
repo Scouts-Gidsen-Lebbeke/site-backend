@@ -215,6 +215,32 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         // TODO("send payment refunded confirmation email")
     }
 
+    fun markRegistrationAsCompleted(id: Int) {
+        logger.info { "Marking registration #$id as completed..." }
+        val registration = getRegistrationById(id)
+        check(registration.paid) { "Only a paid activity can be marked as completed!" }
+        if (registration.completed) {
+            logger.warn { "Registration is already marked as completed!" }
+            return
+        }
+        registration.completed = true
+        paymentRepository.save(registration)
+        if (registration.subscribable.sendCompleteConfirmation) {
+            logger.info { "Linked activity requires completion confirmation, sending mail..." }
+            val params = mapOf(
+                "member" to registration.user.firstName,
+                "activityName" to registration.subscribable.name
+            )
+            val mailBuilder = mailService.builder()
+                .to(registration.user.email)
+                .subject("Afwerking inschrijving")
+                .template("activity-completion.html", params)
+            registration.subscribable.communicationCC?.let { mailBuilder.cc(it) }
+            mailBuilder.send()
+        }
+        logger.info { "Registration #$id successfully marked as completed" }
+    }
+
     fun getCertificateForRegistration(id: Int): ByteArray {
         val registration = getRegistrationById(id)
         val user = userDataProvider.getUser(registration.user.username!!)
