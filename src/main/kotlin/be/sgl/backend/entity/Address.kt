@@ -12,7 +12,7 @@ class Address : Auditable() {
     val id: Int? = null
     var externalId: String? = null
     lateinit var street: String
-    var number: Int = -1
+    lateinit var number: String
     var subPremise: String? = null
     lateinit var zipcode: String
     lateinit var town: String

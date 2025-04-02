@@ -8,8 +8,7 @@ import java.io.Serializable
 class AddressDTO(
     val id: Int?,
     val street: String,
-    @Positive
-    val number: Int,
+    val number: String,
     val subPremise: String?,
     val zipcode: String,
     val town: String,

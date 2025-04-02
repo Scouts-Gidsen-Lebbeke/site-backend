@@ -55,7 +55,7 @@ class ExternalUserDataProvider : UserDataProvider() {
                 address.town,
                 address.street,
                 null,
-                address.number.toString(),
+                address.number,
                 address.subPremise,
                 null,
                 true,
