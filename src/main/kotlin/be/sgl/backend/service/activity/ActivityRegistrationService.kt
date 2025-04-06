@@ -124,10 +124,10 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             logger.info { "Found active membership for branch ${it.branch.name} (#${it.id})" }
             it.branch
         }
-        val branches = listOfNotNull(activeBranch)
+        val branches = listOfNotNull(activeBranch).toMutableList()
         branchRepository.getPassiveBranches().filter { it.matchesUser(user) }.forEach {
             logger.info { "Found matching passive branch ${it.name}" }
-            branches.plus(it)
+            branches += it
         }
         return branches
     }
