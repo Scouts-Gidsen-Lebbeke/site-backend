@@ -40,8 +40,8 @@ data class Vgagegevens(
 )
 
 data class Verbondsgegevens(
-    val lidnummer: String,
-    val klantnummer: String, // ignored
+    val lidnummer: String?,
+    val klantnummer: String?, // ignored
     val lidgeldbetaald: Boolean, // ignored
     val lidkaartafgedrukt: Boolean // ignored
 )
