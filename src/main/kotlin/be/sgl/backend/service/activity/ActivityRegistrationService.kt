@@ -180,17 +180,17 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     private fun isGlobalLimitReached(activity: Activity): Boolean {
         val globalLimit = activity.registrationLimit ?: return false
-        return paymentRepository.getPaidRegistrationsByActivity(activity).count() < globalLimit
+        return paymentRepository.getPaidRegistrationsByActivity(activity).count() >= globalLimit
     }
 
     private fun isRestrictionLimitReached(restriction: ActivityRestriction): Boolean {
         val restrictionLimit = restriction.alternativeLimit ?: return false
-        return paymentRepository.countByRestriction(restriction) < restrictionLimit
+        return paymentRepository.countByRestriction(restriction) >= restrictionLimit
     }
 
     private fun isBranchLimitReached(activity: Activity, branch: Branch): Boolean {
         val branchLimit = activity.getBranchLimit(branch) ?: return false
-        return paymentRepository.countByActivityAndBranch(activity, branch) < branchLimit
+        return paymentRepository.countByActivityAndBranch(activity, branch) >= branchLimit
     }
 
     override fun handlePaymentPaid(payment: ActivityRegistration) {
