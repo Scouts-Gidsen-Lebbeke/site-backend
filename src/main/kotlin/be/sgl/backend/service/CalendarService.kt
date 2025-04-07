@@ -159,7 +159,7 @@ class CalendarService {
             dto.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
         }
         item.image = dto.image
-        return mapper.toDtoWithCalendars(itemRepository.save(mapper.toEntity(dto)))
+        return mapper.toDtoWithCalendars(itemRepository.save(item))
     }
 
     fun deleteCalendarItem(id: Int) {
