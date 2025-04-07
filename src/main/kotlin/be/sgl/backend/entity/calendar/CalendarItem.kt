@@ -20,7 +20,12 @@ class CalendarItem() : Auditable() {
     @Column(nullable = false, length = 1000)
     lateinit var content: String
     var image: String? = null
-    @ManyToMany(mappedBy = "items")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "calendar_items",
+        joinColumns = [JoinColumn(name = "item_id")],
+        inverseJoinColumns = [JoinColumn(name = "calendar_id")]
+    )
     var calendars = mutableListOf<Calendar>()
     var closed = false
     @OneToOne

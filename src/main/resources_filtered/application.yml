@@ -12,6 +12,9 @@ spring:
     password: # TODO: pass as an environment variable
   messages:
     fallback-to-system-locale: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
   security:
     oauth2:
       resourceserver:

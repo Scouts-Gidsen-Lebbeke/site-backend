@@ -14,7 +14,7 @@ import jakarta.persistence.*
 class Calendar() : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null
+    var id: Int? = null
     @ManyToOne
     lateinit var period: CalendarPeriod
     @ManyToOne
@@ -23,12 +23,7 @@ class Calendar() : Auditable() {
     var intro: String? = null
     @Lob
     var outro: String? = null
-    @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-    @JoinTable(
-        name = "calendar_items",
-        joinColumns = [JoinColumn(name = "calendar_id")],
-        inverseJoinColumns = [JoinColumn(name = "item_id")]
-    )
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "calendars")
     var items: MutableList<CalendarItem> = mutableListOf()
 
     constructor(period: CalendarPeriod, branch: Branch) : this() {

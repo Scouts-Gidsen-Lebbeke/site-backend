@@ -15,6 +15,11 @@ open class CalendarBaseDTO(
     val branch: BranchBaseDTO // readonly
 )
 
+class CalendarUpdateDTO(
+    val intro: String?,
+    val outro: String?
+)
+
 // full entity, for crud operations
 class CalendarDTO(
     id: Int?,

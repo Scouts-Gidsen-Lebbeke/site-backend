@@ -3,6 +3,7 @@ package be.sgl.backend.service
 import be.sgl.backend.dto.CalendarDTO
 import be.sgl.backend.dto.CalendarItemWithCalendarsDTO
 import be.sgl.backend.dto.CalendarPeriodDTO
+import be.sgl.backend.dto.CalendarUpdateDTO
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarItem
 import be.sgl.backend.entity.calendar.CalendarPeriod
@@ -19,6 +20,7 @@ import be.sgl.backend.service.exception.CalendarPeriodNotFoundException
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -68,11 +70,20 @@ class CalendarService {
 
     fun deleteCalendarPeriod(id: Int) {
         val period = getPeriodById(id)
-        calendarRepository.getCalendarsByPeriod(period).forEach {
-            it.items.forEach(::deleteCalendarItem)
-            calendarRepository.delete(it)
-        }
+        calendarRepository.getCalendarsByPeriod(period).forEach(::deleteCalendar)
         periodRepository.delete(period)
+    }
+
+    private fun deleteCalendar(calendar: Calendar) {
+        calendar.items.forEach {
+            it.calendars.remove(calendar)
+            if (it.calendars.isEmpty()) {
+                itemRepository.delete(it)
+            } else {
+                itemRepository.save(it)
+            }
+        }
+        calendarRepository.delete(calendar)
     }
 
     fun getCurrentCalendars(): List<CalendarDTO> {
@@ -112,11 +123,15 @@ class CalendarService {
         return sundays
     }
 
-    fun mergeCalendarDTOChanges(id: Int, calendarDTO: CalendarDTO): CalendarDTO {
+    fun mergeCalendarDTOChanges(id: Int, calendarDTO: CalendarUpdateDTO): CalendarDTO {
         val calendar = getCalendarById(id)
         calendar.intro = calendarDTO.intro
         calendar.outro = calendarDTO.outro
         return mapper.toDto(calendarRepository.save(calendar))
+    }
+
+    private fun deleteCalendar(id: Int) {
+        deleteCalendar(getCalendarById(id))
     }
 
     fun getCalendarItemDTOById(id: Int): CalendarItemWithCalendarsDTO {
@@ -125,6 +140,7 @@ class CalendarService {
 
     fun saveCalendarItemDTO(dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
         val item = mapper.toEntity(dto)
+        item.calendars.addAll(dto.calendars.mapNotNull { calendarRepository.findByIdOrNull(it.id) })
         item.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
         return mapper.toDtoWithCalendars(itemRepository.save(item))
     }
