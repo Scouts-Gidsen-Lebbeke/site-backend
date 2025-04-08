@@ -34,6 +34,8 @@ class ImageService {
             return filePath
         } catch (e: IOException) {
             logger.error(e) { "Error while uploading image file ${image.name} to ${directory.path}: ${e.message}" }
+            logger.error(e) { e.stackTraceToString() }
+            logger.error(e) { e.cause.toString() }
             throw ImageUploadException(image.name, directory.path)
         }
     }
