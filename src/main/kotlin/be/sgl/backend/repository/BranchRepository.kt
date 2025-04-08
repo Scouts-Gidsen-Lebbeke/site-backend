@@ -14,6 +14,6 @@ interface BranchRepository : JpaRepository<Branch, Int> {
     fun getVisibleBranches(): List<Branch>
     @Query("from Branch where status = 'PASSIVE'")
     fun getPassiveBranches(): List<Branch>
-    @Query("from Branch where :age between minimumAge and maximumAge and (sex is null or sex = :sex) and status in ('ACTIVE', 'MEMBER') order by status")
+    @Query("from Branch where minimumAge <= :age and (maximumAge is null or :age <= maximumAge) and (sex is null or sex = :sex) and status in ('ACTIVE', 'MEMBER') order by status")
     fun getPossibleBranchesForSexAndAge(sex: Sex, age: Int): List<Branch>
 }
