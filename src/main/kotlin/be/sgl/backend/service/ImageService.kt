@@ -33,9 +33,7 @@ class ImageService {
             }
             return filePath
         } catch (e: IOException) {
-            logger.error(e) { "Error while uploading image file ${image.name} to ${directory.path}: ${e.message}" }
-            logger.error(e) { e.stackTraceToString() }
-            logger.error(e) { e.cause.toString() }
+            logger.error(e) { "Error while uploading image file ${image.name} to ${directory.path}:\n${e.stackTraceToString()}" }
             throw ImageUploadException(image.name, directory.path)
         }
     }
@@ -47,7 +45,7 @@ class ImageService {
             check(Files.exists(filePath)) { "Image $fileName does not exist." }
             Files.delete(filePath)
         } catch (e: IOException) {
-            logger.error(e) { "Error while deleting image file $fileName to ${directory.path}: ${e.message}" }
+            logger.error(e) { "Error while deleting image file $fileName to ${directory.path}:\n${e.stackTraceToString()}" }
             throw ImageDeleteException(fileName, directory.path)
         }
     }
@@ -68,7 +66,7 @@ class ImageService {
             Files.delete(sourceFile.toPath())
             return targetFile
         } catch (e: IOException) {
-            logger.error(e) { "Error while moving image file $fileName from ${sourceDir.path} to ${targetDir.path}: ${e.message}" }
+            logger.error(e) { "Error while moving image file $fileName from ${sourceDir.path} to ${targetDir.path}:\n${e.stackTraceToString()}" }
             throw ImageMoveException(fileName, sourceDir.path, targetDir.path)
         }
     }
