@@ -40,8 +40,8 @@ data class Vgagegevens(
 )
 
 data class Verbondsgegevens(
-    val lidnummer: String,
-    val klantnummer: String, // ignored
+    val lidnummer: String?,
+    val klantnummer: String?, // ignored
     val lidgeldbetaald: Boolean, // ignored
     val lidkaartafgedrukt: Boolean // ignored
 )
@@ -65,7 +65,7 @@ fun Adres.asAddress(): Address {
     val address = Address()
     address.externalId = id
     address.street = straat
-    address.number = nummer.toInt()
+    address.number = nummer
     address.subPremise = bus
     address.zipcode = postcode
     address.town = gemeente

@@ -57,8 +57,11 @@ abstract class Registrable : Payable() {
     fun readAdditionalData(additionalData: String?): Double {
         additionalFormRule ?: return 0.0
         additionalData ?: return 0.0
+        val values = ObjectMapper().readerFor(Map::class.java)
+            .readValue<Map<String, String>>(additionalData)
+            .mapValues { it.value.toDoubleOrNull() ?: it.value }
         return jsonata(additionalFormRule)
-            .evaluate(ObjectMapper().readerFor(Map::class.java).readValue(additionalData))
+            .evaluate(values)
             .toString().toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
     }
 }

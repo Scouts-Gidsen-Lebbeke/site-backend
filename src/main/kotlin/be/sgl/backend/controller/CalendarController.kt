@@ -6,6 +6,7 @@ import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.CalendarDTO
 import be.sgl.backend.dto.CalendarItemWithCalendarsDTO
 import be.sgl.backend.dto.CalendarPeriodDTO
+import be.sgl.backend.dto.CalendarUpdateDTO
 import be.sgl.backend.service.CalendarService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -100,10 +101,10 @@ class CalendarController {
     }
 
     @GetMapping("/period/{id}")
-    @OnlyStaff
+    @Public
     @Operation(
-        summary = "Get all current calendars",
-        description = "Returns a list of all calendars where the current date lays between its start and end date.",
+        summary = "Get the calendars for a specified period",
+        description = "Returns a list of all calendars linked to the period identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = CalendarDTO::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
@@ -137,12 +138,12 @@ class CalendarController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun updateCalendar(@PathVariable id: Int, @Valid @RequestBody calendarDTO: CalendarDTO): ResponseEntity<CalendarDTO> {
+    fun updateCalendar(@PathVariable id: Int, @Valid @RequestBody calendarDTO: CalendarUpdateDTO): ResponseEntity<CalendarDTO> {
         return ResponseEntity.ok(calendarService.mergeCalendarDTOChanges(id, calendarDTO))
     }
 
     @GetMapping("/items/{id}")
-    @OnlyStaff
+    @Public
     @Operation(
         summary = "Get a specific calendar item",
         description = "Returns the calendar item with the given id.",

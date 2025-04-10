@@ -30,6 +30,8 @@ import be.sgl.backend.util.pricePrecision
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Service
@@ -105,6 +107,10 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             logger.info { "Limit is reached for each applicable restriction for $username" }
             return ActivityRegistrationStatus(closedOptions = closed.map(mapper::toDto))
         }
+        if (user.hasReduction) {
+            logger.info { "User is eligible for reduced tariff, altering open option prices..." }
+            open.onEach { it.alternativePrice = (it.alternativePrice ?: activity.price).reducePrice(activity.reductionFactor) }
+        }
         logger.info { "User has ${open.size} open activity options" }
         val medicalRecord = userDataProvider.getMedicalRecord(user)
         if (medicalRecord == null) {
@@ -126,10 +132,10 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             logger.info { "Found active membership for branch ${it.branch.name} (#${it.id})" }
             it.branch
         }
-        val branches = listOfNotNull(activeBranch)
+        val branches = listOfNotNull(activeBranch).toMutableList()
         branchRepository.getPassiveBranches().filter { it.matchesUser(user) }.forEach {
             logger.info { "Found matching passive branch ${it.name}" }
-            branches.plus(it)
+            branches += it
         }
         return branches
     }
@@ -169,8 +175,8 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         val additionalPrice = activity.readAdditionalData(additionalData)
         logger.info { "Additional cost from extra data is €$additionalPrice" }
         if (user.hasReduction) {
-            logger.info { "User is applicable for reduced tariff, dividing base price with reduction factor (${activity.reductionFactor})" }
-            return finalPrice / activity.reductionFactor + additionalPrice
+            logger.info { "User is eligible for reduced tariff, dividing base price with reduction factor (${activity.reductionFactor})" }
+            return finalPrice.reducePrice(activity.reductionFactor) + additionalPrice
         }
         finalPrice += additionalPrice
         siblingRepository.getByUser(user).firstOrNull { !it.sibling.hasReduction && paymentRepository.existsBySubscribableAndUser(activity, it.sibling) }?.let {
@@ -180,19 +186,21 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         return finalPrice
     }
 
+    private fun Double.reducePrice(factor: Double) = BigDecimal(this / factor).setScale(2, RoundingMode.HALF_UP).toDouble()
+
     private fun isGlobalLimitReached(activity: Activity): Boolean {
         val globalLimit = activity.registrationLimit ?: return false
-        return paymentRepository.getPaidRegistrationsByActivity(activity).count() < globalLimit
+        return paymentRepository.getPaidRegistrationsByActivity(activity).count() >= globalLimit
     }
 
     private fun isRestrictionLimitReached(restriction: ActivityRestriction): Boolean {
         val restrictionLimit = restriction.alternativeLimit ?: return false
-        return paymentRepository.countByRestriction(restriction) < restrictionLimit
+        return paymentRepository.countByRestriction(restriction) >= restrictionLimit
     }
 
     private fun isBranchLimitReached(activity: Activity, branch: Branch): Boolean {
         val branchLimit = activity.getBranchLimit(branch) ?: return false
-        return paymentRepository.countByActivityAndBranch(activity, branch) < branchLimit
+        return paymentRepository.countByActivityAndBranch(activity, branch) >= branchLimit
     }
 
     override fun handlePaymentPaid(payment: ActivityRegistration) {

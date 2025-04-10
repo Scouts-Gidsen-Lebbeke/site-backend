@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 interface CalendarRepository : JpaRepository<Calendar, Int> {
     @Query("from Calendar where now() between period.start and period.end")
     fun getCurrentCalendars(): List<Calendar>
-    @Query("from Calendar where branch = :branch and now() between period.start and period.end")
+    @Query("from Calendar where period = :period")
     fun getCalendarsByPeriod(period: CalendarPeriod): List<Calendar>
     fun deleteCalendarsByPeriod(period: CalendarPeriod)
 }
