@@ -86,16 +86,23 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
         userDataProvider.findByNameAndEmail(registrationDTO.name, registrationDTO.firstName, registrationDTO.email)?.let {
             it.username?.let {
                 logger.error { "User creation request for already existing user $it" }
-                throw IllegalStateException("This user already exist, contact the organization to retrieve the login!")
+                throw IllegalStateException("This user already exists, contact the organization to retrieve the login!")
             }
-            val membershipInProgress = paymentRepository.getCurrentByUser(it)
+            val membershipInProgress = paymentRepository.getCurrentPossiblyUnpaidByUser(it)
             if (membershipInProgress == null) {
                 alertLogger.alert(AlertCode.NEW_USER_EXISTS_NO_MEMBERSHIP) {
                     "User ${it.id} isn't linked to any membership!"
                 }
-                throw RuntimeException()
+                throw IllegalStateException("This user already exists as an old unlinked account, " +
+                        "contact the organization for help with creating the account!")
             }
-            // TODO: is paymentstatus ok
+            if (membershipInProgress.paid) {
+                alertLogger.alert(AlertCode.NEW_USER_EXISTS_PAID_MEMBERSHIP) {
+                    "User ${it.id} has active membership #${membershipInProgress.id} but no username!"
+                }
+                throw IllegalStateException("This user already exists but was not yet linked to an account, " +
+                        "check the e-mail you received upon registration to create an account!")
+            }
             logger.debug { "Previous registration exists but was unpaid, returning old checkout url" }
             return checkoutProvider.getCheckoutUrl(membershipInProgress)
         }
