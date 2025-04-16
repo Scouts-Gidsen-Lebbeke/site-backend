@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class ActivityRegistrationService : PaymentService<ActivityRegistration, ActivityRegistrationRepository>() {
@@ -243,6 +244,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             logger.warn { "Registration is already marked as completed!" }
             return
         }
+        check(registration.start.minusHours(1).isBefore(LocalDateTime.now())) { "Registrations can only be completed starting one hour before the activity!" }
         registration.completed = true
         paymentRepository.save(registration)
         if (registration.subscribable.sendCompleteConfirmation) {

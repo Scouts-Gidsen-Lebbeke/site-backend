@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class EventRegistrationService : PaymentService<EventRegistration, EventRegistrationRepository>() {
@@ -91,6 +92,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
             logger.warn { "Registration is already marked as completed!" }
             return
         }
+        check(registration.subscribable.start.minusHours(1).isBefore(LocalDateTime.now())) { "Registrations can only be completed starting one hour before the event!" }
         registration.completed = true
         paymentRepository.save(registration)
         if (registration.subscribable.sendCompleteConfirmation) {
