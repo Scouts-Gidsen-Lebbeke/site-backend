@@ -1,5 +1,6 @@
 package be.sgl.backend.service.organization
 
+import be.sgl.backend.dto.ExternalFunction
 import be.sgl.backend.dto.Representative
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationType
@@ -51,4 +52,8 @@ class InternalOrganizationProvider : OrganizationProvider {
         return organizationRepository.getByType(OrganizationType.CERTIFIER)
             ?: throw IncompleteConfigurationException("No certifier configured!")
     }
+
+    override fun getAllExternalFunctions() = emptyList<ExternalFunction>()
+
+    override fun getPaidExternalFunctions() = emptyList<ExternalFunction>()
 }

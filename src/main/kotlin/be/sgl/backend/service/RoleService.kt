@@ -1,5 +1,6 @@
 package be.sgl.backend.service
 
+import be.sgl.backend.dto.ExternalFunction
 import be.sgl.backend.dto.RoleDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.user.Role
@@ -8,6 +9,7 @@ import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.RoleNotFoundException
+import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -21,6 +23,8 @@ class RoleService {
     private lateinit var mapper: RoleMapper
     @Autowired
     private lateinit var userDataProvider: UserDataProvider
+    @Autowired
+    private lateinit var organizationProvider: OrganizationProvider
     @Autowired
     private lateinit var branchRepository: BranchRepository
 
@@ -57,6 +61,14 @@ class RoleService {
         val role = getRoleById(id)
         val user = userDataProvider.getUser(username)
         userDataProvider.endRole(user, role)
+    }
+
+    fun getAllExternalFunctions(): List<ExternalFunction> {
+        return organizationProvider.getAllExternalFunctions()
+    }
+
+    fun getPaidExternalFunctions(): List<ExternalFunction> {
+        return organizationProvider.getPaidExternalFunctions()
     }
 
     private fun getRoleById(id: Int): Role {

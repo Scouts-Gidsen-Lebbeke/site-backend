@@ -15,12 +15,12 @@ data class Lid(
     val adressen: List<Adres>,
     val contacten: List<Contact>,
     val email: String,
-    val functies: List<Functie>,
+    val functies: List<FunctieInstantie>,
     val groepseigenVelden: Map<String, GroepseigenVelden>,
 )
 
 data class LidFuncties(
-    val functies: List<Functie>
+    val functies: List<FunctieInstantie>
 )
 
 data class Persoonsgegevens(
@@ -85,7 +85,7 @@ data class Contact(
     val email: String?
 )
 
-data class Functie(
+data class FunctieInstantie(
     val groep: String,
     val functie: String,
     val begin: String,
@@ -126,3 +126,17 @@ data class GroepseigenGegevens(
 )
 
 fun LocalDate?.asExternalDate() = this?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
+data class Functies(
+    val functies: List<Functie>
+)
+
+data class Functie(
+    val id: String,
+    val beschrijving: String,
+    val type: FunctieType
+)
+
+enum class FunctieType {
+    verbond, groep;
+}

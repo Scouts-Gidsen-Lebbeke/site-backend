@@ -35,8 +35,8 @@ class BranchService {
         return branchRepository.getVisibleBranches().map(mapper::toBaseDto)
     }
 
-    fun getAllBranches(): List<BranchBaseDTO> {
-        return branchRepository.findAll().map(mapper::toBaseDto)
+    fun getAllBranches(): List<BranchDTO> {
+        return branchRepository.findAll().map(mapper::toDto)
     }
 
     fun saveBranchDTO(dto: BranchDTO): BranchDTO {
@@ -54,12 +54,6 @@ class BranchService {
         branch.image = dto.image
         branch.staffTitle = dto.staffTitle
         return mapper.toDto(branchRepository.save(branch))
-    }
-
-    fun deactivateBranch(id: Int) {
-        val branch = getBranchById(id)
-        branch.status = PASSIVE
-        branchRepository.save(branch)
     }
 
     private fun getBranchById(id: Int): Branch {

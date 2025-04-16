@@ -105,12 +105,12 @@ class ExternalUserDataProvider : UserDataProvider() {
             return
         }
         val functionList = mutableListOf(
-            Functie(externalOrganizationId, externalRole, newRole.startDate.asExternalDate() ?: return, null)
+            FunctieInstantie(externalOrganizationId, externalRole, newRole.startDate.asExternalDate() ?: return, null)
         )
         role.backupExternalId?.let {
             logger.debug { "${user.username} has a back-up external id, also adding this role." }
             functionList.add(
-                Functie(externalOrganizationId, it, newRole.startDate.asExternalDate() ?: return, null)
+                FunctieInstantie(externalOrganizationId, it, newRole.startDate.asExternalDate() ?: return, null)
             )
         }
         postExternalMemberData(user.externalId!!, LidFuncties(functionList))
@@ -130,12 +130,12 @@ class ExternalUserDataProvider : UserDataProvider() {
         }
         userRole.endDate = LocalDate.now()
         val functionList = mutableListOf(
-            Functie(externalOrganizationId, externalRole, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
+            FunctieInstantie(externalOrganizationId, externalRole, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
         )
         role.backupExternalId?.let {
             logger.debug { "${user.username} has a back-up external id, also removing this role." }
             functionList.add(
-                Functie(externalOrganizationId, it, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
+                FunctieInstantie(externalOrganizationId, it, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
             )
         }
         postExternalMemberData(user.externalId!!, LidFuncties(functionList))
@@ -180,7 +180,7 @@ class ExternalUserDataProvider : UserDataProvider() {
         return call(externalId).block()
     }
 
-    private fun translateFunction(user: User, function: Functie): UserRole? {
+    private fun translateFunction(user: User, function: FunctieInstantie): UserRole? {
         if (function.groep != externalOrganizationId) return null
         val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
         val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }

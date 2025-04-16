@@ -13,3 +13,5 @@ data class RoleDTO(
     val staffBranch: BranchBaseDTO?,
     val level: RoleLevel
 )
+
+data class ExternalFunction(val externalId: String, val name: String, val paid: Boolean)
