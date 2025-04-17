@@ -33,5 +33,5 @@ class BranchDTO(
     val law: String?,
     val status: BranchStatus,
     val staffTitle: String?,
-    val staff: List<StaffDTO>
+    val staff: List<StaffDTO> = emptyList()
 ) : BranchBaseDTO(id, name, image)
