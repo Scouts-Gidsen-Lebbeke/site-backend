@@ -42,6 +42,20 @@ class CalendarController {
         return ResponseEntity.ok(calendarService.getAllCalendarPeriods())
     }
 
+    @GetMapping("/periods/{id}")
+    @Public
+    @Operation(
+        summary = "Get a specific calendar period",
+        description = "Returns the calendar period with the given id.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = CalendarPeriodDTO::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
+    fun getPeriod(@PathVariable id: Int): ResponseEntity<CalendarPeriodDTO> {
+        return ResponseEntity.ok(calendarService.getCalendarPeriodDTOById(id))
+    }
+
     @PostMapping("/periods")
     @OnlyAdmin
     @Operation(
@@ -120,7 +134,7 @@ class CalendarController {
         summary = "Get a specific calendar",
         description = "Returns the calendar with the given id.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = CalendarDTO::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = CalendarDTO::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )

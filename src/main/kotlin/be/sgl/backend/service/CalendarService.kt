@@ -50,8 +50,12 @@ class CalendarService {
         return periodRepository.findAll().map(mapper::toDto)
     }
 
+    fun getCalendarPeriodDTOById(id: Int): CalendarPeriodDTO {
+        return mapper.toDto(getPeriodById(id))
+    }
+
     fun saveCalendarPeriodDTO(dto: CalendarPeriodDTO): CalendarPeriodDTO {
-        verifyNoOverlaps(periodRepository.getOverlappingPeriods(dto.start, dto.end))
+        verifyNoOverlaps(dto.start, dto.end)
         val period = periodRepository.save(mapper.toEntity(dto))
         branchRepository.getBranchesWithCalendar().forEach {
             calendarRepository.save(Calendar(period, it))
@@ -61,7 +65,7 @@ class CalendarService {
 
     fun mergeCalendarPeriodDTOChanges(id: Int, dto: CalendarPeriodDTO): CalendarPeriodDTO {
         val period = getPeriodById(id)
-        verifyNoOverlaps(periodRepository.getOverlappingPeriods(dto.start, dto.end).filter { it.id == id })
+        verifyNoOverlaps(dto.start, dto.end, id)
         period.name = dto.name
         period.start = dto.start
         period.end = dto.end
@@ -183,7 +187,8 @@ class CalendarService {
         return itemRepository.findById(id).orElseThrow { CalendarItemNotFoundException() }
     }
 
-    private fun verifyNoOverlaps(overlaps: List<CalendarPeriod>) {
+    private fun verifyNoOverlaps(start: LocalDate, end: LocalDate, id: Int? = null) {
+        val overlaps = periodRepository.getOverlappingPeriods(start, end).filter { it.id != id }
         check(overlaps.isEmpty()) { "Calendar period overlaps with existing periods: ${overlaps.joinToString { it.name }}" }
     }
 }
