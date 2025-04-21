@@ -41,7 +41,7 @@ class EventDTO(
     @Positive(message = "{Positive.event.registrationLimit}")
     var registrationLimit: Int?,
     @NotNull(message = "{NotNull.event.address}")
-    var address: AddressDTO,
+    var address: AddressDTO?,
     var additionalForm: String?,
     @Size(max = 255, message = "{Size.event.additionalFormRule}")
     var additionalFormRule: String?,

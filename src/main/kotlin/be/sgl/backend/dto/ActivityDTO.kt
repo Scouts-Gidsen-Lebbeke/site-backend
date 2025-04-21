@@ -40,8 +40,7 @@ class ActivityDTO(
     var price: Double,
     @field:Positive(message = "{Positive.activity.registrationLimit}")
     var registrationLimit: Int?,
-    @field:NotNull(message = "{NotNull.activity.address}")
-    var address: AddressDTO,
+    var address: AddressDTO?,
     var additionalForm: String?,
     @field:Size(max = 255, message = "{Size.activity.additionalFormRule}")
     var additionalFormRule: String?,

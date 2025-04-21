@@ -24,7 +24,7 @@ abstract class Registrable : Payable() {
     var price = 0.0
     var registrationLimit: Int? = null
     @OneToOne
-    lateinit var address: Address
+    var address: Address? = null
     @Lob
     var additionalForm: String? = null
     var additionalFormRule: String? = null

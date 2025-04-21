@@ -91,7 +91,7 @@ class ActivityService {
             check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
         activity.registrationLimit = dto.registrationLimit
-        activity.address = addressMapper.toEntity(dto.address)
+        activity.address = dto.address?.let { addressMapper.toEntity(it) }
         activity.sendConfirmation = dto.sendConfirmation
         activity.sendCompleteConfirmation = dto.sendCompleteConfirmation
         activity.communicationCC = dto.communicationCC
