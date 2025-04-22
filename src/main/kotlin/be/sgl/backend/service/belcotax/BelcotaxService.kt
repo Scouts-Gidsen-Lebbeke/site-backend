@@ -2,6 +2,7 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import be.sgl.backend.entity.setting.SettingId.LATEST_DISPATCH_RATE
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.service.MailService
@@ -28,29 +29,30 @@ class BelcotaxService {
     @Autowired
     private lateinit var mailService: MailService
 
-    fun getDispatchForFiscalYearAndRate(fiscalYear: Int): Verzendingen {
-        val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
-        val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
-        val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, fiscalYear) }
+    fun getDispatchForPreviousYear(): Verzendingen {
+        val (beginOfYear, endOfYear) = getPreviousYearPeriod()
+        val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
+        val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user) }
         return dispatchService.createDispatch(forms)
     }
 
-    fun getFormsForUserFiscalYearAndRate(username: String, fiscalYear: Int): List<ByteArray> {
-        val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
+    fun getFormsForUserAndPreviousYear(username: String): List<ByteArray> {
+        val (beginOfYear, endOfYear) = getPreviousYearPeriod()
         val user = userDataProvider.getUser(username)
-        val activities = registrationRepository.getByUserAndStartBetweenOrderByStart(user, beginOfYear, endOfYear).filter(::relevantActivity)
+        val activities = registrationRepository.getPaidRegistrationsForUserBetween(user, beginOfYear, endOfYear).filter(::relevantActivity)
         check(activities.isNotEmpty()) { "No relevant activities found for $username" }
-        return activities.asForms(user, fiscalYear).map(formService::createForm)
+        return activities.asForms(user).map(formService::createForm)
     }
 
-    fun getFormsForFiscalYearAndRate(fiscalYear: Int): Map<User, List<ByteArray>> {
-        val (beginOfYear, endOfYear) = getPeriod(fiscalYear)
-        val activities = registrationRepository.getByStartBetweenOrderByStart(beginOfYear, endOfYear).filter(::relevantActivity)
-        return activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user, fiscalYear) }
+    fun getFormsForPreviousYear(): Map<User, List<ByteArray>> {
+        val (beginOfYear, endOfYear) = getPreviousYearPeriod()
+        val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
+        return activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user) }
             .groupBy(DeclarationFormDTO::user, formService::createForm)
     }
 
-    fun mailFormsToUser(fiscalYear: Int, user: User, forms: List<ByteArray>) {
+    fun mailFormsToUser(user: User, forms: List<ByteArray>) {
+        val fiscalYear = LocalDateTime.now().year - 1
         val params = mapOf("member.first.name" to user.firstName, "fiscal-year" to fiscalYear)
         val mailBuilder = mailService.builder()
             .to(user.email)
@@ -60,7 +62,8 @@ class BelcotaxService {
         mailBuilder.send()
     }
 
-    private fun getPeriod(fiscalYear: Int): Pair<LocalDateTime, LocalDateTime> {
+    private fun getPreviousYearPeriod(): Pair<LocalDateTime, LocalDateTime> {
+        val fiscalYear = LocalDateTime.now().year - 1
         val beginOfYear = LocalDateTime.of(fiscalYear, 1, 1, 0, 0, 0, 0)
         val endOfYear = LocalDateTime.of(fiscalYear, 12, 31, 23, 59, 59, 999999999)
         return beginOfYear to endOfYear
@@ -70,8 +73,8 @@ class BelcotaxService {
         return registration.user.getAge(registration.start.toLocalDate()) < if (registration.user.hasHandicap) 21 else 14
     }
 
-    private fun List<ActivityRegistration>.asForms(user: User, fiscalYear: Int): List<DeclarationFormDTO> {
-        val rate = settingService.getRateForFiscalYear(fiscalYear)
+    private fun List<ActivityRegistration>.asForms(user: User): List<DeclarationFormDTO> {
+        val rate = settingService.getOrDefault(LATEST_DISPATCH_RATE, 14.4)
         return chunked(4).mapIndexed { index, it ->
             DeclarationFormDTO(user, it[0], it.getOrNull(1), it.getOrNull(2), it.getOrNull(3), rate, index)
         }

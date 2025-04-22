@@ -4,6 +4,7 @@ import be.sgl.backend.dto.ExternalFunction
 import be.sgl.backend.dto.Representative
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationType
+import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.ImageService
@@ -36,13 +37,13 @@ class InternalOrganizationProvider : OrganizationProvider {
 
     @Cacheable("representative")
     override fun getRepresentative(): Representative {
-        val username = settingService.getRepresentativeUsername()
+        val username = settingService.get(SettingId.REPRESENTATIVE_USERNAME)
             ?: throw IncompleteConfigurationException("No representative configured for organization!")
         val user = userRepository.getByUsername(username)
-        val title = settingService.getRepresentativeTitle()
-        val sigantureFile = settingService.getSignatureFile()
+        val title = settingService.getOrDefault(SettingId.REPRESENTATIVE_TITLE, "Vertegenwoordiger")
+        val signatureFile = settingService.get(SettingId.REPRESENTATIVE_SIGNATURE)
             ?: throw IncompleteConfigurationException("No signature configured for organization!")
-        val signature = imageService.get(sigantureFile, ORGANIZATION)
+        val signature = imageService.get(signatureFile, ORGANIZATION)
             ?: throw IncompleteConfigurationException("No valid signature configured for organization!")
         return Representative(user, title, signature)
     }

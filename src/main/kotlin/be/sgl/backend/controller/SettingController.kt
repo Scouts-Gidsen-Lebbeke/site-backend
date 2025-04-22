@@ -1,6 +1,8 @@
 package be.sgl.backend.controller
 
+import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.Public
+import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.service.SettingService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -11,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 
 @Controller
 @RequestMapping("/settings")
@@ -22,16 +23,30 @@ class SettingController {
     @Autowired
     private lateinit var settingService: SettingService
 
-    @GetMapping("/calendar-name")
+    @GetMapping("/{id}")
     @Public
     @Operation(
-        summary = "Get the name of the calendar.",
-        description = "Returns the name used for denoting the calendar. If nothing is configured, it creates and returns the default name.",
+        summary = "Get the setting value",
+        description = "Returns the value of the setting identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = String::class))])
         ]
     )
-    fun getCalendarName(): ResponseEntity<String> {
-        return ResponseEntity.ok(settingService.getCalendarName())
+    fun getSetting(@PathVariable id: SettingId): ResponseEntity<String?> {
+        return ResponseEntity.ok(settingService.get(id))
+    }
+
+    @PutMapping("/{id}")
+    @OnlyAdmin
+    @Operation(
+        summary = "Update the setting value",
+        description = "Creates or updates the value of the setting identified with the given id. If the value isn't present, the setting is deleted.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok")
+        ]
+    )
+    fun updateSetting(@PathVariable id: SettingId, @RequestParam value: String?): ResponseEntity<Unit> {
+        settingService.update(id, value)
+        return ResponseEntity.ok().build()
     }
 }

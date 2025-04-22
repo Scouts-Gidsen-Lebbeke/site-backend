@@ -1,5 +1,6 @@
-package be.sgl.backend.entity
+package be.sgl.backend.entity.setting
 
+import be.sgl.backend.entity.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 
@@ -9,8 +10,8 @@ class Setting() : Auditable() {
     lateinit var name: String
     lateinit var value: String
 
-    constructor(name: String, value: Any) : this() {
-        this.name = name
+    constructor(id: SettingId, value: Any) : this() {
+        this.name = id.name
         this.value = value.toString()
     }
 }

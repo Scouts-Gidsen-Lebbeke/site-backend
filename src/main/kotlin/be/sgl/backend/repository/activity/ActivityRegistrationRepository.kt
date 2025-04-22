@@ -13,8 +13,10 @@ import java.time.LocalDateTime
 
 @Repository
 interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, Int>, PaymentRepository<ActivityRegistration> {
-    fun getByStartBetweenOrderByStart(begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
-    fun getByUserAndStartBetweenOrderByStart(user: User, begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
+    @Query("from ActivityRegistration where start between :begin and :end and paid order by start")
+    fun getPaidRegistrationsBetween(begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
+    @Query("from ActivityRegistration where user = :user and start between :begin and :end and paid order by start")
+    fun getPaidRegistrationsForUserBetween(user: User, begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
     @Query("from ActivityRegistration where subscribable = :activity and paid")
     fun getPaidRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
     fun existsBySubscribable(subscribable: Activity): Boolean

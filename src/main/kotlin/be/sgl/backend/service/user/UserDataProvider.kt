@@ -65,6 +65,11 @@ abstract class UserDataProvider {
         userRepository.delete(user)
     }
 
+    fun userExists(username: String?): Boolean {
+        logger.debug { "Checking if user with username $username exists..." }
+        return userRepository.existsByUsername(username ?: return false)
+    }
+
     abstract fun findUser(username: String): User?
 
     abstract fun getUser(username: String): User

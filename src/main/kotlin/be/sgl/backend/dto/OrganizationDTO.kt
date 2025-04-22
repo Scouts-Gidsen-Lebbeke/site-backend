@@ -31,3 +31,11 @@ data class Representative(
     val title: String,
     val signature: File
 )
+
+data class RepresentativeDTO(
+    @field:NotBlank
+    val username: String?,
+    val title: String?,
+    @field:NotBlank
+    val signature: String?
+)

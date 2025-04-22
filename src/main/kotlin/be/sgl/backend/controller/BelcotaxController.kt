@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.util.concurrent.Executors
 
 @RestController
-@RequestMapping("/belcotax/{fiscalYear}")
+@RequestMapping("/belcotax")
 @Tag(name = "Belcotax", description = "Endpoints for creating Belcotax forms and dispatches.")
 class BelcotaxController {
 
@@ -36,30 +36,30 @@ class BelcotaxController {
     @OnlyAdmin
     @Operation(
         summary = "Retrieve the Belcotax dispatch xml file.",
-        description = "Generate the tax forms for the fiscal year for the current user. If multiple forms are applicable, a zip file is returned.",
+        description = "Generate the tax forms for the passed fiscal year for the current user. If multiple forms are applicable, a zip file is returned.",
         responses = [
             ApiResponse(responseCode = "200", description = "Dispatch file generated", content = [Content(mediaType = APPLICATION_XML_VALUE, schema = Schema(implementation = Verzendingen::class))]),
             ApiResponse(responseCode = "400", description = "No relevant activities found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
             ApiResponse(responseCode = "409", description = "Missing configuration", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getDispatchForFiscalYear(@PathVariable fiscalYear: Int): ResponseEntity<Verzendingen> {
-        return ResponseEntity.ok(belcotaxService.getDispatchForFiscalYearAndRate(fiscalYear))
+    fun getDispatchForPreviousYear(): ResponseEntity<Verzendingen> {
+        return ResponseEntity.ok(belcotaxService.getDispatchForPreviousYear())
     }
 
     @GetMapping("/form")
     @OnlyAuthenticated
     @Operation(
         summary = "Retrieve the Belcotax forms for the current user.",
-        description = "Generate the tax forms for the fiscal year for the current user. If multiple forms are applicable, a zip file is returned.",
+        description = "Generate the tax forms for the previous fiscal year for the current user. If multiple forms are applicable, a zip file is returned.",
         responses = [
             ApiResponse(responseCode = "200", description = "Form(s) generated", content = [Content(mediaType = APPLICATION_OCTET_STREAM_VALUE)]),
             ApiResponse(responseCode = "400", description = "No relevant activities found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
             ApiResponse(responseCode = "409", description = "Missing configuration", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getUserFormsForFiscalYear(@PathVariable fiscalYear: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ByteArray> {
-        val forms = belcotaxService.getFormsForUserFiscalYearAndRate(userDetails.username, fiscalYear)
+    fun getFormsForUserAndPreviousYear(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ByteArray> {
+        val forms = belcotaxService.getFormsForUserAndPreviousYear(userDetails.username)
         return if (forms.size == 1) {
             ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"form.pdf\"")
@@ -77,21 +77,21 @@ class BelcotaxController {
     @OnlyAdmin
     @Operation(
         summary = "Mail the Belcotax forms to all relevant users.",
-        description = "Generate the tax forms for the fiscal year for all relevant users and mail it to them. Returns a feedback stream with emits for each successful email.",
+        description = "Generate the tax forms for the previous fiscal year for all relevant users and mail it to them. Returns a feedback stream with emits for each successful email.",
         responses = [
             ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = TEXT_EVENT_STREAM_VALUE, schema = Schema(type = "string", format = "binary"))]),
             ApiResponse(responseCode = "409", description = "Missing configuration", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun mailFormsForFiscalYear(@PathVariable fiscalYear: Int): SseEmitter {
+    fun mailFormsForPreviousYear(): SseEmitter {
         val emitter = SseEmitter()
         Executors.newSingleThreadExecutor().submit {
             emitter.send("Generating forms...")
-            val forms = belcotaxService.getFormsForFiscalYearAndRate(fiscalYear)
+            val forms = belcotaxService.getFormsForPreviousYear()
             try {
                 forms.onEachIndexed { i, (user, userForms) ->
                     emitter.send("Sending email $i of ${forms.size}")
-                    belcotaxService.mailFormsToUser(fiscalYear, user, userForms)
+                    belcotaxService.mailFormsToUser(user, userForms)
                 }
                 emitter.send("All emails sent successfully!")
                 emitter.complete()

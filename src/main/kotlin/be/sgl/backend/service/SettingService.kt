@@ -1,8 +1,8 @@
 package be.sgl.backend.service
 
-import be.sgl.backend.entity.Setting
+import be.sgl.backend.entity.setting.Setting
+import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.SettingRepository
-import be.sgl.backend.service.exception.IncompleteConfigurationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
@@ -13,29 +13,22 @@ class SettingService {
     @Autowired
     private lateinit var settingRepository: SettingRepository
 
-    fun getRateForFiscalYear(fiscalYear: Int): Double {
-        return getOrCreateDefault("DISPATCH_RATE_${fiscalYear}", 14.4).toDouble()
+    fun get(id: SettingId): String? {
+        return settingRepository.findByIdOrNull(id.name)?.value
     }
 
-    fun getRepresentativeTitle(): String {
-        return getOrCreateDefault("REPRESENTATIVE_TITLE", "Vertegenwoordiger")
+    fun getOrDefault(id: SettingId, default: String): String {
+        return get(id) ?: default
     }
 
-    fun getRepresentativeUsername(): String? {
-        return settingRepository.findByIdOrNull("REPRESENTATIVE_USERNAME")?.value
+    fun getOrDefault(id: SettingId, default: Double): Double {
+        return get(id)?.toDouble() ?: default
     }
 
-    fun getSignatureFile(): String? {
-        return settingRepository.findByIdOrNull("REPRESENTATIVE_SIGNATURE")?.value
-    }
-
-    fun getCalendarName(): String {
-        return getOrCreateDefault("CALENDAR_NAME", "Kalender")
-    }
-
-    private fun getOrCreateDefault(id: String, default: Any): String {
-        val setting = settingRepository.findByIdOrNull(id)
-            ?: return settingRepository.save(Setting(id, default)).value
-        return setting.value
+    fun update(id: SettingId, value: Any?) {
+        value ?: return settingRepository.deleteById(id.name)
+        val setting = settingRepository.findByIdOrNull(id.name) ?: Setting(id, value)
+        setting.value = value.toString()
+        settingRepository.save(setting)
     }
 }

@@ -16,4 +16,5 @@ interface UserRepository : JpaRepository<User, Int> {
     fun findByNameAndFirstNameAndEmail(name: String, firstName: String, email: String): User?
     @Query("from User where name like concat('%', :query, '%') or firstName like concat('%', :query, '%')")
     fun findByQuery(query: String): List<User>
+    fun existsByUsername(username: String): Boolean
 }
