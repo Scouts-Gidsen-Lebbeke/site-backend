@@ -107,16 +107,16 @@ class ActivityController {
     @DeleteMapping("/{id}")
     @OnlyAdmin
     @Operation(
-        summary = "Delete an existing activity",
-        description = "Deletes an activity, identified with the given id. The activity cannot yet have registrations.",
+        summary = "Cancel an existing activity",
+        description = "Cancels an activity, identified with the given id. The activity cannot yet be started. If the activity has linked registrations, they will be refunded.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Activity deleted"),
-            ApiResponse(responseCode = "400", description = "Activity cannot be deleted", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "200", description = "Activity cancelled"),
+            ApiResponse(responseCode = "400", description = "Activity cannot be cancelled", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun deleteActivity(@PathVariable id: Int): ResponseEntity<Unit> {
-        activityService.deleteActivity(id)
+    fun cancelActivity(@PathVariable id: Int): ResponseEntity<Unit> {
+        activityService.cancelActivity(id)
         return ResponseEntity.ok().build()
     }
 

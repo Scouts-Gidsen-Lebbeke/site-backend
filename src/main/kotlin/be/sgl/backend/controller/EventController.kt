@@ -2,7 +2,6 @@ package be.sgl.backend.controller
 
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.*
@@ -105,16 +104,16 @@ class EventController {
     @DeleteMapping("/{id}")
     @OnlyAdmin
     @Operation(
-        summary = "Delete an existing event",
-        description = "Deletes an event, identified with the given id. The event cannot yet have registrations.",
+        summary = "Cancel an existing event",
+        description = "Cancels an event, identified with the given id. The event cannot yet be started. If the event has linked registrations, they will be refunded.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Event deleted"),
-            ApiResponse(responseCode = "400", description = "Event cannot be deleted", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "200", description = "Event cancelled"),
+            ApiResponse(responseCode = "400", description = "Event cannot be cancelled", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun deleteEvent(@PathVariable id: Int): ResponseEntity<Unit> {
-        eventService.deleteEvent(id)
+    fun cancelEvent(@PathVariable id: Int): ResponseEntity<Unit> {
+        eventService.cancelEvent(id)
         return ResponseEntity.ok().build()
     }
 
@@ -195,8 +194,18 @@ class EventController {
     }
 
     @DeleteMapping("/registrations/{registrationId}")
-    @OnlyAuthenticated
+    @Public
+    @Operation(
+        summary = "Refund an event registration",
+        description = "Retrieves the registration based on the provided id and create a payment refund.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok"),
+            ApiResponse(responseCode = "400", description = "Registration isn't eligible for cancellation", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
     fun cancelRegistration(@PathVariable registrationId: Int): ResponseEntity<Unit> {
-        TODO("New flow, not yet important")
+        registrationService.cancelRegistration(registrationId)
+        return ResponseEntity.ok().build()
     }
 }

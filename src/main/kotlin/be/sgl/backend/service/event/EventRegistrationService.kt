@@ -3,6 +3,8 @@ package be.sgl.backend.service.event
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.dto.EventRegistrationAttemptData
 import be.sgl.backend.dto.EventRegistrationDTO
+import be.sgl.backend.entity.registrable.RegistrableStatus
+import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.entity.registrable.event.EventRegistration
 import be.sgl.backend.mapper.EventMapper
@@ -67,7 +69,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     override fun handlePaymentPaid(payment: EventRegistration) {
         if (!payment.subscribable.sendConfirmation) return
         val params = mapOf(
-            "name" to "${payment.firstName} ${payment.name}",
+            "customer" to "${payment.firstName} ${payment.name}",
             "price" to payment.price,
             "eventName" to payment.subscribable.name,
             "additionalData" to payment.getAdditionalDataMap()
@@ -81,7 +83,17 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     }
 
     override fun handlePaymentRefunded(payment: EventRegistration) {
-        // TODO("send payment refunded confirmation email")
+        val params = mapOf(
+            "customer" to "${payment.firstName} ${payment.name}",
+            "price" to payment.price - 1,
+            "eventName" to payment.subscribable.name,
+        )
+        val mailBuilder = mailService.builder()
+            .to(payment.email)
+            .subject("Annulatie registratie")
+            .template("cancel-event-confirmation.html", params)
+        payment.subscribable.communicationCC?.let { mailBuilder.cc(it) }
+        mailBuilder.send()
     }
 
     fun markRegistrationAsCompleted(id: Int) {
@@ -109,6 +121,15 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
             mailBuilder.send()
         }
         logger.info { "Registration #$id successfully marked as completed" }
+    }
+
+    fun cancelRegistration(id: Int) {
+        logger.info { "Cancelling event registration #$id..." }
+        val registration = getRegistrationById(id)
+        check(registration.paid) { "Only a paid event registration can be cancelled!" }
+        check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
+        checkoutProvider.refundPayment(registration)
+        logger.info { "Event registration #$id successfully cancelled" }
     }
 
     private fun getRegistrationById(id: Int): EventRegistration {

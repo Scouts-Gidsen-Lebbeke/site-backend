@@ -3,16 +3,24 @@ package be.sgl.backend.service.event
 import be.sgl.backend.dto.EventBaseDTO
 import be.sgl.backend.dto.EventDTO
 import be.sgl.backend.dto.EventResultDTO
+import be.sgl.backend.entity.registrable.RegistrableStatus.*
+import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
+import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.mapper.EventMapper
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.service.exception.EventNotFoundException
+import be.sgl.backend.service.payment.CheckoutProvider
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class EventService {
+
+    private val logger = KotlinLogging.logger {}
 
     @Autowired
     private lateinit var eventRepository: EventRepository
@@ -20,6 +28,10 @@ class EventService {
     private lateinit var registrationRepository: EventRegistrationRepository
     @Autowired
     private lateinit var mapper: EventMapper
+    @Autowired
+    private lateinit var addressMapper: AddressMapper
+    @Autowired
+    private lateinit var checkoutProvider: CheckoutProvider
 
     fun getAllEvents(): List<EventResultDTO> {
         return eventRepository.findAll().map { EventResultDTO(it, registrationRepository.getPaidRegistrationsByEvent(it)) }
@@ -33,29 +45,73 @@ class EventService {
         return mapper.toDto(getEventById(id))
     }
 
-    fun saveEventDTO(eventDTO: EventDTO): EventDTO {
-        validateEventDTO(eventDTO)
-        // TODO: additional validations for new events
-        val newEvent = mapper.toEntity(eventDTO)
+    fun saveEventDTO(dto: EventDTO): EventDTO {
+        validateEventDTO(dto)
+        val newEvent = mapper.toEntity(dto)
         return mapper.toDto(eventRepository.save(newEvent))
     }
 
-    fun mergeEventDTOChanges(id: Int, eventDTO: EventDTO): EventDTO {
-        TODO()
-    }
-
-    fun deleteEvent(id: Int) {
+    fun mergeEventDTOChanges(id: Int, dto: EventDTO): EventDTO {
+        validateEventDTO(dto)
         val event = getEventById(id)
-        check(hasRegistrations(event)) { "This event has registrations and cannot be deleted anymore!" }
-        eventRepository.deleteById(id)
+        // update this first, maybe the status alters
+        event.closed = dto.closed
+        check(event.getStatus() != CANCELLED) { "A cancelled event cannot be edited anymore!" }
+        check(event.getStatus() != REGISTRATIONS_COMPLETED) { "An event with closed registrations cannot be edited anymore!" }
+        check(event.getStatus() != STARTED) { "A started event cannot be edited anymore!" }
+        check(event.getStatus() != COMPLETED) { "A completed event cannot be edited anymore!" }
+        if (event.getStatus() == NOT_YET_OPEN) {
+            // price and user data collection can only be altered if no registration was possible yet
+            event.price = dto.price
+            event.additionalForm = dto.additionalForm
+            event.additionalFormRule = dto.additionalFormRule
+            event.needsMobile = dto.needsMobile
+            check(dto.cancellable || !event.cancellable) { "A previously cancellable event cannot be made uncancellable!" }
+            event.cancellable = dto.cancellable
+            // Core activity data that is used in certificates, should never be changed when registrations opened
+            event.name = dto.name
+            event.start = dto.start
+            event.end = dto.end
+            // One can only delay or advance the registration period when it wasn't open yet
+            event.open = dto.open
+        } else {
+            val registrationCount = registrationRepository.getPaidRegistrationsByEvent(event).count()
+            check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
+        }
+        event.registrationLimit = dto.registrationLimit
+        event.address = dto.address?.let { addressMapper.toEntity(it) }
+        event.sendConfirmation = dto.sendConfirmation
+        event.sendCompleteConfirmation = dto.sendCompleteConfirmation
+        event.communicationCC = dto.communicationCC
+        event.description = dto.description
+        return mapper.toDto(eventRepository.save(event))
     }
 
-    private fun validateEventDTO(eventDTO: EventDTO): Boolean {
-        TODO()
+    fun cancelEvent(id: Int) {
+        logger.info { "Cancel event #$id..." }
+        val event = getEventById(id)
+        check(event.getStatus() != CANCELLED) { "This event is already cancelled!" }
+        check(event.getStatus() != STARTED) { "A started event cannot be cancelled anymore!" }
+        check(event.getStatus() != COMPLETED) { "A completed event cannot be cancelled anymore!" }
+        val registrations = registrationRepository.getRegistrationsByEvent(event)
+        if (registrations.isNotEmpty()) {
+            logger.info { "Event has ${registrations.size} linked registrations needing a refund..." }
+            registrations.forEach {
+                checkoutProvider.refundPayment(it)
+                logger.info { "Refund request sent for registration #${it.id}" }
+            }
+        }
+        logger.info { "Registrations fully checked, marking event as cancelled..." }
+        event.cancelled = true
+        eventRepository.save(event)
+        logger.info { "Event successfully cancelled" }
     }
 
-    private fun hasRegistrations(event: Event): Boolean {
-        return registrationRepository.existsBySubscribable(event)
+    private fun validateEventDTO(dto: EventDTO) {
+        check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
+        check(dto.closed < dto.start) { "The start date of an event should be after the closure of registrations!" }
+        check(dto.start < dto.end) { "The start date of an event should be before its end date!" }
+        check(LocalDateTime.now() < dto.closed) { "Event edits should only be performed when they are not yet closed!" }
     }
 
     private fun getEventById(id: Int): Event {

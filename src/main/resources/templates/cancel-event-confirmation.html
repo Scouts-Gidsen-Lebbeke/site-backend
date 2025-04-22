@@ -1,0 +1,15 @@
+<!--/*@thymesVar id="customer" type="java.lang.String"*/-->
+<!--/*@thymesVar id="eventName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="price" type="java.lang.Double"*/-->
+<p>
+    Dag <span th:text="${customer}"></span>,
+</p>
+<p>
+    Jouw registratie voor <span th:text="${eventName}"></span> werd succesvol geannuleerd,
+    je ontvangt binnenkort het betaalde bedrag terug op jouw rekening,
+    exclusief administratiekosten (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>).
+</p>
+<p>
+    Stevige linker,<br/>
+    De leiding
+</p>

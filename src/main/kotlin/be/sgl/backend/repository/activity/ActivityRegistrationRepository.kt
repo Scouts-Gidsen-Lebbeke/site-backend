@@ -19,7 +19,8 @@ interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, I
     fun getPaidRegistrationsForUserBetween(user: User, begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
     @Query("from ActivityRegistration where subscribable = :activity and paid")
     fun getPaidRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
-    fun existsBySubscribable(subscribable: Activity): Boolean
+    @Query("from ActivityRegistration where subscribable = :activity")
+    fun getRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
     fun getByUser(user: User): List<ActivityRegistration>
     fun existsBySubscribableAndUser(subscribable: Activity, user: User): Boolean
     fun countByRestriction(restriction: ActivityRestriction): Int

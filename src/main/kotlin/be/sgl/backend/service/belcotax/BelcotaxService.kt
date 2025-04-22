@@ -53,7 +53,10 @@ class BelcotaxService {
 
     fun mailFormsToUser(user: User, forms: List<ByteArray>) {
         val fiscalYear = LocalDateTime.now().year - 1
-        val params = mapOf("member.first.name" to user.firstName, "fiscal-year" to fiscalYear)
+        val params = mapOf(
+            "member" to user.firstName,
+            "fiscalYear" to fiscalYear
+        )
         val mailBuilder = mailService.builder()
             .to(user.email)
             .subject("Fiscaal attest kinderopvang $fiscalYear")

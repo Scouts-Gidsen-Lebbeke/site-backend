@@ -1,10 +1,12 @@
+<!--/*@thymesVar id="member" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fiscalYear" type="java.lang.Integer"*/-->
 <p>
-    Beste,
+    Dag <span th:text="${member}"></span>,
 </p>
 <p>
-    In de bijlage vindt u het fiscaal attest voor ${member.first.name} voor uitgavenjaar ${fiscal-year}.
-    Dit attest dient als bewijs van het bedrag dat u betaalde aan kinderoppas en waarvoor u recht heeft op belastingvermindering.
-    De gegevens van dit attest werden reeds geregistreerd bij Belcotax-on-web, u hoeft hiervoor verder niets meer te doen.
+    In de bijlage vind je het fiscaal attest voor uitgavenjaar <span th:text="${fiscalYear}"></span>.
+    Dit attest dient als bewijs van het bedrag dat betaald werd aan kinderoppas en bijgevolg recht geeft op belastingvermindering.
+    De gegevens van dit attest werden reeds geregistreerd bij Belcotax-on-web, je hoeft hiervoor verder niets meer te doen.
     Meer informatie is terug te vinden op
     <a href="https://www.vlaanderen.be/cjm/nl/jeugd/andere-diensten/belastingvermindering-voor-kinderopvang" target="_blank">de website van de Vlaamse overheid</a>.
 </p>

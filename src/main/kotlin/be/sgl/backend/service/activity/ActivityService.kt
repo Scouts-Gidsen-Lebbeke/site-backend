@@ -12,12 +12,16 @@ import be.sgl.backend.repository.activity.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
 import be.sgl.backend.mapper.ActivityMapper
 import be.sgl.backend.mapper.AddressMapper
+import be.sgl.backend.service.payment.CheckoutProvider
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class ActivityService {
+
+    private val logger = KotlinLogging.logger {}
 
     @Autowired
     private lateinit var activityRepository: ActivityRepository
@@ -29,13 +33,15 @@ class ActivityService {
     private lateinit var mapper: ActivityMapper
     @Autowired
     private lateinit var addressMapper: AddressMapper
+    @Autowired
+    private lateinit var checkoutProvider: CheckoutProvider
 
     fun getAllActivities(): List<ActivityResultDTO> {
         return activityRepository.findAll().map { ActivityResultDTO(it, registrationRepository.getPaidRegistrationsByActivity(it)) }
     }
 
     fun getVisibleActivities(): List<ActivityBaseDTO> {
-        return activityRepository.findAllByEndAfterOrderByStart(LocalDateTime.now()).map(mapper::toBaseDto)
+        return activityRepository.findAllVisibleActivities().map(mapper::toBaseDto)
     }
 
     fun getActivityDTOById(id: Int): ActivityDTO {
@@ -44,7 +50,6 @@ class ActivityService {
 
     fun saveActivityDTO(dto: ActivityDTO): ActivityDTO {
         validateActivityDTO(dto)
-        check(LocalDateTime.now() < dto.closed) { "New activities should still have the possibility to register!" }
         val newActivity = mapper.toEntity(dto)
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
@@ -58,9 +63,9 @@ class ActivityService {
         // update this first, maybe the status alters
         activity.closed = dto.closed
         check(activity.getStatus() != CANCELLED) { "A cancelled activity cannot be edited anymore!" }
+        check(activity.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
         check(activity.getStatus() != STARTED) { "A started activity cannot be edited anymore!" }
         check(activity.getStatus() != COMPLETED) { "A completed activity cannot be edited anymore!" }
-        check(activity.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
         if (activity.getStatus() == NOT_YET_OPEN) {
             // price and user data collection can only be altered if no registration was possible yet
             activity.reductionFactor = dto.reductionFactor
@@ -99,20 +104,31 @@ class ActivityService {
         return mapper.toDto(activityRepository.save(activity))
     }
 
-    fun deleteActivity(id: Int) {
+    fun cancelActivity(id: Int) {
+        logger.info { "Cancel activity #$id..." }
         val activity = getActivityById(id)
-        check(hasRegistrations(activity)) { "This activity has registrations and cannot be deleted anymore!" }
-        activityRepository.deleteById(id)
+        check(activity.getStatus() != CANCELLED) { "This activity is already cancelled!" }
+        check(activity.getStatus() != STARTED) { "A started activity cannot be cancelled anymore!" }
+        check(activity.getStatus() != COMPLETED) { "A completed activity cannot be cancelled anymore!" }
+        val registrations = registrationRepository.getRegistrationsByActivity(activity)
+        if (registrations.isNotEmpty()) {
+            logger.info { "Activity has ${registrations.size} linked registrations needing a refund..." }
+            registrations.forEach {
+                checkoutProvider.refundPayment(it)
+                logger.info { "Refund request sent for registration #${it.id}" }
+            }
+        }
+        logger.info { "Registrations fully checked, marking activity as cancelled..." }
+        activity.cancelled = true
+        activityRepository.save(activity)
+        logger.info { "Activity successfully cancelled" }
     }
 
     private fun validateActivityDTO(dto: ActivityDTO) {
         check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
         check(dto.closed < dto.start) { "The start date of an activity should be after the closure of registrations!" }
         check(dto.start < dto.end) { "The start date of an activity should be before its end date!" }
-    }
-
-    private fun hasRegistrations(activity: Activity): Boolean {
-        return registrationRepository.existsBySubscribable(activity)
+        check(LocalDateTime.now() < dto.closed) { "Activity edits should only be performed when they are not yet closed!" }
     }
 
     private fun getActivityById(id: Int): Activity {

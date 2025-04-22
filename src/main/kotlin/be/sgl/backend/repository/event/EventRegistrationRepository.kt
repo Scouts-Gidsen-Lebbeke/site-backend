@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository
 interface EventRegistrationRepository : JpaRepository<EventRegistration, Int>, PaymentRepository<EventRegistration> {
     @Query("from EventRegistration where subscribable = :event and paid")
     fun getPaidRegistrationsByEvent(event: Event): List<EventRegistration>
-    fun existsBySubscribable(subscribable: Event): Boolean
-    fun getByUser(user: User): List<EventRegistration>
+    @Query("from EventRegistration where subscribable = :event")
+    fun getRegistrationsByEvent(event: Event): List<EventRegistration>
 }
