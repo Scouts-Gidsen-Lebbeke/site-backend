@@ -33,3 +33,5 @@ class RoleNotFoundException : NotFoundException("Role not found")
 class MembershipNotFoundException : NotFoundException("Membership not found")
 
 class UserNotFoundException(username: String) : NotFoundException("User $username not found")
+
+class MembershipPeriodNotFoundException : NotFoundException("Membership period not found")

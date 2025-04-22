@@ -1,24 +1,40 @@
 package be.sgl.backend.dto
 
+import be.sgl.backend.util.StartEndDate
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.PositiveOrZero
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@Schema(description = "Basic information about a membership period.")
 open class MembershipPeriodBaseDTO(
     val id: Int?,
-    val start: LocalDate,
-    val end: LocalDate
-)
+    @field:NotNull(message = "{NotNull.membershipPeriod.start}")
+    override var start: LocalDate?,
+    @field:NotNull(message = "{NotNull.membershipPeriod.end}")
+    override var end: LocalDate?
+) : StartEndDate
 
+@Schema(description = "The complete membership configuration.")
 class MembershipPeriodDTO(
-    val price: Double,
-    val registrationLimit: Int?,
-    val reductionFactor: Double,
-    val siblingReduction: Double,
     id: Int?,
-    start: LocalDate,
-    end: LocalDate
+    start: LocalDate?,
+    end: LocalDate?,
+    @field:NotNull(message = "{NotNull.membershipPeriod.price}")
+    @field:PositiveOrZero(message = "{PositiveOrZero.membershipPeriod.price}")
+    var price: Double,
+    @field:Positive(message = "{Positive.membershipPeriod.registrationLimit}")
+    var registrationLimit: Int?,
+    @field:NotNull(message = "{NotNull.membershipPeriod.reductionFactor}")
+    var reductionFactor: Double,
+    @field:NotNull(message = "{NotNull.membershipPeriod.siblingReduction}")
+    val siblingReduction: Double,
+    var restrictions: List<MembershipRestrictionDTO>
 ) : MembershipPeriodBaseDTO(id, start, end)
 
+@Schema(description = "A limitation on the membership registration ability for a branch.")
 data class MembershipRestrictionDTO(
     val id: Int?,
     var branch: BranchBaseDTO,

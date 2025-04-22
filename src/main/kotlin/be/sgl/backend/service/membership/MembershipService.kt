@@ -167,6 +167,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     fun getCertificateForMembership(id: Int): ByteArray {
         val membership = getMembershipById(id)
+        check(membership.paid) { "A certificate can only be generated for a paid membership!" }
         val user = userDataProvider.getUser(membership.user.username!!)
         val owner = organizationProvider.getOwner()
         val representative = organizationProvider.getRepresentative()

@@ -86,14 +86,14 @@ class KboValidator : ConstraintValidator<Kbo, String> {
 
 @StartBeforeEnd
 interface StartEndTime {
-    val start: LocalDateTime
-    val end: LocalDateTime
+    val start: LocalDateTime?
+    val end: LocalDateTime?
 }
 
 @StartBeforeEnd
 interface StartEndDate {
-    val start: LocalDate
-    val end: LocalDate
+    val start: LocalDate?
+    val end: LocalDate?
 }
 
 @Constraint(validatedBy = [StartEndTimeValidator::class, StartEndDateValidator::class])
@@ -109,7 +109,7 @@ annotation class StartBeforeEnd(
 class StartEndTimeValidator : ConstraintValidator<StartBeforeEnd, StartEndTime?> {
     override fun isValid(value: StartEndTime?, context: ConstraintValidatorContext): Boolean {
         value ?: return true
-        return value.start < value.end
+        return (value.start ?: return true) < (value.end ?: return true)
     }
 }
 
@@ -117,6 +117,6 @@ class StartEndTimeValidator : ConstraintValidator<StartBeforeEnd, StartEndTime?>
 class StartEndDateValidator : ConstraintValidator<StartBeforeEnd, StartEndDate?> {
     override fun isValid(value: StartEndDate?, context: ConstraintValidatorContext): Boolean {
         value ?: return true
-        return value.start < value.end
+        return (value.start ?: return true) < (value.end ?: return true)
     }
 }

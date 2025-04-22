@@ -154,7 +154,7 @@ class ActivityController {
         summary = "Get a specific activity registration",
         description = "Returns the registration identified with the given id.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = ActivityRegistrationDTO::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationDTO::class))]),
             ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
@@ -169,7 +169,7 @@ class ActivityController {
         summary = "Get the registration status for the current user",
         description = "Returns the registration status for the current user and the activity identified with the given id.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = ActivityRegistrationStatus::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationStatus::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
@@ -183,7 +183,7 @@ class ActivityController {
         summary = "Get the registration status for the given user",
         description = "Returns the registration status for the user with the provided username and the activity identified with the given id.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = ActivityRegistrationStatus::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationStatus::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
@@ -274,7 +274,7 @@ class ActivityController {
     @OnlyAuthenticated
     @Operation(
         summary = "Generate the participation certificate",
-        description = "Returns a pdf with a participation certificate status for the current user and the completed registration identified with the given id.",
+        description = "Returns a pdf with a participation certificate for the completed registration identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_PDF_VALUE)]),
             ApiResponse(responseCode = "400", description = "Registration isn't completed", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
