@@ -29,6 +29,10 @@ class SettingService {
         return settingRepository.findByIdOrNull("REPRESENTATIVE_SIGNATURE")?.value
     }
 
+    fun getCalendarName(): String {
+        return getOrCreateDefault("CALENDAR_NAME", "Kalender")
+    }
+
     private fun getOrCreateDefault(id: String, default: Any): String {
         val setting = settingRepository.findByIdOrNull(id)
             ?: return settingRepository.save(Setting(id, default)).value
