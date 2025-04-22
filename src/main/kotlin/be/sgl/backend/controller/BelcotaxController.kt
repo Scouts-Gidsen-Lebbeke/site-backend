@@ -3,6 +3,7 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
+import be.sgl.backend.service.SseService
 import be.sgl.backend.service.belcotax.BelcotaxService
 import be.sgl.backend.util.zipped
 import generated.Verzendingen
@@ -18,11 +19,8 @@ import org.springframework.http.MediaType.*
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
-import java.util.concurrent.Executors
 
 @RestController
 @RequestMapping("/belcotax")
@@ -31,6 +29,8 @@ class BelcotaxController {
 
     @Autowired
     private lateinit var belcotaxService: BelcotaxService
+    @Autowired
+    private lateinit var sseService: SseService
 
     @GetMapping("/dispatch")
     @OnlyAdmin
@@ -79,27 +79,19 @@ class BelcotaxController {
         summary = "Mail the Belcotax forms to all relevant users.",
         description = "Generate the tax forms for the previous fiscal year for all relevant users and mail it to them. Returns a feedback stream with emits for each successful email.",
         responses = [
-            ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = TEXT_EVENT_STREAM_VALUE, schema = Schema(type = "string", format = "binary"))]),
+            ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = TEXT_PLAIN_VALUE)]),
             ApiResponse(responseCode = "409", description = "Missing configuration", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun mailFormsForPreviousYear(): SseEmitter {
-        val emitter = SseEmitter()
-        Executors.newSingleThreadExecutor().submit {
-            emitter.send("Generating forms...")
-            val forms = belcotaxService.getFormsForPreviousYear()
-            try {
-                forms.onEachIndexed { i, (user, userForms) ->
-                    emitter.send("Sending email $i of ${forms.size}")
-                    belcotaxService.mailFormsToUser(user, userForms)
-                }
-                emitter.send("All emails sent successfully!")
-                emitter.complete()
-            } catch (e: Exception) {
-                emitter.send("Error occurred: ${e.message}")
-                emitter.completeWithError(e)
+    fun mailFormsForPreviousYear(): String {
+        val forms = belcotaxService.getFormsForPreviousYear()
+        return sseService.schedule { emitter ->
+            forms.onEachIndexed { i, (user, userForms) ->
+                emitter.send("Sending email $i of ${forms.size}")
+                belcotaxService.mailFormsToUser(user, userForms)
             }
+            emitter.send("All emails sent successfully!")
+            emitter.complete()
         }
-        return emitter
     }
 }
