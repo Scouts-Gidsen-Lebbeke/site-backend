@@ -39,12 +39,14 @@ class ExternalUserDataProvider : UserDataProvider() {
             voornaam = user.firstName
             achternaam = user.name
             geboortedatum = user.birthdate
-            persoonsgegevens.geslacht = when (user.sex) {
-                Sex.MALE -> PersoonsGegevens.GeslachtEnum.MAN
-                Sex.FEMALE -> PersoonsGegevens.GeslachtEnum.VROUW
-                Sex.UNKNOWN -> PersoonsGegevens.GeslachtEnum.ANDERE
+            persoonsgegevens = PersoonsGegevens().apply {
+                geslacht = when (user.sex) {
+                    Sex.MALE -> PersoonsGegevens.GeslachtEnum.MAN
+                    Sex.FEMALE -> PersoonsGegevens.GeslachtEnum.VROUW
+                    Sex.UNKNOWN -> PersoonsGegevens.GeslachtEnum.ANDERE
+                }
+                gsm = user.mobile
             }
-            persoonsgegevens.gsm = user.mobile
             email = user.email
             adres = Adres().apply {
                 land = address.country

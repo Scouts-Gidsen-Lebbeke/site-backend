@@ -23,15 +23,10 @@ import be.sgl.backend.service.PaymentService
 import be.sgl.backend.service.exception.ActivityRegistrationNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
-import be.sgl.backend.util.base64Encoded
-import be.sgl.backend.util.belgian
-import be.sgl.backend.util.fillForm
-import be.sgl.backend.util.pricePrecision
+import be.sgl.backend.util.*
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -186,8 +181,6 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         }
         return finalPrice
     }
-
-    private fun Double.reducePrice(factor: Double) = BigDecimal(this / factor).setScale(2, RoundingMode.HALF_UP).toDouble()
 
     private fun isGlobalLimitReached(activity: Activity): Boolean {
         val globalLimit = activity.registrationLimit ?: return false

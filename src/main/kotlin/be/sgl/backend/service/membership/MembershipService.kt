@@ -18,14 +18,10 @@ import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.MembershipNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
-import be.sgl.backend.util.base64Encoded
-import be.sgl.backend.util.belgian
-import be.sgl.backend.util.fillForm
-import be.sgl.backend.util.pricePrecision
+import be.sgl.backend.util.*
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters.lastDayOfYear
@@ -125,7 +121,12 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             val branchCount = paymentRepository.countByPeriodAndBranch(currentPeriod, branch)
             check(branchCount < it) { "This branch already has its maximum number of members!" }
         }
-        val price = branchRestriction?.alternativePrice ?: currentPeriod.price
+        var price = branchRestriction?.alternativePrice ?: currentPeriod.price
+        logger.info { "Calculated base price is €$price" }
+        if (user.hasReduction) {
+            logger.info { "User is eligible for reduced tariff, dividing base price with reduction factor (${currentPeriod.reductionFactor})" }
+            price = price.reducePrice(currentPeriod.reductionFactor)
+        }
         val membership = paymentRepository.save(Membership(user, currentPeriod, branch, price))
         val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships", currentPeriod.id)
         paymentRepository.save(membership)
