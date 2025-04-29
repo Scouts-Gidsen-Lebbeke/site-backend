@@ -1,22 +1,19 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.config.security.BearerTokenFilter
+import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.openapi.api.LedenApi
+import be.sgl.backend.openapi.api.LidaanvragenApi
+import be.sgl.backend.openapi.model.*
 import be.sgl.backend.service.exception.UserNotFoundException
-import be.sgl.backend.util.*
+import be.sgl.backend.util.ForExternalOrganization
 import jakarta.persistence.EntityManager
 import mu.KotlinLogging
-import org.apache.http.HttpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
-import java.time.Duration
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import kotlin.reflect.KFunction1
+import java.time.*
 
 @Service
 @ForExternalOrganization
@@ -26,44 +23,42 @@ class ExternalUserDataProvider : UserDataProvider() {
 
     @Autowired
     private lateinit var entityManager: EntityManager
-    @Autowired
-    private lateinit var webClientBuilder: WebClient.Builder
-    @Value("\${rest.ga.url}")
-    private lateinit var restGAUrl: String
     @Value("\${organization.external.id}")
     private lateinit var externalOrganizationId: String
+    @Autowired
+    private lateinit var ledenApi: LedenApi
+    @Autowired
+    private lateinit var lidaanvragenApi: LidaanvragenApi
 
     override fun acceptRegistration(user: User) {
         logger.debug { "Accepting registration for user ${user.id}..." }
         val address = user.addresses.first()
-        createExternalRegistration(LidAanvraag(
-            externalOrganizationId,
-            null,
-            user.firstName,
-            user.name,
-            user.birthdate,
-            Persoonsgegevens(
-                user.sex.code,
-                user.mobile,
-                null
-            ),
-            user.email,
-            Adres(
-                null,
-                address.country,
-                address.zipcode,
-                address.town,
-                address.street,
-                null,
-                address.number,
-                address.subPremise,
-                null,
-                true,
-                null,
-                "normaal"
-            ),
-            user.hasReduction
-        ))
+        val lidAanvraag = LidAanvraag().apply {
+            groepsnummer = externalOrganizationId
+            opmerkingen = "Generated via sgl-backend"
+            voornaam = user.firstName
+            achternaam = user.name
+            geboortedatum = user.birthdate
+            persoonsgegevens.geslacht = when (user.sex) {
+                Sex.MALE -> PersoonsGegevens.GeslachtEnum.MAN
+                Sex.FEMALE -> PersoonsGegevens.GeslachtEnum.VROUW
+                Sex.UNKNOWN -> PersoonsGegevens.GeslachtEnum.ANDERE
+            }
+            persoonsgegevens.gsm = user.mobile
+            email = user.email
+            adres = Adres().apply {
+                land = address.country
+                postcode = address.zipcode
+                gemeente = address.town
+                straat = address.street
+                nummer = address.number
+                bus = address.subPremise
+                postadres = true
+                status = Adres.StatusEnum.NORMAAL
+            }
+            verminderdlidgeld = user.hasReduction
+        }
+        lidaanvragenApi.postNieuweAanvragen(lidAanvraag)
         logger.debug { "External registration finished: request created and ready to be approved!" }
     }
 
@@ -104,16 +99,24 @@ class ExternalUserDataProvider : UserDataProvider() {
             logger.error { "Trying to end a non-externally linked role ${role.name}!" }
             return
         }
-        val functionList = mutableListOf(
-            FunctieInstantie(externalOrganizationId, externalRole, newRole.startDate.asExternalDate() ?: return, null)
-        )
+        val externalFunction = FunctieInstantie().apply {
+            groep = externalOrganizationId
+            functie = externalRole
+            begin = OffsetDateTime.of(newRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+        }
+        val lidPatch = Lid().apply {
+            functies = mutableListOf(externalFunction)
+        }
         role.backupExternalId?.let {
             logger.debug { "${user.username} has a back-up external id, also adding this role." }
-            functionList.add(
-                FunctieInstantie(externalOrganizationId, it, newRole.startDate.asExternalDate() ?: return, null)
-            )
+            val backupExternalFunction = FunctieInstantie().apply {
+                groep = externalOrganizationId
+                functie = it
+                begin = OffsetDateTime.of(newRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+            }
+            lidPatch.functies.add(backupExternalFunction)
         }
-        postExternalMemberData(user.externalId!!, LidFuncties(functionList))
+        ledenApi.patchLid(user.externalId!!, true, lidPatch)
         user.roles.add(newRole)
     }
 
@@ -129,38 +132,62 @@ class ExternalUserDataProvider : UserDataProvider() {
             return
         }
         userRole.endDate = LocalDate.now()
-        val functionList = mutableListOf(
-            FunctieInstantie(externalOrganizationId, externalRole, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
-        )
+        val externalFunction = FunctieInstantie().apply {
+            groep = externalOrganizationId
+            functie = externalRole
+            begin = OffsetDateTime.of(userRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+            einde = OffsetDateTime.of(userRole.endDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+        }
+        val lidPatch = Lid().apply {
+            functies = mutableListOf(externalFunction)
+        }
         role.backupExternalId?.let {
             logger.debug { "${user.username} has a back-up external id, also removing this role." }
-            functionList.add(
-                FunctieInstantie(externalOrganizationId, it, userRole.startDate.asExternalDate() ?: return, userRole.endDate.asExternalDate())
-            )
+            val backupExternalFunction = FunctieInstantie().apply {
+                groep = externalOrganizationId
+                functie = it
+                begin = OffsetDateTime.of(userRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+                einde = OffsetDateTime.of(userRole.endDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+            }
+            lidPatch.functies.add(backupExternalFunction)
         }
-        postExternalMemberData(user.externalId!!, LidFuncties(functionList))
+        ledenApi.patchLid(user.externalId!!, true, lidPatch)
         user.roles.remove(userRole)
     }
 
     private fun User.withExternalData() = apply {
-        getExternalData<Lid>(externalId, ::getExternalMemberData)?.let {
+        ledenApi.getLid(externalId)?.let {
             roles.addAll(it.functies.mapNotNull { f -> translateFunction(this, f) })
-            sex = Sex.values().firstOrNull { s -> s.code == it.persoonsgegevens.geslacht } ?: Sex.UNKNOWN
+            sex = when(it.persoonsgegevens.geslacht) {
+                PersoonsGegevens.GeslachtEnum.MAN -> Sex.MALE
+                PersoonsGegevens.GeslachtEnum.VROUW -> Sex.FEMALE
+                else -> Sex.UNKNOWN
+            }
             mobile = it.persoonsgegevens.gsm
             hasHandicap = it.vgagegevens.beperking
             hasReduction = it.vgagegevens.verminderdlidgeld
             accountNo = it.persoonsgegevens.rekeningnummer
             birthdate = it.vgagegevens.geboortedatum
             memberId = it.verbondsgegevens.lidnummer
-            addresses.addAll(it.adressen.map { a -> a.asAddress() } )
+            addresses.addAll(it.adressen.map { a -> Address().apply {
+                externalId = a.id
+                street = a.straat
+                number = a.nummer
+                subPremise = a.bus
+                zipcode = a.postcode
+                town = a.gemeente
+                country = a.land
+                description = a.omschrijving
+                postalAdress = a.postadres
+            } } )
             contacts.addAll(it.contacten.map { c ->
                 val contact = Contact()
                 contact.name = c.achternaam
                 contact.firstName = c.voornaam
                 contact.role = when(c.rol) {
-                    "vader" -> ContactRole.FATHER
-                    "moeder" -> ContactRole.MOTHER
-                    "voogd" -> ContactRole.GUARDIAN
+                    be.sgl.backend.openapi.model.Contact.RolEnum.VADER -> ContactRole.FATHER
+                    be.sgl.backend.openapi.model.Contact.RolEnum.MOEDER -> ContactRole.MOTHER
+                    be.sgl.backend.openapi.model.Contact.RolEnum.VOOGD -> ContactRole.GUARDIAN
                     else -> ContactRole.RESPONSIBLE
                 }
                 contact.address = addresses.firstOrNull { a -> a.externalId == c.id }
@@ -172,43 +199,11 @@ class ExternalUserDataProvider : UserDataProvider() {
         entityManager.detach(this)
     }
 
-    private fun <T> getExternalData(externalId: String?, call: KFunction1<String, Mono<T>>): T? {
-        if (externalId == null) {
-            logger.error { "External data call for null id!" }
-            return null
-        }
-        return call(externalId).block()
-    }
-
     private fun translateFunction(user: User, function: FunctieInstantie): UserRole? {
         if (function.groep != externalOrganizationId) return null
         val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
-        val endDate = function.einde?.let { LocalDate.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
+        val endDate = function.einde?.toLocalDate()
         if (endDate != null && endDate < LocalDate.now()) return null
-        return UserRole(user, role, LocalDate.parse(function.begin, DateTimeFormatter.ISO_OFFSET_DATE_TIME), endDate)
+        return UserRole(user, role, function.begin.toLocalDate(), endDate)
     }
-
-    private fun authorizedCall() = webClientBuilder
-        .baseUrl(restGAUrl)
-        .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer ${BearerTokenFilter.getToken()}")
-        .build()
-
-    private fun getExternalMemberData(externalId: String) = authorizedCall().get()
-        .uri { it.path("/lid/{id}").build(externalId) }
-        .retrieve()
-        .bodyToMono(Lid::class.java)
-        .cache(Duration.ofSeconds(5))
-
-    private fun postExternalMemberData(externalId: String, data: Any) = authorizedCall().post()
-        .uri { it.path("/lid/{id}").build(externalId) }
-        .bodyValue(data)
-        .retrieve()
-
-    private fun createExternalRegistration(registration: LidAanvraag) = webClientBuilder
-        .baseUrl(restGAUrl)
-        .build()
-        .post()
-        .uri("/lid/aanvraag")
-        .bodyValue(registration)
-        .retrieve()
 }

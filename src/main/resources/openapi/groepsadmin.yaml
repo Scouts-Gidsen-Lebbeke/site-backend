@@ -1,0 +1,3933 @@
+openapi: 3.0.1
+info:
+  title: Groepsadmin API
+  description: REST API achter de Groepsadministratie van Scouts & Gidsen Vlaanderen
+  contact:
+    name: support
+    email: informatica@scoutsengidsenvlaanderen.be
+externalDocs:
+  description: Source code
+  url: https://github.com/ScoutsGidsenVL/groepsadmin
+servers:
+- url: https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga
+  description: Generated server url
+security:
+- bearerAuth: []
+tags:
+- name: Zoeken
+  description: Alle endpoints voor het opzoeken van leden.
+- name: Sjablonen
+  description: Alle endpoints voor het beheren van sjablonen.
+- name: Aanwezigheden
+  description: Alle endpoints voor het beheren van aanwezigheden op activiteiten.
+- name: Lidkaarten
+  description: Alle endpoints voor het beheren van lidkaarten.
+- name: Functies
+  description: Alle endpoints voor het beheren van functies.
+- name: Ledenlijst
+  description: Alle endpoints voor het beheren van ledenlijsten.
+- name: Groepen
+  description: Alle endpoints voor het beheren van groepen.
+- name: Activiteiten
+  description: Alle endpoints voor het beheren van activiteiten.
+- name: GisResource
+  description: Ophalen van gemeentes en straten op basis van meegegeven parameters
+- name: Lidaanvragen
+  description: Alle endpoints voor het beheren van lidaanvragen.
+- name: Leden
+  description: Alle endpoints voor het beheren van een lid en ledendata.
+- name: Websites
+  description: Alle endpoints voor het opvragen van opgelijste websites.
+paths:
+  /sjabloon/mail:
+    get:
+      tags:
+      - Sjablonen
+      summary: Vraag alle beschikbare mailsjablonen op
+      operationId: getMailSjablonen
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailSjablonen'
+        "403":
+          description: Geen leesrechten op mailsjablonen
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/MailSjablonen'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Sjablonen
+      summary: Maak een nieuw mailsjabloon aan
+      operationId: postMailSjabloon
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailSjabloon'
+        required: true
+      responses:
+        "400":
+          description: Ongeldig sjabloon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailSjabloon'
+      security:
+      - bearerAuth: []
+  /sjabloon/etiket:
+    get:
+      tags:
+      - Sjablonen
+      summary: Vraag alle beschikbare etiketsjablonen op
+      operationId: getEtiketSjablonen
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtiketSjablonen'
+        "403":
+          description: Geen leesrechten op etiketsjablonen
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EtiketSjablonen'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Sjablonen
+      summary: Maak een nieuw etiketsjabloon aan
+      operationId: postEtiketSjabloon
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtiketSjabloon'
+        required: true
+      responses:
+        "400":
+          description: Ongeldig sjabloon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtiketSjabloon'
+      security:
+      - bearerAuth: []
+  /lidkaart:
+    post:
+      tags:
+      - Lidkaarten
+      summary: Vraag een pdf met alle lidkaarten op voor de opgegeven leden
+      description: Enkel de leden waarop de huidige gebruiker leesrechten heeft en
+        de lidkaart beschikbaar is worden teruggegeven
+      operationId: getLidkaarten
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LidIdLijst'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+      security:
+      - bearerAuth: []
+  /lidkaart/beschikbaarheid:
+    post:
+      tags:
+      - Lidkaarten
+      summary: Filter de opgegeven leden op leden waarvan de lidkaart beschikbaar
+        is
+      description: Enkel de leden waarop de huidige gebruiker leesrechten heeft worden
+        teruggegeven
+      operationId: controleerBeschikbaarheidLidkaart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LidIdLijst'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - bearerAuth: []
+  /lid:
+    post:
+      tags:
+      - Leden
+      summary: Maak een nieuw lid aan
+      description: "Het lid wordt aangemaakt onder de groep gelinkt aan de enige (toegelaten)\
+        \ functie die is opgegeven.'persoonsgegevens', 'adressen', 'email' en 'functies'\
+        \ zijn verplicht, groepseigenVelden, contacten en vgagegevens zijn optioneel.\
+        \ Alle andere data wordt genegeerd."
+      operationId: postLid
+      parameters:
+      - name: bevestig
+        in: query
+        description: Bevestiging mee te geven indien het lid eigenlijk te jong is
+          om ingeschreven te worden
+        required: true
+        schema:
+          type: boolean
+      - name: vgaFisTeMigreren
+        in: query
+        description: Lijst van functie-instanties stop te zetten indien het nieuwe
+          lid een vga wordt
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lid'
+        required: true
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lid'
+        "403":
+          description: Geen schrijfrechten op deze groep
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Lid'
+      security:
+      - bearerAuth: []
+  /lid/{lidId}/mail:
+    post:
+      tags:
+      - Leden
+      summary: Stuur een mail naar een lid
+      description: "Als voor een gebruiker in het resultaat van het opvragen van een\
+        \ lid een verwijzing staat naar het e-mailen, mag je aannemen dat die gebruiker\
+        \ dat lid mag e-mailen."
+      operationId: stuurMail
+      parameters:
+      - name: lidId
+        in: path
+        description: Unieke id van het lid
+        required: true
+        schema:
+          type: string
+      - name: bevestig
+        in: query
+        description: Bevestiging mee te geven dat de mail moet verstuurd worden.
+        required: true
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - sjabloon
+              type: object
+              properties:
+                sjabloon:
+                  $ref: '#/components/schemas/MailSjabloon'
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+        required: true
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailRapport'
+        "403":
+          description: Geen e-mailrechten op deze gebruiker
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/MailRapport'
+      security:
+      - bearerAuth: []
+  /lid/aanvraag:
+    get:
+      tags:
+      - Lidaanvragen
+      summary: Vraag alle lidaanvragen op
+      description: Enkel lidaanvragen van groepen waar je voldoende rechten op hebt
+        worden getoond.
+      operationId: getAanvragen
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LidAanvragen'
+        "403":
+          description: Geen leesrechten op aanvragen van een groep
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LidAanvragen'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Lidaanvragen
+      summary: Creëer een nieuwe lidaanvraag
+      description: "Omdat de gebruiker in de meeste gevallen niet het recht heeft\
+        \ om de lidaanvraag op te halen, wordt er een lege response gegeven."
+      operationId: postNieuweAanvragen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LidAanvraag'
+        required: true
+      responses:
+        "400":
+          description: Ongeldige aanvraag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "204":
+          description: Aangemaakt
+        "403":
+          description: De opgegeven groep werkt niet met online inschrijvingen
+  /ledenlijst:
+    get:
+      tags:
+      - Ledenlijst
+      summary: Vraag het huidige overzicht van de gebruiker op
+      description: Het aantal dat wordt teruggegeven wordt bepaald op basis van response-tijd
+        en belasting.
+      operationId: getLedenlijst
+      parameters:
+      - name: offset
+        in: query
+        description: Bij het hoeveelste lid de ledenlijst moet starten (startend van
+          0)
+        required: false
+        schema:
+          type: string
+          default: "0"
+      responses:
+        "400":
+          description: Ongeldige offset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ledenlijst'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Ledenlijst
+      summary: Vraag het huidige overzicht van de gebruiker op voor de opgegeven lidnummer
+      description: Het teruggegeven formaat hangt af van de request header (pdf of
+        csv).
+      operationId: getLedenlijstVoorExport
+      parameters:
+      - name: Accept
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LidIdLijst'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/pdf:
+              schema:
+                type: object
+            text/csv:
+              schema:
+                type: object
+      security:
+      - bearerAuth: []
+  /ledenlijst/steekkaart:
+    post:
+      tags:
+      - Ledenlijst
+      summary: Vraag de medische steekkaarten op van alle opgegeven leden
+      description: Enkel de leden waarop de huidige gebruiker leesrechten heeft worden
+        teruggegeven
+      operationId: getSteekkaarten
+      parameters:
+      - name: Accept
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LidIdLijst'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: Geen leesrechten op alle opgegeven leden
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+      security:
+      - bearerAuth: []
+  /ledenlijst/mail:
+    post:
+      tags:
+      - Ledenlijst
+      summary: Stuur een mail naar alle opgegeven leden
+      description: "Indien de ledenlijst in het mailsjabloon leeg is, wordt naar alle\
+        \ leden gemaild waarop de huidige gebruiker leesrechten heeft."
+      operationId: stuurMail_1
+      parameters:
+      - name: bevestig
+        in: query
+        description: Bevestiging mee te geven
+        required: false
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - sjabloon
+              type: object
+              properties:
+                sjabloon:
+                  $ref: '#/components/schemas/MailSjabloon'
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+        required: true
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailRapport'
+      security:
+      - bearerAuth: []
+  /ledenlijst/id/controle:
+    post:
+      tags:
+      - Ledenlijst
+      summary: Filter de opgegeven leden op leden waar de huidige gebruiker leesrechten
+        heeft
+      operationId: checkToegangTotLid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LidIdLijst'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+      - bearerAuth: []
+  /ledenlijst/filter:
+    get:
+      tags:
+      - Ledenlijst
+      summary: Vraag alle beschikbare filters voor de huidige gebruiker op
+      operationId: getOpgeslagenFilters
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Ledenlijst
+      summary: Maak een nieuwe filter aan
+      operationId: postNieuweFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Filter'
+        required: true
+      responses:
+        "400":
+          description: Ongeldige filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+        "403":
+          description: Geen rechten om een filter te delen
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Filter'
+      security:
+      - bearerAuth: []
+  /ledenlijst/filter/stateless:
+    post:
+      tags:
+      - Ledenlijst
+      summary: Vraag een ledenoverzicht op via een opgegeven filter
+      description: De filter wordt niet bewaard in het filteroverzicht van de gebruiker
+      operationId: postFilterNu
+      parameters:
+      - name: offset
+        in: query
+        description: Bij het hoeveelste lid de ledenlijst moet starten (startend van
+          0)
+        required: false
+        schema:
+          type: string
+          default: "0"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Filter'
+        required: true
+      responses:
+        "400":
+          description: Ongeldige offset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ledenlijst'
+      security:
+      - bearerAuth: []
+  /ledenlijst/etiket:
+    post:
+      tags:
+      - Ledenlijst
+      summary: Maak een etiket aan
+      description: Het teruggegeven formaat hangt af van de request header (pdf of
+        csv).
+      operationId: getEtiketten
+      parameters:
+      - name: Accept
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtiketSjabloon'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+      security:
+      - bearerAuth: []
+  /functie:
+    get:
+      tags:
+      - Functies
+      summary: Vraag alle functies die gebruikt worden binnen de opgegeven groepen
+      description: Enkel functies van groepen waar je een functie in of rechten op
+        hebt worden opgelijst.
+      operationId: getFuncties
+      parameters:
+      - name: startGroepsnummer
+        in: query
+        description: Dit duidt op alle groepen waarvan het groepsnummer hiermee begint.
+        required: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Functies'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Functies
+      summary: Maak een nieuwe groepseigen functie aan.
+      description: Enkel de velden `beschrijving` en `voor` zijn verplicht. We laten
+        (op dit moment) geen meerdere groepen in het `voor` veld door.
+      operationId: postFunctie
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Functie'
+        required: true
+      responses:
+        "400":
+          description: Ongeldige functiedata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Functie'
+        "403":
+          description: Geen schrijfrechten op deze groep
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Functie'
+      security:
+      - bearerAuth: []
+  /activiteit:
+    get:
+      tags:
+      - Activiteiten
+      summary: Vraag alle activiteiten voor een groep aan
+      operationId: getActiviteitenPerGroep
+      parameters:
+      - name: groep
+        description: Uniek groepsnummer van de groep
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aanwezigheid'
+        "403":
+          description: Geen leesrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Activiteiten
+      summary: Maak een activiteit aan
+      operationId: postActiviteit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activiteit'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activiteit'
+        "403":
+          description: Geen schrijfrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Activiteiten
+      summary: Update een activiteit
+      operationId: bewerkActiviteit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activiteit'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activiteit'
+        "403":
+          description: Geen schrijfrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /activiteit/{activiteitId}:
+    get:
+      tags:
+      - Activiteiten
+      summary: Vraag een specifieke activiteit op
+      operationId: getActiviteitOpId
+      parameters:
+      - name: activiteitId
+        in: path
+        description: Unieke id van de activiteit
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activiteit'
+        "403":
+          description: Geen leesrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Activiteit bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Activiteiten
+      summary: Maak een aanwezigheid aan voor een activiteit
+      operationId: postAanwezigheid
+      parameters:
+      - name: activiteitId
+        in: path
+        description: Unieke id van de activiteit
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Aanwezigheid'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aanwezigheid'
+        "403":
+          description: Geen schrijfrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Activiteiten
+      summary: Verwijder een activiteit
+      operationId: verwijderActiviteit
+      parameters:
+      - name: activiteitId
+        in: path
+        description: Unieke id van de activiteit
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Ok
+        "403":
+          description: Geen schrijfrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /sjabloon/mail/{sjabloonId}:
+    get:
+      tags:
+      - Sjablonen
+      summary: Vraag een specifiek mailsjabloon op
+      operationId: getMailSjabloon
+      parameters:
+      - name: sjabloonId
+        in: path
+        description: De unieke id van het mailsjabloon
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailSjabloon'
+        "404":
+          description: Sjabloon niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Sjablonen
+      summary: Verwijder een specifiek mailsjabloon
+      operationId: deleteMailSjabloon
+      parameters:
+      - name: sjabloonId
+        in: path
+        description: De unieke id van het mailsjabloon
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Ok
+        "403":
+          description: Geen schrijfrechten op dit sjabloon
+        "404":
+          description: Sjabloon niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Sjablonen
+      summary: Update een specifiek mailsjabloon
+      operationId: patchMailSjabloon
+      parameters:
+      - name: sjabloonId
+        in: path
+        description: De unieke id van het mailsjabloon
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailSjabloon'
+        required: true
+      responses:
+        "400":
+          description: Ongeldig sjabloon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailSjabloon'
+        "403":
+          description: Geen schrijfrechten op dit sjabloon
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/MailSjabloon'
+        "404":
+          description: Sjabloon niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /sjabloon/etiket/{sjabloonId}:
+    get:
+      tags:
+      - Sjablonen
+      summary: Vraag een specifiek etiketsjabloon op
+      operationId: getEtiketSjabloon
+      parameters:
+      - name: sjabloonId
+        in: path
+        description: De unieke id van het etiketsjabloon
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtiketSjabloon'
+        "404":
+          description: Sjabloon niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Sjablonen
+      summary: Verwijder een specifiek etiketsjabloon
+      operationId: deleteEtiketSjabloon
+      parameters:
+      - name: sjabloonId
+        in: path
+        description: De unieke id van het etiketsjabloon
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Ok
+        "403":
+          description: Geen schrijfrechten op dit sjabloon
+        "404":
+          description: Sjabloon niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Sjablonen
+      summary: Update een specifiek etiketsjabloon
+      operationId: patchEtiketSjabloon
+      parameters:
+      - name: sjabloonId
+        in: path
+        description: De unieke id van het etiketsjabloon
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtiketSjabloon'
+        required: true
+      responses:
+        "400":
+          description: Ongeldig sjabloon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtiketSjabloon'
+        "403":
+          description: Geen schrijfrechten op dit sjabloon
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/EtiketSjabloon'
+        "404":
+          description: Sjabloon niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /lid/{lidId}:
+    get:
+      tags:
+      - Leden
+      summary: Vraag een lid met een specifieke id op
+      operationId: getLid
+      parameters:
+      - name: lidId
+        in: path
+        description: Unieke id van het lid
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lid'
+        "403":
+          description: Geen leesrechten op dit lid
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Lid'
+        "404":
+          description: Lid niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Leden
+      summary: Update een bestaand lid
+      description: Secties gemarkeerd als 'update' in de links bij een opgevraagd
+        lid kunnen aangepast worden door de huidige gebruiker. De gebruikersnaam en
+        verbondsgegevens zijn sowieso niet aanpasbaar. Niet-aanwezige secties worden
+        beschouwd als niet aangepast
+      operationId: patchLid
+      parameters:
+      - name: lidId
+        in: path
+        description: Unieke id van het lid
+        required: true
+        schema:
+          type: string
+      - name: bevestig
+        in: query
+        description: "Bevestiging mee te geven indien een functie werd opgegeven waarvoor\
+          \ het lid eigenlijk te jong is, of wanneer een functie geschrapt wordt."
+        required: true
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lid'
+        required: true
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lid'
+      security:
+      - bearerAuth: []
+  /lid/{lidId}/steekkaart:
+    get:
+      tags:
+      - Leden
+      summary: Vraag de individuele steekkaart van een lid op
+      description: "Als voor een gebruiker in het resultaat van het opvragen van een\
+        \ lid een link staat naar de individuele steekkaart, dan kan die gebruiker\
+        \ de steekkaart opvragen."
+      operationId: getLidSteekkaart
+      parameters:
+      - name: lidId
+        in: path
+        description: Unieke id van het lid
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Ongeldige accept header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lid'
+        "403":
+          description: Geen leesrechten op de steekkaart van dit lid
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Lid niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Leden
+      summary: Bewerk de individuele steekkaart van een lid
+      description: Gebruikers kunnen enkel hun eigen individuele steekkaart aanpassen.
+      operationId: patchLidSteekkaart
+      parameters:
+      - name: lidId
+        in: path
+        description: Unieke id van het lid
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Steekkaart'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lid'
+        "403":
+          description: Geen schrijfrechten op de steekkaart van dit lid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Steekkaart'
+        "404":
+          description: Lid niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /ledenlijst/filter/{filterId}:
+    get:
+      tags:
+      - Ledenlijst
+      summary: Vraag een specifieke filter op
+      operationId: getFilter
+      parameters:
+      - name: filterId
+        in: path
+        description: De unieke id van de filter
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+        "404":
+          description: Filter niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Ledenlijst
+      summary: Verwijder een specifieke filter
+      description: De huidige filter mag niet verwijderd worden.
+      operationId: deleteFilter
+      parameters:
+      - name: filterId
+        in: path
+        description: De unieke id van de filter
+        required: true
+        schema:
+          type: string
+      - name: bevestig
+        in: query
+        description: Bevestiging mee te geven
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "204":
+          description: Ok
+        "403":
+          description: Geen schrijfrechten op deze filter
+        "404":
+          description: Filter niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Ledenlijst
+      summary: Update een specifieke filter
+      operationId: patchFilter
+      parameters:
+      - name: filterId
+        in: path
+        description: De unieke id van de filter
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Filter'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+        "403":
+          description: Geen schrijfrechten op deze filter of geen rechten om te delen
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Filter'
+        "404":
+          description: Filter niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /ledenlijst/filter/huidige:
+    get:
+      tags:
+      - Ledenlijst
+      summary: Vraag de huidige actieve filter op
+      operationId: getHuidigeFilter
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Ledenlijst
+      summary: Update de huidige filter
+      operationId: patchHuidigeFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Filter'
+        required: true
+      responses:
+        "400":
+          description: Ongeldige filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+        "404":
+          description: Filter niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /groep/{groepsnummer}:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag een specifieke groep op
+      description: "Afhankelijk van de rechten van de ingelogde gebruiker op de opgevraagde\
+        \ groep, worden sommige secties getoond of verborgen."
+      operationId: getGroep
+      parameters:
+      - name: groepsnummer
+        in: path
+        description: Uniek groepsnummer van de groep
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groep'
+        "404":
+          description: Groep bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Groepen
+      summary: Update een bestaande groep
+      operationId: patchGroep
+      parameters:
+      - name: groepsnummer
+        in: path
+        description: Uniek groepsnummer van de groep
+        required: true
+        schema:
+          type: string
+      - name: bevestig
+        in: query
+        description: Bevestiging mee te geven indien groepseigen gegevens moeten verwijderd
+          worden.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Groep'
+        required: true
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groep'
+        "404":
+          description: Groep bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /functie/{functieId}:
+    get:
+      tags:
+      - Functies
+      summary: Vraag een specifieke functie op
+      description: |-
+        Een gebruiker heeft leesrechten op de groepseigen functies van de groepen waar hij rechten over heeft en alle verbondsfuncties.
+        Het veld `groepen` bevat alle groepen waarbij deze functie kan voorkomen en waar de ingelogde gebruiker toegang toe heeft.
+      operationId: getFunctie
+      parameters:
+      - name: functieId
+        in: path
+        description: Unieke id van de functie
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Functie'
+        "403":
+          description: Geen leesrechten op de groep gelinkt aan deze functie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Functie'
+        "404":
+          description: Functie niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Functies
+      summary: Verwijder een specifieke functie
+      operationId: deleteFunctie
+      parameters:
+      - name: functieId
+        in: path
+        description: Unieke id van de functie
+        required: true
+        schema:
+          type: string
+      - name: bevestig
+        in: query
+        description: Bevestiging mee te geven om de functie te verwijderen
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "400":
+          description: Niet bevestigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+        "204":
+          description: Ok
+          content:
+            '*/*':
+              schema:
+                type: object
+        "403":
+          description: Geen schrijfrechten op de groep gelinkt aan deze functie
+          content:
+            '*/*':
+              schema:
+                type: object
+        "404":
+          description: Functie niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Functies
+      summary: Update een groepseigen functie
+      description: "Enkel de beschrijving wordt geupdated, alle andere velden worden\
+        \ genegeerd."
+      operationId: patchFunctie
+      parameters:
+      - name: functieId
+        in: path
+        description: Unieke id van de functie
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Functie'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Functie'
+        "403":
+          description: "Geen groepseigen functie, of geen schrijfrechten op de groep\
+            \ gelinkt aan deze functie"
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Functie'
+        "404":
+          description: Functie niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /aanwezigheid/{aanwezigheidId}:
+    delete:
+      tags:
+      - Aanwezigheden
+      summary: Verwijder een aanwezigheid
+      operationId: verwijderAanwezigheid
+      parameters:
+      - name: aanwezigheidId
+        in: path
+        description: Unieke id van de aanwezigheid
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Ok
+        "403":
+          description: Geen schrijfrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Aanwezigheden
+      summary: Update een aanwezigheid
+      operationId: patchAanwezigheden
+      parameters:
+      - name: aanwezigheidId
+        in: path
+        description: Unieke id van de aanwezigheid
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Aanwezigheid'
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aanwezigheid'
+        "403":
+          description: Geen schrijfrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Aanwezigheid bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /zoeken:
+    get:
+      tags:
+      - Zoeken
+      summary: Vraag een lijst op van alle leden die in aanmerking komen voor de query
+      operationId: zoekLid
+      parameters:
+      - name: query
+        in: query
+        description: Query waarop gezocht moet worden
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Geen query meegegeven
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoekLeden'
+        "403":
+          description: Niet ingelogd
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ZoekLeden'
+      security:
+      - bearerAuth: []
+  /zoeken/gelijkaardig:
+    get:
+      tags:
+      - Zoeken
+      summary: Vraag een lijst op van alle leden van wie de naam lijkt op de opgegeven
+        naam
+      operationId: zoekLid_1
+      parameters:
+      - name: voornaam
+        in: query
+        description: De voornaam waarop gezocht moet worden
+        required: true
+        schema:
+          type: string
+      - name: achternaam
+        in: query
+        description: De achternaam waarop gezocht moet worden
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Geen voor- en/of achternaam meegegeven
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoekLeden'
+        "403":
+          description: Niet ingelogd
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ZoekLeden'
+      security:
+      - bearerAuth: []
+  /website:
+    get:
+      tags:
+      - Websites
+      summary: Vraag een lijst van websites op die getoond moeten worden in de globale
+        menubalk
+      description: Enkel websites van toepassing voor het huidige lid (of de publieke
+        websites indien niet aangelogd) worden getoond.
+      operationId: getWebsites
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Websites'
+      security:
+      - bearerAuth: []
+  /lid/profiel:
+    get:
+      tags:
+      - Leden
+      summary: Vraag het lid op dat overeen komt met de huidige ingelogde gebruiker
+      operationId: getProfiel
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lid'
+      security:
+      - bearerAuth: []
+  /lid/aanvraag/{id}:
+    get:
+      tags:
+      - Lidaanvragen
+      summary: Vraag een lidaanvraag met een specifieke id op
+      operationId: getAanvraag
+      parameters:
+      - name: id
+        in: path
+        description: Unieke id van de lidaanvraag
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LidAanvraag'
+        "403":
+          description: Geen opvraagrechten voor deze groep
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LidAanvraag'
+        "404":
+          description: Lidaanvraag niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Lidaanvragen
+      summary: Verwijder een lidaanvraag
+      operationId: deleteAanvraag
+      parameters:
+      - name: id
+        in: path
+        description: Unieke id van de lidaanvraag
+        required: true
+        schema:
+          type: string
+      - name: aanvaard
+        in: query
+        description: "ja/nee, moet de aanvraag aanvaard worden alvorens te verwijderen?"
+        required: false
+        schema:
+          type: string
+          default: nee
+      - name: sendMail
+        in: query
+        description: Moet er een mail gestuurd worden naar de aanvrager bij aanvaarden/verwijderen?
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "204":
+          description: Verwijderd
+        "403":
+          description: Geen rechten voor deze groep
+        "404":
+          description: Lidaanvraag niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /lid/aanvraag/export:
+    get:
+      tags:
+      - Lidaanvragen
+      summary: Exporteer alle lidaanvragen
+      description: "Het export-type wordt bepaald aan de hand van de accept-header\
+        \ (enkel json, pdf en csv toegelaten)."
+      operationId: getAanvragenCsv
+      parameters:
+      - name: Accept
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LidAanvragen'
+        "403":
+          description: Geen leesrechten op aanvragen van een groep
+          content:
+            application/json:
+              schema:
+                type: object
+            application/pdf:
+              schema:
+                type: object
+            text/csv:
+              schema:
+                type: object
+      security:
+      - bearerAuth: []
+  /ledenlijst/kolom-type:
+    get:
+      tags:
+      - Ledenlijst
+      summary: Vraag alle kolom-types op die gebruikt kunnen worden in een filter
+      operationId: getKolomType
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kolommen'
+  /groep:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag alle voor de gebruiker zichtbare groepen op
+      description: Enkel groepen waar je een functie in of rechten op hebt worden
+        opgelijst.
+      operationId: getGroepen
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groepen'
+      security:
+      - bearerAuth: []
+  /groep/{groepsnummer}/ledenaantallen:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag de ledenaantallen van een specifieke groep op
+      operationId: getStatistieken
+      parameters:
+      - name: groepsnummer
+        in: path
+        description: Uniek groepsnummer van de groep
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedenAantallen'
+        "403":
+          description: Geen opvraagrechten voor deze groep
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LedenAantallen'
+        "404":
+          description: Groep bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /groep/{groepsnummer}/fiscaalattest:
+    get:
+      tags:
+      - Groepen
+      operationId: getFiscaalAttest
+      parameters:
+      - name: groepsnummer
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: kbo
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: certnaam
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: certadres
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: certpostcode
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: certgemeente
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: certkbo
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/StreamingResponseBody'
+  /groep/vga:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag alle groepen op waarvan de gebruiker vga is
+      operationId: getGroepenWaarvanGebruikerVGA
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groepen'
+      security:
+      - bearerAuth: []
+  /groep/lijst:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag alle groepen op voor een bepaald gebied en type
+      operationId: getGroepenFitsXml_1_1
+      parameters:
+      - name: fits
+        in: query
+        description: "De coördinaten van grenzen waarbinnen de groepen moeten liggen.\
+          \ Formaat 'lat1,lng1|lat2,lng2'"
+        required: false
+        schema:
+          type: string
+        example: "51.2594,4.2215|51.1005,4.4289"
+      - name: soort
+        in: query
+        description: De mogelijke groepssoort(en)
+        required: false
+        schema:
+          type: string
+        example: "groep,gouw"
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Groepen'
+            application/vnd.google-earth.kml+xml:
+              schema:
+                oneOf:
+                - type: string
+                - $ref: '#/components/schemas/Groepen'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groepen'
+  /groep/leiding:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag alle groepen op waarvan de gebruiker leiding of vga is
+      operationId: getGroepenWaarvanGebruikerVGAOfLeiding
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groepen'
+      security:
+      - bearerAuth: []
+  /groep/groepseigengegevens/{groepsnummer}:
+    get:
+      tags:
+      - Groepen
+      summary: Vraag de groepseigen gegevens van een specifieke groep op
+      operationId: getGroepsEigenGegevens
+      parameters:
+      - name: groepsnummer
+        in: path
+        description: Uniek groepsnummer van de groep
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Groep bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /gis/straat:
+    get:
+      tags:
+      - GisResource
+      operationId: getStraten
+      parameters:
+      - name: term
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: postcode
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  /gis/gemeente:
+    get:
+      tags:
+      - GisResource
+      operationId: getGemeentes
+      parameters:
+      - name: term
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  /aanwezigheid/{activiteitId}:
+    get:
+      tags:
+      - Aanwezigheden
+      summary: Vraag alle aanwezigheden voor een activiteit op
+      operationId: getAanwezigheden
+      parameters:
+      - name: activiteitId
+        in: path
+        description: Unieke id van de activiteit
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aanwezigheden'
+        "403":
+          description: Geen leesrechten op activiteiten van deze groep
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Activiteit bestaat niet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /:
+    get:
+      tags:
+      - Overzicht
+      summary: Overzicht opvragen
+      description: De endpoints in de response worden bepaald door de algemene rechten
+        van de gebruiker. 'ledenlijst' wordt enkel teruggegeven voor gebruikers met
+        leesrecht op anderen.
+      operationId: getRoot
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Root'
+components:
+  schemas:
+    Bestemming:
+      type: object
+      properties:
+        lid:
+          type: boolean
+        contacten:
+          type: boolean
+        groepseigenGegevens:
+          type: array
+          items:
+            type: string
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+          format: uri
+        method:
+          type: string
+        secties:
+          type: array
+          items:
+            type: string
+    MailSjabloon:
+      required:
+      - bestemming
+      - inhoud
+      - onderwerp
+      - replyTo
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        naam:
+          type: string
+        lidIds:
+          type: array
+          items:
+            type: string
+        onderwerp:
+          type: string
+        inhoud:
+          type: string
+        bestemming:
+          $ref: '#/components/schemas/Bestemming'
+        van:
+          type: string
+        replyTo:
+          type: string
+        bcc:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        titel:
+          type: string
+        beschrijving:
+          type: string
+    EtiketSjabloon:
+      required:
+      - grootte
+      - inhoud
+      - marge
+      - tussenruimte
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        grootte:
+          $ref: '#/components/schemas/Vec2'
+        tussenruimte:
+          $ref: '#/components/schemas/Vec2'
+        marge:
+          $ref: '#/components/schemas/Vec2'
+        naam:
+          type: string
+        lidIds:
+          type: array
+          items:
+            type: string
+        inhoud:
+          type: string
+        blanco:
+          type: integer
+          format: int32
+        familie:
+          type: boolean
+        alleAdressen:
+          type: boolean
+        aantalEtikettenPerRij:
+          type: integer
+          format: int32
+        aantalRijenPerPagina:
+          type: integer
+          format: int32
+    Vec2:
+      required:
+      - horizontaal
+      - verticaal
+      type: object
+      properties:
+        horizontaal:
+          type: number
+          format: float
+        verticaal:
+          type: number
+          format: float
+    LidIdLijst:
+      type: object
+      properties:
+        lidIds:
+          type: array
+          items:
+            type: string
+    Adres:
+      required:
+      - gemeente
+      - land
+      - nummer
+      - postadres
+      - postcode
+      - status
+      - straat
+      type: object
+      properties:
+        id:
+          type: string
+        land:
+          type: string
+        postcode:
+          type: string
+        gemeente:
+          type: string
+        straat:
+          type: string
+        nummer:
+          pattern: "^[1-9][0-9]*([A-Z]|BIS|TER|[-/][1-9][0-9]*)?$"
+          type: string
+        bus:
+          pattern: "^[A-Z]*[0-9]*[0-9]*([A-Z]|BIS|TER|[.-/][A-Z]*[1-9][0-9]*)?$|"
+          type: string
+        telefoon:
+          type: string
+        postadres:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - normaal
+          - geblokkeerd
+          - overleden
+          - extra
+        positie:
+          $ref: '#/components/schemas/Positie'
+        omschrijving:
+          type: string
+      description: Adres van een lid of een contact. Belgische adressen moeten bestaan
+        in de CRAB-databank van de Vlaamse overheid
+    Contact:
+      required:
+      - adres
+      - rol
+      type: object
+      properties:
+        id:
+          type: string
+        adres:
+          type: string
+        voornaam:
+          type: string
+        achternaam:
+          type: string
+        zelfdeAdres:
+          type: boolean
+        gsm:
+          type: string
+        email:
+          type: string
+        rol:
+          type: string
+          enum:
+          - vader
+          - moeder
+          - voogd
+          - opvoedingsverantwoordelijke
+        rijksregisternummer:
+          type: string
+        rijksregisternummeringevuld:
+          type: boolean
+        lidtenlaste:
+          type: boolean
+    FunctieInstantie:
+      required:
+      - begin
+      - functie
+      - groep
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        groep:
+          type: string
+        functie:
+          type: string
+        begin:
+          type: string
+          format: date-time
+        einde:
+          type: string
+          format: date-time
+        code:
+          type: string
+        omschrijving:
+          type: string
+      description: De functies van het lid (zowel groepseigenfuncties als verbondsfuncties)
+    GroepseigenGegeven:
+      required:
+      - label
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - tekst
+          - vinkje
+          - lijst
+          - email
+          - tekst_meerdere_lijnen
+          - link
+          - groep
+        label:
+          maxLength: 2147483647
+          minLength: 1
+          type: string
+        beschrijving:
+          type: string
+        verplicht:
+          type: boolean
+        kanLeidingWijzigen:
+          type: boolean
+        kanLidWijzigen:
+          type: boolean
+        kanGebruikerWijzigen:
+          type: boolean
+        sort:
+          minimum: 0
+          type: integer
+          format: int32
+        keuzes:
+          maxItems: 2147483647
+          minItems: 1
+          type: array
+          items:
+            type: string
+        parent:
+          type: string
+        waarde:
+          type: string
+    GroepseigenGegevens:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroepseigenGegeven'
+        waarden:
+          type: object
+          additionalProperties:
+            type: string
+      description: De groepseigen velden en gegevens van het lid in de groep met dit
+        groepsnummer (opgedeeld per groep)
+    Lid:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        persoonsgegevens:
+          $ref: '#/components/schemas/PersoonsGegevens'
+        vgagegevens:
+          $ref: '#/components/schemas/VgaGegevens'
+        verbondsgegevens:
+          $ref: '#/components/schemas/VerbondsGegevens'
+        email:
+          type: string
+          description: E-mailadres van het lid. Enkel aanpasbaar door het lid zelf
+            of door de VGA indien het lid nog geen gebruikersnaam heeft.
+        geblokkeerdEmail:
+          type: boolean
+        geblokkeerdEmailAdres:
+          type: string
+        gebruikersnaam:
+          type: string
+        adressen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Adres'
+        contacten:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        groepseigenVelden:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/GroepseigenGegevens'
+          description: De groepseigen velden en gegevens van het lid in de groep met
+            dit groepsnummer (opgedeeld per groep)
+        isActiefVvksmLid:
+          type: boolean
+        heeftGroepseigenFunctie:
+          type: boolean
+        nietVerzekerdReden:
+          type: string
+        functies:
+          maxItems: 2147483647
+          minItems: 1
+          type: array
+          description: De functies van het lid (zowel groepseigenfuncties als verbondsfuncties)
+          items:
+            $ref: '#/components/schemas/FunctieInstantie'
+    PersoonsGegevens:
+      required:
+      - geslacht
+      type: object
+      properties:
+        geslacht:
+          type: string
+          enum:
+          - man
+          - vrouw
+          - andere
+          - g
+        gsm:
+          type: string
+        rekeningnummer:
+          type: string
+        rijksregisternummer:
+          type: string
+        rijksregisternummeringevuld:
+          type: boolean
+      description: Algemene persoonsgegevens
+    Positie:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+    VerbondsGegevens:
+      type: object
+      properties:
+        lidnummer:
+          type: string
+        klantnummer:
+          type: string
+        lidgeldBetaald:
+          type: boolean
+        lidkaartAfgedrukt:
+          type: boolean
+      description: Gegevens die beheerd worden door het verbond
+    VgaGegevens:
+      required:
+      - achternaam
+      - beperking
+      - geboortedatum
+      - verhoogdekinderbijslag
+      - verminderdlidgeld
+      - voornaam
+      type: object
+      properties:
+        voornaam:
+          type: string
+        achternaam:
+          type: string
+        geboortedatum:
+          type: string
+          format: date
+        beperking:
+          type: boolean
+        individueleSteekkaartDatumAangepast:
+          type: string
+          format: date
+        verhoogdekinderbijslag:
+          type: boolean
+        verminderdlidgeld:
+          type: boolean
+      description: Gegevens die enkel door de VGA beheerd worden
+    CustomErrorResponse:
+      type: object
+      properties:
+        boodschap:
+          type: string
+        vraag:
+          type: string
+        link:
+          type: string
+    MailRapport:
+      type: object
+      properties:
+        gelukt:
+          type: array
+          items:
+            type: string
+        mislukt:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    LidAanvraag:
+      required:
+      - geboortedatum
+      - groepsnummer
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        groepsnummer:
+          type: string
+        opmerkingen:
+          type: string
+        voornaam:
+          type: string
+        achternaam:
+          type: string
+        geboortedatum:
+          type: string
+          format: date
+        persoonsgegevens:
+          $ref: '#/components/schemas/PersoonsGegevens'
+        email:
+          type: string
+        adres:
+          $ref: '#/components/schemas/Adres'
+        adressen:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Adres'
+        contacten:
+          type: array
+          items:
+            $ref: '#/components/schemas/LidAanvraagContact'
+        groepsEigenGegevens:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroepseigenGegeven'
+        verminderdlidgeld:
+          type: boolean
+        gsmnummer:
+          type: string
+    LidAanvraagContact:
+      required:
+      - rol
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        adresId:
+          type: string
+        adres:
+          $ref: '#/components/schemas/Adres'
+        voornaam:
+          type: string
+        achternaam:
+          type: string
+        rijksregisternummer:
+          type: string
+        zelfdeAdres:
+          type: boolean
+        gsm:
+          type: string
+        email:
+          type: string
+        rol:
+          type: string
+          enum:
+          - vader
+          - moeder
+          - voogd
+          - opvoedingsverantwoordelijke
+        rijksregisternummeringevuld:
+          type: boolean
+        lidtenlaste:
+          type: boolean
+    Criteria:
+      type: object
+      properties:
+        functies:
+          type: array
+          items:
+            type: string
+        leeftijd:
+          $ref: '#/components/schemas/Leeftijd'
+        geslacht:
+          type: string
+          enum:
+          - man
+          - vrouw
+          - andere
+          - g
+        adresgeblokkeerd:
+          type: boolean
+        emailgeblokkeerd:
+          type: boolean
+        emailleeg:
+          type: boolean
+        geenLidkaart:
+          type: boolean
+        oudleden:
+          type: boolean
+        verminderdLidgeld:
+          type: boolean
+        geweigerdLid:
+          type: boolean
+        geenLidTenLaste:
+          type: boolean
+        individuelesteekkaart:
+          $ref: '#/components/schemas/IndividueleSteekkaart'
+        achternaamlike:
+          type: string
+        naamlike:
+          type: string
+        straatlike:
+          type: string
+        voornaamlike:
+          type: string
+        groepen:
+          type: array
+          items:
+            type: string
+        geenRijksregisternummer:
+          type: array
+          items:
+            type: string
+        groepseigen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Groepseigen'
+    Filter:
+      required:
+      - criteria
+      - groepen
+      - kolommen
+      - sortering
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        naam:
+          type: string
+        type:
+          type: string
+          enum:
+          - verbond
+          - groep
+          - lid
+        groepen:
+          type: array
+          items:
+            type: string
+        kolommen:
+          type: array
+          items:
+            type: string
+        criteria:
+          $ref: '#/components/schemas/Criteria'
+        sortering:
+          type: array
+          items:
+            type: string
+        delen:
+          type: boolean
+        gedeeldvanuit:
+          type: array
+          items:
+            type: string
+    Groepseigen:
+      required:
+      - operator
+      - veld
+      - waarde
+      type: object
+      properties:
+        veld:
+          type: string
+        waarde:
+          type: string
+        operator:
+          type: string
+          enum:
+          - equals
+          - like
+          - greater
+          - less
+    IndividueleSteekkaart:
+      required:
+      - operator
+      - referentie
+      type: object
+      properties:
+        referentie:
+          type: string
+          format: date-time
+        operator:
+          type: string
+          enum:
+          - jonger
+          - ouder
+    Leeftijd:
+      type: object
+      properties:
+        ouderdan:
+          type: integer
+          format: int32
+        jongerdan:
+          type: integer
+          format: int32
+        op31december:
+          type: boolean
+    Ledenlijst:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        leden:
+          type: array
+          items:
+            $ref: '#/components/schemas/LijstLid'
+        aantal:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
+        totaal:
+          type: integer
+          format: int32
+        filtercriterium:
+          type: string
+    LijstLid:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        waarden:
+          type: object
+          additionalProperties:
+            type: string
+        positie:
+          type: integer
+          format: int32
+    Functie:
+      required:
+      - beschrijving
+      - groepen
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        beschrijving:
+          type: string
+        type:
+          type: string
+          enum:
+          - verbond
+          - groep
+        groeperingen:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctieGroepering'
+        groepen:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        code:
+          pattern: "^[A-Z]{1,4}$"
+          type: string
+        adjunct:
+          type: string
+        uiterstegeboortedatum:
+          type: string
+          format: date
+    FunctieGroepering:
+      required:
+      - naam
+      type: object
+      properties:
+        naam:
+          type: string
+        volgorde:
+          type: integer
+          format: int32
+    Activiteit:
+      required:
+      - groep
+      - prijs
+      - tot
+      - van
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        werkjaar:
+          type: integer
+          format: int32
+        van:
+          type: string
+          format: date-time
+        tot:
+          type: string
+          format: date-time
+        omschrijving:
+          type: string
+        prijs:
+          type: number
+          format: double
+        groep:
+          type: string
+    Aanwezigheid:
+      required:
+      - activiteitid
+      - lidid
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        voornaam:
+          type: string
+        naam:
+          type: string
+        prijs:
+          type: number
+          format: double
+        activiteitid:
+          type: string
+        lidid:
+          type: string
+        aantaldagen:
+          type: integer
+          format: int32
+        betaaljaar:
+          type: integer
+          format: int32
+    Steekkaart:
+      required:
+      - gegevens
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        gegevens:
+          $ref: '#/components/schemas/GroepseigenGegevens'
+    Groep:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        aangepast:
+          type: string
+          format: date-time
+        groepsnummer:
+          type: string
+        naam:
+          type: string
+        adressen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Adres'
+        opgericht:
+          type: string
+          format: date-time
+        beeindigd:
+          type: string
+          format: date-time
+        facturatieLeden:
+          type: string
+          format: date-time
+        facturatieLeiding:
+          type: string
+          format: date-time
+        enkelLeiding:
+          type: boolean
+        ledenVerbeterdTonen:
+          type: boolean
+        rekeningnummer:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        vrijeInfo:
+          type: string
+        bovenliggendeGroep:
+          type: string
+        onderliggendeGroepen:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        groepseigenFuncties:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Functie'
+        groepseigenGegevens:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroepseigenGegeven'
+        contacten:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/GroepContact'
+        soort:
+          type: string
+        evenementSchrijfRecht:
+          type: boolean
+        verantwoordelijkheden:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        publiek-inschrijven:
+          type: boolean
+    GroepContact:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        oidFunctie:
+          type: string
+        oidLid:
+          type: string
+        naam:
+          type: string
+        tel:
+          type: string
+        email:
+          type: string
+    ZoekLeden:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        leden:
+          type: array
+          items:
+            $ref: '#/components/schemas/ZoekLid'
+        criteria:
+          type: object
+          additionalProperties:
+            type: string
+        volledig:
+          type: boolean
+    ZoekLid:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        id:
+          type: string
+        voornaam:
+          type: string
+        achternaam:
+          type: string
+        geboortedatum:
+          type: string
+          format: date-time
+        email:
+          type: string
+        gsm:
+          type: string
+    Website:
+      type: object
+      properties:
+        afbeelding:
+          type: string
+        naam:
+          type: string
+        url:
+          type: string
+        link:
+          $ref: '#/components/schemas/Link'
+    Websites:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        websites:
+          type: array
+          items:
+            $ref: '#/components/schemas/Website'
+    MailSjablonen:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        sjablonen:
+          type: array
+          items:
+            $ref: '#/components/schemas/MailSjabloon'
+    EtiketSjablonen:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        sjablonen:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtiketSjabloon'
+    LidAanvragen:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        aanvragen:
+          type: array
+          items:
+            $ref: '#/components/schemas/LidAanvraag'
+    Kolom:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - tekst
+          - vinkje
+          - lijst
+          - email
+          - tekst_meerdere_lijnen
+          - link
+          - groep
+        label:
+          type: string
+        beschrijving:
+          type: string
+        groepering:
+          type: string
+        van:
+          type: string
+          enum:
+          - verbond
+          - groep
+        verouderd:
+          type: boolean
+    Kolommen:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        kolommen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Kolom'
+    Groepen:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        groepen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Groep'
+    Criterium:
+      type: object
+      properties:
+        naam:
+          type: string
+        formaat:
+          type: string
+        waarden:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+    Evolutie:
+      type: object
+      properties:
+        naam:
+          type: string
+        aantalPersonen:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+    LedenAantallen:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        groepsnummer:
+          type: string
+        takStatistieken:
+          type: array
+          items:
+            $ref: '#/components/schemas/TakEvolutie'
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/Criterium'
+        groepsevolutie:
+          type: array
+          items:
+            $ref: '#/components/schemas/Evolutie'
+        ledenPerLeeftijd:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+              format: int32
+        leidingservaring:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        instroom:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stroom'
+        uitstroom:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stroom'
+    Stroom:
+      type: object
+      properties:
+        werkjaar:
+          type: string
+        aantalPerLeeftijd:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+    TakEvolutie:
+      type: object
+      properties:
+        takNaam:
+          type: string
+        aantalLeden:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        aantalLeiding:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        percentageVrouwelijkeLeden:
+          type: number
+          format: double
+        omkaderingscijfer:
+          type: number
+          format: double
+    StreamingResponseBody:
+      type: object
+    Functies:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        functies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Functie'
+    Aanwezigheden:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+        aanwezigen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Aanwezigheid'
+    Root:
+      type: object
+      properties:
+        links:
+          type: array
+          properties:
+            first:
+              $ref: '#/components/schemas/Link'
+            last:
+              $ref: '#/components/schemas/Link'
+            empty:
+              type: boolean
+          items:
+            $ref: '#/components/schemas/Link'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

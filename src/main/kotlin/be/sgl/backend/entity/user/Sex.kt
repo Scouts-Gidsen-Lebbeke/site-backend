@@ -1,5 +1,5 @@
 package be.sgl.backend.entity.user
 
-enum class Sex(val code: String) {
-    MALE("man"), FEMALE("vrouw"), UNKNOWN("andere")
+enum class Sex {
+    MALE, FEMALE, UNKNOWN
 }
