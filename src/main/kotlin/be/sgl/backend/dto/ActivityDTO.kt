@@ -19,7 +19,11 @@ open class ActivityBaseDTO(
     @field:NotNull(message = "{NotNull.activity.start}")
     var start: LocalDateTime,
     @field:NotNull(message = "{NotNull.activity.end}")
-    var end: LocalDateTime
+    var end: LocalDateTime,
+    @field:NotNull(message = "{NotNull.activity.closed}")
+    var closed: LocalDateTime,
+    @field:NotNull(message = "{NotNull.activity.cancellable}")
+    var cancellable: Boolean
 ) : Serializable
 
 // DTO for registration page and CRUD
@@ -29,12 +33,12 @@ class ActivityDTO(
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
+    closed: LocalDateTime,
+    cancellable: Boolean,
     @field:NotBlank(message = "{NotBlank.activity.description}")
     var description: String,
     @field:NotNull(message = "{NotNull.activity.open}")
     var open: LocalDateTime,
-    @field:NotNull(message = "{NotNull.activity.closed}")
-    var closed: LocalDateTime,
     @field:NotNull(message = "{NotNull.activity.price}")
     @field:PositiveOrZero(message = "{PositiveOrZero.activity.price}")
     var price: Double,
@@ -44,8 +48,6 @@ class ActivityDTO(
     var additionalForm: String?,
     @field:Size(max = 255, message = "{Size.activity.additionalFormRule}")
     var additionalFormRule: String?,
-    @field:NotNull(message = "{NotNull.activity.cancellable}")
-    var cancellable: Boolean,
     @field:NotNull(message = "{NotNull.activity.sendConfirmation}")
     var sendConfirmation: Boolean,
     @field:NotNull(message = "{NotNull.activity.sendCompleteConfirmation}")
@@ -57,8 +59,9 @@ class ActivityDTO(
     @field:NotNull(message = "{NotNull.activity.siblingReduction}")
     var siblingReduction: Double,
     @field:NotEmpty(message = "{NotNull.activity.restrictions}")
-    var restrictions: List<ActivityRestrictionDTO>
-) : ActivityBaseDTO(id, name, start, end)
+    var restrictions: List<ActivityRestrictionDTO>,
+    var cancelled: Boolean
+) : ActivityBaseDTO(id, name, start, end, closed, cancellable)
 
 @Schema(description = "A limitation on the activity registration ability for a branch.")
 data class ActivityRestrictionDTO(
@@ -77,12 +80,14 @@ class ActivityResultDTO(
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
+    closed: LocalDateTime,
+    cancellable: Boolean,
     var registrationCount: Int,
     var totalPrice: Double,
     var status: RegistrableStatus
-) : ActivityBaseDTO(id, name, start, end) {
+) : ActivityBaseDTO(id, name, start, end, closed, cancellable) {
     constructor(activity: Activity, registrations: List<ActivityRegistration>) :
-            this(activity.id, activity.name, activity.start, activity.end, registrations.count(), registrations.sumOf { it.price }, activity.getStatus())
+            this(activity.id, activity.name, activity.start, activity.end, activity.closed, activity.cancellable, registrations.count(), registrations.sumOf { it.price }, activity.getStatus())
 }
 
 /**

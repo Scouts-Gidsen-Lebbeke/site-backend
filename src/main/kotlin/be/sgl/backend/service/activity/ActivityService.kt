@@ -37,36 +37,44 @@ class ActivityService {
     private lateinit var checkoutProvider: CheckoutProvider
 
     fun getAllActivities(): List<ActivityResultDTO> {
-        return activityRepository.findAll().map { ActivityResultDTO(it, registrationRepository.getPaidRegistrationsByActivity(it)) }
+        logger.debug { "Fetching all activities" }
+        return activityRepository.findAllRecentFirst().map { ActivityResultDTO(it, registrationRepository.getPaidRegistrationsByActivity(it)) }
     }
 
     fun getVisibleActivities(): List<ActivityBaseDTO> {
+        logger.debug { "Fetching all visible activities" }
         return activityRepository.findAllVisibleActivities().map(mapper::toBaseDto)
     }
 
     fun getActivityDTOById(id: Int): ActivityDTO {
+        logger.debug { "Fetching activity #$id" }
         return mapper.toDto(getActivityById(id))
     }
 
     fun saveActivityDTO(dto: ActivityDTO): ActivityDTO {
+        logger.info { "Saving new activity ${dto.name} (${dto.start} - ${dto.end})" }
         validateActivityDTO(dto)
         val newActivity = mapper.toEntity(dto)
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
         }
+        newActivity.validateRestrictions()
         return mapper.toDto(activityRepository.save(newActivity))
     }
 
     fun mergeActivityDTOChanges(id: Int, dto: ActivityDTO): ActivityDTO {
+        logger.info { "Updating activity #$id" }
         validateActivityDTO(dto)
         val activity = getActivityById(id)
-        // update this first, maybe the status alters
+        // If it was closed, it can be reopened again. The closing date is always before the start date anyway,
+        // and the check hereafter enforces that the closing date is still in the future.
         activity.closed = dto.closed
         check(activity.getStatus() != CANCELLED) { "A cancelled activity cannot be edited anymore!" }
         check(activity.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
         check(activity.getStatus() != STARTED) { "A started activity cannot be edited anymore!" }
         check(activity.getStatus() != COMPLETED) { "A completed activity cannot be edited anymore!" }
         if (activity.getStatus() == NOT_YET_OPEN) {
+            logger.info { "Activity registrations are not yet open, activity can be fully edited" }
             // price and user data collection can only be altered if no registration was possible yet
             activity.reductionFactor = dto.reductionFactor
             activity.siblingReduction = dto.siblingReduction
@@ -85,6 +93,7 @@ class ActivityService {
             activity.restrictions = dto.restrictions.map(mapper::toEntity).toMutableList()
             activity.validateRestrictions()
         } else {
+            logger.info { "Activity registrations are already open, only certain restriction modifications are allowed" }
             val updatedRestrictions = dto.restrictions.map(mapper::toEntity).toMutableList()
             for (existing in activity.restrictions) {
                 val updated = updatedRestrictions.find { it.id == existing.id }
@@ -125,10 +134,10 @@ class ActivityService {
     }
 
     private fun validateActivityDTO(dto: ActivityDTO) {
+        logger.debug { "Validating a correct open-closed-start-end sequence" }
         check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
         check(dto.closed < dto.start) { "The start date of an activity should be after the closure of registrations!" }
         check(dto.start < dto.end) { "The start date of an activity should be before its end date!" }
-        check(LocalDateTime.now() < dto.closed) { "Activity edits should only be performed when they are not yet closed!" }
     }
 
     private fun getActivityById(id: Int): Activity {

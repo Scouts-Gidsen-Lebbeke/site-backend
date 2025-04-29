@@ -34,24 +34,29 @@ class EventService {
     private lateinit var checkoutProvider: CheckoutProvider
 
     fun getAllEvents(): List<EventResultDTO> {
-        return eventRepository.findAll().map { EventResultDTO(it, registrationRepository.getPaidRegistrationsByEvent(it)) }
+        logger.debug { "Fetching all events" }
+        return eventRepository.findAllRecentFirst().map { EventResultDTO(it, registrationRepository.getPaidRegistrationsByEvent(it)) }
     }
 
     fun getVisibleEvents(): List<EventBaseDTO> {
+        logger.debug { "Fetching all visible events" }
         return eventRepository.findAllVisibleEvents().map(mapper::toBaseDto)
     }
 
     fun getEventDTOById(id: Int): EventDTO {
+        logger.debug { "Fetching event #$id" }
         return mapper.toDto(getEventById(id))
     }
 
     fun saveEventDTO(dto: EventDTO): EventDTO {
+        logger.info { "Saving new event ${dto.name} (${dto.start} - ${dto.end})" }
         validateEventDTO(dto)
         val newEvent = mapper.toEntity(dto)
         return mapper.toDto(eventRepository.save(newEvent))
     }
 
     fun mergeEventDTOChanges(id: Int, dto: EventDTO): EventDTO {
+        logger.info { "Updating event #$id" }
         validateEventDTO(dto)
         val event = getEventById(id)
         // update this first, maybe the status alters
@@ -61,6 +66,7 @@ class EventService {
         check(event.getStatus() != STARTED) { "A started event cannot be edited anymore!" }
         check(event.getStatus() != COMPLETED) { "A completed event cannot be edited anymore!" }
         if (event.getStatus() == NOT_YET_OPEN) {
+            logger.info { "Event registrations are not yet open, activity can be fully edited" }
             // price and user data collection can only be altered if no registration was possible yet
             event.price = dto.price
             event.additionalForm = dto.additionalForm
@@ -75,6 +81,7 @@ class EventService {
             // One can only delay or advance the registration period when it wasn't open yet
             event.open = dto.open
         } else {
+            logger.info { "Event registrations are already open, registration limit should respect current registration count" }
             val registrationCount = registrationRepository.getPaidRegistrationsByEvent(event).count()
             check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
@@ -108,10 +115,10 @@ class EventService {
     }
 
     private fun validateEventDTO(dto: EventDTO) {
+        logger.debug { "Validating a correct open-closed-start-end sequence" }
         check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
         check(dto.closed < dto.start) { "The start date of an event should be after the closure of registrations!" }
         check(dto.start < dto.end) { "The start date of an event should be before its end date!" }
-        check(LocalDateTime.now() < dto.closed) { "Event edits should only be performed when they are not yet closed!" }
     }
 
     private fun getEventById(id: Int): Event {

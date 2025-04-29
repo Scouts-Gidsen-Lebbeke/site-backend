@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ActivityRepository : JpaRepository<Activity, Int> {
-    @Query("from Activity where now() < end order by start")
+    @Query("from Activity order by start desc")
+    fun findAllRecentFirst(): List<Activity>
+    @Query("from Activity where now() < end and not cancelled order by start")
     fun findAllVisibleActivities(): List<Activity>
 }

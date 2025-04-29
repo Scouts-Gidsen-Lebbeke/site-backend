@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface EventRepository : JpaRepository<Event, Int> {
-    @Query("from Event where now() between open and end order by start")
+    @Query("from Event order by start desc")
+    fun findAllRecentFirst(): List<Event>
+    @Query("from Event where now() between open and end and not cancelled order by start")
     fun findAllVisibleEvents(): List<Event>
 }
