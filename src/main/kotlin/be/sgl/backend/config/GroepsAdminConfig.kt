@@ -5,6 +5,7 @@ import be.sgl.backend.openapi.ApiClient
 import be.sgl.backend.openapi.api.FunctiesApi
 import be.sgl.backend.openapi.api.GroepenApi
 import be.sgl.backend.openapi.api.LedenApi
+import be.sgl.backend.openapi.api.LedenlijstApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -42,6 +43,11 @@ class GroepsAdminConfig {
     @Bean
     fun getFunctiesApi(groepsAdminApiClient: ApiClient): FunctiesApi {
         return FunctiesApi(groepsAdminApiClient)
+    }
+
+    @Bean
+    fun getLedenlijstApi(groepsAdminApiClient: ApiClient): LedenlijstApi {
+        return LedenlijstApi(groepsAdminApiClient)
     }
 
     // apparently bearerToken authentication is still not implemented,
