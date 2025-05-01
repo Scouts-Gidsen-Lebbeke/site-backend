@@ -69,7 +69,7 @@ class ExternalUserDataProvider : UserDataProvider() {
     }
 
     override fun getUser(username: String): User {
-        return userRepository.findByUsername(username)?.withExternalData() ?: throw UserNotFoundException(username)
+        return findUser(username) ?: throw UserNotFoundException(username)
     }
 
     override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
