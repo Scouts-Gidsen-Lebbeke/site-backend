@@ -85,7 +85,7 @@ class MembershipController {
             ApiResponse(responseCode = "400", description = "Bad membership period format", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun createActivity(@Valid @RequestBody membershipPeriodDTO: MembershipPeriodDTO): ResponseEntity<MembershipPeriodDTO> {
+    fun createPeriod(@Valid @RequestBody membershipPeriodDTO: MembershipPeriodDTO): ResponseEntity<MembershipPeriodDTO> {
         return ResponseEntity(membershipPeriodService.saveMembershipPeriodDTO(membershipPeriodDTO), HttpStatus.CREATED)
     }
 
@@ -100,7 +100,7 @@ class MembershipController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun updateActivity(@PathVariable id: Int, @Valid @RequestBody membershipPeriodDTO: MembershipPeriodDTO): ResponseEntity<MembershipPeriodDTO> {
+    fun updatePeriod(@PathVariable id: Int, @Valid @RequestBody membershipPeriodDTO: MembershipPeriodDTO): ResponseEntity<MembershipPeriodDTO> {
         return ResponseEntity.ok(membershipPeriodService.mergeMembershipPeriodDTOChanges(id, membershipPeriodDTO))
     }
 
@@ -140,7 +140,7 @@ class MembershipController {
         description = "Returns the paid membership linked to the current period for the user identified with the given username.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = MembershipDTO::class))]),
-            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
     fun getCurrentMembershipForUser(@PathVariable username: String): ResponseEntity<MembershipDTO?> {
