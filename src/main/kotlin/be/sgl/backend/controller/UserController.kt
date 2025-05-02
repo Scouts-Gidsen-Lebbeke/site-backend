@@ -4,9 +4,9 @@ import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.dto.RemoteFile
 import be.sgl.backend.dto.UserDTO
-import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.service.user.UserService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -83,5 +83,20 @@ class UserController {
     )
     fun findUser(@RequestParam query: String): ResponseEntity<List<UserDTO>> {
         return ResponseEntity.ok(userService.getByQuery(query))
+    }
+
+    @GetMapping("/staffBranch")
+    @OnlyAuthenticated
+    @Operation(
+        summary = "Get the current staff branch for the given user",
+        description = "Returns the (unique) active branch linked to a staff role for the user identified with the given username.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = BranchDTO::class))]),
+            ApiResponse(responseCode = "204", description = "Not found")
+        ]
+    )
+    fun getStaffBranchForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<BranchDTO?> {
+        val staffBranch = userService.getStaffBranch(userDetails.username)
+        return staffBranch?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 }

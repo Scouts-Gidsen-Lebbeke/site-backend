@@ -1,6 +1,8 @@
 package be.sgl.backend.entity.user
 
 import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.branch.BranchStatus
 import jakarta.persistence.*
 import java.io.Serializable
 import java.time.LocalDate
@@ -65,5 +67,9 @@ class User : Serializable {
 
     fun getHomeAddress(): Address? {
         return addresses.find { it.postalAdress }
+    }
+
+    fun getStaffBranch(): Branch? {
+        return roles.mapNotNull { it.role.staffBranch }.firstOrNull { it.status == BranchStatus.ACTIVE }
     }
 }
