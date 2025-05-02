@@ -16,4 +16,7 @@ class Role {
     @ManyToOne
     var staffBranch: Branch? = null
     var level = RoleLevel.GUEST
+
+    val forExternalSync: Boolean
+        get() = branch != null
 }

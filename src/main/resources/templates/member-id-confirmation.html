@@ -1,11 +1,13 @@
+<!--/*@thymesVar id="member" type="java.lang.String"*/-->
+<!--/*@thymesVar id="memberId" type="java.lang.String"*/-->
 <p>
-    Dag ${member.first.name},
+    Dag <span th:text="${member}"></span>,
 </p>
 <p>
     Ondertussen is jouw lidnummer aangemaakt en kan je jouw gegevens verder aanvullen
     op de <a href="https://groepsadmin.scoutsengidsenvlaanderen.be" target="_blank">Groepsadministratie</a>,
     dit is een centrale ledendatabase van onze koepel Scouts &amp; Gidsen Vlaanderen.
-    Je kan een account aanmaken met jouw lidnummer (${member.id}) en de gegevens die je eerder doorgaf in het formulier.
+    Je kan een account aanmaken met jouw lidnummer (<span th:text="${memberId}"></span>) en de gegevens die je eerder doorgaf in het formulier.
     Hierna kan je inloggen en jouw profiel verder aanvullen (contactgegevens van de ouder(s) en medische fiche).
 </p>
 <p>

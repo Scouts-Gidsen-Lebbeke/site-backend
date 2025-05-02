@@ -33,4 +33,6 @@ class Branch : Auditable() {
         val age = user.getAge() + user.ageDeviation
         return age >= minimumAge && (maximumAge == null || age <= maximumAge!!) && (sex == null || user.sex == sex)
     }
+
+    override fun toString() = name
 }

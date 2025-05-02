@@ -7,24 +7,20 @@ import be.sgl.backend.dto.MembershipDTO
 import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.membership.Membership
-import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.mapper.MembershipMapper
 import be.sgl.backend.repository.BranchRepository
+import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.service.PaymentService
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.MembershipNotFoundException
-import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
-import be.sgl.backend.util.*
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters.lastDayOfYear
 
 @Service
 @Transactional
@@ -39,13 +35,17 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     @Autowired
     private lateinit var branchRepository: BranchRepository
     @Autowired
+    private lateinit var roleRepository: RoleRepository
+    @Autowired
     private lateinit var mapper: MembershipMapper
     @Autowired
     private lateinit var userDataProvider: UserDataProvider
     @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
-    @Autowired
     private lateinit var alertLogger: AlertLogger
+    @Autowired
+    private lateinit var validateAndCreateMembership: ValidateAndCreateMembership
+    @Autowired
+    private lateinit var createCertificateForMembership: CreateCertificateForMembership
 
     fun getAllMembershipsForUser(username: String): List<MembershipDTO> {
         val user = userDataProvider.getUser(username)
@@ -110,38 +110,16 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     private fun createMembershipForUser(user: User): String {
         val currentPeriod = membershipPeriodRepository.getActivePeriod()
-        currentPeriod.registrationLimit?.let {
-            val periodCount = paymentRepository.countByPeriod(currentPeriod)
-            check(periodCount < it) { "This period already has its maximum number of members!" }
-        }
-        val branch = determineCurrentBranchForUser(user, currentPeriod)
-        check(branch != null) { "No active branch can be linked to a user of this age and sex!" }
-        val branchRestriction = currentPeriod.restrictions.find { it.branch == branch }
-        branchRestriction?.registrationLimit?.let {
-            val branchCount = paymentRepository.countByPeriodAndBranch(currentPeriod, branch)
-            check(branchCount < it) { "This branch already has its maximum number of members!" }
-        }
-        var price = branchRestriction?.alternativePrice ?: currentPeriod.price
-        logger.info { "Calculated base price is €$price" }
-        if (user.hasReduction) {
-            logger.info { "User is eligible for reduced tariff, dividing base price with reduction factor (${currentPeriod.reductionFactor})" }
-            price = price.reducePrice(currentPeriod.reductionFactor)
-        }
-        val membership = paymentRepository.save(Membership(user, currentPeriod, branch, price))
+        val membership = paymentRepository.save(validateAndCreateMembership.execute(currentPeriod, user))
         val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships", currentPeriod.id)
         paymentRepository.save(membership)
         return checkoutUrl
     }
 
-    private fun determineCurrentBranchForUser(user: User, period: MembershipPeriod): Branch? {
-        val age = user.getAge(period.end.with(lastDayOfYear())) + user.ageDeviation
-        return branchRepository.getPossibleBranchesForSexAndAge(user.sex, age).firstOrNull()
-    }
-
     override fun handlePaymentPaid(payment: Membership) {
-        if (payment.user.username == null) {
-            logger.debug { "Membership for new user, also accepting linked registration..." }
-            userDataProvider.acceptRegistration(payment.user)
+        roleRepository.getRoleToSyncByBranch(payment.branch)?.let {
+            logger.info { "Membership ${payment.id} to branch ${payment.branch.name} requires role ${it.name}, assigning it..." }
+            userDataProvider.startRole(payment.user, it)
         }
         val params = mapOf(
             "member" to payment.user.firstName,
@@ -149,11 +127,17 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             "periodName" to payment.period.toString(),
             "branchName" to payment.branch.name
         )
-        mailService.builder()
+        val mailBuilder = mailService.builder()
             .to(payment.user.email)
             .subject("Bevestiging inschrijving")
-            .template("subscription-confirmation.html", params)
-            .send()
+        if (payment.user.username == null) {
+            logger.debug { "Membership for new user, also accepting linked registration..." }
+            userDataProvider.acceptRegistration(payment.user)
+            mailBuilder.template("membership-new-user-confirmation.html", params)
+        } else {
+            mailBuilder.template("membership-confirmation.html", params)
+        }
+        mailBuilder.send()
     }
 
     override fun handlePaymentCanceled(payment: Membership) {
@@ -163,32 +147,12 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     }
 
     override fun handlePaymentRefunded(payment: Membership) {
-        TODO("send payment refunded confirmation email")
+        //  membership payments aren't supported with a normal flow, only possible via payment provider
     }
 
     fun getCertificateForMembership(id: Int): ByteArray {
         val membership = getMembershipById(id)
-        check(membership.paid) { "A certificate can only be generated for a paid membership!" }
-        val user = userDataProvider.getUser(membership.user.username!!)
-        val owner = organizationProvider.getOwner()
-        val representative = organizationProvider.getRepresentative()
-        val formData = mapOf(
-            "name" to user.name,
-            "first_name" to user.firstName,
-            "birth_date" to user.birthdate.belgian(),
-            "nis_nr" to user.nis,
-            "address" to user.getHomeAddress(),
-            "membership_period" to membership.period,
-            "amount" to "€ ${membership.price.pricePrecision()}",
-            "payment_date" to membership.createdDate?.belgian(),
-            "organization_name" to owner.name,
-            "organization_address" to owner.address,
-            "organization_email" to owner.getEmail(),
-            "signature_date" to LocalDate.now().belgian(),
-            "signatory" to representative.user.getFullName(),
-            "id" to "${membership.period.id}-#${membership.id}".base64Encoded()
-        )
-        return fillForm("forms/membership.pdf", formData, representative.signature)
+        return createCertificateForMembership.execute(membership)
     }
 
     private fun getMembershipById(id: Int): Membership {

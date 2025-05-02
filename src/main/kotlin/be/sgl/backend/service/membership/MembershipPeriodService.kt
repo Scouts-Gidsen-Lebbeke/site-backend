@@ -32,8 +32,9 @@ class MembershipPeriodService {
     }
 
     fun saveMembershipPeriodDTO(dto: MembershipPeriodDTO): MembershipPeriodDTO {
-        // TODO: validate overlaps, restriction consistency and futureness
+        // TODO: validate overlaps and futureness
         val newPeriod = mapper.toEntity(dto)
+        newPeriod.validateRestrictions()
         for (restriction in newPeriod.restrictions) {
             restriction.period = newPeriod
         }

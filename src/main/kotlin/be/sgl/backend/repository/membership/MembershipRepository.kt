@@ -3,6 +3,7 @@ package be.sgl.backend.repository.membership
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
+import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.PaymentRepository
 import org.springframework.data.jpa.repository.JpaRepository
@@ -25,4 +26,5 @@ interface MembershipRepository : JpaRepository<Membership, Int>, PaymentReposito
     fun countByPeriod(period: MembershipPeriod): Int
     @Query(value = "from Membership where paid and user = :user")
     fun getMembershipsByUser(user: User): MutableList<Membership>
+    fun existsByPeriodAndUser(period: MembershipPeriod, user: User): Boolean
 }
