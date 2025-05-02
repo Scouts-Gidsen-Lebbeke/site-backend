@@ -1,6 +1,7 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.dto.UserDTO
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.mapper.UserMapper
@@ -56,5 +57,9 @@ class UserService {
 
     fun getByQuery(query: String): List<UserDTO> {
         return userDataProvider.findByQuery(query).map(mapper::toDto)
+    }
+
+    fun getStaffBranch(username: String): BranchDTO? {
+        return userDataProvider.getUser(username).getStaffBranch()?.run { mapper.toDto(this) }
     }
 }
