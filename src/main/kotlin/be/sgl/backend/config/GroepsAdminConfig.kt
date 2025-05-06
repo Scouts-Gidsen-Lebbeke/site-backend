@@ -64,6 +64,7 @@ class GroepsAdminConfig {
                                           accept: MutableList<MediaType>?, contentType: MediaType?, authNames: Array<out String>?,
                                           returnType: ParameterizedTypeReference<T>?): RestClient.ResponseSpec {
             BearerTokenFilter.getToken()?.let { headerParams?.setBearerAuth(it) }
+            headerParams?.accept = listOf(MediaType.APPLICATION_JSON)
             return super.invokeAPI(path, method, pathParams, queryParams, body, headerParams, cookieParams, formParams, accept, contentType, authNames, returnType)
         }
     }
