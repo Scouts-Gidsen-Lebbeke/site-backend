@@ -86,8 +86,8 @@ class ActivityResultDTO(
     var totalPrice: Double,
     var status: RegistrableStatus
 ) : ActivityBaseDTO(id, name, start, end, closed, cancellable) {
-    constructor(activity: Activity, registrations: List<ActivityRegistration>) :
-            this(activity.id, activity.name, activity.start, activity.end, activity.closed, activity.cancellable, registrations.count(), registrations.sumOf { it.price }, activity.getStatus())
+    constructor(activity: Activity, registrations: List<Double>) :
+            this(activity.id, activity.name, activity.start, activity.end, activity.closed, activity.cancellable, registrations.count(), registrations.sum(), activity.getStatus())
 }
 
 /**

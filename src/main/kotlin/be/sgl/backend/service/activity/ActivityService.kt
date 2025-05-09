@@ -38,7 +38,8 @@ class ActivityService {
 
     fun getAllActivities(): List<ActivityResultDTO> {
         logger.debug { "Fetching all activities" }
-        return activityRepository.findAllRecentFirst().map { ActivityResultDTO(it, registrationRepository.getPaidRegistrationsByActivity(it)) }
+        return activityRepository.findAllRecentFirst()
+            .map { ActivityResultDTO(it, registrationRepository.getPaidRegistrationPricesByActivity(it)) }
     }
 
     fun getVisibleActivities(): List<ActivityBaseDTO> {
@@ -101,7 +102,7 @@ class ActivityService {
                 check(updated.alternativePrice == existing.alternativePrice) { "The price cannot be altered once the activity has started!" }
             }
             activity.restrictions.addAll(restrictionRepository.saveAll(updatedRestrictions))
-            val registrationCount = registrationRepository.getPaidRegistrationsByActivity(activity).count()
+            val registrationCount = registrationRepository.countPaidRegistrationsByActivity(activity)
             check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
         activity.registrationLimit = dto.registrationLimit

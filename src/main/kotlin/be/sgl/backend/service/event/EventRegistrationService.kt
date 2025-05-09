@@ -59,7 +59,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
 
     private fun isGlobalLimitReached(event: Event): Boolean {
         val globalLimit = event.registrationLimit ?: return false
-        return paymentRepository.getPaidRegistrationsByEvent(event).count() < globalLimit
+        return paymentRepository.countPaidRegistrationsByEvent(event) < globalLimit
     }
 
     private fun calculatePriceForEvent(event: Event, additionalData: String?): Double {

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MembershipPeriodRepository : JpaRepository<MembershipPeriod, Int> {
+    @Query("from MembershipPeriod order by start desc")
+    fun findAllRecentFirst(): List<MembershipPeriod>
     @Query("from MembershipPeriod where now() between start and end")
     fun getActivePeriod(): MembershipPeriod
 }

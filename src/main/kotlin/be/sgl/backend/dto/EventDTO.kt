@@ -63,6 +63,6 @@ class EventResultDTO(
     var totalPrice: Double,
     var status: RegistrableStatus
 ) : EventBaseDTO(id, name, start, end) {
-    constructor(event: Event, registrations: List<EventRegistration>) :
-            this(event.id, event.name, event.start, event.end, registrations.count(), registrations.sumOf { it.price }, event.getStatus())
+    constructor(event: Event, registrations: List<Double>) :
+            this(event.id, event.name, event.start, event.end, registrations.count(), registrations.sum(), event.getStatus())
 }

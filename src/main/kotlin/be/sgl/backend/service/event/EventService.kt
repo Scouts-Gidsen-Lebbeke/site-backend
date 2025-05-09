@@ -35,7 +35,7 @@ class EventService {
 
     fun getAllEvents(): List<EventResultDTO> {
         logger.debug { "Fetching all events" }
-        return eventRepository.findAllRecentFirst().map { EventResultDTO(it, registrationRepository.getPaidRegistrationsByEvent(it)) }
+        return eventRepository.findAllRecentFirst().map { EventResultDTO(it, registrationRepository.getPaidRegistrationPricesByEvent(it)) }
     }
 
     fun getVisibleEvents(): List<EventBaseDTO> {
@@ -82,7 +82,7 @@ class EventService {
             event.open = dto.open
         } else {
             logger.info { "Event registrations are already open, registration limit should respect current registration count" }
-            val registrationCount = registrationRepository.getPaidRegistrationsByEvent(event).count()
+            val registrationCount = registrationRepository.countPaidRegistrationsByEvent(event)
             check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
         event.registrationLimit = dto.registrationLimit

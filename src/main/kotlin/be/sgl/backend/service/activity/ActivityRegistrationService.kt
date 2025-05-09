@@ -184,7 +184,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
 
     private fun isGlobalLimitReached(activity: Activity): Boolean {
         val globalLimit = activity.registrationLimit ?: return false
-        return paymentRepository.getPaidRegistrationsByActivity(activity).count() >= globalLimit
+        return paymentRepository.countPaidRegistrationsByActivity(activity) >= globalLimit
     }
 
     private fun isRestrictionLimitReached(restriction: ActivityRestriction): Boolean {

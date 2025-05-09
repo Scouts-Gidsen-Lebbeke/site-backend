@@ -41,10 +41,10 @@ class MembershipController {
         summary = "Get all membership periods",
         description = "Returns a list of all membership periods.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = MembershipPeriodDTO::class))])
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = MembershipPeriodResultDTO::class))])
         ]
     )
-    fun getAllMembershipPeriods(): ResponseEntity<List<MembershipPeriodDTO>> {
+    fun getAllMembershipPeriods(): ResponseEntity<List<MembershipPeriodResultDTO>> {
         return ResponseEntity.ok(membershipPeriodService.getAllMembershipPeriods())
     }
 

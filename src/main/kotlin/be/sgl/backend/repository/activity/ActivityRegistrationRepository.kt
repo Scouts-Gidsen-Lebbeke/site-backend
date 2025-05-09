@@ -19,6 +19,10 @@ interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, I
     fun getPaidRegistrationsForUserBetween(user: User, begin: LocalDateTime, end: LocalDateTime): List<ActivityRegistration>
     @Query("from ActivityRegistration where subscribable = :activity and paid")
     fun getPaidRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
+    @Query("select price from ActivityRegistration where subscribable = :activity and paid")
+    fun getPaidRegistrationPricesByActivity(activity: Activity): List<Double>
+    @Query("select count(*) from ActivityRegistration where subscribable = :activity and paid")
+    fun countPaidRegistrationsByActivity(activity: Activity): Int
     @Query("from ActivityRegistration where subscribable = :activity")
     fun getRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
     fun getByUser(user: User): List<ActivityRegistration>

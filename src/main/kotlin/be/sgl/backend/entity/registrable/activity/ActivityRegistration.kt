@@ -5,8 +5,6 @@ import be.sgl.backend.entity.user.User
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import kotlin.math.absoluteValue
 
 @Entity
 class ActivityRegistration() : Registration<Activity>() {
