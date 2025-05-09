@@ -10,7 +10,7 @@ data class NewsItemDTO(
     @field:Size(max = 50, message = "{Size.newsItem.title}")
     var title: String,
     @field:NotBlank(message = "{NotBlank.newsItem.content}")
-    @field:Size(max = 500, message = "{Size.newsItem.content}")
+    @field:Size(max = 1000, message = "{Size.newsItem.content}")
     var content: String,
     var image: String? = null,
     var createdDate: LocalDateTime?
