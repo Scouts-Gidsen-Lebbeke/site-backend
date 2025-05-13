@@ -28,6 +28,7 @@ jobs:
         with:
           path: ./
           artifact-name: sbom2.json
+          output-file: .
 
       - name: curl
         run: |
