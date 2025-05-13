@@ -54,6 +54,7 @@ class ActivityService {
 
     fun saveActivityDTO(dto: ActivityDTO): ActivityDTO {
         logger.info { "Saving new activity ${dto.name} (${dto.start} - ${dto.end})" }
+        check(LocalDateTime.now() < dto.closed) { "New activities cannot be closed for registrations yet!" }
         validateActivityDTO(dto)
         val newActivity = mapper.toEntity(dto)
         for (restriction in newActivity.restrictions) {

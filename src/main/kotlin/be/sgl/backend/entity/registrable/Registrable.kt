@@ -23,7 +23,7 @@ abstract class Registrable : Payable() {
     var end: LocalDateTime = LocalDateTime.now()
     var price = 0.0
     var registrationLimit: Int? = null
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var address: Address? = null
     @Lob
     var additionalForm: String? = null
