@@ -208,4 +208,48 @@ class ExternalUserDataProvider : UserDataProvider() {
         if (endDate != null && endDate < LocalDate.now()) return null
         return UserRole(user, role, function.begin.toLocalDate(), endDate)
     }
+
+    override fun getMedicalRecord(user: User): MedicalRecord? {
+        return ledenApi.getLidSteekkaart(user.externalId!!, null)?.run {
+            val record = MedicalRecord()
+            record.user = user
+            record.mayBePhotographed = gegevens.waarden["d5f75e1e463384de014639190ebb00eb"] == "ja"
+            record.mayTakePainkillers = gegevens.waarden["d5f75e1e463384de0146390e395900e2"] == "ja"
+            record.foodAnomalies = gegevens.waarden["d5f75e1e463384de0146391a3b4800ed"].sanitized() // Zo ja, op vlak van voeding (vb. vegetariër, halal):
+            record.allergies = gegevens.waarden["d5f75e1e463384de0146391124af00e5"].sanitized() // Onze zoon of dochter moet een bepaald dieet volgen
+            val impossibleActivities = gegevens.waarden["d5f75e1e4610ed0201461f119f740016"].sanitized()
+            val atSports = gegevens.waarden["d5f75e1e480b9aa901480c7fb70100de"].sanitized()
+            val atHygiene = gegevens.waarden["d5f75e1e4610ed0201461f1464ef001a"].sanitized()
+            val atSocial = gegevens.waarden["d5f75e1e4610ed0201461f14d9de001b"].sanitized()
+            val other = gegevens.waarden["d5f75e1e4610ed0201461f1523c6001c"].sanitized()
+            record.activityRestrictions = listOfNotNull(impossibleActivities, atSports, atHygiene, atSocial, other).joinToString(",").sanitized()
+            record.familyRemarks = gegevens.waarden["d5f75e1e4610ed0201461f026f8e0013"].sanitized()
+            record.socialRemarks = gegevens.waarden["d5f75e1e463384de0146391abdd000ee"].sanitized() // Zo ja, andere aandachtspunten die belang kunnen hebben bij de omgang met ons kind:
+            val diseaseList = gegevens.waarden["d5f75e1e463384de01463905280100de"].sanitized()
+            val diseaseGuidance = gegevens.waarden["d5f75e1e4610ed0201461f1464ef001a"].sanitized()
+            record.diseases = listOfNotNull(diseaseList, diseaseGuidance).joinToString(", ").sanitized()
+            record.medications = gegevens.waarden["d5f75e1e463384de01463901e13c00dc"].sanitized() // ja/nee, but no concrete info
+            // record.physician
+            record.physicianContact = gegevens.waarden["d5f75e1e463384de0146391800f100e9"].sanitized()
+            record.bloodGroup = when(gegevens.waarden["d5f75e1e463384de01463916d21b00e8"]) {
+                "O+" -> BloodGroup.OP
+                "O-" -> BloodGroup.ON
+                "A+" -> BloodGroup.AP
+                "A-" -> BloodGroup.AN
+                "B+ " -> BloodGroup.BP
+                "B-" -> BloodGroup.BN
+                "AB+" -> BloodGroup.ABP
+                "AB-" -> BloodGroup.ABN
+                else -> BloodGroup.UNKNOWN
+            }
+            //record.lastModifiedDate
+            record
+        }
+    }
+
+    private fun String?.sanitized(): String? {
+        return this?.takeIf { it.isNotBlank() && it != "/" && !it.equals("nee", true)
+                && !it.equals("neen", true) && !it.equals("nvt", true)
+                && !it.equals("geen", true) }
+    }
 }

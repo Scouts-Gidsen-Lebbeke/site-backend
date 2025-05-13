@@ -5,6 +5,7 @@ import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.dto.BranchDTO
+import be.sgl.backend.dto.MedicalRecordDTO
 import be.sgl.backend.dto.RemoteFile
 import be.sgl.backend.dto.UserDTO
 import be.sgl.backend.service.user.UserService
@@ -98,5 +99,37 @@ class UserController {
     fun getStaffBranchForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<BranchDTO?> {
         val staffBranch = userService.getStaffBranch(userDetails.username)
         return staffBranch?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/medical-record")
+    @OnlyAuthenticated
+    @Operation(
+        summary = "Get the medical record of the current user",
+        description = "Returns the medical record for the current user, if existing.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = MedicalRecordDTO::class))]),
+            ApiResponse(responseCode = "204", description = "Not found"),
+            ApiResponse(responseCode = "404", description = "User not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+        ]
+    )
+    fun getMedicalRecord(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MedicalRecordDTO?> {
+        val medicalRecord = userService.getMedicalRecord(userDetails.username)
+        return medicalRecord?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/{username}/medical-record")
+    @OnlyStaff
+    @Operation(
+        summary = "Get the medical record of a specific user",
+        description = "Returns the medical record for the user with the specified username, if existing.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = MedicalRecordDTO::class))]),
+            ApiResponse(responseCode = "204", description = "Not found"),
+            ApiResponse(responseCode = "404", description = "User not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+        ]
+    )
+    fun getMedicalRecord(@PathVariable username: String): ResponseEntity<MedicalRecordDTO?> {
+        val medicalRecord = userService.getMedicalRecord(username)
+        return medicalRecord?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 }

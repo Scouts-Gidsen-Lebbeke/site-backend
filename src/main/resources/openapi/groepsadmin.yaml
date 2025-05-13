@@ -1320,7 +1320,6 @@ paths:
           type: string
       - name: Accept
         in: header
-        required: true
         schema:
           type: string
       responses:
@@ -1335,7 +1334,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Lid'
+                $ref: '#/components/schemas/Steekkaart'
         "403":
           description: Geen leesrechten op de steekkaart van dit lid
           content:

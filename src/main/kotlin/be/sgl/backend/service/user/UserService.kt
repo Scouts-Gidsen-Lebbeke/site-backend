@@ -2,6 +2,7 @@ package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.dto.BranchDTO
+import be.sgl.backend.dto.MedicalRecordDTO
 import be.sgl.backend.dto.UserDTO
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.mapper.UserMapper
@@ -60,6 +61,11 @@ class UserService {
     }
 
     fun getStaffBranch(username: String): BranchDTO? {
-        return userDataProvider.getUser(username).getStaffBranch()?.run { mapper.toDto(this) }
+        return userDataProvider.getUser(username).getStaffBranch()?.run(mapper::toDto)
+    }
+
+    fun getMedicalRecord(username: String): MedicalRecordDTO? {
+        val user = userDataProvider.getUser(username)
+        return userDataProvider.getMedicalRecord(user)?.run(mapper::toDto)
     }
 }
