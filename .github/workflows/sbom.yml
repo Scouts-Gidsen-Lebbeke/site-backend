@@ -28,3 +28,7 @@ jobs:
         with:
           path: ./
           artifact-name: sbom.spdx
+
+      - name: curl
+        run: |
+          curl -X POST -H 'X-Api-Key: odt_j5TEn8Qe_oPIpMDxzR8kXFsI6s8GJt8vQtixB4NIY' -F 'project=86a2ee45-fcbe-4c28-ab39-34351b6cd960' -F 'bom=@sbom.json' https://dependency.portasecura.com/api/v1/bom
