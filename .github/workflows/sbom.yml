@@ -1,0 +1,30 @@
+name: Generate SBOM
+
+on:
+  push:
+    branches:
+      - feature/workshopWorkflows
+
+jobs:
+  build-sbom:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Build JAR file
+        run: mvn clean package -Dmaven.test.skip
+
+      - uses: anchore/sbom-action@v0
+        with:
+          path: ./build/
+          artifact-name: sbom.spdx
