@@ -24,10 +24,8 @@ jobs:
       - name: Build JAR file
         run: mvn clean package -Dmaven.test.skip
 
-      - uses: anchore/sbom-action@v0
-        with:
-          path: ./
-          artifact-name: sbom.spdx
+      - name: Create SBOM step
+        run: npx @cyclonedx/cyclonedx-npm --output-format JSON --output-file sbom.json --verbose package.json
 
       - name: curl
         run: |
