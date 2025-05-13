@@ -26,5 +26,5 @@ jobs:
 
       - uses: anchore/sbom-action@v0
         with:
-          path: ./build/
+          path: ./
           artifact-name: sbom.spdx
