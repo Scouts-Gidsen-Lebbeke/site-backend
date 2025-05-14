@@ -54,6 +54,7 @@ class MembershipPeriodResultDTO(
 data class MembershipRestrictionDTO(
     val id: Int?,
     var branch: BranchBaseDTO?,
+    var alternativeStart: LocalDate?,
     var alternativePrice: Double?,
     var alternativeLimit: Int?
 )
