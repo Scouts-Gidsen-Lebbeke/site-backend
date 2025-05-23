@@ -27,8 +27,8 @@ jobs:
             ENV_TAG=dev
           fi
           mvn clean package \
-            -Ddocker.publishRegistry.username=${{ github.actor }} \
-            -Ddocker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
+            -Ddocker.publishRegistry.username=rokeppen \
+            -Ddocker.publishRegistry.password=${{ secrets.TEST_PWD }} \
             -Ddocker.publishRegistry.url=ghcr.io \
             -Dspring-boot.build-image.publish=true \
             -Dspring-boot.build-image.imageName=ghcr.io/sgl/site-backend:${ENV_TAG}
