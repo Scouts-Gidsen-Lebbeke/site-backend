@@ -12,7 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -21,14 +20,15 @@ jobs:
 
       - name: Build and publish with Maven
         run: |
+          OWNER=${{ github.repository_owner }}
           if [[ ${{ github.ref }} == 'refs/heads/prd' ]]; then
             ENV_TAG=latest
           else
             ENV_TAG=dev
           fi
           mvn clean package \
-            -Ddocker.publishRegistry.username=rokeppen \
-            -Ddocker.publishRegistry.password=${{ secrets.TEST_PWD }} \
+            -Ddocker.publishRegistry.username=${{ github.actor }} \
+            -Ddocker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
             -Ddocker.publishRegistry.url=ghcr.io \
             -Dspring-boot.build-image.publish=true \
-            -Dspring-boot.build-image.imageName=ghcr.io/sgl/site-backend:${ENV_TAG}
+            -Dspring-boot.build-image.imageName=ghcr.io/${OWNER,,}/backend:${ENV_TAG}
