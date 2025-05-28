@@ -3,7 +3,6 @@ package be.sgl.backend.dto
 import be.sgl.backend.entity.registrable.RegistrableStatus
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 import java.io.Serializable
@@ -70,7 +69,7 @@ data class ActivityRestrictionDTO(
     val name: String?,
     val alternativeStart: LocalDateTime?,
     val alternativeEnd: LocalDateTime?,
-    val alternativePrice: Double?,
+    var alternativePrice: Double?,
     val alternativeLimit: Int?
 )
 

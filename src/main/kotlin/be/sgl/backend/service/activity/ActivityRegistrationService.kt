@@ -2,6 +2,7 @@ package be.sgl.backend.service.activity
 
 import be.sgl.backend.dto.ActivityRegistrationDTO
 import be.sgl.backend.dto.ActivityRegistrationStatus
+import be.sgl.backend.dto.ActivityRestrictionDTO
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.RegistrableStatus
@@ -93,7 +94,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             logger.info { "Global activity limit (${activity.registrationLimit}) is reached for ${activity.name}" }
             return ActivityRegistrationStatus(closedOptions = relevantRestrictions.map(mapper::toDto))
         }
-        val restrictionsWithoutBranchLimit = relevantRestrictions.filter { !isBranchLimitReached(activity, it.branch) }
+        val restrictionsWithoutBranchLimit = relevantRestrictions.filter { !isBranchLimitReached(activity, it.branch) }.map(mapper::toDto)
         if (restrictionsWithoutBranchLimit.isEmpty()) {
             logger.info { "Branch limit is reached for all active branches of $username" }
             return ActivityRegistrationStatus(closedOptions = relevantRestrictions.map(mapper::toDto))
@@ -101,7 +102,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         val (closed, open) = restrictionsWithoutBranchLimit.partition(::isRestrictionLimitReached)
         if (open.isEmpty()) {
             logger.info { "Limit is reached for each applicable restriction for $username" }
-            return ActivityRegistrationStatus(closedOptions = closed.map(mapper::toDto))
+            return ActivityRegistrationStatus(closedOptions = closed)
         }
         if (user.hasReduction) {
             logger.info { "User is eligible for reduced tariff, altering open option prices..." }
@@ -115,8 +116,8 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
             logger.info { "Medical record for $username is older than one year" }
         }
         return ActivityRegistrationStatus(
-            openOptions = open.map(mapper::toDto),
-            closedOptions = closed.map(mapper::toDto),
+            openOptions = open,
+            closedOptions = closed,
             medicsDate = medicalRecord?.lastModifiedDate,
             medicalsUpToDate = medicalRecord?.isUpToDate ?: false
         )
@@ -187,9 +188,9 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         return paymentRepository.countPaidRegistrationsByActivity(activity) >= globalLimit
     }
 
-    private fun isRestrictionLimitReached(restriction: ActivityRestriction): Boolean {
+    private fun isRestrictionLimitReached(restriction: ActivityRestrictionDTO): Boolean {
         val restrictionLimit = restriction.alternativeLimit ?: return false
-        return paymentRepository.countByRestriction(restriction) >= restrictionLimit
+        return paymentRepository.countByRestriction_Id(restriction.id!!) >= restrictionLimit
     }
 
     private fun isBranchLimitReached(activity: Activity, branch: Branch): Boolean {
