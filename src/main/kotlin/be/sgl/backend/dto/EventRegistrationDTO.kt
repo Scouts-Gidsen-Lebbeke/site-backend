@@ -3,6 +3,7 @@ package be.sgl.backend.dto
 import be.sgl.backend.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 // read-only, no validation
 data class EventRegistrationDTO(
@@ -25,7 +26,6 @@ data class EventRegistrationAttemptData(
     @field:NotBlank(message = "{NotBlank.event.registration.email}")
     @field:Email(message = "{Email.event.registration.email}")
     var email: String,
-    @field:NotBlank(message = "{NotBlank.event.registration.mobile}")
     @PhoneNumber(message = "{PhoneNumber.event.registration.mobile}")
     var mobile: String?,
     var additionalData: String?
