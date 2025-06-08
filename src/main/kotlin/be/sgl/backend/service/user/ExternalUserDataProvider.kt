@@ -171,6 +171,7 @@ class ExternalUserDataProvider : UserDataProvider() {
             accountNo = it.persoonsgegevens.rekeningnummer
             birthdate = it.vgagegevens.geboortedatum
             memberId = it.verbondsgegevens.lidnummer
+            nis = it.persoonsgegevens.rijksregisternummer
             addresses.addAll(it.adressen.map { a -> Address().apply {
                 externalId = a.id
                 street = a.straat
@@ -192,9 +193,11 @@ class ExternalUserDataProvider : UserDataProvider() {
                     be.sgl.backend.openapi.model.Contact.RolEnum.VOOGD -> ContactRole.GUARDIAN
                     else -> ContactRole.RESPONSIBLE
                 }
-                contact.address = addresses.firstOrNull { a -> a.externalId == c.id }
+                contact.address = addresses.firstOrNull { a -> a.externalId == c.adres }
                 contact.mobile = c.gsm
                 contact.email = c.email
+                contact.nis = c.rijksregisternummer
+                contact.taxable = c.lidtenlaste
                 contact
             })
         }

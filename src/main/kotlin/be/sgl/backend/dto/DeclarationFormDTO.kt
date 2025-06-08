@@ -22,7 +22,7 @@ data class DeclarationFormDTO(
     val address: Address
         get() = user.addresses.first { it.postalAdress }
     val parent: Contact
-        get() = user.contacts.first { it.nis != null }
+        get() = user.contacts.first { it.taxable && it.nis != null }
     val totalPrice: Double
         get() = activity1.price + (activity2?.price ?: 0.0) + (activity3?.price ?: 0.0) + (activity4?.price ?: 0.0)
 

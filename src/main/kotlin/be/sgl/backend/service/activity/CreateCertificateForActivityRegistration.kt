@@ -38,6 +38,6 @@ class CreateCertificateForActivityRegistration {
             "signatory" to representative.user.getFullName(),
             "id" to "${registration.subscribable.id}-#${registration.id}".base64Encoded()
         )
-        return fillForm("forms/participation.pdf", formData, representative.signature)
+        return fillForm("forms/participation.pdf", formData, StampSpecs(representative.signature))
     }
 }
