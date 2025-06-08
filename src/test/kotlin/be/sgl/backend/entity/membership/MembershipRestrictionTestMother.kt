@@ -3,7 +3,7 @@ package be.sgl.backend.entity.membership
 import be.sgl.backend.entity.branch.Branch
 import java.time.LocalDate
 
-class MembershipRestrictionTestMother {
+object MembershipRestrictionTestMother {
 
     fun membershipRestriction() = MembershipRestrictionBuilder()
 
@@ -30,6 +30,12 @@ class MembershipRestrictionTestMother {
 
         fun build(): MembershipRestriction {
             val restriction = MembershipRestriction()
+            restriction.id = this.id
+            restriction.period = period
+            restriction.branch = branch
+            restriction.alternativeStart = alternativeStart
+            restriction.alternativePrice = alternativePrice
+            restriction.registrationLimit = registrationLimit
             return restriction
         }
     }

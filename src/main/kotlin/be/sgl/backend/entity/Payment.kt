@@ -6,7 +6,7 @@ import jakarta.persistence.*
 abstract class Payment : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null
+    var id: Int? = null
     var paid: Boolean = false
     var price: Double = 0.0
     @Column(unique = true)

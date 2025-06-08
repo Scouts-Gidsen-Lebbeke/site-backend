@@ -17,7 +17,7 @@ import java.time.Period
 class User : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null
+    var id: Int? = null
 
     var username: String? = null
     var externalId: String? = null
