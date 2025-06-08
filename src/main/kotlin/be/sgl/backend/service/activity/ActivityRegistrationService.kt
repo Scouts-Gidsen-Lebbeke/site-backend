@@ -155,6 +155,8 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
         if (registration.price > 0) {
             checkoutProvider.refundPayment(registration)
+            registration.markRefunded()
+            paymentRepository.save(registration)
         } else {
             paymentRepository.delete(registration)
             handlePaymentRefunded(registration)

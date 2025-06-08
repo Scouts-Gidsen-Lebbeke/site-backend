@@ -14,7 +14,11 @@ abstract class Payment : Auditable() {
 
     abstract fun getDescription(): String
 
-    fun markPaid() {
+    fun markPaid() = apply {
         paid = true
+    }
+
+    fun markRefunded() = apply {
+        paid = false
     }
 }
