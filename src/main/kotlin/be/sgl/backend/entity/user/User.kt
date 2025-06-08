@@ -57,6 +57,9 @@ class User : Serializable {
     @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
     var staffData = StaffData(this)
 
+    val taxableParent: Contact?
+        get() = contacts.firstOrNull { it.taxable && it.nis != null }
+
     fun getFullName(): String {
         return "$firstName $name"
     }

@@ -7,6 +7,7 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.service.MailService
 import be.sgl.backend.service.SettingService
+import be.sgl.backend.service.exception.LocalizedException
 import be.sgl.backend.service.user.UserDataProvider
 import generated.Verzendingen
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,8 +40,11 @@ class BelcotaxService {
     fun getFormsForUserAndPreviousYear(username: String): List<ByteArray> {
         val (beginOfYear, endOfYear) = getPreviousYearPeriod()
         val user = userDataProvider.getUser(username)
+        user.nis ?: throw LocalizedException("belcotax.service.form.user.no.nis")
+        user.taxableParent ?: throw LocalizedException("belcotax.service.form.user.no.taxable.parent")
+        user.taxableParent?.address ?: throw LocalizedException("belcotax.service.forms.user.no.parent.address")
         val activities = registrationRepository.getPaidRegistrationsForUserBetween(user, beginOfYear, endOfYear).filter(::relevantActivity)
-        check(activities.isNotEmpty()) { "No relevant activities found for $username" }
+        if (activities.isEmpty()) throw LocalizedException("belcotax.service.forms.user.no.activities", getRelevantAge(user))
         return activities.asForms(user).map(formService::createForm)
     }
 
@@ -72,8 +76,12 @@ class BelcotaxService {
         return beginOfYear to endOfYear
     }
 
+    private fun getRelevantAge(user: User): Int {
+        return if (user.hasHandicap) 21 else 14
+    }
+
     private fun relevantActivity(registration: ActivityRegistration): Boolean {
-        return registration.user.getAge(registration.start.toLocalDate()) < if (registration.user.hasHandicap) 21 else 14
+        return registration.user.getAge(registration.start.toLocalDate()) < getRelevantAge(registration.user)
     }
 
     private fun List<ActivityRegistration>.asForms(user: User): List<DeclarationFormDTO> {
