@@ -53,9 +53,20 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         val finalPrice = calculatePriceForEvent(event, attempt.additionalData)
         var registration = EventRegistration(event, attempt, finalPrice, user)
         registration = paymentRepository.save(registration)
+        logger.info { "Created registration #${registration.id}" }
+        if (registration.price == 0.0) {
+            logger.info { "Registration was free, marking it paid and returning redirect url immediately" }
+            registration.markPaid()
+            registration = paymentRepository.save(registration)
+            handlePaymentPaid(registration)
+            return checkoutProvider.createRedirectUrl(registration, "events", event.id)
+        }
+        logger.info { "Registration is not free, linking payment via payment provider" }
         val customer = user?.let { Customer(it) } ?: Customer("${registration.firstName} ${registration.name}", registration.email)
         val checkoutUrl = checkoutProvider.createCheckoutUrl(customer, registration, "events", event.id)
+        logger.info { "Registration linked to payment ${registration.paymentId}, saving reference" }
         paymentRepository.save(registration)
+        logger.info { "Redirecting user to payment url $checkoutUrl" }
         return checkoutUrl
     }
 
@@ -130,7 +141,12 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         val registration = getRegistrationById(id)
         check(registration.paid) { "Only a paid event registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
-        checkoutProvider.refundPayment(registration)
+        if (registration.price > 0) {
+            checkoutProvider.refundPayment(registration)
+        } else {
+            paymentRepository.delete(registration)
+            handlePaymentRefunded(registration)
+        }
         logger.info { "Event registration #$id successfully cancelled" }
     }
 

@@ -75,7 +75,10 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         registration = paymentRepository.save(registration)
         logger.info { "Created registration #${registration.id}" }
         if (registration.price == 0.0) {
-            logger.info { "Registration was free, returning redirect url immediately" }
+            logger.info { "Registration was free, marking it paid and returning redirect url immediately" }
+            registration.markPaid()
+            registration = paymentRepository.save(registration)
+            handlePaymentPaid(registration)
             return checkoutProvider.createRedirectUrl(registration, "activities", restriction.activity.id)
         }
         logger.info { "Registration is not free, linking payment via payment provider" }
@@ -150,7 +153,12 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
         val registration = getRegistrationById(id)
         check(registration.paid) { "Only a paid activity registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
-        checkoutProvider.refundPayment(registration)
+        if (registration.price > 0) {
+            checkoutProvider.refundPayment(registration)
+        } else {
+            paymentRepository.delete(registration)
+            handlePaymentRefunded(registration)
+        }
         logger.info { "Activity registration #$id successfully cancelled" }
     }
 
