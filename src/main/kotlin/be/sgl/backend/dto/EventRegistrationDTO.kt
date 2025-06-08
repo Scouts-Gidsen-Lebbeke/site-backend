@@ -3,7 +3,6 @@ package be.sgl.backend.dto
 import be.sgl.backend.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Size
 
 // read-only, no validation
 data class EventRegistrationDTO(
@@ -15,7 +14,8 @@ data class EventRegistrationDTO(
     val name: String,
     val firstName: String,
     val email: String,
-    val mobile: String?
+    val mobile: String?,
+    val subscribable: EventBaseDTO
 )
 
 data class EventRegistrationAttemptData(

@@ -98,7 +98,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     override fun handlePaymentRefunded(payment: EventRegistration) {
         val params = mapOf(
             "customer" to "${payment.firstName} ${payment.name}",
-            "price" to payment.price - 1,
+            "price" to payment.price - checkoutProvider.getRefundCost(payment),
             "eventName" to payment.subscribable.name,
         )
         val mailBuilder = mailService.builder()

@@ -110,7 +110,7 @@ class ActivityRegistrationService : PaymentService<ActivityRegistration, Activit
     override fun handlePaymentRefunded(payment: ActivityRegistration) {
         val params = mapOf(
             "member" to payment.user.firstName,
-            "price" to payment.price - 1,
+            "price" to payment.price - checkoutProvider.getRefundCost(payment),
             "activityName" to payment.subscribable.name,
         )
         val mailBuilder = mailService.builder()

@@ -5,9 +5,11 @@
     Dag <span th:text="${customer}"></span>,
 </p>
 <p>
-    Jouw registratie voor <span th:text="${eventName}"></span> werd succesvol geannuleerd,
-    je ontvangt binnenkort het betaalde bedrag terug op jouw rekening,
-    exclusief administratiekosten (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>).
+    Jouw registratie voor <span th:text="${eventName}"></span> werd succesvol geannuleerd.
+    <span th:if="${price > 0.0}">
+        Je ontvangt binnenkort het betaalde bedrag terug op jouw rekening,
+        exclusief administratiekosten (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>).
+    </span>
 </p>
 <p>
     Stevige linker,<br/>
