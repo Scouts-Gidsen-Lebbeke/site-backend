@@ -132,4 +132,18 @@ class UserController {
         val medicalRecord = userService.getMedicalRecord(username)
         return medicalRecord?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
+
+    @GetMapping("/{username}/siblings")
+    @OnlyStaff
+    @Operation(
+        summary = "Get all the siblings a specific user",
+        description = "Returns a list of users registered as sibling from the user with the specified username.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = UserDTO::class))]),
+            ApiResponse(responseCode = "404", description = "User not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
+        ]
+    )
+    fun getSiblings(@PathVariable username: String): ResponseEntity<List<UserDTO>> {
+        return ResponseEntity.ok(userService.getSiblings(username))
+    }
 }

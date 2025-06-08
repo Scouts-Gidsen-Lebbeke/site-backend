@@ -13,8 +13,8 @@ import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.service.PaymentService
 import be.sgl.backend.service.exception.EventNotFoundException
 import be.sgl.backend.service.exception.EventRegistrationNotFoundException
+import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import be.sgl.backend.service.user.UserDataProvider
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -33,6 +33,8 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     private lateinit var mapper: EventMapper
     @Autowired
     private lateinit var userDataProvider: UserDataProvider
+    @Autowired
+    private lateinit var calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
 
     fun getAllRegistrationsForEvent(id: Int): List<EventRegistrationDTO> {
         val event = getEventById(id)
@@ -63,7 +65,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     }
 
     private fun calculatePriceForEvent(event: Event, additionalData: String?): Double {
-        return event.price + event.readAdditionalData(additionalData)
+        return event.price + calculatePriceFromAdditionalData.execute(event, additionalData)
     }
 
     override fun handlePaymentPaid(payment: EventRegistration) {

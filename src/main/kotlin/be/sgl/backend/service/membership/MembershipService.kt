@@ -111,8 +111,11 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     private fun createMembershipForUser(user: User): String {
         val currentPeriod = membershipPeriodRepository.getActivePeriod()
         val membership = paymentRepository.save(validateAndCreateMembership.execute(currentPeriod, user))
+        logger.info { "Created membership #${membership.id}" }
         val checkoutUrl = checkoutProvider.createCheckoutUrl(Customer(user), membership, "memberships", currentPeriod.id)
+        logger.info { "Membership linked to payment ${membership.paymentId}, saving reference" }
         paymentRepository.save(membership)
+        logger.info { "Redirecting user to payment url $checkoutUrl" }
         return checkoutUrl
     }
 

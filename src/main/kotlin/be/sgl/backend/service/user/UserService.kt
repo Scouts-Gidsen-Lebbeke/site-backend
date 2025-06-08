@@ -6,6 +6,7 @@ import be.sgl.backend.dto.MedicalRecordDTO
 import be.sgl.backend.dto.UserDTO
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.mapper.UserMapper
+import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.repository.user.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -25,6 +26,8 @@ class UserService {
     private lateinit var userRepository: UserRepository
     @Autowired
     private lateinit var imageService: ImageService
+    @Autowired
+    private lateinit var siblingRepository: SiblingRepository
 
     fun getProfile(username: String): UserDTO {
         return mapper.toDto(userDataProvider.getUser(username))
@@ -67,5 +70,10 @@ class UserService {
     fun getMedicalRecord(username: String): MedicalRecordDTO? {
         val user = userDataProvider.getUser(username)
         return userDataProvider.getMedicalRecord(user)?.run(mapper::toDto)
+    }
+
+    fun getSiblings(username: String): List<UserDTO> {
+        val user = userDataProvider.getUser(username)
+        return siblingRepository.getByUser(user).map { mapper.toDto(it.sibling) }
     }
 }
