@@ -55,7 +55,7 @@ class MailService {
             val organization = organizationRepository.getByType(OrganizationType.OWNER)
                 ?: throw IncompleteConfigurationException("No organization configured!")
             return organization.getEmail()
-                ?: throw IncompleteConfigurationException("No organization email configured, not able to send forms!")
+                ?: throw IncompleteConfigurationException("No organization email configured!")
         }
 
         fun to(vararg to: String) = apply { this.to.addAll(to) }

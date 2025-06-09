@@ -33,7 +33,10 @@ class BelcotaxService {
     fun getDispatchForPreviousYear(): Verzendingen {
         val (beginOfYear, endOfYear) = getPreviousYearPeriod()
         val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
-        val forms = activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user) }
+        val forms = activities.groupBy { it.user }
+            .filter { it.key.nis != null && it.key.taxableParent?.address != null }
+            .flatMap { (user, activities) -> activities.asForms(user) }
+        if (forms.isEmpty()) throw LocalizedException("belcotax.service.dispatch.no.activities")
         return dispatchService.createDispatch(forms)
     }
 
