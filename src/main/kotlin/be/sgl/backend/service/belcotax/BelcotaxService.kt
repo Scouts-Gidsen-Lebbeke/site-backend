@@ -10,12 +10,15 @@ import be.sgl.backend.service.SettingService
 import be.sgl.backend.service.exception.LocalizedException
 import be.sgl.backend.service.user.UserDataProvider
 import generated.Verzendingen
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class BelcotaxService {
+
+    private val logger = KotlinLogging.logger {}
 
     @Autowired
     private lateinit var settingService: SettingService
@@ -31,12 +34,15 @@ class BelcotaxService {
     private lateinit var mailService: MailService
 
     fun getDispatchForPreviousYear(): Verzendingen {
+        logger.info { "Creating dispatch for latest fiscal year..." }
         val (beginOfYear, endOfYear) = getPreviousYearPeriod()
         val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
+        logger.info { "Found ${activities.size} relevant registrations between ${beginOfYear} and ${endOfYear}." }
         val forms = activities.groupBy { it.user }
             .filter { it.key.nis != null && it.key.taxableParent?.address != null }
             .flatMap { (user, activities) -> activities.asForms(user) }
         if (forms.isEmpty()) throw LocalizedException("belcotax.service.dispatch.no.activities")
+        logger.info { "Mapped registrations to dispatch data, ${forms.size} forms left." }
         return dispatchService.createDispatch(forms)
     }
 
@@ -52,9 +58,13 @@ class BelcotaxService {
     }
 
     fun getFormsForPreviousYear(): Map<User, List<ByteArray>> {
+        logger.info { "Creating forms for latest fiscal year..." }
         val (beginOfYear, endOfYear) = getPreviousYearPeriod()
         val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
-        return activities.groupBy { it.user }.flatMap { (user, activities) -> activities.asForms(user) }
+        logger.info { "Found ${activities.size} relevant registrations between ${beginOfYear} and ${endOfYear}." }
+        return activities.groupBy { it.user }
+            .filter { it.key.nis != null && it.key.taxableParent?.address != null }
+            .flatMap { (user, activities) -> activities.asForms(user) }
             .groupBy(DeclarationFormDTO::user, formService::createForm)
     }
 
