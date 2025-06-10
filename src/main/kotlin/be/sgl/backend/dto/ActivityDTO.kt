@@ -112,10 +112,10 @@ data class ActivityRegistrationStatus(
 )
 
 data class ActivityRegistrationStatusDTO(
-    val currentRegistration: ActivityRegistrationDTO? = null,
-    val activeMembership: Boolean = true,
-    val openOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
-    val closedOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
-    val medicsDate: LocalDateTime? = null,
-    val medicalsUpToDate: Boolean = false
+    var currentRegistration: ActivityRegistrationDTO? = null,
+    var activeMembership: Boolean = true,
+    var openOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
+    var closedOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
+    var medicsDate: LocalDateTime? = null,
+    var medicalsUpToDate: Boolean = false
 )
