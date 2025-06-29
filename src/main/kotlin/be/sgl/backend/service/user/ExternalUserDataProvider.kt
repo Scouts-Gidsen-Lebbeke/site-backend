@@ -197,7 +197,6 @@ class ExternalUserDataProvider : UserDataProvider() {
                 contact.mobile = c.gsm
                 contact.email = c.email
                 contact.nis = c.rijksregisternummer
-                contact.taxable = c.lidtenlaste
                 contact
             })
         }
