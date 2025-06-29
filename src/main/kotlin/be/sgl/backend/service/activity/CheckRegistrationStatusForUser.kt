@@ -2,6 +2,7 @@ package be.sgl.backend.service.activity
 
 import be.sgl.backend.dto.ActivityRegistrationStatus
 import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.user.User
@@ -35,10 +36,15 @@ class CheckRegistrationStatusForUser {
             logger.info { "No active branch found for ${user.username}" }
             return ActivityRegistrationStatus(activeMembership = false)
         }
-        val relevantRestrictions = activity.getRestrictionsForBranches(relevantBranches)
+        var relevantRestrictions = activity.getRestrictionsForBranches(relevantBranches)
         if (relevantRestrictions.isEmpty()) {
             logger.info { "No applicable restrictions found for ${user.username}" }
             return ActivityRegistrationStatus()
+        }
+        val nonPassiveRelevantBranches = relevantBranches.filter { it.status != BranchStatus.PASSIVE }
+        if (activity.getRestrictionsForBranches(nonPassiveRelevantBranches).isNotEmpty()) {
+            logger.info { "Applicable non-passive branch restrictions found, prioritizing these" }
+            relevantRestrictions = activity.getRestrictionsForBranches(nonPassiveRelevantBranches)
         }
         if (isGlobalLimitReached(activity)) {
             logger.info { "Global activity limit (${activity.registrationLimit}) is reached for ${activity.name}" }
