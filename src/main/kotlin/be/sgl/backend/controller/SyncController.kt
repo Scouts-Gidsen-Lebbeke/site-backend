@@ -23,10 +23,9 @@ class SyncController {
 
     @GetMapping("/users")
     @OnlyAdmin
-    fun syncUsers(@RequestParam(required = false, defaultValue = "false") withData: Boolean): SseEmitter {
+    fun syncUsers(): SseEmitter {
         TODO("Fetch all users based on the organization id and create the users")
         // one time thing to fill up db
-        // withData param to fetch all external data and save internally, if GA ever decides to stop
     }
 
     @GetMapping("/members")

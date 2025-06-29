@@ -5,25 +5,29 @@ import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.util.Kbo
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import java.io.File
 
 data class OrganizationDTO(
-    val id: Int?,
+    var id: Int?,
     @NotBlank
-    val name: String,
-    val type: OrganizationType,
+    var name: String?,
+    var type: OrganizationType?,
     @Kbo
-    val kbo: String?,
-    val address: AddressDTO,
-    val contactMethods: List<ContactMethodDTO>,
-    val image: String?,
-    val description: String?
+    var kbo: String?,
+    @NotNull
+    var address: AddressDTO?,
+    var contactMethods: List<ContactMethodDTO>,
+    var image: String?,
+    var description: String?
 )
 
 data class ContactMethodDTO(
-    val id: Int?,
-    val value: String,
-    val type: ContactMethodType
+    var id: Int?,
+    @NotNull
+    var value: String?,
+    @NotNull
+    var type: ContactMethodType?
 )
 
 data class Representative(
@@ -34,8 +38,8 @@ data class Representative(
 
 data class RepresentativeDTO(
     @field:NotBlank
-    val username: String?,
-    val title: String?,
+    var username: String?,
+    var title: String?,
     @field:NotBlank
-    val signature: String?
+    var signature: String?
 )

@@ -9,6 +9,7 @@ import be.sgl.backend.openapi.model.*
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.MailService
+import be.sgl.backend.service.user.ExternalUserDataProvider.Companion.toDto
 import be.sgl.backend.util.ForExternalOrganization
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +41,7 @@ class SyncService {
 
     fun syncMembers(sseEmitter: SseEmitter) {
         val externalUsers = getExternalMemberIds()
+        sseEmitter.send("$externalOrganizationId currently has ${externalUsers.size} members")
         val openRegistrations = getOpenRegistrations()
         membershipRepository.getCurrent().forEach { membership ->
             val user = membership.user
@@ -52,11 +54,11 @@ class SyncService {
                     if (newRole == null) {
                         // This should only happen for staff branch memberships, which shouldn't be common for new members
                         logger.info { "Internal membership didn't assign role, manual intervention is needed." }
-                         // TODO: escalate this
+                        sseEmitter.send("No role for new member in branch ${membership.branch} was assigned, please pick and assign a role manually.")
                         return@forEach
                     }
                     sseEmitter.send("Internal membership assigned role ${newRole.name}, passing it for external creation...")
-                    user.externalId = createExternalMemberForRequestId(requestId, newRole)
+                    user.externalId = createExternalMemberForUser(user, newRole)
                     userRepository.save(user)
                     lidaanvragenApi.deleteAanvraag(requestId, "ja", false)
                     sseEmitter.send("External membership request accepted.")
@@ -66,7 +68,13 @@ class SyncService {
                 checkNotNull(user.externalId) { "Member with an active membership but without a username should only exist for users with open registrations!" }
                 checkNotNull(externalUsers.remove(user.externalId)) { "Member with an external id (${user.externalId}) but no username should still be found externally!"}
                 ledenApi.getLid(user.externalId).verbondsgegevens.lidnummer?.let {
-                    // TODO: avoid this mail is sent multiple times, perhaps with externalMember.aangepast?
+                    user.memberId?.let {
+                        sseEmitter.send("User has already received a mail for account creation, skipped....")
+                        return@forEach
+                    }
+                    logger.info { "Saving externally generated member id $it, linking it internally..." }
+                    user.memberId = it
+                    userRepository.save(user)
                     val params = mapOf(
                         "member" to user.firstName,
                         "memberId" to it
@@ -76,14 +84,16 @@ class SyncService {
                         .subject("Bevestiging aanmaak lidnummer")
                         .template("member-id-confirmation.html", params)
                         .send()
-                    sseEmitter.send("User has memberId $it, sent mail for account creation.")
+                    sseEmitter.send("User has member id $it, sent mail for account creation.")
                     return@forEach
                 }
                 sseEmitter.send("User has no member id yet, no further checks needed.")
                 return@forEach
             }
-            sseEmitter.send("User has a username, checking external functions...")
-            checkNotNull(externalUsers.remove(user.externalId)) { "Member with a username (${user.username}) should always be found externally!" }
+            sseEmitter.send("User has a username ${user.username}, checking external functions...")
+            val externalId = user.externalId
+            checkNotNull(externalId) { "Member with a username should always have an external id!" }
+            checkNotNull(externalUsers.remove(user.externalId)) { "Member with a username should always be found externally!" }
             val externalFunctions = getCurrentlyActiveExternalFunctionIds(user.externalId!!)
             sseEmitter.send("Current external functions: $externalFunctions")
             // check if member roles are applied externally (lookup role based on branch and apply (backup)ExternalIds)
@@ -91,13 +101,13 @@ class SyncService {
                 userRole.role.externalId?.let {
                     if (it !in externalFunctions) {
                         sseEmitter.send("External function $it should be assigned for role ${userRole.role.name} but isn't, assigning it...")
-                        createExternalFunction(user, it)
+                        createExternalFunction(externalId, it)
                     }
                 }
                 userRole.role.backupExternalId?.let {
                     if (it !in externalFunctions) {
                         sseEmitter.send("External backup function $it should be assigned for role ${userRole.role.name} but isn't, assigning it...")
-                        createExternalFunction(user, it)
+                        createExternalFunction(externalId, it)
                     }
                 }
                 // We currently don't care about external functions corresponding to an internal role
@@ -105,16 +115,28 @@ class SyncService {
                 // If members don't have any internal functions, they will still be synced in the next step
             }
         }
-        for ((externalId, _) in externalUsers) {
+        for ((externalId, listMember) in externalUsers) {
             sseEmitter.send("External user #$externalId has no membership, removing all external roles...")
             val lidPatch = Lid().apply {
-                functies = mutableListOf()
-            }
-            getCurrentlyActiveExternalFunctions(externalId).forEach {
-                it.einde = OffsetDateTime.now()
-                lidPatch.functies.add(it)
+                functies = getCurrentlyActiveExternalFunctions(externalId).onEach {
+                    it.einde = OffsetDateTime.now()
+                }
             }
             ledenApi.patchLid(externalId, true, lidPatch)
+            val params = mapOf(
+                "member" to listMember.waarden[EXTERNAL_FIRST_NAME]
+            )
+            val email = listMember.waarden[EXTERNAL_EMAIL]
+            if (email == null) {
+                sseEmitter.send("All roles were removed, but no notification sent to user due to no known email.")
+                continue
+            }
+            mailService.builder()
+                .to(email)
+                .subject("Stopzetting lidmaatschap")
+                .template("unsubscribe-confirmation.html", params)
+                .send()
+            sseEmitter.send("All roles were removed, notified user via mail $email.")
         }
     }
 
@@ -123,16 +145,10 @@ class SyncService {
             naam = "Members $externalOrganizationId"
             type = Filter.TypeEnum.GROEP
             groepen = listOf(externalOrganizationId)
-            kolommen = listOf( // at least one is required
-                "be.vvksm.groepsadmin.model.column.VoornaamColumn",
-//                "be.vvksm.groepsadmin.model.column.AchternaamColumn",
-//                "be.vvksm.groepsadmin.model.column.VVKSMFunktiesColumn",
-//                "be.vvksm.groepsadmin.model.column.GeboorteDatumColumn",
-//                "be.vvksm.groepsadmin.model.column.VVKSMTakkenColumn",
-//                "be.vvksm.groepsadmin.model.column.VVKSMLeeftijdsTakkenColumn"
-            )
+            // at least one is required
+            kolommen = listOf(EXTERNAL_FIRST_NAME, EXTERNAL_EMAIL)
             criteria = Criteria().apply {
-                functies = listOf() // TODO
+                // we don't filter on functions, unknown functions should always be unlinked anyway
                 groepen = listOf(externalOrganizationId)
             }
             delen = false
@@ -155,28 +171,24 @@ class SyncService {
         }.associate { it }
     }
 
-    private fun createExternalMemberForRequestId(requestId: String, newRole: Role): String {
-        val request = lidaanvragenApi.getAanvraag(requestId)
-        val newLid = Lid().apply {
-            persoonsgegevens = request.persoonsgegevens
-            vgagegevens = VgaGegevens().apply {
-                voornaam = request.voornaam
-                achternaam = request.achternaam
-                geboortedatum = request.geboortedatum
-                beperking = false // this should be done better
-                verminderdlidgeld = request.verminderdlidgeld
+    private fun createExternalMemberForUser(user: User, newRole: Role): String {
+        logger.info { "Translating internal user #${user.id} into an external user..." }
+        var newLid = user.toDto()
+        newLid.functies = listOf(
+            FunctieInstantie().apply {
+                groep = externalOrganizationId
+                functie = newRole.externalId
+                begin = OffsetDateTime.now()
             }
-            adressen = request.adressen.toMutableList()
-            functies = listOf(
-                FunctieInstantie().apply {
-                    groep = externalOrganizationId
-                    functie = newRole.externalId
-                    begin = OffsetDateTime.now()
-                }
-            )
-            email = request.email
+        )
+        newLid = ledenApi.postLid(false, newLid, null)
+        logger.info { "Created external member with id ${newLid.id} and external function ${newRole.externalId}" }
+        // Upon creation only a single function can be passed
+        newRole.backupExternalId?.let {
+            logger.info { "${newRole.name} has an additional external function $it to link..." }
+            createExternalFunction(newLid.id, it)
         }
-        return ledenApi.postLid(false, newLid, null).id
+        return newLid.id
     }
 
     private fun getCurrentlyActiveExternalFunctions(externalId: String): MutableList<FunctieInstantie> {
@@ -189,7 +201,7 @@ class SyncService {
         return getCurrentlyActiveExternalFunctions(externalId).map { it.functie }.toMutableList()
     }
 
-    private fun createExternalFunction(user: User, functionId: String) {
+    private fun createExternalFunction(externalId: String, functionId: String) {
         val externalFunction = FunctieInstantie().apply {
             groep = externalOrganizationId
             functie = functionId
@@ -198,14 +210,11 @@ class SyncService {
         val lidPatch = Lid().apply {
             functies = mutableListOf(externalFunction)
         }
-        ledenApi.patchLid(user.externalId, true, lidPatch)
+        ledenApi.patchLid(externalId, true, lidPatch)
     }
 
-    private fun endExternalFunction(externalId: String, externalFunction: FunctieInstantie) {
-        externalFunction.einde = OffsetDateTime.now()
-        val lidPatch = Lid().apply {
-            functies = mutableListOf(externalFunction)
-        }
-        ledenApi.patchLid(externalId, true, lidPatch)
+    companion object {
+        private const val EXTERNAL_FIRST_NAME = "be.vvksm.groepsadmin.model.column.VoornaamColumn"
+        private const val EXTERNAL_EMAIL = "be.vvksm.groepsadmin.model.column.EmailColumn"
     }
 }

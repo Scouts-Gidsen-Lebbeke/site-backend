@@ -43,13 +43,13 @@ class User : Serializable {
     var hasReduction = false
     var hasHandicap = false
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val addresses: MutableList<Address> = mutableListOf()
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val contacts: MutableList<Contact> = mutableListOf()
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val roles: MutableList<UserRole> = mutableListOf()
     val level: RoleLevel
         get() = roles.maxOfOrNull { it.role.level } ?: RoleLevel.GUEST

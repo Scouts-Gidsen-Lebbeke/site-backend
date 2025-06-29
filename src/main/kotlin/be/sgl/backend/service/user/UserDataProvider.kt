@@ -4,13 +4,15 @@ import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.entity.user.MedicalRecord
 import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.entity.user.UserRole
 import be.sgl.backend.repository.user.MedicalRecordRepository
-import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.repository.user.UserRoleRepository
 import be.sgl.backend.mapper.AddressMapper
+import be.sgl.backend.service.exception.UserNotFoundException
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 /**
  * Gateway for all user data (contact info, medical data and roles).
@@ -24,8 +26,6 @@ abstract class UserDataProvider {
     protected lateinit var userRepository: UserRepository
     @Autowired
     private lateinit var addressMapper: AddressMapper
-    @Autowired
-    protected lateinit var roleRepository: RoleRepository
     @Autowired
     protected lateinit var userRoleRepository: UserRoleRepository
     @Autowired
@@ -70,34 +70,65 @@ abstract class UserDataProvider {
         return userRepository.existsByUsername(username ?: return false)
     }
 
-    abstract fun findUser(username: String): User?
+    open fun findUser(username: String): User? {
+        logger.debug { "Fetching user data for $username..." }
+        return userRepository.findByUsername(username)
+    }
 
-    abstract fun getUser(username: String): User
+    fun getUser(username: String): User {
+        return findUser(username) ?: throw UserNotFoundException(username)
+    }
 
-    abstract fun findByNameAndEmail(name: String, firstName: String, email: String) : User?
+    open fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
+        logger.debug { "Trying to find user with name $firstName $name and email $email..." }
+        return userRepository.findByNameAndFirstNameAndEmail(name, firstName, email)
+    }
 
     fun findByQuery(query: String): List<User> {
         logger.debug { "Trying to find users by query $query..." }
         return userRepository.findByQuery(query)
     }
 
-    abstract fun updateUser(user: User): User
+    open fun updateUser(user: User): User {
+        logger.debug { "Updating user data for ${user.username}..." }
+        return userRepository.save(user)
+    }
 
     open fun deleteUser(username: String) {
         logger.debug { "Deleting all user data for ${username}..." }
         userRepository.deleteByUsername(username)
     }
 
-    abstract fun startRole(user: User, role: Role)
+    open fun startRole(user: User, role: Role): UserRole? {
+        logger.debug { "Starting role ${role.name} for ${user.username}..." }
+        if (user.roles.any { it.role == role }) {
+            logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
+            return null
+        }
+        val newRole = userRoleRepository.save(UserRole(user, role))
+        user.roles.add(newRole)
+        return newRole
+    }
 
-    abstract fun endRole(user: User, role: Role)
+    open fun endRole(user: User, role: Role): UserRole? {
+        logger.debug { "Ending role ${role.name} for ${user.username}..." }
+        val userRole = user.roles.find { it.role == role }
+        if (userRole == null) {
+            logger.warn { "${user.username} never had the role ${role.name}! Ending aborted." }
+            return null
+        }
+        userRole.endDate = LocalDate.now()
+        userRoleRepository.delete(userRole)
+        user.roles.remove(userRole)
+        return userRole
+    }
 
-    open fun getMedicalRecord(user: User): MedicalRecord? {
+    fun getMedicalRecord(user: User): MedicalRecord? {
         logger.debug { "Fetching medical record for ${user.username}..." }
         return medicalRecordRepository.getMedicalRecordByUser(user)
     }
 
-    open fun updateMedicalRecord(medicalRecord: MedicalRecord) {
+    fun updateMedicalRecord(medicalRecord: MedicalRecord) {
         logger.debug { "Updating medical record for ${medicalRecord.user.username}..." }
         medicalRecordRepository.save(medicalRecord)
     }

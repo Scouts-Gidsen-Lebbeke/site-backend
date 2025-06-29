@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface RoleRepository : JpaRepository<Role, Int> {
     fun getRoleByExternalIdEquals(id: String): Role?
-    @Query("from Role where branch = :branch and staffBranch is null")
+    @Query("from Role where branch = :branch")
     fun getRoleToSyncByBranch(branch: Branch): Role?
 }

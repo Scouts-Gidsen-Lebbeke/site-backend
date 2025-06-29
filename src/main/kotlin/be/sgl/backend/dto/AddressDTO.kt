@@ -6,13 +6,18 @@ import java.io.Serializable
 
 class AddressDTO(
     var id: Int?,
-    var street: String,
-    var number: String,
+    @NotNull
+    var street: String?,
+    @NotNull
+    var number: String?,
     var subPremise: String?,
-    var zipcode: String,
-    var town: String,
+    @NotNull
+    var zipcode: String?,
+    @NotNull
+    var town: String?,
     @NotNull
     @CountryCode
-    var country: String,
-    var description: String?
+    var country: String?,
+    var description: String?,
+    var postalAdress: Boolean
 ) : Serializable

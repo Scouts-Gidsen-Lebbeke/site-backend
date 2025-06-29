@@ -121,7 +121,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     override fun handlePaymentPaid(payment: Membership) {
         roleRepository.getRoleToSyncByBranch(payment.branch)?.let {
-            logger.info { "Membership ${payment.id} to branch ${payment.branch.name} requires role ${it.name}, assigning it..." }
+            logger.info { "Membership ${payment.id} to branch ${payment.branch} requires role ${it.name}, assigning it..." }
             userDataProvider.startRole(payment.user, it)
         }
         val params = mapOf(

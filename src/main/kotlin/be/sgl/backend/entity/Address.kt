@@ -1,9 +1,6 @@
 package be.sgl.backend.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import jakarta.persistence.*
 
 @Entity
 class Address : Auditable() {
@@ -11,11 +8,16 @@ class Address : Auditable() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
     var externalId: String? = null
+    @Column(nullable = false)
     lateinit var street: String
+    @Column(nullable = false)
     lateinit var number: String
     var subPremise: String? = null
+    @Column(nullable = false)
     lateinit var zipcode: String
+    @Column(nullable = false)
     lateinit var town: String
+    @Column(nullable = false)
     lateinit var country: String
     var description: String? = null
     var postalAdress: Boolean = false
