@@ -3,6 +3,9 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.dto.ExternalFunction
 import be.sgl.backend.dto.RoleDTO
+import be.sgl.backend.dto.UserDTO
+import be.sgl.backend.dto.UserRoleDTO
+import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.service.RoleService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -14,6 +17,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
@@ -61,5 +65,18 @@ class RoleController {
     )
     fun getPaidExternalFunctions(): ResponseEntity<List<ExternalFunction>> {
         return ResponseEntity.ok(roleService.getPaidExternalFunctions())
+    }
+
+    @GetMapping("/{level}/users")
+    @OnlyAdmin
+    @Operation(
+        summary = "Get all users with a role of the specified level",
+        description = "Returns a list of all users roles, filtered by their current role level.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = UserDTO::class))])
+        ]
+    )
+    fun getAllUsers(@PathVariable level: RoleLevel): ResponseEntity<List<UserRoleDTO>> {
+        return ResponseEntity.ok(roleService.getUserRoles(level))
     }
 }

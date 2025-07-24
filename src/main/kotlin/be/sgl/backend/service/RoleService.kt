@@ -2,11 +2,14 @@ package be.sgl.backend.service
 
 import be.sgl.backend.dto.ExternalFunction
 import be.sgl.backend.dto.RoleDTO
+import be.sgl.backend.dto.UserRoleDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.user.Role
+import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.mapper.RoleMapper
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.RoleRepository
+import be.sgl.backend.repository.user.UserRoleRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.RoleNotFoundException
 import be.sgl.backend.service.organization.OrganizationProvider
@@ -27,6 +30,8 @@ class RoleService {
     private lateinit var organizationProvider: OrganizationProvider
     @Autowired
     private lateinit var branchRepository: BranchRepository
+    @Autowired
+    private lateinit var userRoleRepository: UserRoleRepository
 
     fun getAllRoles(): List<RoleDTO> {
         return roleRepository.findAll().map(mapper::toDto)
@@ -69,6 +74,10 @@ class RoleService {
 
     fun getPaidExternalFunctions(): List<ExternalFunction> {
         return organizationProvider.getPaidExternalFunctions()
+    }
+
+    fun getUserRoles(level: RoleLevel): List<UserRoleDTO> {
+        return userRoleRepository.findByRole_Level(level).map(mapper::toDto)
     }
 
     private fun getRoleById(id: Int): Role {

@@ -136,7 +136,7 @@ class UserController {
     @GetMapping("/{username}/siblings")
     @OnlyStaff
     @Operation(
-        summary = "Get all the siblings a specific user",
+        summary = "Get all the siblings of a specific user",
         description = "Returns a list of users registered as sibling from the user with the specified username.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = UserDTO::class))]),
