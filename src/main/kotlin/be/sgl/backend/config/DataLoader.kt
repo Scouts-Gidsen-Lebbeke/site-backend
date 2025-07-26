@@ -40,7 +40,7 @@ class DataLoader {
 
         val externalSync = externalOrganizationId != null
         roleRepository.saveAll(listOf(
-            adminRole("Admin", "d5f75b320b812440010b812555970393".takeIf { externalSync }, "8a95af9385ad9b880185c035ee740010".takeIf { externalSync }),
+            adminRole("Admin", VGA_FUNCTION.takeIf { externalSync }, "8a95af9385ad9b880185c035ee740010".takeIf { externalSync }),
             staffRole("Kapoenenleiding", "d5f75b320b812440010b812555e603a4".takeIf { externalSync }, null, kapoenen, true),
             staffRole("Welpenleiding", "d5f75b320b812440010b812555ec03a5".takeIf { externalSync }, null, welpen, true),
             staffRole("Jonggiverleiding", "d5f75b320b812440010b812555cc039e".takeIf { externalSync }, null, jonggivers, true),
@@ -66,5 +66,9 @@ class DataLoader {
         this.maximumAge = max
         this.image = "${name.lowercase()}.png"
         this.status = status
+    }
+
+    companion object {
+        const val VGA_FUNCTION = "d5f75b320b812440010b812555970393"
     }
 }

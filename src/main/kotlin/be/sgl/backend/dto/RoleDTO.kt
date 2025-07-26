@@ -3,7 +3,6 @@ package be.sgl.backend.dto
 import be.sgl.backend.entity.user.RoleLevel
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import java.time.LocalDate
 
 data class RoleDTO(
     val id: Int?,
@@ -35,9 +34,7 @@ data class StaffRoleDTO(
 data class UserRoleDTO(
     var id: Int?,
     var user: UserDTO,
-    var role: RoleDTO,
-    var startDate: LocalDate?,
-    var endDate: LocalDate?
+    var role: RoleDTO
 )
 
 data class StaffLinkDTO(

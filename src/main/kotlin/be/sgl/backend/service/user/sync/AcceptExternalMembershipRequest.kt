@@ -1,6 +1,5 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LedenApi
@@ -27,7 +26,7 @@ class AcceptExternalMembershipRequest {
     @Autowired
     private lateinit var ledenApi: LedenApi
     @Autowired
-    private lateinit var createExternalFunction: CreateExternalFunction
+    private lateinit var createExternalFunctions: CreateExternalFunctions
 
     fun execute(user: User, requestId: String): Boolean {
         logger.info { "User has external membership request $requestId, trying to accept..." }
@@ -60,7 +59,7 @@ class AcceptExternalMembershipRequest {
         // Upon creation only a single function can be passed
         newRole.backupExternalId?.let {
             logger.info { "${newRole.name} has an additional external function $it to link..." }
-            createExternalFunction.execute(newLid.id, it)
+            createExternalFunctions.execute(newLid.id, it)
         }
         return newLid.id
     }

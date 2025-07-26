@@ -18,6 +18,8 @@ class SyncService {
     private val logger = KotlinLogging.logger {}
 
     @Autowired
+    private lateinit var createUserForExternalMember: CreateUserForExternalMember
+    @Autowired
     private lateinit var fetchExternalMembersById: FetchExternalMembersById
     @Autowired
     private lateinit var fetchUsersWithExternalOpenRegistrations: FetchUsersWithExternalOpenRegistrations
@@ -28,11 +30,19 @@ class SyncService {
     @Autowired
     private lateinit var acceptExternalMembershipRequest: AcceptExternalMembershipRequest
     @Autowired
-    private lateinit var removeExternalFunctions: RemoveExternalFunctions
+    private lateinit var removeAllExternalFunctions: RemoveAllExternalFunctions
     @Autowired
-    private lateinit var checkMissingExternalFunctions: CheckMissingExternalFunctions
+    private lateinit var checkOutOfSyncExternalFunctions: CheckOutOfSyncExternalFunctions
     @Autowired
     private lateinit var alertLogger: AlertLogger
+
+    fun syncUsers(sseEmitter: SseEmitter) {
+        logger.info { "Syncing users..." }
+        fetchExternalMembersById.execute().forEach { (externalId, _) ->
+            sseEmitter.send(i18n("sync.users.create.user", externalId))
+            createUserForExternalMember.execute(externalId)
+        }
+    }
 
     fun syncMembers(sseEmitter: SseEmitter) {
         logger.info { "Syncing members..." }
@@ -72,30 +82,30 @@ class SyncService {
                         "User #${user.id} with active membership and username ${user.username} could not be found externally!" }
                     return@forEach
                 }
-                val missingFunctions = checkMissingExternalFunctions.execute(user, true)
-                if (missingFunctions.isNotEmpty()) {
-                    sseEmitter.send(i18n("sync.members.external.functions.assigned", missingFunctions.size))
-                } else {
+                val (missingFunctions, wrongFunctions) = checkOutOfSyncExternalFunctions.execute(user, true)
+                if (missingFunctions == 0 && wrongFunctions == 0) {
                     sseEmitter.send(i18n("sync.members.external.functions.okay"))
+                } else {
+                    sseEmitter.send(i18n("sync.members.external.functions.corrected", missingFunctions, wrongFunctions))
                 }
             }
         }
         for ((externalId, externalMember) in externalMembers) {
             sseEmitter.send(i18n("sync.members.no.membership", externalId))
-            removeExternalFunctions.execute(externalId, externalMember)
+            removeAllExternalFunctions.execute(externalId, externalMember)
             sseEmitter.send(i18n("sync.members.external.functions.removed"))
         }
     }
 
-    fun getUnsyncedMembers(): Map<ExternalMember, SyncState> {
-        val usersWithSyncState = mutableMapOf<ExternalMember, SyncState>()
+    fun getUnsyncedMembers(): List<ExternalMember> {
+        val unsyncedMembers = mutableListOf<ExternalMember>()
         val externalMembers = fetchExternalMembersById.execute()
         val usersWithOpenRegistrations = fetchUsersWithExternalOpenRegistrations.execute()
         membershipRepository.getCurrent().forEach { membership ->
             val user = membership.user
             if (user.username == null) {
                 usersWithOpenRegistrations[user]?.let { _ ->
-                    usersWithSyncState[ExternalMember.fromUser(user)] = HAS_EXTERNAL_OPEN_REGISTRATION
+                    unsyncedMembers += ExternalMember.fromUser(user, HAS_EXTERNAL_OPEN_REGISTRATION)
                     return@forEach
                 }
                 if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
@@ -104,9 +114,9 @@ class SyncService {
                     return@forEach
                 }
                 if (user.memberId != null) {
-                    usersWithSyncState[ExternalMember.fromUser(user)] = HAS_EXTERNAL_MEMBER_ID_BUT_NO_ACCOUNT
+                    unsyncedMembers += ExternalMember.fromUser(user, HAS_EXTERNAL_MEMBER_ID_BUT_NO_ACCOUNT)
                 } else if (checkForNewMemberId.execute(user, false)) {
-                    usersWithSyncState[ExternalMember.fromUser(user)] = HAS_NEW_EXTERNAL_MEMBER_ID
+                    unsyncedMembers += ExternalMember.fromUser(user, HAS_NEW_EXTERNAL_MEMBER_ID)
                 }
             } else {
                 if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
@@ -114,40 +124,15 @@ class SyncService {
                         "User #${user.id} with active membership and username ${user.username} could not be found externally!" }
                     return@forEach
                 }
-                val missingFunctions = checkMissingExternalFunctions.execute(user, false)
-                if (missingFunctions.isNotEmpty()) {
-                    usersWithSyncState[ExternalMember.fromUser(user)] = HAS_UNMATCHED_EXTERNAL_FUNCTIONS
+                val (missingFunctions, wrongFunctions) = checkOutOfSyncExternalFunctions.execute(user, false)
+                if (missingFunctions != 0 || wrongFunctions != 0) {
+                    unsyncedMembers += ExternalMember.fromUser(user, HAS_UNMATCHED_EXTERNAL_FUNCTIONS)
                 }
             }
         }
         for ((_, externalMember) in externalMembers) {
-            usersWithSyncState[externalMember] = HAS_NO_ACTIVE_MEMBERSHIP
+            unsyncedMembers += externalMember.apply { syncState = HAS_NO_ACTIVE_MEMBERSHIP }
         }
-        return usersWithSyncState
-    }
-
-    fun syncUser(externalMember: ExternalMember) {
-        val unsyncedMembers = getUnsyncedMembers()
-        when (unsyncedMembers[externalMember]) {
-            HAS_EXTERNAL_OPEN_REGISTRATION -> {
-                // accept registration
-                // acceptExternalMembershipRequest.execute(user, requestId)
-            }
-            HAS_NEW_EXTERNAL_MEMBER_ID -> {
-                // link new member id
-                // checkForNewMemberId.execute(user, true)
-            }
-            HAS_UNMATCHED_EXTERNAL_FUNCTIONS -> {
-                // assign external functions
-                // checkMissingExternalFunctions.execute(user, true)
-            }
-            HAS_NO_ACTIVE_MEMBERSHIP -> {
-                // unassign external functions
-                // removeExternalFunctions.execute(externalId, externalMember)
-            }
-            HAS_EXTERNAL_MEMBER_ID_BUT_NO_ACCOUNT, null -> {
-                // nothing to do
-            }
-        }
+        return unsyncedMembers
     }
 }

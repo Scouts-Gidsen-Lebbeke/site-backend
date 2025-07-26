@@ -68,8 +68,7 @@ class RoleService {
         val role = getRoleById(id)
         check(role.staffRole) { "The requested role to update is not a staff role!" }
         role.name = dto.name!!
-        // If the external function references get updated, a sync afterward will create the new external functions.
-        // TODO: consider removing external functions not linked to an internal role in the sync
+        // If the external function references get updated, a sync afterward will create the new external functions and remove the old ones.
         role.externalId = dto.externalId
         role.backupExternalId = dto.backupExternalId
         role.level = if (dto.staffLevel) RoleLevel.STAFF else RoleLevel.GUEST
@@ -79,7 +78,7 @@ class RoleService {
     fun deleteRole(id: Int) {
         val role = getRoleById(id)
         check(role.level != RoleLevel.ADMIN) { "Admin roles can't be deleted!" }
-        // TODO: see above
+        // A sync afterward will remove the old external functions coming from the deleted role.
         userRoleRepository.deleteUserRolesByRole(role)
         roleRepository.delete(role)
     }
@@ -105,10 +104,8 @@ class RoleService {
     fun deassignRoleFromUser(id: Int) {
         val userRole = userRoleRepository.findById(id).orElseThrow { UserRoleNotFoundException() }
         check(!userRole.role.memberRole) { "Member roles can't be manually deassigned!" }
-        if (userRole.role.adminRole) {
-            check(userRoleRepository.findByRole(userRole.role).isNotEmpty()) { "At least one admin should exist!" }
-        }
-        userRoleRepository.delete(userRole)
+        check(!userRole.role.adminRole || userRoleRepository.findByRole(userRole.role).isNotEmpty()) { "At least one admin should exist!" }
+        userDataProvider.endRole(userRole)
     }
 
     fun getAllExternalFunctions(): List<ExternalFunction> {

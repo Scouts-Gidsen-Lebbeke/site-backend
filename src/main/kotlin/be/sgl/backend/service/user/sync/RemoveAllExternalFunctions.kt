@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.OffsetDateTime
 
 @ExternalUsecase
-class RemoveExternalFunctions {
+class RemoveAllExternalFunctions {
 
     private val logger = KotlinLogging.logger {}
 

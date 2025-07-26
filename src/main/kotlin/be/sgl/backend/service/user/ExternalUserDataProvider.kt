@@ -6,6 +6,8 @@ import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.*
+import be.sgl.backend.service.user.sync.CreateExternalFunctions
+import be.sgl.backend.service.user.sync.EndExternalFunctions
 import be.sgl.backend.util.ForExternalOrganization
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +19,11 @@ import java.time.*
 @ForExternalOrganization
 class ExternalUserDataProvider : UserDataProvider() {
 
+    @Autowired
+    private lateinit var endExternalFunctions: EndExternalFunctions
+
+    @Autowired
+    private lateinit var createExternalFunctions: CreateExternalFunctions
     private val logger = KotlinLogging.logger {}
 
     @Value("\${organization.external.id}")
@@ -65,58 +72,19 @@ class ExternalUserDataProvider : UserDataProvider() {
 
     override fun startRole(user: User, role: Role): UserRole? {
         val newRole = super.startRole(user, role) ?: return null
-        // Much cleaner than a check on authorization, externally synchronized roles are scaffolded
+        // A lot easier than a check on authorization, externally synchronized roles are scaffolded
         // at membership creation, so 99% of the time in a non-admin user request
-        if (role.forExternalSync) {
+        if (role.memberRole) {
             logger.info { "Staring a role synchronized automatically, skipping external synchronization." }
             return newRole
         }
-        if (role.externalId == null) {
-            logger.info { "Starting a non-externally linked role ${role.name}, skipped external synchronization." }
-            return newRole
-        }
-        val lidPatch = Lid()
-        lidPatch.functies.add(FunctieInstantie().apply {
-            groep = externalOrganizationId
-            functie = role.externalId
-            begin = OffsetDateTime.of(newRole.startDate, LocalTime.MIN, ZoneOffset.UTC)
-        })
-        role.backupExternalId?.let {
-            logger.debug { "${user.username} has a back-up external id, also adding this role." }
-            lidPatch.functies.add(FunctieInstantie().apply {
-                groep = externalOrganizationId
-                functie = it
-                begin = OffsetDateTime.of(newRole.startDate, LocalTime.MIN, ZoneOffset.UTC)
-            })
-        }
-        ledenApi.patchLid(user.externalId!!, true, lidPatch)
+        createExternalFunctions.execute(user.externalId!!, role.externalId, role.backupExternalId)
         return newRole
     }
 
-    override fun endRole(user: User, role: Role): UserRole? {
-        val userRole = super.startRole(user, role) ?: return null
-        if (role.externalId == null) {
-            logger.info { "Ending a non-externally linked role ${role.name}, skipped external synchronization." }
-            return userRole
-        }
-        val lidPatch = Lid()
-        lidPatch.functies.add(FunctieInstantie().apply {
-            groep = externalOrganizationId
-            functie = role.externalId
-            begin = OffsetDateTime.of(userRole.startDate, LocalTime.MIN, ZoneOffset.UTC)
-            einde = OffsetDateTime.of(userRole.endDate, LocalTime.MIN, ZoneOffset.UTC)
-        })
-        role.backupExternalId?.let {
-            logger.debug { "${user.username} has a back-up external id, also removing this role." }
-            lidPatch.functies.add(FunctieInstantie().apply {
-                groep = externalOrganizationId
-                functie = it
-                begin = OffsetDateTime.of(userRole.startDate, LocalTime.MIN, ZoneOffset.UTC)
-                einde = OffsetDateTime.of(userRole.endDate, LocalTime.MIN, ZoneOffset.UTC)
-            })
-        }
-        ledenApi.patchLid(user.externalId!!, true, lidPatch)
-        return userRole
+    override fun endRole(userRole: UserRole) {
+        super.endRole(userRole)
+        endExternalFunctions.execute(userRole.user.externalId!!, userRole.role.externalId, userRole.role.backupExternalId)
     }
 
     companion object {

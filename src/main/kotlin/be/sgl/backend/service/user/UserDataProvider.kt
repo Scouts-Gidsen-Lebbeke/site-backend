@@ -110,17 +110,9 @@ abstract class UserDataProvider {
         return newRole
     }
 
-    open fun endRole(user: User, role: Role): UserRole? {
-        logger.debug { "Ending role ${role.name} for ${user.username}..." }
-        val userRole = user.roles.find { it.role == role }
-        if (userRole == null) {
-            logger.warn { "${user.username} never had the role ${role.name}! Ending aborted." }
-            return null
-        }
-        userRole.endDate = LocalDate.now()
+    open fun endRole(userRole: UserRole) {
+        logger.debug { "Ending role ${userRole.role.name} for ${userRole.user.username}..." }
         userRoleRepository.delete(userRole)
-        user.roles.remove(userRole)
-        return userRole
     }
 
     fun getMedicalRecord(user: User): MedicalRecord? {
