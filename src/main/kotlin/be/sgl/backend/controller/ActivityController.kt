@@ -155,7 +155,7 @@ class ActivityController {
         description = "Returns the registration identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationDTO::class))]),
-            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
     fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO?> {
