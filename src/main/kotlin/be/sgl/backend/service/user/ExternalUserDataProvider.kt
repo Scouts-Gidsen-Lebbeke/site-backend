@@ -90,21 +90,21 @@ class ExternalUserDataProvider : UserDataProvider() {
         return user
     }
 
-    override fun startRole(user: User, role: Role) {
-        if (user.roles.none { it.role == role }) {
+    override fun startRole(user: User, role: Role): UserRole? {
+        if (user.roles.any { it.role == role }) {
             logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
-            return
+            return null
         }
         val newRole = UserRole(user, role)
         val externalRole = role.externalId
         if (externalRole == null) {
-            logger.error { "Trying to end a non-externally linked role ${role.name}!" }
-            return
+            logger.error { "Trying to start a non-externally linked role ${role.name}!" }
+            return null
         }
         val externalFunction = FunctieInstantie().apply {
             groep = externalOrganizationId
             functie = externalRole
-            begin = OffsetDateTime.of(newRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+            begin = OffsetDateTime.of(newRole.startDate ?: return null, LocalTime.MIN, ZoneOffset.UTC)
         }
         val lidPatch = Lid().apply {
             functies = mutableListOf(externalFunction)
@@ -114,12 +114,13 @@ class ExternalUserDataProvider : UserDataProvider() {
             val backupExternalFunction = FunctieInstantie().apply {
                 groep = externalOrganizationId
                 functie = it
-                begin = OffsetDateTime.of(newRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+                begin = OffsetDateTime.of(newRole.startDate ?: return null, LocalTime.MIN, ZoneOffset.UTC)
             }
             lidPatch.functies.add(backupExternalFunction)
         }
         ledenApi.patchLid(user.externalId!!, true, lidPatch)
         user.roles.add(newRole)
+        return newRole
     }
 
     override fun endRole(user: User, role: Role) {

@@ -125,7 +125,7 @@ class MembershipController {
         description = "Returns the paid membership linked to the current period for the current user.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = MembershipDTO::class))]),
-            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
     fun getCurrentMembershipsForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MembershipDTO?> {
@@ -168,7 +168,7 @@ class MembershipController {
         description = "Returns the membership identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = MembershipDTO::class))]),
-            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
     fun getMembershipById(@PathVariable id: Int): ResponseEntity<MembershipDTO?> {
