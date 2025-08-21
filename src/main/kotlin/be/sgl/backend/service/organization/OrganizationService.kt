@@ -48,7 +48,7 @@ class OrganizationService {
 
     fun saveOrganizationDTO(dto: OrganizationDTO): OrganizationDTO {
         val organization = mapper.toEntity(dto)
-        check(organizationRepository.getByType(dto.type) == null) { "This organization already exists!" }
+        check(organizationRepository.getByType(dto.type!!) == null) { "This organization already exists!" }
         organization.image = organization.image.nullIfBlank()
         organization.image?.let { imageService.move(it, TEMPORARY, ORGANIZATION) }
         return mapper.toDto(organizationRepository.save(organization))
@@ -56,11 +56,11 @@ class OrganizationService {
 
     fun mergeOrganizationDTOChanges(id: Int, dto: OrganizationDTO): OrganizationDTO {
         val organization = organizationRepository.findById(id).orElseThrow { OrganizationNotFoundException() }
-        organization.name = dto.name
+        organization.name = dto.name!!
         organization.kbo = dto.kbo
-        if (dto.address.id == null) {
+        if (dto.address!!.id == null) {
             addressRepository.delete(organization.address)
-            organization.address = addressMapper.toEntity(dto.address)
+            organization.address = addressMapper.toEntity(dto.address!!)
         }
         if (organization.image != dto.image.nullIfBlank()) {
             organization.image?.let { imageService.delete(ORGANIZATION, it) }

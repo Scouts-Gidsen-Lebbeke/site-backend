@@ -34,7 +34,7 @@ class UserService {
     }
 
     /**
-     * When a user creates an account externally (but linked to the correct organization),
+     * When a user created an account externally (but linked to the correct organization),
      * we didn't receive the username thus cannot find the user with the normal flow.
      * As a workaround, we can try to use the other user details to fetch the correct user.
      * When we find a user in this way, we should update it too before returning the profile,
@@ -44,6 +44,7 @@ class UserService {
     fun getUserWithDetails(userDetails: CustomUserDetails): UserDTO {
         val user = userDataProvider.findUser(userDetails.username)
             ?: userDataProvider.findByNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
+            // TODO: ?: checkForFirstRun => on external org, check if no users in db, if so check if current user vga, if so syncService.syncUsers and assign root admin role to current user
             ?: throw UserNotFoundException(userDetails.username)
         if (user.username == null) {
             userRepository.updateUsername(user.id!!, userDetails.username)

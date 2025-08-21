@@ -12,6 +12,7 @@ data class OrganizationDTO(
     var id: Int?,
     @NotBlank
     var name: String?,
+    @NotNull
     var type: OrganizationType?,
     @Kbo
     var kbo: String?,

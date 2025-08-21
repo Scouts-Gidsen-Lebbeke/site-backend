@@ -20,17 +20,12 @@ class FetchExternalMembersById {
 
     fun execute(): MutableMap<String, ExternalMember> {
         logger.info { "Fetching external members for $externalOrganizationId..." }
-        val filter = Filter().apply {
-            naam = "Members $externalOrganizationId"
-            type = Filter.TypeEnum.GROEP
-            groepen = listOf(externalOrganizationId)
-            // at least one is required
+        val filter = Filter().apply { // at least one is required
             kolommen = listOf(EXTERNAL_FIRST_NAME, EXTERNAL_LAST_NAME, EXTERNAL_EMAIL)
             criteria = Criteria().apply {
                 // we don't filter on functions, unknown functions should always be unlinked anyway
                 groepen = listOf(externalOrganizationId)
             }
-            delen = false
         }
         val memberIds = mutableMapOf<String, ExternalMember>()
         var filterResult: Ledenlijst

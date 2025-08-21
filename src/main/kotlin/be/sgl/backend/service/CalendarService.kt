@@ -144,7 +144,7 @@ class CalendarService {
 
     fun saveCalendarItemDTO(dto: CalendarItemWithCalendarsDTO): CalendarItemWithCalendarsDTO {
         val item = mapper.toEntity(dto)
-        item.calendars.addAll(dto.calendars.mapNotNull { calendarRepository.findByIdOrNull(it.id) })
+        item.calendars.addAll(dto.calendars.mapNotNull { it.id?.let(calendarRepository::findByIdOrNull) })
         item.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
         return mapper.toDtoWithCalendars(itemRepository.save(item))
     }

@@ -32,19 +32,6 @@ class SyncController {
     @Value("\${organization.external.id}")
     lateinit var externalOrganizationId: String
 
-    @PostMapping("/users")
-    @OnlyAdmin
-    @Operation(
-        summary = "Retrieve and save all external users",
-        description = "Fetches all external users and save them internally with all their data.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = TEXT_PLAIN_VALUE)])
-        ]
-    )
-    fun syncUsers(): String {
-        return sseService.schedule(syncService::syncUsers)
-    }
-
     @PostMapping("/members")
     @OnlyAdmin
     @Operation(
