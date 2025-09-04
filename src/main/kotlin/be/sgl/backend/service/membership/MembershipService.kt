@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 
 @Service
 @Transactional
@@ -122,7 +123,11 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     override fun handlePaymentPaid(payment: Membership) {
         roleRepository.getRoleToSyncByBranch(payment.branch)?.let {
             logger.info { "Membership ${payment.id} to branch ${payment.branch.name} requires role ${it.name}, assigning it..." }
-            userDataProvider.startRole(payment.user, it)
+            try {
+                userDataProvider.startRole(payment.user, it)
+            } catch (e: RestClientResponseException) {
+                logger.warn { "Failed to assign role, continuing with normal flow: ${e.message}\n$e" }
+            }
         }
         val params = mapOf(
             "member" to payment.user.firstName,
