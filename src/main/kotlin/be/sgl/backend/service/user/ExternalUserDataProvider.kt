@@ -118,7 +118,7 @@ class ExternalUserDataProvider : UserDataProvider() {
             }
             lidPatch.functies.add(backupExternalFunction)
         }
-        ledenApi.patchLid(user.externalId!!, true, lidPatch)
+        ledenApi.patchLid(user.externalId ?: return null, true, lidPatch)
         user.roles.add(newRole)
         return newRole
     }

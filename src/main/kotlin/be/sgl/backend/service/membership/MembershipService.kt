@@ -123,11 +123,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
     override fun handlePaymentPaid(payment: Membership) {
         roleRepository.getRoleToSyncByBranch(payment.branch)?.let {
             logger.info { "Membership ${payment.id} to branch ${payment.branch.name} requires role ${it.name}, assigning it..." }
-            try {
-                userDataProvider.startRole(payment.user, it)
-            } catch (e: RestClientResponseException) {
-                logger.warn { "Failed to assign role, continuing with normal flow: ${e.message}\n$e" }
-            }
+            userDataProvider.startRole(payment.user, it)
         }
         val params = mapOf(
             "member" to payment.user.firstName,
