@@ -60,6 +60,8 @@ class MailService {
 
         fun to(vararg to: String) = apply { this.to.addAll(to) }
 
+        fun toOrganization() = apply { to(fromDefault()) }
+
         fun cc(vararg cc: String) = apply { this.cc.addAll(cc) }
 
         fun subject(subject: String) = apply { this.subject = subject }
