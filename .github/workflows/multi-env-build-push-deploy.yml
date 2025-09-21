@@ -61,7 +61,7 @@ jobs:
   deploy-dev:
     needs: build-and-push
     if: github.ref == 'refs/heads/dev'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: development
     steps:
       - name: Checkout code
