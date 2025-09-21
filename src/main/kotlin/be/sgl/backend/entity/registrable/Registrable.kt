@@ -26,29 +26,4 @@ abstract class Registrable : Payable() {
     @Lob
     var additionalForm: String? = null
     var additionalFormRule: String? = null
-
-    /**
-     * Is the registration cancellable by the user (when requested before the [closed] date)?
-     */
-    var cancellable: Boolean = true
-
-    /**
-     * Should a confirmation email be sent when a user paid the registration?
-     */
-    var sendConfirmation: Boolean = true
-
-    /**
-     * Should a confirmation email be sent when a registration is marked as completed?
-     */
-    var sendCompleteConfirmation: Boolean = false
-
-    /**
-     * Optional email address put in cc at each communication to a registered user.
-     */
-    var communicationCC: String? = null
-
-    /**
-     * Is this event cancelled by the admin?
-     */
-    var cancelled: Boolean = false
 }

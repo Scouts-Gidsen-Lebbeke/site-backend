@@ -4,16 +4,12 @@ import be.sgl.backend.entity.Auditable
 import jakarta.persistence.*
 
 @Entity
-class ShopItem : Auditable() {
+class ShopItemOption : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null
     @ManyToOne
-    lateinit var shop: Shop
+    lateinit var shop: ShopItem
     lateinit var name: String
-    lateinit var info: String
-    var price = 0.0
-    var image: String? = null
-    @OneToMany
-    lateinit var options: List<ShopItemOption>
+    var stock: Int? = null
 }

@@ -15,4 +15,5 @@ class OrderItem : Auditable() {
     @ManyToOne
     lateinit var shopItem: ShopItem
     var amount: Int = 0
+    var option: String? = null
 }
