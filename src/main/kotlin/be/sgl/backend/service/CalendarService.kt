@@ -1,9 +1,6 @@
 package be.sgl.backend.service
 
-import be.sgl.backend.dto.CalendarDTO
-import be.sgl.backend.dto.CalendarItemWithCalendarsDTO
-import be.sgl.backend.dto.CalendarPeriodDTO
-import be.sgl.backend.dto.CalendarUpdateDTO
+import be.sgl.backend.dto.*
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarItem
 import be.sgl.backend.entity.calendar.CalendarPeriod
@@ -24,6 +21,8 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Service
 @Transactional
@@ -136,6 +135,15 @@ class CalendarService {
 
     private fun deleteCalendar(id: Int) {
         deleteCalendar(getCalendarById(id))
+    }
+
+    fun getCalendarItemOverviewBetween(from: LocalDate, to: LocalDate): Map<String, List<CalendarItemWithCalendarsDTO>> {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        return itemRepository.findByClosedFalseAndStartAfterAndEndBefore(from.atStartOfDay(), to.atTime(LocalTime.MAX))
+            .map(mapper::toDtoWithCalendars)
+            .groupBy { item ->
+                "${formatter.format(item.start)} - ${formatter.format(item.end)}"
+            }
     }
 
     fun getCalendarItemDTOById(id: Int): CalendarItemWithCalendarsDTO {

@@ -3,10 +3,7 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.config.security.Public
-import be.sgl.backend.dto.CalendarDTO
-import be.sgl.backend.dto.CalendarItemWithCalendarsDTO
-import be.sgl.backend.dto.CalendarPeriodDTO
-import be.sgl.backend.dto.CalendarUpdateDTO
+import be.sgl.backend.dto.*
 import be.sgl.backend.service.CalendarService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -20,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/calendars")
@@ -154,6 +152,12 @@ class CalendarController {
     )
     fun updateCalendar(@PathVariable id: Int, @Valid @RequestBody calendarDTO: CalendarUpdateDTO): ResponseEntity<CalendarDTO> {
         return ResponseEntity.ok(calendarService.mergeCalendarDTOChanges(id, calendarDTO))
+    }
+
+    @GetMapping("/items")
+    @Public
+    fun getCalendarOverview(@RequestParam from: LocalDate, @RequestParam to: LocalDate): ResponseEntity<Map<String, List<CalendarItemDTO>>> {
+        return ResponseEntity.ok(calendarService.getCalendarItemOverviewBetween(from, to))
     }
 
     @GetMapping("/items/{id}")
