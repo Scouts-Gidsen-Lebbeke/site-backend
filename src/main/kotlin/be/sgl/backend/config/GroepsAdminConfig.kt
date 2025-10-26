@@ -2,11 +2,10 @@ package be.sgl.backend.config
 
 import be.sgl.backend.config.security.BearerTokenFilter
 import be.sgl.backend.openapi.ApiClient
-import be.sgl.backend.openapi.api.FunctiesApi
-import be.sgl.backend.openapi.api.GroepenApi
-import be.sgl.backend.openapi.api.LedenApi
-import be.sgl.backend.openapi.api.LedenlijstApi
-import be.sgl.backend.openapi.api.LidaanvragenApi
+import be.sgl.backend.openapi.api.*
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,7 +21,10 @@ class GroepsAdminConfig {
 
     @Bean
     fun getGroepsAdminApiClient(@Value("\${rest.ga.url}") basePath: String): ApiClient {
-        return DynamicAuthApiClient(basePath)
+        val objectMapper = ObjectMapper()
+            .registerModule(JavaTimeModule())
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        return DynamicAuthApiClient(basePath, objectMapper)
     }
 
     @Bean
@@ -52,7 +54,7 @@ class GroepsAdminConfig {
 
     // apparently bearerToken authentication is still not implemented,
     // see https://openapi-generator.tech/docs/generators/spring/#security-feature
-    private class DynamicAuthApiClient(basePath: String) : ApiClient() {
+    private class DynamicAuthApiClient(basePath: String, objectMapper: ObjectMapper) : ApiClient(objectMapper, createDefaultDateFormat()) {
 
         init {
             this.basePath = basePath
