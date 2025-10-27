@@ -1,10 +1,38 @@
 package be.sgl.backend.service.user.sync
 
-enum class SyncState {
-    HAS_EXTERNAL_OPEN_REGISTRATION,
-    HAS_NEW_EXTERNAL_MEMBER_ID,
-    HAS_EXTERNAL_MEMBER_ID_BUT_NO_ACCOUNT,
-    HAS_UNMATCHED_EXTERNAL_FUNCTIONS,
-    HAS_NO_ACTIVE_MEMBERSHIP,
-    OK
+sealed interface SyncState {
+    val fixable: Boolean
+    val name: String
+}
+
+sealed class FixableSyncState: SyncState {
+    override val fixable = true
+}
+
+sealed class UnfixableSyncState: SyncState {
+    override val fixable = false
+}
+
+data class HasExternalOpenRegistration(val requestId: String) : FixableSyncState() {
+    override val name = "HAS_EXTERNAL_OPEN_REGISTRATION"
+}
+
+class HasNewExternalMemberId : FixableSyncState() {
+    override val name = "HAS_NEW_EXTERNAL_MEMBER_ID"
+}
+
+class HasExternalMemberIdButNoAccount : UnfixableSyncState() {
+    override val name = "HAS_EXTERNAL_MEMBER_ID_BUT_NO_ACCOUNT"
+}
+
+data class HasUnmatchedExternalFunctions(val functionsToAssign: List<String>, val functionsToDeassign: List<String>) : FixableSyncState() {
+    override val name = "HAS_UNMATCHED_EXTERNAL_FUNCTIONS"
+}
+
+class HasNoActiveMembership : FixableSyncState() {
+    override val name = "HAS_NO_ACTIVE_MEMBERSHIP"
+}
+
+class Ok : UnfixableSyncState() {
+    override val name = "OK"
 }

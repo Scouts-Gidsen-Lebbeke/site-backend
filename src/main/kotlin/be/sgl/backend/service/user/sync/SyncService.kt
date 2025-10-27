@@ -3,6 +3,8 @@ package be.sgl.backend.service.user.sync
 import be.sgl.backend.alert.AlertCode
 import be.sgl.backend.alert.AlertLogger
 import be.sgl.backend.repository.membership.MembershipRepository
+import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.util.ForExternalOrganization
 import be.sgl.backend.util.I18nUtil.Companion.i18n
 import mu.KotlinLogging
@@ -33,6 +35,8 @@ class SyncService {
     private lateinit var removeAllExternalFunctions: RemoveAllExternalFunctions
     @Autowired
     private lateinit var checkOutOfSyncExternalFunctions: CheckOutOfSyncExternalFunctions
+    @Autowired
+    private lateinit var userRepository: UserRepository
     @Autowired
     private lateinit var alertLogger: AlertLogger
 
@@ -82,17 +86,18 @@ class SyncService {
                         "User #${user.id} with active membership and username ${user.username} could not be found externally!" }
                     return@forEach
                 }
-                val (missingFunctions, wrongFunctions) = checkOutOfSyncExternalFunctions.execute(user, true)
-                if (missingFunctions == 0 && wrongFunctions == 0) {
-                    sseEmitter.send(i18n("sync.members.external.functions.okay"))
+                val outOfSyncState = checkOutOfSyncExternalFunctions.execute(user, true)
+                if (outOfSyncState.isOutOfSync()) {
+                    sseEmitter.send(i18n("sync.members.external.functions.corrected",
+                        outOfSyncState.functionsToAssign, outOfSyncState.functionsToDeassign))
                 } else {
-                    sseEmitter.send(i18n("sync.members.external.functions.corrected", missingFunctions, wrongFunctions))
+                    sseEmitter.send(i18n("sync.members.external.functions.okay"))
                 }
             }
         }
         for ((externalId, externalMember) in externalMembers) {
             sseEmitter.send(i18n("sync.members.no.membership", externalId))
-            removeAllExternalFunctions.execute(externalId, externalMember)
+            removeAllExternalFunctions.execute(externalMember)
             sseEmitter.send(i18n("sync.members.external.functions.removed"))
         }
     }
@@ -104,8 +109,8 @@ class SyncService {
         membershipRepository.getCurrent().forEach { membership ->
             val user = membership.user
             if (user.username == null) {
-                usersWithOpenRegistrations[user]?.let { _ ->
-                    unsyncedMembers += ExternalMember.fromUser(user, HAS_EXTERNAL_OPEN_REGISTRATION)
+                usersWithOpenRegistrations[user]?.let { requestId ->
+                    unsyncedMembers += ExternalMember.fromUser(user, HasExternalOpenRegistration(requestId))
                     return@forEach
                 }
                 if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
@@ -114,9 +119,9 @@ class SyncService {
                     return@forEach
                 }
                 if (user.memberId != null) {
-                    unsyncedMembers += ExternalMember.fromUser(user, HAS_EXTERNAL_MEMBER_ID_BUT_NO_ACCOUNT)
+                    unsyncedMembers += ExternalMember.fromUser(user, HasExternalMemberIdButNoAccount())
                 } else if (checkForNewMemberId.execute(user, false)) {
-                    unsyncedMembers += ExternalMember.fromUser(user, HAS_NEW_EXTERNAL_MEMBER_ID)
+                    unsyncedMembers += ExternalMember.fromUser(user, HasNewExternalMemberId())
                 }
             } else {
                 if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
@@ -124,15 +129,35 @@ class SyncService {
                         "User #${user.id} with active membership and username ${user.username} could not be found externally!" }
                     return@forEach
                 }
-                val (missingFunctions, wrongFunctions) = checkOutOfSyncExternalFunctions.execute(user, false)
-                if (missingFunctions != 0 || wrongFunctions != 0) {
-                    unsyncedMembers += ExternalMember.fromUser(user, HAS_UNMATCHED_EXTERNAL_FUNCTIONS)
+                val outOfSyncState = checkOutOfSyncExternalFunctions.execute(user, false)
+                if (outOfSyncState.isOutOfSync()) {
+                    unsyncedMembers += ExternalMember.fromUser(user, HasUnmatchedExternalFunctions(
+                        outOfSyncState.functionsToAssign, outOfSyncState.functionsToDeassign))
                 }
             }
         }
         for ((_, externalMember) in externalMembers) {
-            unsyncedMembers += externalMember.apply { syncState = HAS_NO_ACTIVE_MEMBERSHIP }
+            unsyncedMembers += externalMember.apply { syncState = HasNoActiveMembership() }
         }
         return unsyncedMembers
+    }
+
+    fun syncMemberWithExternalOpenRegistration(userId: Int, requestId: String): Boolean {
+        val user = userRepository.findById(userId).orElseThrow { UserNotFoundException(userId.toString()) }
+        return acceptExternalMembershipRequest.execute(user, requestId)
+    }
+
+    fun synMemberWithNewExternalMemberId(userId: Int): Boolean {
+        val user = userRepository.findById(userId).orElseThrow { UserNotFoundException(userId.toString()) }
+        return checkForNewMemberId.execute(user, true)
+    }
+
+    fun syncMemberWithUnmatchedExternalFunctions(userId: Int) {
+        val user = userRepository.findById(userId).orElseThrow { UserNotFoundException(userId.toString()) }
+        checkOutOfSyncExternalFunctions.execute(user, true)
+    }
+
+    fun syncMemberWithNoActiveMembership(externalMember: ExternalMember) {
+        removeAllExternalFunctions.execute(externalMember)
     }
 }

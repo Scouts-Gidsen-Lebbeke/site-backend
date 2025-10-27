@@ -19,7 +19,8 @@ class RemoveAllExternalFunctions {
     @Autowired
     protected lateinit var mailService: MailService
 
-    fun execute(externalId: String, externalMember: ExternalMember) {
+    fun execute(externalMember: ExternalMember) {
+        val externalId = externalMember.externalId ?: return
         logger.info { "Removing all external functions for user with external id $externalId..." }
         val lidPatch = Lid().apply {
             functies = fetchCurrentlyActiveExternalFunctions.execute(externalId).onEach {

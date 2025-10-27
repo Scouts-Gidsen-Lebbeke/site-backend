@@ -34,7 +34,7 @@ class FetchExternalMembersById {
             filterResult = ledenlijstApi.postFilterNu(filter, "$offset")
             logger.info { "Got filter result ${filterResult.aantal + offset}/${filterResult.totaal}" }
             memberIds += filterResult.leden.associate { it.id to ExternalMember.fromExternal(
-                it.waarden[EXTERNAL_FIRST_NAME], it.waarden[EXTERNAL_LAST_NAME], it.waarden[EXTERNAL_EMAIL]) }
+                it.waarden[EXTERNAL_FIRST_NAME], it.waarden[EXTERNAL_LAST_NAME], it.waarden[EXTERNAL_EMAIL], it.id) }
             offset += filterResult.aantal
         } while (offset < filterResult.totaal)
         logger.info { "Fully fetched ${memberIds.size} external members for $externalOrganizationId from filter result(s)" }

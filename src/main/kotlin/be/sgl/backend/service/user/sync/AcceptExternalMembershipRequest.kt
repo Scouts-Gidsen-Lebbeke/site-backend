@@ -6,6 +6,7 @@ import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.service.user.ExternalUserDataProvider.Companion.toDto
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
