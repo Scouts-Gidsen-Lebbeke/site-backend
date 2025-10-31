@@ -67,11 +67,12 @@ class SyncService {
                     return@forEach
                 }
                 sseEmitter.send(i18n("sync.members.external.request.not.found"))
-                if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
+                if (user.externalId == null) {
                     alertLogger.alert(AlertCode.ACTIVE_MEMBERSHIP_NO_EXTERNAL_LINK) {
                         "User #${user.id} with active membership and no username could not be found externally!" }
                     return@forEach
                 }
+                externalMembers.remove(user.externalId)
                 if (user.memberId != null) {
                     sseEmitter.send(i18n("sync.members.member.id.already.linked"))
                 } else if (checkForNewMemberId.execute(user, true)) {
@@ -81,11 +82,12 @@ class SyncService {
                 }
             } else {
                 sseEmitter.send(i18n("sync.members.check.external.functions", user.username))
-                if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
+                if (user.externalId == null) {
                     alertLogger.alert(AlertCode.ACTIVE_MEMBERSHIP_NO_EXTERNAL_LINK) {
                         "User #${user.id} with active membership and username ${user.username} could not be found externally!" }
                     return@forEach
                 }
+                externalMembers.remove(user.externalId)
                 val outOfSyncState = checkOutOfSyncExternalFunctions.execute(user, true)
                 if (outOfSyncState.isOutOfSync()) {
                     sseEmitter.send(i18n("sync.members.external.functions.corrected",
@@ -113,22 +115,26 @@ class SyncService {
                     unsyncedMembers += ExternalMember.fromUser(user, HasExternalOpenRegistration(requestId))
                     return@forEach
                 }
-                if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
+                if (user.externalId == null) {
                     alertLogger.alert(AlertCode.ACTIVE_MEMBERSHIP_NO_EXTERNAL_LINK) {
                         "User #${user.id} with active membership and no username could not be found externally!" }
                     return@forEach
                 }
+                externalMembers.remove(user.externalId)
                 if (user.memberId != null) {
                     unsyncedMembers += ExternalMember.fromUser(user, HasExternalMemberIdButNoAccount())
                 } else if (checkForNewMemberId.execute(user, false)) {
                     unsyncedMembers += ExternalMember.fromUser(user, HasNewExternalMemberId())
+                } else {
+                    unsyncedMembers += ExternalMember.fromUser(user, HasNoExternalMemberIdYet())
                 }
             } else {
-                if (user.externalId == null || externalMembers.remove(user.externalId) == null) {
+                if (user.externalId == null) {
                     alertLogger.alert(AlertCode.ACTIVE_MEMBERSHIP_NO_EXTERNAL_LINK) {
                         "User #${user.id} with active membership and username ${user.username} could not be found externally!" }
                     return@forEach
                 }
+                externalMembers.remove(user.externalId)
                 val outOfSyncState = checkOutOfSyncExternalFunctions.execute(user, false)
                 if (outOfSyncState.isOutOfSync()) {
                     unsyncedMembers += ExternalMember.fromUser(user, HasUnmatchedExternalFunctions(

@@ -76,7 +76,6 @@ class GroepsAdminConfig {
                                           returnType: ParameterizedTypeReference<T>?): RestClient.ResponseSpec {
             BearerTokenFilter.getToken()?.let { headerParams?.setBearerAuth(it) }
             headerParams?.accept = listOf(MediaType.APPLICATION_JSON)
-            println(objectMapper.writeValueAsString(body))
             return super.invokeAPI(path, method, pathParams, queryParams, body, headerParams, cookieParams, formParams, accept, contentType, authNames, returnType)
         }
     }
