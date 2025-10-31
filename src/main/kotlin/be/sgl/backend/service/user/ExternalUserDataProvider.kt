@@ -184,22 +184,24 @@ class ExternalUserDataProvider : UserDataProvider() {
                 description = a.omschrijving
                 postalAdress = a.postadres
             } } )
-            contacts.addAll(it.contacten.map { c ->
-                val contact = Contact()
-                contact.name = c.achternaam
-                contact.firstName = c.voornaam
-                contact.role = when(c.rol) {
-                    be.sgl.backend.openapi.model.Contact.RolEnum.VADER -> ContactRole.FATHER
-                    be.sgl.backend.openapi.model.Contact.RolEnum.MOEDER -> ContactRole.MOTHER
-                    be.sgl.backend.openapi.model.Contact.RolEnum.VOOGD -> ContactRole.GUARDIAN
-                    else -> ContactRole.RESPONSIBLE
-                }
-                contact.address = addresses.firstOrNull { a -> a.externalId == c.adres }
-                contact.mobile = c.gsm
-                contact.email = c.email
-                contact.nis = c.rijksregisternummer
-                contact
-            })
+            contacts.addAll(it.contacten
+                .filter { c -> c.voornaam != null && c.achternaam != null }
+                .map { c ->
+                    val contact = Contact()
+                    contact.name = c.achternaam
+                    contact.firstName = c.voornaam
+                    contact.role = when(c.rol) {
+                        be.sgl.backend.openapi.model.Contact.RolEnum.VADER -> ContactRole.FATHER
+                        be.sgl.backend.openapi.model.Contact.RolEnum.MOEDER -> ContactRole.MOTHER
+                        be.sgl.backend.openapi.model.Contact.RolEnum.VOOGD -> ContactRole.GUARDIAN
+                        else -> ContactRole.RESPONSIBLE
+                    }
+                    contact.address = addresses.firstOrNull { a -> a.externalId == c.adres }
+                    contact.mobile = c.gsm
+                    contact.email = c.email
+                    contact.nis = c.rijksregisternummer
+                    contact
+                })
         }
         entityManager.detach(this)
     }
