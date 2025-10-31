@@ -1,7 +1,6 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.service.exception.UserNotFoundException
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -24,6 +23,13 @@ class CheckOutOfSyncExternalFunctions {
         logger.info { "Current external functions: $uncheckedActiveExternalFunctions" }
         val functionsToAssign = mutableListOf<String>()
         for (role in user.roles.map { it.role }) {
+            if (role.adminRole) {
+                if (!uncheckedActiveExternalFunctions.remove(role.externalId) &&
+                    !uncheckedActiveExternalFunctions.remove(role.backupExternalId)) {
+                    functionsToAssign.add(role.backupExternalId!!)
+                }
+                continue
+            }
             val externalRoleId = role.externalId
             if (externalRoleId != null && !uncheckedActiveExternalFunctions.contains(externalRoleId)) {
                 logger.info { "External function $externalRoleId should be assigned for role ${role.name} but isn't" }

@@ -8,7 +8,7 @@ data class ExternalMember(
     val name: String?,
     val email: String?,
     val externalId: String?,
-    var syncState: SyncState
+    var syncState: SyncState?
 ) {
     companion object {
         fun fromUser(user: User, syncState: SyncState): ExternalMember {
@@ -16,7 +16,7 @@ data class ExternalMember(
         }
 
         fun fromExternal(firstName: String?, lastName: String?, email: String?, externalId: String?): ExternalMember {
-            return ExternalMember(null, firstName, lastName, email, externalId, Ok())
+            return ExternalMember(null, firstName, lastName, email, externalId, null)
         }
     }
 }

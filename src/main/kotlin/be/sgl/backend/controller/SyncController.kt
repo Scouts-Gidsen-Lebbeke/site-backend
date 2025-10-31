@@ -81,21 +81,26 @@ class SyncController {
 
     @PostMapping("/member/{userId}/new-external-member-id")
     @OnlyAdmin
-    fun synMemberWithNewExternalMemberId(@PathVariable userId: Int): Boolean {
-        return syncService.synMemberWithNewExternalMemberId(userId)
+    fun synMemberWithNewExternalMemberId(@PathVariable userId: Int): ResponseEntity<Unit> {
+        if (syncService.synMemberWithNewExternalMemberId(userId)) {
+            return ResponseEntity.noContent().build()
+        }
+        return ResponseEntity.badRequest().build()
     }
 
     @PostMapping("/member/{userId}/unmatched-external-functions")
     @OnlyAdmin
-    fun syncMemberWithUnmatchedExternalFunctions(@PathVariable userId: Int): Boolean {
+    @Operation(summary = "Match the external functions with the current internal roles")
+    fun syncMemberWithUnmatchedExternalFunctions(@PathVariable userId: Int): ResponseEntity<Unit> {
         syncService.syncMemberWithUnmatchedExternalFunctions(userId)
-        return true
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/member/{userId}/no-active-membership")
     @OnlyAdmin
-    fun syncMemberWithNoActiveMembership(@RequestBody externalMember: ExternalMember): Boolean {
+    @Operation(summary = "Remove all external roles")
+    fun syncMemberWithNoActiveMembership(@RequestBody externalMember: ExternalMember): ResponseEntity<Unit> {
         syncService.syncMemberWithNoActiveMembership(externalMember)
-        return true
+        return ResponseEntity.noContent().build()
     }
 }
