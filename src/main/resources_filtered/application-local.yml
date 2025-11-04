@@ -1,6 +1,8 @@
 spring:
   application:
     environment: local
+    base-url: http://localhost:8080/api
+    public-base-url: http://localhost:8080/api
   datasource:
     url: jdbc:mariadb://localhost:3308/application
     username: user
@@ -34,5 +36,8 @@ logging:
 
 organization:
   api-key:
-    mollie: "invalid-key"
+    # Leave mollie blank to enable LocalCheckoutProvider for local testing
+    # To use real Mollie in local dev, uncomment and set your test API key:
+    # mollie: "test_xxxxxxxxxxxxxxxxxx"
+    mollie:
 
