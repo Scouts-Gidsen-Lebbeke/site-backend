@@ -13,21 +13,21 @@ class SettingService {
     @Autowired
     private lateinit var settingRepository: SettingRepository
 
-    fun get(id: SettingId): String? {
-        return settingRepository.findByIdOrNull(id.name)?.value
+    fun get(id: String): String? {
+        return settingRepository.findByIdOrNull(id)?.value
     }
 
-    fun getOrDefault(id: SettingId, default: String): String {
+    fun getOrDefault(id: String, default: String): String {
         return get(id) ?: default
     }
 
-    fun getOrDefault(id: SettingId, default: Double): Double {
+    fun getOrDefault(id: String, default: Double): Double {
         return get(id)?.toDouble() ?: default
     }
 
-    fun update(id: SettingId, value: Any?) {
-        value ?: return settingRepository.deleteById(id.name)
-        val setting = settingRepository.findByIdOrNull(id.name) ?: Setting(id, value)
+    fun update(id: String, value: Any?) {
+        value ?: return settingRepository.deleteById(id)
+        val setting = settingRepository.findByIdOrNull(id) ?: Setting(id, value)
         setting.value = value.toString()
         settingRepository.save(setting)
     }

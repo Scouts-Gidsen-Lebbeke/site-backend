@@ -2,7 +2,6 @@ package be.sgl.backend.controller
 
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.Public
-import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.service.SettingService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -31,7 +30,7 @@ class SettingController {
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = TEXT_PLAIN_VALUE)])
         ]
     )
-    fun getSetting(@PathVariable id: SettingId): ResponseEntity<String?> {
+    fun getSetting(@PathVariable id: String): ResponseEntity<String?> {
         return ResponseEntity.ok(settingService.get(id))
     }
 
@@ -44,7 +43,7 @@ class SettingController {
             ApiResponse(responseCode = "200", description = "Ok")
         ]
     )
-    fun updateSetting(@PathVariable id: SettingId, @RequestParam value: String?): ResponseEntity<Unit> {
+    fun updateSetting(@PathVariable id: String, @RequestParam value: String?): ResponseEntity<Unit> {
         settingService.update(id, value)
         return ResponseEntity.ok().build()
     }

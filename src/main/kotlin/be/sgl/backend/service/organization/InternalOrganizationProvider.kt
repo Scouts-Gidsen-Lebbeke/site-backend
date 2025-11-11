@@ -37,11 +37,11 @@ class InternalOrganizationProvider : OrganizationProvider {
 
     @Cacheable("representative")
     override fun getRepresentative(): Representative {
-        val username = settingService.get(SettingId.REPRESENTATIVE_USERNAME)
+        val username = settingService.get(SettingId.REPRESENTATIVE_USERNAME.name)
             ?: throw IncompleteConfigurationException("No representative configured for organization!")
         val user = userRepository.getByUsername(username)
-        val title = settingService.getOrDefault(SettingId.REPRESENTATIVE_TITLE, "Vertegenwoordiger")
-        val signatureFile = settingService.get(SettingId.REPRESENTATIVE_SIGNATURE)
+        val title = settingService.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, "Vertegenwoordiger")
+        val signatureFile = settingService.get(SettingId.REPRESENTATIVE_SIGNATURE.name)
             ?: throw IncompleteConfigurationException("No signature configured for organization!")
         val signature = imageService.get(signatureFile, ORGANIZATION)
             ?: throw IncompleteConfigurationException("No valid signature configured for organization!")

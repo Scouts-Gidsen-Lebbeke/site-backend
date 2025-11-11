@@ -20,6 +20,8 @@ class SyncService {
     private val logger = KotlinLogging.logger {}
 
     @Autowired
+    private lateinit var fetchExternalData: FetchExternalData
+    @Autowired
     private lateinit var createUserForExternalMember: CreateUserForExternalMember
     @Autowired
     private lateinit var fetchExternalMembersById: FetchExternalMembersById
@@ -40,9 +42,20 @@ class SyncService {
     @Autowired
     private lateinit var alertLogger: AlertLogger
 
+    fun syncUser(username: String) {
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
+        fetchExternalData.execute(user)
+    }
+
     fun syncUsers(sseEmitter: SseEmitter) {
         logger.info { "Syncing users..." }
-        fetchExternalMembersById.execute().forEach { (externalId, _) ->
+        val externalMembers = fetchExternalMembersById.execute()
+        userRepository.findAll().forEach { user ->
+            sseEmitter.send(i18n("sync.users.update.user", user.id))
+            fetchExternalData.execute(user)
+            user.externalId?.let(externalMembers::remove)
+        }
+        externalMembers.forEach { (externalId, _) ->
             sseEmitter.send(i18n("sync.users.create.user", externalId))
             createUserForExternalMember.execute(externalId)
         }

@@ -20,9 +20,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig {
 
-    @Value("\${spring.application.base-url}")
-    private lateinit var baseUrl: String
-
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
@@ -40,7 +37,7 @@ class SecurityConfig {
     }
 
     @Bean
-    @Profile("local", "dev")
+    @Profile("local")
     fun corsConfigurer(): WebMvcConfigurer {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
@@ -53,8 +50,8 @@ class SecurityConfig {
     }
 
     @Bean
-    @Profile("prod", "qa")
-    fun prodCorsConfigurer(): WebMvcConfigurer {
+    @Profile("prod", "dev")
+    fun prodCorsConfigurer(@Value("\${spring.application.base-url}") baseUrl: String): WebMvcConfigurer {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
                 registry.addMapping("/**")

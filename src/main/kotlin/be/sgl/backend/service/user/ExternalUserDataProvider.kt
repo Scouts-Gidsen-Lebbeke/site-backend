@@ -13,25 +13,19 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.*
 
 @Service
 @ForExternalOrganization
-class ExternalUserDataProvider : UserDataProvider() {
-
-    @Autowired
-    private lateinit var endExternalFunctions: EndExternalFunctions
-
-    @Autowired
-    private lateinit var createExternalFunctions: CreateExternalFunctions
-    private val logger = KotlinLogging.logger {}
-
+class ExternalUserDataProvider(
     @Value("\${organization.external.id}")
-    private lateinit var externalOrganizationId: String
-    @Autowired
-    private lateinit var ledenApi: LedenApi
-    @Autowired
-    private lateinit var lidaanvragenApi: LidaanvragenApi
+    val externalOrganizationId: String,
+    val lidaanvragenApi: LidaanvragenApi,
+    val ledenApi: LedenApi,
+    val createExternalFunctions: CreateExternalFunctions,
+    val endExternalFunctions: EndExternalFunctions
+) : UserDataProvider() {
+
+    private val logger = KotlinLogging.logger {}
 
     override fun acceptRegistration(user: User) {
         logger.debug { "Accepting registration for user ${user.id}..." }
@@ -52,16 +46,6 @@ class ExternalUserDataProvider : UserDataProvider() {
         }
         lidaanvragenApi.postNieuweAanvragen(lidAanvraag)
         logger.debug { "External registration finished: request created and ready to be approved!" }
-    }
-
-    override fun findUser(username: String): User? {
-        // TODO: remove and handle lazy fetching of contacts/addresses
-        return userRepository.findByUsername(username)
-    }
-
-    override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
-        // TODO: remove and handle lazy fetching of contacts/addresses
-        return userRepository.findByNameAndFirstNameAndEmail(name, firstName, email)
     }
 
     override fun updateUser(user: User): User {
@@ -97,10 +81,13 @@ class ExternalUserDataProvider : UserDataProvider() {
                 rijksregisternummer = nis
             }
             vgagegevens = VgaGegevens().apply {
+                voornaam = firstName
+                achternaam = name
                 beperking = hasHandicap
                 verminderdlidgeld = hasReduction
                 geboortedatum = birthdate
             }
+            email = this@toDto.email
             adressen = addresses.map { it.toDto() }
             contacten = contacts.map { it.toDto() }
         }
@@ -139,7 +126,7 @@ class ExternalUserDataProvider : UserDataProvider() {
             gsm = mobile
             email = this@toDto.email
             rijksregisternummer = nis
-            lidtenlaste = taxable
+            lidtenlaste = nis != null
             adres = address?.externalId
         }
     }

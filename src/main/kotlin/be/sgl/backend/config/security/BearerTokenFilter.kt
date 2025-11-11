@@ -6,7 +6,6 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
-import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,14 +13,10 @@ import org.springframework.stereotype.Component
 class BearerTokenFilter : Filter {
 
     companion object {
-
-        private val logger = KotlinLogging.logger {}
         private val tokenHolder = ThreadLocal<String?>()
 
         fun getToken(): String? {
-            val token = tokenHolder.get()
-            logger.debug { "Fetched token: ${token?.take(20)}" }
-            return token
+            return tokenHolder.get()
         }
     }
 

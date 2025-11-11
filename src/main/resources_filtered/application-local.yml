@@ -11,16 +11,13 @@ spring:
   mail:
     host: localhost
     port: 1025
-    alert:
-      enabled: false
     properties:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
 
-# unstable and on demand
-#rest:
-#  ga:
-#    url: https://ga-staging.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga
+sgl:
+  alert:
+    enabled: false
 
 keycloak:
   resource: master-realm

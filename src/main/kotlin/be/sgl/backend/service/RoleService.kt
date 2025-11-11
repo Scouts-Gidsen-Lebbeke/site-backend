@@ -13,26 +13,17 @@ import be.sgl.backend.repository.user.UserRoleRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.RoleNotFoundException
 import be.sgl.backend.service.exception.UserRoleNotFoundException
-import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class RoleService {
-
-    @Autowired
-    private lateinit var roleRepository: RoleRepository
-    @Autowired
-    private lateinit var mapper: RoleMapper
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
-    @Autowired
-    private lateinit var branchRepository: BranchRepository
-    @Autowired
-    private lateinit var userRoleRepository: UserRoleRepository
+class RoleService(
+    private val roleRepository: RoleRepository,
+    private val mapper: RoleMapper,
+    private val userDataProvider: UserDataProvider,
+    private val branchRepository: BranchRepository,
+    private val userRoleRepository: UserRoleRepository
+) {
 
     fun getAllRoles(): List<RoleDTO> {
         return roleRepository.findAll().map(mapper::toDto)
@@ -106,14 +97,6 @@ class RoleService {
         check(!userRole.role.memberRole) { "Member roles can't be manually deassigned!" }
         check(!userRole.role.adminRole || userRoleRepository.findByRole(userRole.role).isNotEmpty()) { "At least one admin should exist!" }
         userDataProvider.endRole(userRole)
-    }
-
-    fun getAllExternalFunctions(): List<ExternalFunction> {
-        return organizationProvider.getAllExternalFunctions()
-    }
-
-    fun getPaidExternalFunctions(): List<ExternalFunction> {
-        return organizationProvider.getPaidExternalFunctions()
     }
 
     fun getRoleToSyncByBranch(branchId: Int): RoleDTO? {

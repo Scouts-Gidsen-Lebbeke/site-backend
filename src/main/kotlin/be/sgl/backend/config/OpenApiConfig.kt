@@ -38,7 +38,7 @@ class OpenApiConfig {
                 .url("https://github.com/Scouts-Gidsen-Lebbeke/site-backend")
             )
             .servers(listOf(
-                Server().url("$baseUrl/api").description("Current")
+                Server().url("$baseUrl:8080/api").description("Current")
             ))
     }
 }

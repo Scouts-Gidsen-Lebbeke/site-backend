@@ -4,7 +4,6 @@ import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.service.organization.OrganizationProvider
 import generated.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -12,10 +11,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class DispatchService {
-
-    @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
+class DispatchService(
+    private val organizationProvider: OrganizationProvider
+) {
 
     /**
      * Generate the dispatch for the listed [forms] in the official [Verzendingen] format.

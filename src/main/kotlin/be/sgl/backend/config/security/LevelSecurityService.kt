@@ -1,31 +1,30 @@
 package be.sgl.backend.config.security
 
 import be.sgl.backend.entity.user.RoleLevel
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.repository.user.UserRepository
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-class LevelSecurityService {
-
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
+class LevelSecurityService(
+    private val userRepository: UserRepository,
+) {
 
     fun isAdmin() = currentUserHasRoleWithLevel(RoleLevel.ADMIN)
 
     fun isStaff() = currentUserHasRoleWithLevel(RoleLevel.STAFF)
 
     private fun currentUserHasRoleWithLevel(level: RoleLevel): Boolean {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val user = userDataProvider.findUser(authentication?.name ?: return false) ?: return false
+        val authentication = SecurityContextHolder.getContext().authentication ?: return false
+        val username = authentication.name ?: return false
+        val user = userRepository.findByUsername(username) ?: return false
         return user.level >= level
     }
 }

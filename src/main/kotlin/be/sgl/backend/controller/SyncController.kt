@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -33,6 +34,30 @@ class SyncController {
     private lateinit var syncService: SyncService
     @Value("\${organization.external.id}")
     lateinit var externalOrganizationId: String
+
+    @PutMapping("/users")
+    @OnlyAdmin
+    @Operation(
+        summary = "Fetch all external data for all currently known users, and optionally create new users for unknown external ones",
+        responses = [
+            ApiResponse(responseCode = "200", description = "SSE stream established", content = [Content(mediaType = TEXT_PLAIN_VALUE)])
+        ]
+    )
+    fun fetchExternalDataForAllUsers(): String {
+        return sseService.schedule(syncService::syncUsers)
+    }
+
+    @PutMapping("/user/{username}")
+    @OnlyAdmin
+    @Operation(
+        summary = "Fetch all external data for a currently known user, identified with the given username",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok")
+        ]
+    )
+    fun fetchExternalDataForUser(@PathVariable username: String) {
+        syncService.syncUser(username)
+    }
 
     @PostMapping("/members")
     @OnlyAdmin
@@ -75,8 +100,11 @@ class SyncController {
 
     @PostMapping("/member/{userId}/open-external-registration/{requestId}")
     @OnlyAdmin
-    fun syncMemberWithOpenExternalRegistration(@PathVariable userId: Int, @PathVariable requestId: String): Boolean {
-        return syncService.syncMemberWithExternalOpenRegistration(userId, requestId)
+    fun syncMemberWithOpenExternalRegistration(@PathVariable userId: Int, @PathVariable requestId: String): ResponseEntity<Unit> {
+        if (syncService.syncMemberWithExternalOpenRegistration(userId, requestId)) {
+            return ResponseEntity.noContent().build()
+        }
+        return ResponseEntity.badRequest().build()
     }
 
     @PostMapping("/member/{userId}/new-external-member-id")

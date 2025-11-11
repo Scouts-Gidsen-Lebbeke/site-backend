@@ -7,6 +7,7 @@ import be.sgl.backend.dto.StaffRoleDTO
 import be.sgl.backend.dto.ExternalFunction
 import be.sgl.backend.dto.RoleDTO
 import be.sgl.backend.service.RoleService
+import be.sgl.backend.service.organization.OrganizationProvider
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -14,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping("/roles")
 @Tag(name = "Roles", description = "Endpoints for managing roles.")
-class RoleController {
-
-    @Autowired
-    private lateinit var roleService: RoleService
+class RoleController(
+    private val roleService: RoleService,
+    private val organizationProvider: OrganizationProvider
+) {
 
     @GetMapping
     @OnlyAdmin
@@ -66,7 +66,7 @@ class RoleController {
         ]
     )
     fun getAllExternalFunctions(): ResponseEntity<List<ExternalFunction>> {
-        return ResponseEntity.ok(roleService.getAllExternalFunctions())
+        return ResponseEntity.ok(organizationProvider.getAllExternalFunctions())
     }
 
     @GetMapping("/paid-functions")
@@ -79,7 +79,7 @@ class RoleController {
         ]
     )
     fun getPaidExternalFunctions(): ResponseEntity<List<ExternalFunction>> {
-        return ResponseEntity.ok(roleService.getPaidExternalFunctions())
+        return ResponseEntity.ok(organizationProvider.getPaidExternalFunctions())
     }
 
     @GetMapping("/branch/{branchId}")

@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter
 
 data class DeclarationFormDTO(
     val user: User,
+    val address: Address,
+    val parent: Contact,
     val activity1: ActivityRegistration,
     val activity2: ActivityRegistration?,
     val activity3: ActivityRegistration?,
@@ -19,10 +21,6 @@ data class DeclarationFormDTO(
         get() = activity1.start.year.toString()
     val id: String
         get() = "${user.name[0]}${user.firstName[0]}${user.birthdate.format(ID_DATE_FORMAT)}-$year-${index + 1}"
-    val parent: Contact
-        get() = user.taxableParent!!
-    val address: Address
-        get() = parent.address!!
     val totalPrice: Double
         get() = activity1.price + (activity2?.price ?: 0.0) + (activity3?.price ?: 0.0) + (activity4?.price ?: 0.0)
 
