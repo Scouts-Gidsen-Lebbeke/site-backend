@@ -43,12 +43,13 @@ class CheckForInitialRunExternal(
 
     override fun execute(userDetails: CustomUserDetails): User? {
         if (!isInitialRun) return null
-        isInitialRun = false
         createOrganizationIfNeeded()
         val externalUser = ledenApi.getLid(userDetails.externalId)
         if (externalUser != null && externalUser.functies.any { it.groep == externalOrganizationId && it.functie == VGA_FUNCTION }) {
             createAdminRoleIfNeeded(true)
-            return createUserForExternalMember.execute(externalUser.id)
+            val user = createUserForExternalMember.execute(externalUser.id)
+            isInitialRun = false
+            return user
         }
         return null
     }

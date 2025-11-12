@@ -26,16 +26,17 @@ class CheckForInitialRunInternal(
 
     override fun execute(userDetails: CustomUserDetails): User? {
         if (!isInitialRun) return null
-        isInitialRun = false
         createAdminRoleIfNeeded()
-        val user = User().apply {
+        var user = User().apply {
             name = userDetails.lastName
             firstName = userDetails.firstName
             email = userDetails.email
             username = userDetails.username
             birthdate = LocalDate.now() // non-null
         }
-        return userRepository.save(user)
+        user = userRepository.save(user)
+        isInitialRun = false
+        return user
     }
 
     fun createAdminRoleIfNeeded() {
