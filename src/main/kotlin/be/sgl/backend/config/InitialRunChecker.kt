@@ -27,8 +27,8 @@ class InitialRunChecker(
     private val roleRepository: RoleRepository,
     private val organizationProvider: OrganizationProvider,
     private val groepenApi: GroepenApi,
-    @Value("\${organization.external.id}")
-    private val externalOrganizationId: String,
+    @Value("\${organization.external.id:}")
+    private val externalOrganizationId: String?,
     private val organizationRepository: OrganizationRepository,
     private val ledenApi: LedenApi,
     private val createUserForExternalMember: CreateUserForExternalMember
@@ -42,14 +42,14 @@ class InitialRunChecker(
     }
 
     fun onInitialRun(userDetails: CustomUserDetails): User? {
-        if (!isInitialRun) return
+        if (!isInitialRun) return null
         isInitialRun = false
         if (externalOrganizationId != null) {
             createOrganizationIfNeeded()
             val externalUser = ledenApi.getLid(userDetails.externalId)
-            if (externalUser != null) {
+            if (externalUser != null && externalUser.functies.any { it.groep == externalOrganizationId && it.functie == VGA_FUNCTION }) {
                 createAdminRoleIfNeeded(true)
-                createUserForExternalMember.execute(externalUser.id)
+                return createUserForExternalMember.execute(externalUser.id)
             }
             return null
         } else {
