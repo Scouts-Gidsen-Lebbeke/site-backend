@@ -5,19 +5,21 @@ import be.sgl.backend.util.Nis
 import be.sgl.backend.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
 data class ContactDTO(
     val id: Int?,
-    @NotBlank
-    val name: String,
-    @NotBlank
-    val firstName: String,
-    val role: ContactRole,
-    @PhoneNumber
+    @field:NotBlank
+    val name: String?,
+    @field:NotBlank
+    val firstName: String?,
+    @field:NotNull
+    val role: ContactRole?,
+    @field:PhoneNumber
     val mobile: String?,
-    @Email
+    @field:Email
     val email: String?,
-    @Nis
+    @field:Nis
     val nis: String?,
     val address: AddressDTO?
 )

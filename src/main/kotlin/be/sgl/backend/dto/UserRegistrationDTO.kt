@@ -9,17 +9,20 @@ import java.time.LocalDate
 
 data class UserRegistrationDTO(
     @field:NotBlank(message = "{NotBlank.userRegistration.name}")
-    var name: String,
+    var name: String?,
     @field:NotBlank(message = "{NotBlank.userRegistration.firstName}")
-    var firstName: String,
-    var birthdate: LocalDate,
+    var firstName: String?,
+    var birthdate: LocalDate?,
+    @field:NotNull(message = "{NotNull.userRegistration.email}")
     @field:Email(message = "{Email.userRegistration.email}")
-    var email: String,
+    var email: String?,
     @field:NotNull(message = "{NotNull.userRegistration.mobile}")
     @field:PhoneNumber(message = "{PhoneNumber.userRegistration.mobile}")
-    var mobile: String,
-    var sex: Sex,
+    var mobile: String?,
+    @field:NotNull(message = "{NotNull.userRegistration.sex}")
+    var sex: Sex?,
     var hasReduction: Boolean = false,
     var hasHandicap: Boolean = false,
-    var address: AddressDTO
+    @field:NotNull(message = "{NotNull.userRegistration.address}")
+    var address: AddressDTO?
 )

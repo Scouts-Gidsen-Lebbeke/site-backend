@@ -4,11 +4,11 @@ import be.sgl.backend.entity.user.RoleLevel
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
+// read-only
 data class RoleDTO(
     val id: Int?,
     val externalId: String?,
     val backupExternalId: String?,
-    @field:NotBlank
     val name: String,
     val branch: BranchBaseDTO?,
     val staffBranch: BranchBaseDTO?,
@@ -28,9 +28,10 @@ data class StaffRoleDTO(
     var backupExternalId: String?,
     @field:NotBlank
     var name: String?,
-    var staffLevel: Boolean
+    var staffLevel: Boolean = false
 )
 
+// read-only
 data class UserRoleDTO(
     var id: Int?,
     var user: UserDTO,
@@ -44,4 +45,5 @@ data class StaffLinkDTO(
     var branchId: Int?
 )
 
+// read-only
 data class ExternalFunction(val externalId: String, val name: String, val paid: Boolean)

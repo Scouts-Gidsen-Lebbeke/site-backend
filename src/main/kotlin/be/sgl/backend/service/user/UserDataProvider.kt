@@ -12,7 +12,6 @@ import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.service.exception.UserNotFoundException
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 
 /**
  * Gateway for all user data (contact info, medical data and roles).
@@ -38,15 +37,15 @@ abstract class UserDataProvider {
      */
     fun registerUser(registrationDTO: UserRegistrationDTO): User {
         val user = User()
-        user.name = registrationDTO.name
-        user.firstName = registrationDTO.firstName
-        user.email = registrationDTO.email
-        user.birthdate = registrationDTO.birthdate
+        user.name = registrationDTO.name!!
+        user.firstName = registrationDTO.firstName!!
+        user.email = registrationDTO.email!!
+        user.birthdate = registrationDTO.birthdate!!
         user.mobile = registrationDTO.mobile
-        user.sex = registrationDTO.sex
+        user.sex = registrationDTO.sex!!
         user.hasReduction = registrationDTO.hasReduction
         user.hasHandicap = registrationDTO.hasHandicap
-        user.addresses.add(addressMapper.toEntity(registrationDTO.address))
+        user.addresses.add(addressMapper.toEntity(registrationDTO.address!!))
         return userRepository.save(user)
     }
 

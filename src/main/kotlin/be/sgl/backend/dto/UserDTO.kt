@@ -7,32 +7,35 @@ import be.sgl.backend.util.Nis
 import be.sgl.backend.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDate
 
 data class UserDTO(
     val username: String?,
-    @NotBlank
-    val name: String,
-    @NotBlank
-    val firstName: String,
-    @Email
-    @NotBlank
-    val email: String,
+    @field:NotBlank
+    val name: String?,
+    @field:NotBlank
+    val firstName: String?,
+    @field:Email
+    @field:NotBlank
+    val email: String?,
     val image: String?,
     val level: RoleLevel,
     val memberId: String?,
-    val birthdate: LocalDate,
-    @PhoneNumber
+    @field:NotNull
+    val birthdate: LocalDate?,
+    @field:PhoneNumber
     val mobile: String?,
-    @Nis
+    @field:Nis
     val nis: String?,
     val accountNo: String?,
-    val sex: Sex,
-    val hasReduction: Boolean,
-    val addresses: List<AddressDTO>,
-    val contacts: List<ContactDTO>
+    @field:NotNull
+    val sex: Sex?,
+    val hasReduction: Boolean = false,
+    val hasHandicap: Boolean = false
 )
 
+// read-only
 data class StaffDTO(
     val name: String,
     val firstName: String,

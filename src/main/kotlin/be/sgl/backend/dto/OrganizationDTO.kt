@@ -10,13 +10,13 @@ import java.io.File
 
 data class OrganizationDTO(
     var id: Int?,
-    @NotBlank
+    @field:NotBlank
     var name: String?,
-    @NotNull
+    @field:NotNull
     var type: OrganizationType?,
-    @Kbo
+    @field:Kbo
     var kbo: String?,
-    @NotNull
+    @field:NotNull
     var address: AddressDTO?,
     var contactMethods: List<ContactMethodDTO>,
     var image: String?,

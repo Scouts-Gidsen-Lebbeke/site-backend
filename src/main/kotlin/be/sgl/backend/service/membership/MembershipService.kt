@@ -81,7 +81,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     fun createMembershipForNewUser(registrationDTO: UserRegistrationDTO): String {
         logger.debug { "New membership creation request for new user..." }
-        userDataProvider.findByNameAndEmail(registrationDTO.name, registrationDTO.firstName, registrationDTO.email)?.let {
+        userDataProvider.findByNameAndEmail(registrationDTO.name!!, registrationDTO.firstName!!, registrationDTO.email!!)?.let {
             it.username?.let {
                 logger.error { "User creation request for already existing user $it" }
                 throw IllegalStateException("This user already exists, contact the organization to retrieve the login!")

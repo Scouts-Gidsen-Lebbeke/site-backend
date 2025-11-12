@@ -1,9 +1,6 @@
 package be.sgl.backend.dto
 
-import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
-import be.sgl.backend.entity.registrable.RegistrableStatus
-import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.util.StartEndDate
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotNull

@@ -10,28 +10,29 @@ import java.io.Serializable
 
 open class BranchBaseDTO(
     val id: Int?,
-    @NotBlank
-    val name: String,
-    @NotBlank
-    val image: String
+    @field:NotBlank
+    val name: String?,
+    @field:NotBlank
+    val image: String?
 ) : Serializable
 
 class BranchDTO(
     id: Int?,
-    name: String,
-    image: String,
-    @NotNull
-    @Email
-    val email: String,
-    @NotNull
-    @Positive
-    val minimumAge: Int,
-    @Positive
+    name: String?,
+    image: String?,
+    @field:NotNull
+    @field:Email
+    val email: String?,
+    @field:NotNull
+    @field:Positive
+    val minimumAge: Int?,
+    @field:Positive
     val maximumAge: Int?,
     val sex: Sex?,
     val description: String?,
     val law: String?,
-    val status: BranchStatus,
+    @field:NotNull
+    val status: BranchStatus?,
     val staffTitle: String?,
     val staff: List<StaffDTO> = emptyList()
 ) : BranchBaseDTO(id, name, image)
