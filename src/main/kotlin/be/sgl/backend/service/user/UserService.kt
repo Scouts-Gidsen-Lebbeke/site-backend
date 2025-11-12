@@ -1,6 +1,7 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.config.InitialRunChecker
 import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.dto.MedicalRecordDTO
 import be.sgl.backend.dto.UserDTO
@@ -8,7 +9,6 @@ import be.sgl.backend.service.ImageService
 import be.sgl.backend.mapper.UserMapper
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.repository.user.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
@@ -16,18 +16,15 @@ import be.sgl.backend.service.exception.UserNotFoundException
 import java.nio.file.Path
 
 @Service
-class UserService {
+class UserService(
+    private val mapper: UserMapper,
+    private val userDataProvider: UserDataProvider,
+    private val initialRunChecker: InitialRunChecker,
+    private val userRepository: UserRepository,
+    private val imageService: ImageService,
+    private val siblingRepository: SiblingRepository
 
-    @Autowired
-    private lateinit var mapper: UserMapper
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    private lateinit var imageService: ImageService
-    @Autowired
-    private lateinit var siblingRepository: SiblingRepository
+) {
 
     fun getProfile(username: String): UserDTO {
         return mapper.toDto(userDataProvider.getUser(username))
@@ -44,7 +41,7 @@ class UserService {
     fun getUserWithDetails(userDetails: CustomUserDetails): UserDTO {
         val user = userDataProvider.findUser(userDetails.username)
             ?: userDataProvider.findByNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
-            // TODO: ?: checkForFirstRun => on external org, check if no users in db, if so check if current user vga, if so syncService.syncUsers and assign root admin role to current user
+            ?: initialRunChecker.onInitialRun(userDetails)
             ?: throw UserNotFoundException(userDetails.username)
         if (user.username == null) {
             userRepository.updateUsername(user.id!!, userDetails.username)

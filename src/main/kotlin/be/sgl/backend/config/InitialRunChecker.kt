@@ -6,6 +6,7 @@ import be.sgl.backend.entity.organization.ContactMethodType
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.entity.user.Role.Companion.adminRole
+import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.GroepenApi
 import be.sgl.backend.openapi.model.Groep
 import be.sgl.backend.repository.OrganizationRepository
@@ -33,6 +34,11 @@ class InitialRunChecker(
     @PostConstruct
     fun checkInitialRun() {
         isInitialRun = userRepository.count() == 0L
+    }
+
+    fun onInitialRun(userDetails: CustomUserDetails): User? {
+        if (!isInitialRun) return
+
     }
 
     private fun createOrganizationIfNeeded() {
