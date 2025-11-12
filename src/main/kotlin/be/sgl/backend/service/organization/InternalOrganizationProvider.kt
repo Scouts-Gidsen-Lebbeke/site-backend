@@ -29,7 +29,7 @@ class InternalOrganizationProvider : OrganizationProvider {
     @Autowired
     private lateinit var imageService: ImageService
 
-    @Cacheable("internalOwner")
+    @Cacheable("owner")
     override fun getOwner(): Organization {
         return organizationRepository.getByType(OrganizationType.OWNER)
             ?: throw IncompleteConfigurationException("No organization configured!")
