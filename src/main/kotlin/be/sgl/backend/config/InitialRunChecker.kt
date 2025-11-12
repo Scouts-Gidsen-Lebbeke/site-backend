@@ -8,15 +8,18 @@ import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.entity.user.Role.Companion.adminRole
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.GroepenApi
+import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Groep
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import be.sgl.backend.service.organization.OrganizationProvider
+import be.sgl.backend.service.user.sync.CreateUserForExternalMember
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class InitialRunChecker(
@@ -26,7 +29,9 @@ class InitialRunChecker(
     private val groepenApi: GroepenApi,
     @Value("\${organization.external.id}")
     private val externalOrganizationId: String,
-    private val organizationRepository: OrganizationRepository
+    private val organizationRepository: OrganizationRepository,
+    private val ledenApi: LedenApi,
+    private val createUserForExternalMember: CreateUserForExternalMember
 ) {
 
     private var isInitialRun = false
@@ -38,7 +43,26 @@ class InitialRunChecker(
 
     fun onInitialRun(userDetails: CustomUserDetails): User? {
         if (!isInitialRun) return
-
+        isInitialRun = false
+        if (externalOrganizationId != null) {
+            createOrganizationIfNeeded()
+            val externalUser = ledenApi.getLid(userDetails.externalId)
+            if (externalUser != null) {
+                createAdminRoleIfNeeded(true)
+                createUserForExternalMember.execute(externalUser.id)
+            }
+            return null
+        } else {
+            createAdminRoleIfNeeded(false)
+            val user = User().apply {
+                name = userDetails.lastName
+                firstName = userDetails.firstName
+                email = userDetails.email
+                username = userDetails.username
+                birthdate = LocalDate.now() // non-null
+            }
+            return userRepository.save(user)
+        }
     }
 
     private fun createOrganizationIfNeeded() {

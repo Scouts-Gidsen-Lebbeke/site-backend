@@ -21,7 +21,7 @@ class CreateUserForExternalMember(
 
     private val logger = KotlinLogging.logger {}
 
-    fun execute(externalId: String) {
+    fun execute(externalId: String): User {
         logger.info { "Creating new user based on external id $externalId..." }
         val externalMember = ledenApi.getLid(externalId)
         val user = User().apply {
@@ -62,7 +62,7 @@ class CreateUserForExternalMember(
                 email = c.email
             } } )
         }
-        userRepository.save(user)
+        return userRepository.save(user)
     }
 
     private fun translateFunction(user: User, function: FunctieInstantie): UserRole? {
