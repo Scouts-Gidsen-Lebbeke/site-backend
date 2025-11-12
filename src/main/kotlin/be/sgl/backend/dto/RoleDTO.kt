@@ -8,7 +8,7 @@ data class RoleDTO(
     val id: Int?,
     val externalId: String?,
     val backupExternalId: String?,
-    @NotBlank
+    @field:NotBlank
     val name: String,
     val branch: BranchBaseDTO?,
     val staffBranch: BranchBaseDTO?,
@@ -16,17 +16,17 @@ data class RoleDTO(
 )
 
 data class MemberRoleDTO(
-    @NotBlank
+    @field:NotBlank
     var externalId: String?,
     var backupExternalId: String?,
-    @NotBlank
+    @field:NotBlank
     var name: String?,
 )
 
 data class StaffRoleDTO(
     var externalId: String?,
     var backupExternalId: String?,
-    @NotBlank
+    @field:NotBlank
     var name: String?,
     var staffLevel: Boolean
 )
@@ -38,9 +38,9 @@ data class UserRoleDTO(
 )
 
 data class StaffLinkDTO(
-    @NotNull
+    @field:NotNull
     var username: String?,
-    @NotNull
+    @field:NotNull
     var branchId: Int?
 )
 

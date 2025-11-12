@@ -16,6 +16,8 @@ import be.sgl.backend.service.exception.UserRoleNotFoundException
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.stereotype.Service
 
+// If the external function references get updated by whatever CRUD operation,
+// a sync will create the new external functions and remove the old ones afterward.
 @Service
 class RoleService(
     private val roleRepository: RoleRepository,
@@ -49,7 +51,6 @@ class RoleService(
         val role = getRoleById(id)
         check(role.memberRole) { "The requested role to update is not a member role!" }
         role.name = dto.name!!
-        // TODO: this implies looping over the active memberships and assigning additional user roles (synced with external functions afterwards)
         role.externalId = dto.externalId
         role.backupExternalId = dto.backupExternalId
         return mapper.toDto(roleRepository.save(role))
@@ -59,7 +60,6 @@ class RoleService(
         val role = getRoleById(id)
         check(role.staffRole) { "The requested role to update is not a staff role!" }
         role.name = dto.name!!
-        // If the external function references get updated, a sync afterward will create the new external functions and remove the old ones.
         role.externalId = dto.externalId
         role.backupExternalId = dto.backupExternalId
         role.level = if (dto.staffLevel) RoleLevel.STAFF else RoleLevel.GUEST
@@ -68,8 +68,7 @@ class RoleService(
 
     fun deleteRole(id: Int) {
         val role = getRoleById(id)
-        check(role.level != RoleLevel.ADMIN) { "Admin roles can't be deleted!" }
-        // A sync afterward will remove the old external functions coming from the deleted role.
+        check(!role.adminRole) { "Admin roles can't be deleted!" }
         userRoleRepository.deleteUserRolesByRole(role)
         roleRepository.delete(role)
     }

@@ -8,15 +8,15 @@ import jakarta.validation.constraints.NotNull
 import java.time.LocalDate
 
 data class UserRegistrationDTO(
-    @NotBlank(message = "{NotBlank.userRegistration.name}")
+    @field:NotBlank(message = "{NotBlank.userRegistration.name}")
     var name: String,
-    @NotBlank(message = "{NotBlank.userRegistration.firstName}")
+    @field:NotBlank(message = "{NotBlank.userRegistration.firstName}")
     var firstName: String,
     var birthdate: LocalDate,
-    @Email(message = "{Email.userRegistration.email}")
+    @field:Email(message = "{Email.userRegistration.email}")
     var email: String,
-    @NotNull(message = "{NotNull.userRegistration.mobile}")
-    @PhoneNumber(message = "{PhoneNumber.userRegistration.mobile}")
+    @field:NotNull(message = "{NotNull.userRegistration.mobile}")
+    @field:PhoneNumber(message = "{PhoneNumber.userRegistration.mobile}")
     var mobile: String,
     var sex: Sex,
     var hasReduction: Boolean = false,
