@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.config.DataLoader.Companion.VGA_FUNCTION
+import be.sgl.backend.config.InitialRunChecker.Companion.VGA_FUNCTION
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.Lid
