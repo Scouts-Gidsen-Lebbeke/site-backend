@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.config.InitialRunChecker.Companion.VGA_FUNCTION
+import be.sgl.backend.service.user.inital.InitialRunChecker.Companion.VGA_FUNCTION
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Lid
 import mu.KotlinLogging

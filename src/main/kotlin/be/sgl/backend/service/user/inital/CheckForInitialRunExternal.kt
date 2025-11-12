@@ -1,5 +1,6 @@
-package be.sgl.backend.config
+package be.sgl.backend.service.user.inital
 
+import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.organization.ContactMethod
 import be.sgl.backend.entity.organization.ContactMethodType
@@ -16,23 +17,22 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.sync.CreateUserForExternalMember
+import be.sgl.backend.service.user.sync.ExternalUsecase
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
-import java.time.LocalDate
 
-@Component
-class InitialRunChecker(
+@ExternalUsecase
+class CheckForInitialRunExternal(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
     private val organizationProvider: OrganizationProvider,
     private val groepenApi: GroepenApi,
-    @Value("\${organization.external.id:}")
-    private val externalOrganizationId: String?,
+    @Value("\${organization.external.id}")
+    private val externalOrganizationId: String,
     private val organizationRepository: OrganizationRepository,
     private val ledenApi: LedenApi,
     private val createUserForExternalMember: CreateUserForExternalMember
-) {
+) : CheckForInitialRun {
 
     private var isInitialRun = false
 
@@ -41,28 +41,16 @@ class InitialRunChecker(
         isInitialRun = userRepository.count() == 0L
     }
 
-    fun onInitialRun(userDetails: CustomUserDetails): User? {
+    override fun execute(userDetails: CustomUserDetails): User? {
         if (!isInitialRun) return null
         isInitialRun = false
-        if (externalOrganizationId != null) {
-            createOrganizationIfNeeded()
-            val externalUser = ledenApi.getLid(userDetails.externalId)
-            if (externalUser != null && externalUser.functies.any { it.groep == externalOrganizationId && it.functie == VGA_FUNCTION }) {
-                createAdminRoleIfNeeded(true)
-                return createUserForExternalMember.execute(externalUser.id)
-            }
-            return null
-        } else {
-            createAdminRoleIfNeeded(false)
-            val user = User().apply {
-                name = userDetails.lastName
-                firstName = userDetails.firstName
-                email = userDetails.email
-                username = userDetails.username
-                birthdate = LocalDate.now() // non-null
-            }
-            return userRepository.save(user)
+        createOrganizationIfNeeded()
+        val externalUser = ledenApi.getLid(userDetails.externalId)
+        if (externalUser != null && externalUser.functies.any { it.groep == externalOrganizationId && it.functie == VGA_FUNCTION }) {
+            createAdminRoleIfNeeded(true)
+            return createUserForExternalMember.execute(externalUser.id)
         }
+        return null
     }
 
     private fun createOrganizationIfNeeded() {
@@ -71,12 +59,6 @@ class InitialRunChecker(
         } catch (e: IncompleteConfigurationException) {
             val group = groepenApi.getGroep(externalOrganizationId) ?: throw IncompleteConfigurationException("No valid external organization found!")
             organizationRepository.save(translateGroup(group))
-        }
-    }
-
-    private fun createAdminRoleIfNeeded(externalSync: Boolean) {
-        if (roleRepository.count() == 0L) {
-            adminRole("Admin", VGA_FUNCTION.takeIf { externalSync }, AVGA_FUNCTION.takeIf { externalSync })
         }
     }
 
@@ -98,6 +80,12 @@ class InitialRunChecker(
         group.email?.let { contactMethods.add(ContactMethod(this, ContactMethodType.EMAIL, it)) }
         group.adressen[0].telefoon?.let { contactMethods.add(ContactMethod(this, ContactMethodType.MOBILE, it)) }
         description = group.vrijeInfo
+    }
+
+    fun createAdminRoleIfNeeded(externalSync: Boolean) {
+        if (roleRepository.count() == 0L) {
+            adminRole("Admin", VGA_FUNCTION.takeIf { externalSync }, AVGA_FUNCTION.takeIf { externalSync })
+        }
     }
 
     companion object {

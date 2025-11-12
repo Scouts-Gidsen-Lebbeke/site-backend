@@ -1,7 +1,6 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.InitialRunChecker
 import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.dto.MedicalRecordDTO
 import be.sgl.backend.dto.UserDTO
@@ -13,13 +12,14 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
 import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.service.user.inital.CheckForInitialRun
 import java.nio.file.Path
 
 @Service
 class UserService(
     private val mapper: UserMapper,
     private val userDataProvider: UserDataProvider,
-    private val initialRunChecker: InitialRunChecker,
+    private val checkForInitialRun: CheckForInitialRun,
     private val userRepository: UserRepository,
     private val imageService: ImageService,
     private val siblingRepository: SiblingRepository
@@ -41,7 +41,7 @@ class UserService(
     fun getUserWithDetails(userDetails: CustomUserDetails): UserDTO {
         val user = userDataProvider.findUser(userDetails.username)
             ?: userDataProvider.findByNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
-            ?: initialRunChecker.onInitialRun(userDetails)
+            ?: checkForInitialRun.execute(userDetails)
             ?: throw UserNotFoundException(userDetails.username)
         if (user.username == null) {
             userRepository.updateUsername(user.id!!, userDetails.username)
