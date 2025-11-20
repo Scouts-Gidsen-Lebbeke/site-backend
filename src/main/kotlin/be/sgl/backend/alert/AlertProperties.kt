@@ -13,9 +13,9 @@ import org.springframework.validation.annotation.Validated
 class AlertProperties {
     @setparam:DefaultValue("true")
     var enabled: Boolean = true
-    @set:NotNull
-    @set:Email
+    @field:NotNull
+    @field:Email
     var recipient: String? = null
-    @set:NotNull
+    @field:NotNull
     var environment: String? = null
 }

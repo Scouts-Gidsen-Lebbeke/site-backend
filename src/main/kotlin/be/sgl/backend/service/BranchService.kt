@@ -49,20 +49,21 @@ class BranchService {
 
     fun mergeBranchDTOChanges(id: Int, dto: BranchDTO): BranchDTO {
         val branch = getBranchById(id)
-        branch.name = dto.name
-        branch.email = dto.email
-        branch.minimumAge = dto.minimumAge
-        branch.maximumAge = dto.maximumAge
-        branch.sex = dto.sex
-        branch.description = dto.description
-        branch.law = dto.law
-        if (branch.image != dto.image) {
+        val branchFromDto = mapper.toEntity(dto)
+        branch.name = branchFromDto.name
+        branch.email = branchFromDto.email
+        branch.minimumAge = branchFromDto.minimumAge
+        branch.maximumAge = branchFromDto.maximumAge
+        branch.sex = branchFromDto.sex
+        branch.description = branchFromDto.description
+        branch.law = branchFromDto.law
+        if (branch.image != branchFromDto.image) {
             imageService.delete(BRANCH, branch.image)
-            imageService.move(dto.image, TEMPORARY, BRANCH)
-            branch.image = dto.image
+            imageService.move(branchFromDto.image, TEMPORARY, BRANCH)
+            branch.image = branchFromDto.image
         }
-        branch.status = dto.status
-        branch.staffTitle = dto.staffTitle
+        branch.status = branchFromDto.status
+        branch.staffTitle = branchFromDto.staffTitle
         return mapper.toDto(branchRepository.save(branch))
     }
 

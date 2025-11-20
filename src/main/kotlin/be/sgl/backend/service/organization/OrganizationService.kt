@@ -73,19 +73,19 @@ class OrganizationService {
 
     fun getRepresentativeDTO(): RepresentativeDTO {
         return RepresentativeDTO(
-            settingService.get(SettingId.REPRESENTATIVE_USERNAME),
-            settingService.get(SettingId.REPRESENTATIVE_TITLE),
-            settingService.get(SettingId.REPRESENTATIVE_SIGNATURE),
+            settingService.get(SettingId.REPRESENTATIVE_USERNAME.name),
+            settingService.get(SettingId.REPRESENTATIVE_TITLE.name),
+            settingService.get(SettingId.REPRESENTATIVE_SIGNATURE.name),
         )
     }
 
     @CacheEvict(cacheNames = ["representative"])
     fun mergeRepresentativeDTOChanges(dto: RepresentativeDTO): RepresentativeDTO {
-        checkNotNull(userDataProvider.userExists(dto.username)) { "No valid username provided!" }
+        check(userDataProvider.userExists(dto.username)) { "No valid username provided!" }
         imageService.move(dto.signature!!, TEMPORARY, ORGANIZATION)
-        settingService.update(SettingId.REPRESENTATIVE_USERNAME, dto.username)
-        settingService.update(SettingId.REPRESENTATIVE_TITLE, dto.title)
-        settingService.update(SettingId.REPRESENTATIVE_SIGNATURE, dto.signature)
+        settingService.update(SettingId.REPRESENTATIVE_USERNAME.name, dto.username)
+        settingService.update(SettingId.REPRESENTATIVE_TITLE.name, dto.title)
+        settingService.update(SettingId.REPRESENTATIVE_SIGNATURE.name, dto.signature)
         return dto
     }
 }
