@@ -10,7 +10,6 @@ import be.sgl.backend.service.user.sync.CreateExternalFunctions
 import be.sgl.backend.service.user.sync.EndExternalFunctions
 import be.sgl.backend.util.ForExternalOrganization
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 

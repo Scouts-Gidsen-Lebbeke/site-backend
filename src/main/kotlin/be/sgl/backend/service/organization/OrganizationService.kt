@@ -1,42 +1,26 @@
 package be.sgl.backend.service.organization
 
 import be.sgl.backend.dto.OrganizationDTO
-import be.sgl.backend.dto.RepresentativeDTO
-import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.mapper.OrganizationMapper
 import be.sgl.backend.repository.AddressRepository
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.*
-import be.sgl.backend.service.SettingService
+import be.sgl.backend.service.ImageService.ImageDirectory.ORGANIZATION
+import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
 import be.sgl.backend.service.exception.OrganizationNotFoundException
-import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.util.nullIfBlank
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 
 @Service
-class OrganizationService {
-
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-
-    @Autowired
-    protected lateinit var organizationRepository: OrganizationRepository
-    @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
-    @Autowired
-    private lateinit var mapper: OrganizationMapper
-    @Autowired
-    protected lateinit var addressRepository: AddressRepository
-    @Autowired
-    private lateinit var addressMapper: AddressMapper
-    @Autowired
-    private lateinit var imageService: ImageService
-    @Autowired
-    private lateinit var settingService: SettingService
+class OrganizationService(
+    private val organizationRepository: OrganizationRepository,
+    private val organizationProvider: OrganizationProvider,
+    private val mapper: OrganizationMapper,
+    private val addressRepository: AddressRepository,
+    private val addressMapper: AddressMapper,
+    private val imageService: ImageService
+) {
 
     fun getOwner(): OrganizationDTO {
         return mapper.toDto(organizationProvider.getOwner())
@@ -69,23 +53,5 @@ class OrganizationService {
         }
         organization.description = dto.description
         return mapper.toDto(organizationRepository.save(organization))
-    }
-
-    fun getRepresentativeDTO(): RepresentativeDTO {
-        return RepresentativeDTO(
-            settingService.get(SettingId.REPRESENTATIVE_USERNAME.name),
-            settingService.get(SettingId.REPRESENTATIVE_TITLE.name),
-            settingService.get(SettingId.REPRESENTATIVE_SIGNATURE.name),
-        )
-    }
-
-    @CacheEvict(cacheNames = ["representative"])
-    fun mergeRepresentativeDTOChanges(dto: RepresentativeDTO): RepresentativeDTO {
-        check(userDataProvider.userExists(dto.username)) { "No valid username provided!" }
-        imageService.move(dto.signature!!, TEMPORARY, ORGANIZATION)
-        settingService.update(SettingId.REPRESENTATIVE_USERNAME.name, dto.username)
-        settingService.update(SettingId.REPRESENTATIVE_TITLE.name, dto.title)
-        settingService.update(SettingId.REPRESENTATIVE_SIGNATURE.name, dto.signature)
-        return dto
     }
 }

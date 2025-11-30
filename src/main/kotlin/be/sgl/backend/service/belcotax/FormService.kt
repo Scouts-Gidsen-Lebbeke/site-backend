@@ -2,6 +2,7 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.util.StampSpecs
 import be.sgl.backend.util.belgian
@@ -12,12 +13,13 @@ import java.time.LocalDate
 
 @Service
 class FormService(
-    private val organizationProvider: OrganizationProvider
+    private val organizationProvider: OrganizationProvider,
+    private val getRepresentativeForOwner: GetRepresentativeForOwner
 ) {
 
     fun createForm(form: DeclarationFormDTO): ByteArray {
         val owner = organizationProvider.getOwner()
-        val representative = organizationProvider.getRepresentative()
+        val representative = getRepresentativeForOwner.execute()
         val certifier = organizationProvider.getCertifier()
         val formData = mapOf(
             "organization_name" to owner.name,

@@ -1,6 +1,9 @@
-package be.sgl.backend.service
+package be.sgl.backend.service.role
 
-import be.sgl.backend.dto.*
+import be.sgl.backend.dto.role.MemberRoleChangeRequest
+import be.sgl.backend.dto.role.RoleDTO
+import be.sgl.backend.dto.role.StaffRoleChangeRequest
+import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.Role.Companion.memberRole
@@ -35,19 +38,19 @@ class RoleService(
         return mapper.toDto(findAdminRole())
     }
 
-    fun createMemberRole(branchId: Int, dto: MemberRoleDTO): RoleDTO {
+    fun createMemberRole(branchId: Int, dto: MemberRoleChangeRequest): RoleDTO {
         val branch = getBranchById(branchId)
         val newRole = memberRole(dto.name!!, dto.externalId!!, dto.backupExternalId, branch)
         return mapper.toDto(roleRepository.save(newRole))
     }
 
-    fun createStaffRole(branchId: Int, dto: StaffRoleDTO): RoleDTO {
+    fun createStaffRole(branchId: Int, dto: StaffRoleChangeRequest): RoleDTO {
         val branch = getBranchById(branchId)
         val newRole = staffRole(dto.name!!, dto.externalId, dto.backupExternalId, branch, dto.staffLevel)
         return mapper.toDto(roleRepository.save(newRole))
     }
 
-    fun mergeMemberRoleDTOChanges(id: Int, dto: MemberRoleDTO): RoleDTO {
+    fun updateMemberRole(id: Int, dto: MemberRoleChangeRequest): RoleDTO {
         val role = getRoleById(id)
         check(role.memberRole) { "The requested role to update is not a member role!" }
         role.name = dto.name!!
@@ -56,10 +59,10 @@ class RoleService(
         return mapper.toDto(roleRepository.save(role))
     }
 
-    fun mergeStaffRoleDTOChanges(id: Int, dto: StaffRoleDTO): RoleDTO {
+    fun updateStaffRole(id: Int, dto: StaffRoleChangeRequest): RoleDTO {
         val role = getRoleById(id)
         check(role.staffRole) { "The requested role to update is not a staff role!" }
-        role.name = dto.name!!
+        dto.name?.let { role.name = it }
         role.externalId = dto.externalId
         role.backupExternalId = dto.backupExternalId
         role.level = if (dto.staffLevel) RoleLevel.STAFF else RoleLevel.GUEST

@@ -68,8 +68,7 @@ class BackgroundController {
             ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun deleteBackground(@PathVariable filename: String): ResponseEntity<Unit> {
+    fun deleteBackground(@PathVariable filename: String) {
         imageService.delete(BACKGROUND, filename)
-        return ResponseEntity.ok().build()
     }
 }

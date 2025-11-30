@@ -1,13 +1,26 @@
 package be.sgl.backend.service.organization
 
-import be.sgl.backend.dto.ExternalFunction
-import be.sgl.backend.dto.Representative
 import be.sgl.backend.entity.organization.Organization
+import be.sgl.backend.entity.organization.OrganizationType
+import be.sgl.backend.repository.OrganizationRepository
+import be.sgl.backend.service.exception.IncompleteConfigurationException
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.stereotype.Service
 
-interface OrganizationProvider {
-    fun getOwner(): Organization
-    fun getRepresentative(): Representative
-    fun getCertifier(): Organization
-    fun getAllExternalFunctions(): List<ExternalFunction>
-    fun getPaidExternalFunctions(): List<ExternalFunction>
+@Service
+class OrganizationProvider(
+    private val organizationRepository: OrganizationRepository
+) {
+
+    @Cacheable("owner")
+    fun getOwner(): Organization {
+        return organizationRepository.getByType(OrganizationType.OWNER)
+            ?: throw IncompleteConfigurationException("No organization configured!")
+    }
+
+    @Cacheable("certifier")
+    fun getCertifier(): Organization {
+        return organizationRepository.getByType(OrganizationType.CERTIFIER)
+            ?: throw IncompleteConfigurationException("No certifier configured!")
+    }
 }

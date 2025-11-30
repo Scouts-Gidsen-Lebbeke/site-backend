@@ -1,5 +1,6 @@
 package be.sgl.backend.dto
 
+import be.sgl.backend.dto.user.StaffDTO
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.user.Sex
 import jakarta.validation.constraints.Email

@@ -2,7 +2,7 @@ package be.sgl.backend.mapper
 
 import be.sgl.backend.dto.BranchBaseDTO
 import be.sgl.backend.dto.BranchDTO
-import be.sgl.backend.dto.StaffDTO
+import be.sgl.backend.dto.user.StaffDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.user.User
 import org.mapstruct.Mapper

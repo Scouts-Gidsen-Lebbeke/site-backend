@@ -68,8 +68,4 @@ class User : Serializable {
     fun getHomeAddress(): Address? {
         return addresses.find { it.postalAdress }
     }
-
-    fun getStaffBranch(): Branch? {
-        return roles.mapNotNull { it.role.staffBranch }.firstOrNull { it.status == BranchStatus.ACTIVE }
-    }
 }

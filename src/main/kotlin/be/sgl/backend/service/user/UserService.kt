@@ -2,8 +2,7 @@ package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.dto.BranchDTO
-import be.sgl.backend.dto.MedicalRecordDTO
-import be.sgl.backend.dto.UserDTO
+import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.mapper.UserMapper
 import be.sgl.backend.repository.user.SiblingRepository
@@ -23,7 +22,6 @@ class UserService(
     private val userRepository: UserRepository,
     private val imageService: ImageService,
     private val siblingRepository: SiblingRepository
-
 ) {
 
     fun getProfile(username: String): UserDTO {
@@ -59,15 +57,6 @@ class UserService(
 
     fun getByQuery(query: String): List<UserDTO> {
         return userDataProvider.findByQuery(query).map(mapper::toDto)
-    }
-
-    fun getStaffBranch(username: String): BranchDTO? {
-        return userDataProvider.getUser(username).getStaffBranch()?.run(mapper::toDto)
-    }
-
-    fun getMedicalRecord(username: String): MedicalRecordDTO? {
-        val user = userDataProvider.getUser(username)
-        return userDataProvider.getMedicalRecord(user)?.run(mapper::toDto)
     }
 
     fun getSiblings(username: String): List<UserDTO> {

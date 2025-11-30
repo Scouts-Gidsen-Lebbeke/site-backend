@@ -1,25 +1,24 @@
 package be.sgl.backend.service.activity
 
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.util.*
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 @Usecase
-class CreateCertificateForActivityRegistration {
-
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
+class CreateCertificateForActivityRegistration(
+    private val userDataProvider: UserDataProvider,
+    private val organizationProvider: OrganizationProvider,
+    private val getRepresentativeForOwner: GetRepresentativeForOwner
+) {
 
     fun execute(registration: ActivityRegistration): ByteArray {
         check(registration.completed) { "A certificate can only be generated for a completed activity!" }
         val user = userDataProvider.getUser(registration.user.username!!)
         val owner = organizationProvider.getOwner()
-        val representative = organizationProvider.getRepresentative()
+        val representative = getRepresentativeForOwner.execute()
         val formData = mapOf(
             "name" to user.name,
             "first_name" to user.firstName,

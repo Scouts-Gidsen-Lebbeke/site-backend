@@ -3,7 +3,6 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.OrganizationDTO
-import be.sgl.backend.dto.RepresentativeDTO
 import be.sgl.backend.service.organization.OrganizationService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -16,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
+@Validated
 @RestController
 @RequestMapping("/organizations")
 @Tag(name = "Organization", description = "Endpoints for managing organizations.")
@@ -83,33 +84,5 @@ class OrganizationController {
     )
     fun updateOrganization(@PathVariable id: Int, @Valid @RequestBody organization: OrganizationDTO): ResponseEntity<OrganizationDTO> {
         return ResponseEntity.ok(organizationService.mergeOrganizationDTOChanges(id, organization))
-    }
-
-    @GetMapping("/representative")
-    @OnlyAdmin
-    @Operation(
-        summary = "Get the representative of the owning organization",
-        description = "Returns the representative of the owning organization, without validating the underlying setting values.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = RepresentativeDTO::class))])
-        ]
-    )
-    fun getRepresentative(): ResponseEntity<RepresentativeDTO> {
-        return ResponseEntity.ok(organizationService.getRepresentativeDTO())
-    }
-
-    @PutMapping("/representative")
-    @OnlyAdmin
-    @Operation(
-        summary = "Update the representative of the owning organization",
-        description = "Updates the representative of the owning organization, hereby validating the underlying setting values.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Representative updated", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = RepresentativeDTO::class))]),
-            ApiResponse(responseCode = "400", description = "Bad representative format", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "500", description = "Image error", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
-        ]
-    )
-    fun updateRepresentative(@Valid @RequestBody representative: RepresentativeDTO): ResponseEntity<RepresentativeDTO> {
-        return ResponseEntity.ok(organizationService.mergeRepresentativeDTOChanges(representative))
     }
 }

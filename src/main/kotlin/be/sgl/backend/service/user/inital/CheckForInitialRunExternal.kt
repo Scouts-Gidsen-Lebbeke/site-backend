@@ -15,7 +15,6 @@ import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
-import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.service.user.sync.CreateUserForExternalMember
 import be.sgl.backend.service.user.sync.ExternalUsecase
 import jakarta.annotation.PostConstruct
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value
 class CheckForInitialRunExternal(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
-    private val organizationProvider: OrganizationProvider,
     private val groepenApi: GroepenApi,
     @Value("\${organization.external.id}")
     private val externalOrganizationId: String,
@@ -55,12 +53,10 @@ class CheckForInitialRunExternal(
     }
 
     private fun createOrganizationIfNeeded() {
-        try {
-            organizationProvider.getOwner()
-        } catch (e: IncompleteConfigurationException) {
-            val group = groepenApi.getGroep(externalOrganizationId) ?: throw IncompleteConfigurationException("No valid external organization found!")
-            organizationRepository.save(translateGroup(group))
-        }
+        organizationRepository.getByType(OrganizationType.OWNER) ?: return
+        val group = groepenApi.getGroep(externalOrganizationId)
+            ?: throw IncompleteConfigurationException("No valid external organization found!")
+        organizationRepository.save(translateGroup(group))
     }
 
     private fun translateGroup(group: Groep) = Organization().apply {

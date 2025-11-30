@@ -1,24 +1,21 @@
 package be.sgl.backend.service
 
-import be.sgl.backend.dto.NewsItemDTO
+import be.sgl.backend.dto.news.CreateOrUpdateNewsItemRequest
+import be.sgl.backend.dto.news.NewsItemDTO
 import be.sgl.backend.entity.NewsItem
 import be.sgl.backend.repository.NewsItemRepository
 import be.sgl.backend.service.exception.NewsItemNotFoundException
 import be.sgl.backend.mapper.NewsItemMapper
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import be.sgl.backend.service.ImageService.ImageDirectory.*
 import be.sgl.backend.util.nullIfBlank
 
 @Service
-class NewsItemService {
-
-    @Autowired
-    private lateinit var mapper: NewsItemMapper
-    @Autowired
-    private lateinit var newsItemRepository: NewsItemRepository
-    @Autowired
-    private lateinit var imageService: ImageService
+class NewsItemService(
+    private val mapper: NewsItemMapper,
+    private val newsItemRepository: NewsItemRepository,
+    private val imageService: ImageService
+) {
 
     fun getVisibleItems(): List<NewsItemDTO> {
         return newsItemRepository.getNewsItemByVisibleTrue().map(mapper::toDto)
@@ -28,21 +25,23 @@ class NewsItemService {
         return mapper.toDto(getNewsItemById(id))
     }
 
-    fun saveNewsItemDTO(dto: NewsItemDTO): NewsItemDTO {
-        val item = mapper.toEntity(dto)
-        item.image = item.image.nullIfBlank()
+    fun createNewsItem(request: CreateOrUpdateNewsItemRequest): NewsItemDTO {
+        val item = NewsItem()
+        request.title?.let { item.title = it }
+        request.content?.let { item.content = it }
+        item.image = request.image.nullIfBlank()
         item.image?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
         return mapper.toDto(newsItemRepository.save(item))
     }
 
-    fun mergeNewsItemDTOChanges(id: Int, dto: NewsItemDTO): NewsItemDTO {
+    fun updateNewsItem(id: Int, request: CreateOrUpdateNewsItemRequest): NewsItemDTO {
         val item = getNewsItemById(id)
-        item.title = dto.title
-        item.content = dto.content
-        if (item.image != dto.image.nullIfBlank()) {
+        request.title?.let { item.title = it }
+        request.content?.let { item.content = it }
+        if (item.image != request.image.nullIfBlank()) {
             item.image?.let { imageService.delete(NEWS_ITEMS, it) }
-            dto.image.nullIfBlank()?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
-            item.image = dto.image.nullIfBlank()
+            request.image.nullIfBlank()?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
+            item.image = request.image.nullIfBlank()
         }
         return mapper.toDto(newsItemRepository.save(item))
     }

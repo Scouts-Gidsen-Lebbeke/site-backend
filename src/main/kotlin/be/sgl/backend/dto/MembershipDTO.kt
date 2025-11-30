@@ -1,5 +1,6 @@
 package be.sgl.backend.dto
 
+import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.util.StartEndDate
 import io.swagger.v3.oas.annotations.media.Schema

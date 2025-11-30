@@ -1,5 +1,6 @@
 package be.sgl.backend.dto
 
+import be.sgl.backend.dto.user.UserDTO
 import java.time.LocalDateTime
 
 // read-only, no validation
