@@ -1,8 +1,8 @@
 package be.sgl.backend.service.event
 
-import be.sgl.backend.dto.EventBaseDTO
-import be.sgl.backend.dto.EventDTO
-import be.sgl.backend.dto.EventResultDTO
+import be.sgl.backend.dto.registrable.event.EventBaseDTO
+import be.sgl.backend.dto.registrable.event.EventDTO
+import be.sgl.backend.dto.registrable.event.EventResultDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
@@ -15,7 +15,6 @@ import be.sgl.backend.service.payment.CheckoutProvider
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service

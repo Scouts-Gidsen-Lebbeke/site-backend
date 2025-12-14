@@ -1,6 +1,6 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.dto.DeclarationFormDTO
+import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.MailService
@@ -51,7 +51,7 @@ class BelcotaxService(
         return findRelevantRegistrations.forPreviousYear()
             .groupBy { it.user }
             .flatMap { (user, registrations) -> filterIntoValidFormData.execute(user, registrations) }
-            .groupBy(DeclarationFormDTO::user, formService::createForm)
+            .groupBy(DeclarationForm::user, formService::createForm)
     }
 
     fun mailFormsToUser(user: User, forms: List<ByteArray>) {

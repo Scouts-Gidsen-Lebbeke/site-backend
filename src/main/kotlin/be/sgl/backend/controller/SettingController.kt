@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -16,10 +15,9 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping("/settings")
 @Tag(name = "Settings", description = "Endpoints for managing settings.")
-class SettingController {
-
-    @Autowired
-    private lateinit var settingService: SettingService
+class SettingController(
+    private val settingService: SettingService
+) {
 
     @GetMapping("/{id}")
     @Public
@@ -43,8 +41,7 @@ class SettingController {
             ApiResponse(responseCode = "200", description = "Ok")
         ]
     )
-    fun updateSetting(@PathVariable id: String, @RequestParam value: String?): ResponseEntity<Unit> {
+    fun updateSetting(@PathVariable id: String, @RequestParam value: String?) {
         settingService.update(id, value)
-        return ResponseEntity.ok().build()
     }
 }

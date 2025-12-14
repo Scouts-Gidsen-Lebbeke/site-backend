@@ -3,20 +3,18 @@ package be.sgl.backend.service.activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
-import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.util.*
 import java.time.LocalDate
 
 @Usecase
 class CreateCertificateForActivityRegistration(
-    private val userDataProvider: UserDataProvider,
     private val organizationProvider: OrganizationProvider,
     private val getRepresentativeForOwner: GetRepresentativeForOwner
 ) {
 
     fun execute(registration: ActivityRegistration): ByteArray {
         check(registration.completed) { "A certificate can only be generated for a completed activity!" }
-        val user = userDataProvider.getUser(registration.user.username!!)
+        val user = registration.user
         val owner = organizationProvider.getOwner()
         val representative = getRepresentativeForOwner.execute()
         val formData = mapOf(

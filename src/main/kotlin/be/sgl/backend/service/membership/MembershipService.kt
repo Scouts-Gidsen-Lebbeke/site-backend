@@ -3,57 +3,52 @@ package be.sgl.backend.service.membership
 import be.sgl.backend.alert.AlertCode
 import be.sgl.backend.alert.AlertLogger
 import be.sgl.backend.dto.Customer
-import be.sgl.backend.dto.MembershipDTO
-import be.sgl.backend.dto.UserRegistrationDTO
+import be.sgl.backend.dto.membership.MembershipDTO
+import be.sgl.backend.dto.membership.UserRegistrationDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.mapper.MembershipMapper
+import be.sgl.backend.mapper.AddressMapper
+import be.sgl.backend.mapper.membership.MembershipMapper
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
-import be.sgl.backend.service.PaymentService
+import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.MembershipNotFoundException
+import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.service.user.UserDataProvider
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 @Transactional
-class MembershipService : PaymentService<Membership, MembershipRepository>() {
+class MembershipService(
+    override var paymentRepository: MembershipRepository,
+    private val membershipPeriodRepository: MembershipPeriodRepository,
+    private val branchRepository: BranchRepository,
+    private val roleRepository: RoleRepository,
+    private val mapper: MembershipMapper,
+    private val addressMapper: AddressMapper,
+    private val userRepository: UserRepository,
+    private val userDataProvider: UserDataProvider,
+    private val alertLogger: AlertLogger,
+    private val validateAndCreateMembership: ValidateAndCreateMembership,
+    private val createCertificateForMembership: CreateCertificateForMembership
+) : PaymentService<Membership, MembershipRepository>() {
 
     private val logger = KotlinLogging.logger {}
 
-    @Autowired
-    override lateinit var paymentRepository: MembershipRepository
-    @Autowired
-    private lateinit var membershipPeriodRepository: MembershipPeriodRepository
-    @Autowired
-    private lateinit var branchRepository: BranchRepository
-    @Autowired
-    private lateinit var roleRepository: RoleRepository
-    @Autowired
-    private lateinit var mapper: MembershipMapper
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var alertLogger: AlertLogger
-    @Autowired
-    private lateinit var validateAndCreateMembership: ValidateAndCreateMembership
-    @Autowired
-    private lateinit var createCertificateForMembership: CreateCertificateForMembership
-
     fun getAllMembershipsForUser(username: String): List<MembershipDTO> {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         return paymentRepository.getMembershipsByUser(user).map(mapper::toDto)
     }
 
     fun getCurrentMembershipForUser(username: String): MembershipDTO? {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         return paymentRepository.getCurrentByUser(user)?.run(mapper::toDto)
     }
 
@@ -71,7 +66,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     fun createMembershipForExistingUser(username: String): String {
         logger.debug { "New membership creation request for user $username..." }
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         paymentRepository.getCurrentByUser(user)?.let {
             logger.error { "Active membership found for $username on creation request" }
             throw IllegalStateException("There is already an active membership for $username!")
@@ -79,9 +74,9 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
         return createMembershipForUser(user)
     }
 
-    fun createMembershipForNewUser(registrationDTO: UserRegistrationDTO): String {
+    fun createMembershipForNewUser(registration: UserRegistrationDTO): String {
         logger.debug { "New membership creation request for new user..." }
-        userDataProvider.findByNameAndEmail(registrationDTO.name!!, registrationDTO.firstName!!, registrationDTO.email!!)?.let {
+        userRepository.findByNameAndFirstNameAndBirthdate(registration.name!!, registration.firstName!!, registration.birthdate!!)?.let {
             it.username?.let {
                 logger.error { "User creation request for already existing user $it" }
                 throw IllegalStateException("This user already exists, contact the organization to retrieve the login!")
@@ -104,7 +99,17 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
             logger.debug { "Previous registration exists but was unpaid, returning old checkout url" }
             return checkoutProvider.getCheckoutUrl(membershipInProgress)
         }
-        val newUser = userDataProvider.registerUser(registrationDTO)
+        val newUser = User()
+        registration.name?.let { newUser.name = it }
+        registration.firstName?.let { newUser.firstName = it }
+        registration.email?.let { newUser.email = it }
+        registration.birthdate?.let { newUser.birthdate = it }
+        registration.mobile?.let { newUser.mobile = it }
+        registration.sex?.let { newUser.sex = it }
+        newUser.hasReduction = registration.hasReduction
+        newUser.hasHandicap = registration.hasHandicap
+        registration.address?.let { newUser.addresses.add(addressMapper.toEntity(it)) }
+        userRepository.save(newUser)
         return createMembershipForUser(newUser)
     }
 
@@ -145,7 +150,7 @@ class MembershipService : PaymentService<Membership, MembershipRepository>() {
 
     override fun handlePaymentCanceled(payment: Membership) {
         if (payment.user.username == null) {
-            userDataProvider.denyRegistration(payment.user)
+            userRepository.delete(payment.user)
         }
     }
 

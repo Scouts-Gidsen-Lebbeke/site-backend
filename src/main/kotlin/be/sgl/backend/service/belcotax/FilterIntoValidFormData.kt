@@ -1,6 +1,6 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.dto.DeclarationFormDTO
+import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.service.SettingService
@@ -13,8 +13,8 @@ class FilterIntoValidFormData(
 ) {
     private val logger = KotlinLogging.logger {}
 
-    fun execute(user: User, registrations: List<ActivityRegistration>): List<DeclarationFormDTO> {
-        val forms = mutableListOf<DeclarationFormDTO>()
+    fun execute(user: User, registrations: List<ActivityRegistration>): List<DeclarationForm> {
+        val forms = mutableListOf<DeclarationForm>()
         if (user.nis == null) {
             logger.debug { "User has no nis configured, no forms can be made." }
             return forms
@@ -36,7 +36,7 @@ class FilterIntoValidFormData(
             val secondRegistration = chunk.getOrNull(1)
             val thirdRegistration = chunk.getOrNull(2)
             val fourthRegistration = chunk.getOrNull(3)
-            val validForm = DeclarationFormDTO(user, address, parent, firstRegistration, secondRegistration,
+            val validForm = DeclarationForm(user, address, parent, firstRegistration, secondRegistration,
                 thirdRegistration, fourthRegistration, rate, index)
             forms.add(validForm)
         }

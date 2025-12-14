@@ -2,6 +2,7 @@ package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.alert.AlertCode
 import be.sgl.backend.alert.AlertLogger
+import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.exception.UserNotFoundException
@@ -11,7 +12,6 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
-import be.sgl.backend.service.user.sync.SyncState.*
 
 @Component
 @ForExternalOrganization

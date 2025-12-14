@@ -1,13 +1,13 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.dto.DeclarationFormDTO
+import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
+import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.util.StampSpecs
 import be.sgl.backend.util.belgian
 import be.sgl.backend.util.fillForm
-import be.sgl.backend.util.priceWithCurrency
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -17,7 +17,7 @@ class FormService(
     private val getRepresentativeForOwner: GetRepresentativeForOwner
 ) {
 
-    fun createForm(form: DeclarationFormDTO): ByteArray {
+    fun createForm(form: DeclarationForm): ByteArray {
         val owner = organizationProvider.getOwner()
         val representative = getRepresentativeForOwner.execute()
         val certifier = organizationProvider.getCertifier()
@@ -78,5 +78,9 @@ class FormService(
 
     private fun ActivityRegistration.asPeriod(): String {
         return "${start.belgian()} - ${end.belgian()}"
+    }
+
+    private fun Double?.priceWithCurrency(): String? {
+        return this?.let { "€ " + String.format(BE_NL, "%.2f", it) }
     }
 }

@@ -1,6 +1,6 @@
 package be.sgl.backend.mapper
 
-import be.sgl.backend.dto.BranchDTO
+import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.dto.user.MedicalRecordDTO
 import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.entity.branch.Branch

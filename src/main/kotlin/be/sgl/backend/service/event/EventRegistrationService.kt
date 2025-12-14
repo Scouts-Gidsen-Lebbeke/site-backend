@@ -1,8 +1,8 @@
 package be.sgl.backend.service.event
 
 import be.sgl.backend.dto.Customer
-import be.sgl.backend.dto.EventRegistrationAttemptData
-import be.sgl.backend.dto.EventRegistrationDTO
+import be.sgl.backend.dto.registrable.event.EventRegistrationAttemptData
+import be.sgl.backend.dto.registrable.event.EventRegistrationDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
@@ -10,31 +10,25 @@ import be.sgl.backend.entity.registrable.event.EventRegistration
 import be.sgl.backend.mapper.EventMapper
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.service.PaymentService
+import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.service.exception.EventNotFoundException
 import be.sgl.backend.service.exception.EventRegistrationNotFoundException
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
-import be.sgl.backend.service.user.UserDataProvider
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class EventRegistrationService : PaymentService<EventRegistration, EventRegistrationRepository>() {
+class EventRegistrationService(
+    override var paymentRepository: EventRegistrationRepository,
+    private val eventRepository: EventRepository,
+    private val mapper: EventMapper,
+    private val userRepository: UserRepository,
+    private val calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
+) : PaymentService<EventRegistration, EventRegistrationRepository>() {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    override lateinit var paymentRepository: EventRegistrationRepository
-    @Autowired
-    private lateinit var eventRepository: EventRepository
-    @Autowired
-    private lateinit var mapper: EventMapper
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
 
     fun getAllRegistrationsForEvent(id: Int): List<EventRegistrationDTO> {
         val event = getEventById(id)
@@ -48,7 +42,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     fun createPaymentForEvent(id: Int, attempt: EventRegistrationAttemptData, username: String?): String {
         val event = getEventById(id)
         check(!event.needsMobile || attempt.mobile != null) { "No valid mobile number provided!" }
-        val user = username?.let { userDataProvider.findUser(it) }
+        val user = username?.let { userRepository.findByUsername(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
         val finalPrice = calculatePriceForEvent(event, attempt.additionalData)
         var registration = EventRegistration(event, attempt, finalPrice, user)

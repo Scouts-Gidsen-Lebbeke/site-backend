@@ -18,6 +18,4 @@ fun LocalDateTime.belgian(): String = format(DateTimeFormatter.ofPattern("dd/MM/
 
 fun Double?.pricePrecision() = this?.let { String.format(BE_NL, "%.2f", it) }
 
-fun Double?.priceWithCurrency() = this?.let { "€ " + String.format(BE_NL, "%.2f", it) }
-
 fun Double.reducePrice(factor: Double) = BigDecimal(this / factor).setScale(2, RoundingMode.HALF_UP).toDouble()

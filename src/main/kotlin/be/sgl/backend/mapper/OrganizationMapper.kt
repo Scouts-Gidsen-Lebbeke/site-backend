@@ -1,6 +1,6 @@
 package be.sgl.backend.mapper
 
-import be.sgl.backend.dto.OrganizationDTO
+import be.sgl.backend.dto.organization.OrganizationDTO
 import be.sgl.backend.entity.organization.Organization
 import org.mapstruct.Mapper
 

@@ -1,29 +1,25 @@
 package be.sgl.backend.service.activity
 
-import be.sgl.backend.dto.ActivityRegistrationStatus
+import be.sgl.backend.dto.registrable.activity.ActivityRegistrationStatus
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.util.reducePrice
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class CheckRegistrationStatusForUser {
+class CheckRegistrationStatusForUser(
+    private val registrationRepository: ActivityRegistrationRepository,
+    private val medicalRecordRepository: MedicalRecordRepository,
+    private val getCurrentValidBranchesForUser: GetCurrentValidBranchesForUser
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    lateinit var registrationRepository: ActivityRegistrationRepository
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var getCurrentValidBranchesForUser: GetCurrentValidBranchesForUser
 
     fun execute(activity: Activity, user: User): ActivityRegistrationStatus {
         logger.info { "Calculating registration status for activity #${activity.id} and user ${user.username}" }
@@ -65,7 +61,7 @@ class CheckRegistrationStatusForUser {
             open.onEach(::reducePrice)
         }
         logger.info { "User has ${open.size} open activity options" }
-        val medicalRecord = userDataProvider.getMedicalRecord(user)
+        val medicalRecord = medicalRecordRepository.findMedicalRecordByUser(user)
         if (medicalRecord == null) {
             logger.info { "Medical record not found for ${user.username}" }
         } else if (!medicalRecord.isUpToDate) {

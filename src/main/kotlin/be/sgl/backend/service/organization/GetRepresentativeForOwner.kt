@@ -1,6 +1,6 @@
 package be.sgl.backend.service.organization
 
-import be.sgl.backend.dto.Representative
+import be.sgl.backend.dto.organization.Representative
 import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.ImageService

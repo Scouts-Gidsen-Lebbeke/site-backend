@@ -3,7 +3,7 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.Public
 import be.sgl.backend.service.SseService
-import be.sgl.backend.service.user.sync.ExternalMember
+import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.service.user.sync.SyncService
 import be.sgl.backend.util.ForExternalOrganization
 import io.swagger.v3.oas.annotations.Operation

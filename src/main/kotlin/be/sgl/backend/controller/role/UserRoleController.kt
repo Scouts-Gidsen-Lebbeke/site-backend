@@ -3,7 +3,7 @@ package be.sgl.backend.controller.role
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
-import be.sgl.backend.dto.BranchDTO
+import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.dto.role.StaffLinkRequest
 import be.sgl.backend.mapper.BranchMapper

@@ -1,5 +1,6 @@
 package be.sgl.backend.service.user.sync
 
+import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.openapi.api.LedenlijstApi
 import be.sgl.backend.openapi.model.Criteria
 import be.sgl.backend.openapi.model.Filter

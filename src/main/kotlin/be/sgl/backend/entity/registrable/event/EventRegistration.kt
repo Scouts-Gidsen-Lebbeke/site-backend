@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.registrable.event
 
-import be.sgl.backend.dto.EventRegistrationAttemptData
+import be.sgl.backend.dto.registrable.event.EventRegistrationAttemptData
 import be.sgl.backend.entity.registrable.Registration
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.Entity

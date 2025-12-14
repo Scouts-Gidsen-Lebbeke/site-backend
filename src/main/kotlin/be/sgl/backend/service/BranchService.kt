@@ -1,7 +1,7 @@
 package be.sgl.backend.service
 
-import be.sgl.backend.dto.BranchBaseDTO
-import be.sgl.backend.dto.BranchDTO
+import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.user.UserRepository

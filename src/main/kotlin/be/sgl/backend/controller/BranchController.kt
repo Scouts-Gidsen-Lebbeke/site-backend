@@ -3,8 +3,8 @@ package be.sgl.backend.controller
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.config.security.Public
-import be.sgl.backend.dto.BranchBaseDTO
-import be.sgl.backend.dto.BranchDTO
+import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.service.BranchService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation

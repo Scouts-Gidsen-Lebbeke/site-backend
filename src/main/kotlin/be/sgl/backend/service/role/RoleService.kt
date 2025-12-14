@@ -12,9 +12,11 @@ import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.mapper.RoleMapper
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.RoleRepository
+import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.repository.user.UserRoleRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
 import be.sgl.backend.service.exception.RoleNotFoundException
+import be.sgl.backend.service.exception.UserNotFoundException
 import be.sgl.backend.service.exception.UserRoleNotFoundException
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.stereotype.Service
@@ -27,7 +29,8 @@ class RoleService(
     private val mapper: RoleMapper,
     private val userDataProvider: UserDataProvider,
     private val branchRepository: BranchRepository,
-    private val userRoleRepository: UserRoleRepository
+    private val userRoleRepository: UserRoleRepository,
+    private val userRepository: UserRepository
 ) {
 
     fun getAllRoles(): List<RoleDTO> {
@@ -88,7 +91,7 @@ class RoleService(
     }
 
     private fun assignRole(username: String, role: Role): UserRoleDTO {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         val newRole = userDataProvider.startRole(user, role)
         checkNotNull(newRole) { "User already has this role!" }
         return mapper.toDto(newRole)

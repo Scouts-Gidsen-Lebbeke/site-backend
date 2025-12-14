@@ -1,8 +1,8 @@
 package be.sgl.backend.service.activity
 
-import be.sgl.backend.dto.ActivityBaseDTO
-import be.sgl.backend.dto.ActivityDTO
-import be.sgl.backend.dto.ActivityResultDTO
+import be.sgl.backend.dto.registrable.activity.ActivityBaseDTO
+import be.sgl.backend.dto.registrable.activity.ActivityDTO
+import be.sgl.backend.dto.registrable.activity.ActivityResultDTO
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
@@ -10,7 +10,7 @@ import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
 import be.sgl.backend.service.exception.ActivityNotFoundException
-import be.sgl.backend.mapper.ActivityMapper
+import be.sgl.backend.mapper.activity.ActivityMapper
 import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.service.payment.CheckoutProvider
 import mu.KotlinLogging

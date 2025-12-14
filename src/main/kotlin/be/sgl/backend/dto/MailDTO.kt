@@ -6,15 +6,15 @@ import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
 
 data class MailDTO(
-    @Email
-    @NotNull
-    val from: String,
-    @NotEmpty
-    val to: List<@Email String>,
-    @Email
-    val cc: String?,
-    @NotBlank
-    val subject: String,
-    @NotBlank
-    val body: String
+    @field:Email
+    @field:NotNull
+    var from: String?,
+    @field:NotEmpty
+    var to: List<@Email String>,
+    @field:Email
+    var cc: String?,
+    @field:NotBlank
+    var subject: String?,
+    @field:NotBlank
+    var body: String?
 )

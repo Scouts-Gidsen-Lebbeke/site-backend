@@ -1,9 +1,9 @@
 package be.sgl.backend.service.membership
 
-import be.sgl.backend.dto.MembershipPeriodDTO
-import be.sgl.backend.dto.MembershipPeriodResultDTO
+import be.sgl.backend.dto.membership.MembershipPeriodDTO
+import be.sgl.backend.dto.membership.MembershipPeriodResult
 import be.sgl.backend.entity.membership.MembershipPeriod
-import be.sgl.backend.mapper.MembershipPeriodMapper
+import be.sgl.backend.mapper.membership.MembershipPeriodMapper
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.service.exception.MembershipPeriodNotFoundException
@@ -23,10 +23,10 @@ class MembershipPeriodService {
     @Autowired
     private lateinit var mapper: MembershipPeriodMapper
 
-    fun getAllMembershipPeriods(): List<MembershipPeriodResultDTO> {
+    fun getAllMembershipPeriods(): List<MembershipPeriodResult> {
         logger.debug { "Fetching all activities" }
         return periodRepository.findAllRecentFirst()
-            .map { MembershipPeriodResultDTO(it, membershipRepository.getPaidByPeriod(it)) }
+            .map { MembershipPeriodResult(it, membershipRepository.getPaidByPeriod(it)) }
     }
 
     fun getMembershipPeriodDTOById(id: Int): MembershipPeriodDTO {

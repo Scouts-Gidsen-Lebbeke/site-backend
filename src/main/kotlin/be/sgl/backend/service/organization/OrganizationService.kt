@@ -1,6 +1,6 @@
 package be.sgl.backend.service.organization
 
-import be.sgl.backend.dto.OrganizationDTO
+import be.sgl.backend.dto.organization.OrganizationDTO
 import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.mapper.OrganizationMapper
 import be.sgl.backend.repository.AddressRepository

@@ -1,7 +1,6 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.mapper.UserMapper
@@ -17,7 +16,6 @@ import java.nio.file.Path
 @Service
 class UserService(
     private val mapper: UserMapper,
-    private val userDataProvider: UserDataProvider,
     private val checkForInitialRun: CheckForInitialRun,
     private val userRepository: UserRepository,
     private val imageService: ImageService,
@@ -25,7 +23,7 @@ class UserService(
 ) {
 
     fun getProfile(username: String): UserDTO {
-        return mapper.toDto(userDataProvider.getUser(username))
+        return mapper.toDto(userRepository.getByUsername(username))
     }
 
     /**
@@ -37,8 +35,8 @@ class UserService(
      * (except for manual lookup and linking on database).
      */
     fun getUserWithDetails(userDetails: CustomUserDetails): UserDTO {
-        val user = userDataProvider.findUser(userDetails.username)
-            ?: userDataProvider.findByNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
+        val user = userRepository.findByUsername(userDetails.username)
+            ?: userRepository.findByNameAndFirstNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
             ?: checkForInitialRun.execute(userDetails)
             ?: throw UserNotFoundException(userDetails.username)
         if (user.username == null) {
@@ -48,19 +46,19 @@ class UserService(
     }
 
     fun uploadProfilePicture(username: String, image: MultipartFile): Path {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.getByUsername(username)
         val path = imageService.replace(PROFILE_PICTURE, user.image, image)
         user.image = path.fileName.toString()
-        userDataProvider.updateUser(user)
+        userRepository.save(user)
         return path
     }
 
     fun getByQuery(query: String): List<UserDTO> {
-        return userDataProvider.findByQuery(query).map(mapper::toDto)
+        return userRepository.findByQuery(query).map(mapper::toDto)
     }
 
     fun getSiblings(username: String): List<UserDTO> {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.getByUsername(username)
         return siblingRepository.getByUser(user).map { mapper.toDto(it.sibling) }
     }
 }

@@ -1,6 +1,6 @@
 package be.sgl.backend.service.activity
 
-import be.sgl.backend.dto.ActivityRegistrationStatus
+import be.sgl.backend.dto.registrable.activity.ActivityRegistrationStatus
 import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
 import be.sgl.backend.entity.user.SiblingRelation
