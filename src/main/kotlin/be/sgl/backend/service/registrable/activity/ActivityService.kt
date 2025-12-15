@@ -3,6 +3,7 @@ package be.sgl.backend.service.registrable.activity
 import be.sgl.backend.dto.registrable.activity.ActivityBaseDTO
 import be.sgl.backend.dto.registrable.activity.ActivityDTO
 import be.sgl.backend.dto.registrable.activity.ActivityResult
+import be.sgl.backend.dto.registrable.activity.CreateOrUpdateActivityRequest
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
@@ -43,11 +44,11 @@ class ActivityService(
         return mapper.toDto(getActivityById(id))
     }
 
-    fun createActivity(dto: ActivityDTO): ActivityDTO {
-        logger.info { "Saving new activity ${dto.name} (${dto.start} - ${dto.end})" }
-        check(LocalDateTime.now() < dto.closed) { "New activities cannot be closed for registrations yet!" }
-        validateActivityDTO(dto)
-        val newActivity = mapper.toEntity(dto)
+    fun createActivity(request: CreateOrUpdateActivityRequest): ActivityDTO {
+        logger.info { "Saving new activity ${request.name} (${request.start} - ${request.end})" }
+        check(LocalDateTime.now() < request.closed) { "New activities cannot be closed for registrations yet!" }
+        validateActivityDTO(request)
+        val newActivity = mapper.toEntity(request)
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
         }

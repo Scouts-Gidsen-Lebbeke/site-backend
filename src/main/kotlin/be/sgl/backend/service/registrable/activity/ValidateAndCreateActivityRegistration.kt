@@ -9,22 +9,17 @@ import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import be.sgl.backend.util.reducePrice
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class ValidateAndCreateActivityRegistration {
+class ValidateAndCreateActivityRegistration(
+    private val checkRegistrationStatusForUser: CheckRegistrationStatusForUser,
+    private val calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData,
+    private val siblingRepository: SiblingRepository,
+    private val registrationRepository: ActivityRegistrationRepository
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var checkRegistrationStatusForUser: CheckRegistrationStatusForUser
-    @Autowired
-    private lateinit var calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
-    @Autowired
-    private lateinit var siblingRepository: SiblingRepository
-    @Autowired
-    lateinit var registrationRepository: ActivityRegistrationRepository
 
     fun execute(restriction: ActivityRestriction, user: User, additionalData: String?): ActivityRegistration {
         val activity = restriction.activity
@@ -32,7 +27,7 @@ class ValidateAndCreateActivityRegistration {
         check(status.currentRegistration == null) { "Registration for user ${user.username} already exists!" }
         check(status.activeMembership) { "User ${user.username} has no active membership!" }
         check(status.openOptions.any { it.id == restriction.id }) { "The chosen restriction is not valid (anymore) for ${activity.name} and ${user.username}!" }
-        // check(status.medicalsUpToDate) { "User ${user.username} has no active medical record!" }
+        check(status.medicalsUpToDate) { "User ${user.username} has no active medical record!" }
         val finalPrice = calculatePriceForActivity(user, activity, restriction, additionalData)
         logger.info { "Calculated price for this registration is €$finalPrice" }
         return ActivityRegistration(activity, user, restriction, finalPrice, additionalData)

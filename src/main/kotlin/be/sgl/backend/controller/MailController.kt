@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
 import org.springframework.validation.annotation.Validated
@@ -24,12 +23,10 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/mails")
 @Tag(name = "Mail", description = "Endpoints for managing mails.")
-class MailController {
-
-    @Autowired
-    private lateinit var mailService: MailService
-    @Autowired
-    private lateinit var sseService: SseService
+class MailController(
+    private val mailService: MailService,
+    private val sseService: SseService
+) {
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @OnlyStaff

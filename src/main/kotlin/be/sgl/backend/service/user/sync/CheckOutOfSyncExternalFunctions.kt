@@ -2,19 +2,15 @@ package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.entity.user.User
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 
 @ExternalUsecase
-class CheckOutOfSyncExternalFunctions {
+class CheckOutOfSyncExternalFunctions(
+    private val fetchCurrentlyActiveExternalFunctions: FetchCurrentlyActiveExternalFunctions,
+    private val createExternalFunctions: CreateExternalFunctions,
+    private val endExternalFunctions: EndExternalFunctions
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var fetchCurrentlyActiveExternalFunctions: FetchCurrentlyActiveExternalFunctions
-    @Autowired
-    private lateinit var createExternalFunctions: CreateExternalFunctions
-    @Autowired
-    private lateinit var endExternalFunctions: EndExternalFunctions
 
     fun execute(user: User, correct: Boolean): OutOfSyncState {
         val externalId = user.externalId ?: return OutOfSyncState()

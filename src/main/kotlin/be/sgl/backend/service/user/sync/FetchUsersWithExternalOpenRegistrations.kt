@@ -4,17 +4,14 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.repository.user.UserRepository
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 
 @ExternalUsecase
-class FetchUsersWithExternalOpenRegistrations {
+class FetchUsersWithExternalOpenRegistrations(
+    private val userRepository: UserRepository,
+    private val lidaanvragenApi: LidaanvragenApi
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    private lateinit var lidaanvragenApi: LidaanvragenApi
 
     fun execute(): Map<User, String> {
         logger.info { "Fetching users with external open registrations..." }

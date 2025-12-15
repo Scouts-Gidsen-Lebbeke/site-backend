@@ -5,19 +5,17 @@ import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.Lid
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import java.time.OffsetDateTime
 
 @ExternalUsecase
-class CreateExternalFunctions {
+class CreateExternalFunctions(
+    @Value("\${organization.external.id}")
+    private val externalOrganizationId: String,
+    private val ledenApi: LedenApi
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Value("\${organization.external.id}")
-    private lateinit var externalOrganizationId: String
-    @Autowired
-    private lateinit var ledenApi: LedenApi
 
     fun execute(externalId: String, vararg functionIds: String?) {
         // don't check if they exist, the internal roles should be correct and otherwise the api will throw an error

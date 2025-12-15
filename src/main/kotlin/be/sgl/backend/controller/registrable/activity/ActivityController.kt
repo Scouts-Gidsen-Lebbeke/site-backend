@@ -5,6 +5,7 @@ import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.registrable.activity.ActivityBaseDTO
 import be.sgl.backend.dto.registrable.activity.ActivityDTO
 import be.sgl.backend.dto.registrable.activity.ActivityResult
+import be.sgl.backend.dto.registrable.activity.CreateOrUpdateActivityRequest
 import be.sgl.backend.service.registrable.activity.ActivityService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation

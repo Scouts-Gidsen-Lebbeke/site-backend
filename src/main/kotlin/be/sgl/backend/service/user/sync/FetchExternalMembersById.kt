@@ -6,18 +6,16 @@ import be.sgl.backend.openapi.model.Criteria
 import be.sgl.backend.openapi.model.Filter
 import be.sgl.backend.openapi.model.Ledenlijst
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
 @ExternalUsecase
-class FetchExternalMembersById {
+class FetchExternalMembersById(
+    @Value("\${organization.external.id}")
+    private val externalOrganizationId: String,
+    private val ledenlijstApi: LedenlijstApi
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Value("\${organization.external.id}")
-    private lateinit var externalOrganizationId: String
-    @Autowired
-    private lateinit var ledenlijstApi: LedenlijstApi
 
     fun execute(): MutableMap<String, ExternalMember> {
         logger.info { "Fetching external members for $externalOrganizationId..." }

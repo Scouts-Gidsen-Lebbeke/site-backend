@@ -8,7 +8,6 @@ import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
-import be.sgl.backend.mapper.registrable.activity.ActivityMapper
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
@@ -18,6 +17,7 @@ import be.sgl.backend.exception.ActivityNotFoundException
 import be.sgl.backend.exception.ActivityRegistrationNotFoundException
 import be.sgl.backend.exception.RestrictionNotFoundException
 import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.mapper.registrable.activity.ActivityRegistrationMapper
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -28,7 +28,7 @@ class ActivityRegistrationService(
     private val userRepository: UserRepository,
     private val activityRepository: ActivityRepository,
     private val restrictionRepository: ActivityRestrictionRepository,
-    private val mapper: ActivityMapper,
+    private val mapper: ActivityRegistrationMapper,
     private val checkRegistrationStatusForUser: CheckRegistrationStatusForUser,
     private val validateAndCreateActivityRegistration: ValidateAndCreateActivityRegistration,
     private val createCertificateForActivityRegistration: CreateCertificateForActivityRegistration

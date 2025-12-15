@@ -8,25 +8,20 @@ import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.ExternalUserDataProvider.Companion.toDto
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import java.time.OffsetDateTime
 
 @ExternalUsecase
-class AcceptExternalMembershipRequest {
+class AcceptExternalMembershipRequest(
+    @Value("\${organization.external.id}")
+    private val externalOrganizationId: String,
+    private val userRepository: UserRepository,
+    private val lidaanvragenApi: LidaanvragenApi,
+    private val ledenApi: LedenApi,
+    private val createExternalFunctions: CreateExternalFunctions
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Value("\${organization.external.id}")
-    private lateinit var externalOrganizationId: String
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    private lateinit var lidaanvragenApi: LidaanvragenApi
-    @Autowired
-    private lateinit var ledenApi: LedenApi
-    @Autowired
-    private lateinit var createExternalFunctions: CreateExternalFunctions
 
     fun execute(user: User, requestId: String): Boolean {
         logger.info { "User has external membership request $requestId, trying to accept..." }

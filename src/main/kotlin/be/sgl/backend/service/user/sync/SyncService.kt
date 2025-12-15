@@ -9,38 +9,26 @@ import be.sgl.backend.exception.UserNotFoundException
 import be.sgl.backend.util.ForExternalOrganization
 import be.sgl.backend.util.I18nUtil.Companion.i18n
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 
 @Component
 @ForExternalOrganization
-class SyncService {
+class SyncService(
+    private val fetchExternalData: FetchExternalData,
+    private val createUserForExternalMember: CreateUserForExternalMember,
+    private val fetchExternalMembersById: FetchExternalMembersById,
+    private val fetchUsersWithExternalOpenRegistrations: FetchUsersWithExternalOpenRegistrations,
+    private val membershipRepository: MembershipRepository,
+    private val checkForNewMemberId: CheckForNewMemberId,
+    private val acceptExternalMembershipRequest: AcceptExternalMembershipRequest,
+    private val removeAllExternalFunctions: RemoveAllExternalFunctions,
+    private val checkOutOfSyncExternalFunctions: CheckOutOfSyncExternalFunctions,
+    private val userRepository: UserRepository,
+    private val alertLogger: AlertLogger
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var fetchExternalData: FetchExternalData
-    @Autowired
-    private lateinit var createUserForExternalMember: CreateUserForExternalMember
-    @Autowired
-    private lateinit var fetchExternalMembersById: FetchExternalMembersById
-    @Autowired
-    private lateinit var fetchUsersWithExternalOpenRegistrations: FetchUsersWithExternalOpenRegistrations
-    @Autowired
-    private lateinit var membershipRepository: MembershipRepository
-    @Autowired
-    private lateinit var checkForNewMemberId: CheckForNewMemberId
-    @Autowired
-    private lateinit var acceptExternalMembershipRequest: AcceptExternalMembershipRequest
-    @Autowired
-    private lateinit var removeAllExternalFunctions: RemoveAllExternalFunctions
-    @Autowired
-    private lateinit var checkOutOfSyncExternalFunctions: CheckOutOfSyncExternalFunctions
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    private lateinit var alertLogger: AlertLogger
 
     fun syncUser(username: String) {
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)

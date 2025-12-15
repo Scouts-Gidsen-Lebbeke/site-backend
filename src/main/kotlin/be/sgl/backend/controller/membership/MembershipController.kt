@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -30,10 +29,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/memberships")
 @Tag(name = "Memberships", description = "Endpoints for creating memberships for users.")
-class MembershipController {
-
-    @Autowired
-    private lateinit var membershipService: MembershipService
+class MembershipController(
+    private val membershipService: MembershipService
+) {
 
     @GetMapping(produces = [APPLICATION_JSON_VALUE])
     @OnlyAuthenticated

@@ -5,18 +5,15 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class GetCurrentValidBranchesForUser {
+class GetCurrentValidBranchesForUser(
+    private val membershipRepository: MembershipRepository,
+    private val branchRepository: BranchRepository
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var membershipRepository: MembershipRepository
-    @Autowired
-    private lateinit var branchRepository: BranchRepository
 
     fun execute(user: User): List<Branch> {
         logger.info { "Retrieving current valid branch(es) for ${user.username}" }

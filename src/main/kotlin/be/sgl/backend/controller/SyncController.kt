@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
@@ -26,14 +25,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 @ForExternalOrganization
 @RequestMapping("/sync")
-class SyncController {
-
-    @Autowired
-    private lateinit var sseService: SseService
-    @Autowired
-    private lateinit var syncService: SyncService
+class SyncController(
+    private val sseService: SseService,
+    private val syncService: SyncService,
     @Value("\${organization.external.id}")
-    lateinit var externalOrganizationId: String
+    private val externalOrganizationId: String
+) {
 
     @PutMapping("/users")
     @OnlyAdmin

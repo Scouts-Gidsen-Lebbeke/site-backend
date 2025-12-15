@@ -4,21 +4,16 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.MailService
-import be.sgl.backend.exception.UserNotFoundException
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 
 @ExternalUsecase
-class CheckForNewMemberId {
+class CheckForNewMemberId(
+    private val ledenApi: LedenApi,
+    private val userRepository: UserRepository,
+    private val mailService: MailService
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var ledenApi: LedenApi
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    protected lateinit var mailService: MailService
 
     fun execute(user: User, saveAndNotifyUser: Boolean): Boolean {
         logger.info { "Checking if ${user.username} has a new external member id ..." }

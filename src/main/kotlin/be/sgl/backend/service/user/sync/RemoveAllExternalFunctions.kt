@@ -5,20 +5,16 @@ import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Lid
 import be.sgl.backend.service.MailService
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.OffsetDateTime
 
 @ExternalUsecase
-class RemoveAllExternalFunctions {
+class RemoveAllExternalFunctions(
+    private val fetchCurrentlyActiveExternalFunctions: FetchCurrentlyActiveExternalFunctions,
+    private val ledenApi: LedenApi,
+    private val mailService: MailService
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var fetchCurrentlyActiveExternalFunctions: FetchCurrentlyActiveExternalFunctions
-    @Autowired
-    private lateinit var ledenApi: LedenApi
-    @Autowired
-    protected lateinit var mailService: MailService
 
     fun execute(externalMember: ExternalMember) {
         val externalId = externalMember.externalId ?: return
