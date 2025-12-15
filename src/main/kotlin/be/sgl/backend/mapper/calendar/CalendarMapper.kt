@@ -12,5 +12,5 @@ interface CalendarMapper {
     fun toEntity(dto: CalendarBaseDTO): Calendar
     fun toDto(calendarItem: CalendarItem): CalendarItemDTO
     fun toDtoWithCalendars(calendarItem: CalendarItem): CalendarItemWithCalendarsDTO
-    fun toEntity(dto: CalendarItemDTO): CalendarItem
+    fun toEntity(dto: CreateOrUpdateCalendarItemRequest): CalendarItem
 }

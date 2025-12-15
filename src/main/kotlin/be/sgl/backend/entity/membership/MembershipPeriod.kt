@@ -24,11 +24,5 @@ class MembershipPeriod : Auditable() {
         return restrictions.find { it.branch == branch  }?.registrationLimit
     }
 
-    fun validateRestrictions() {
-        restrictions.onEach { it.validate() }.filter { it.branch != null }.groupBy { it.branch }.forEach { (_, restrictions) ->
-            check(restrictions.filterNot { it.isTimeRestriction }.size <= 1) { "A branch should at most have one single non-time related restriction!" }
-        }
-    }
-
     override fun toString() = "${start.belgian()} - ${end.belgian()}"
 }

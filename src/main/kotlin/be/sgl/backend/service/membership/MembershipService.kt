@@ -8,17 +8,16 @@ import be.sgl.backend.dto.membership.UserRegistrationDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.mapper.membership.MembershipMapper
-import be.sgl.backend.repository.BranchRepository
-import be.sgl.backend.repository.RoleRepository
+import be.sgl.backend.repository.branch.BranchRepository
+import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.payment.PaymentService
-import be.sgl.backend.service.exception.BranchNotFoundException
-import be.sgl.backend.service.exception.MembershipNotFoundException
-import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.exception.BranchNotFoundException
+import be.sgl.backend.exception.MembershipNotFoundException
+import be.sgl.backend.exception.UserNotFoundException
 import be.sgl.backend.service.user.UserDataProvider
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
@@ -32,7 +31,6 @@ class MembershipService(
     private val branchRepository: BranchRepository,
     private val roleRepository: RoleRepository,
     private val mapper: MembershipMapper,
-    private val addressMapper: AddressMapper,
     private val userRepository: UserRepository,
     private val userDataProvider: UserDataProvider,
     private val alertLogger: AlertLogger,
@@ -108,7 +106,7 @@ class MembershipService(
         registration.sex?.let { newUser.sex = it }
         newUser.hasReduction = registration.hasReduction
         newUser.hasHandicap = registration.hasHandicap
-        registration.address?.let { newUser.addresses.add(addressMapper.toEntity(it)) }
+        registration.address?.let { newUser.addresses.add(mapper.toEntity(it)) }
         userRepository.save(newUser)
         return createMembershipForUser(newUser)
     }

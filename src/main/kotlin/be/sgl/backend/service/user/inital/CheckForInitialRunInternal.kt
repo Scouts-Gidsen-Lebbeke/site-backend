@@ -1,9 +1,9 @@
 package be.sgl.backend.service.user.inital
 
 import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.entity.user.Role.Companion.adminRole
+import be.sgl.backend.entity.role.Role.Companion.adminRole
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.RoleRepository
+import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.util.ForInternalOrganization
 import jakarta.annotation.PostConstruct

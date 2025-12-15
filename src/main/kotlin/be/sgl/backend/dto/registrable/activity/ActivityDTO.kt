@@ -2,18 +2,13 @@ package be.sgl.backend.dto.registrable.activity
 
 import be.sgl.backend.dto.AddressDTO
 import be.sgl.backend.dto.branch.BranchBaseDTO
-import be.sgl.backend.entity.registrable.RegistrableStatus
-import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
-import be.sgl.backend.entity.registrable.activity.Activity
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 import java.io.Serializable
 import java.time.LocalDateTime
 
 // DTO for a list overview of activities
-@Schema(description = "Basic information about an activity.")
+@Schema(name = "ActivityBase", description = "Basic information about an activity.")
 open class ActivityBaseDTO(
     val id: Int?,
     @field:NotBlank(message = "{NotBlank.activity.name}")
@@ -30,7 +25,7 @@ open class ActivityBaseDTO(
 ) : Serializable
 
 // DTO for registration page and CRUD
-@Schema(description = "The complete activity configuration.")
+@Schema(name = "Activity", description = "The complete activity configuration.")
 class ActivityDTO(
     id: Int?,
     name: String,
@@ -66,7 +61,7 @@ class ActivityDTO(
     var cancelled: Boolean
 ) : ActivityBaseDTO(id, name, start, end, closed, cancellable)
 
-@Schema(description = "A limitation on the activity registration ability for a branch.")
+@Schema(name = "ActivityRestriction", description = "A limitation on the activity registration ability for a branch.")
 data class ActivityRestrictionDTO(
     val id: Int?,
     val branch: BranchBaseDTO,
@@ -75,42 +70,6 @@ data class ActivityRestrictionDTO(
     val alternativeEnd: LocalDateTime?,
     var alternativePrice: Double?,
     val alternativeLimit: Int?
-)
-
-// DTO for statistics list overview
-class ActivityResultDTO(
-    id: Int?,
-    name: String,
-    start: LocalDateTime,
-    end: LocalDateTime,
-    closed: LocalDateTime,
-    cancellable: Boolean,
-    var registrationCount: Int,
-    var totalPrice: Double,
-    var status: RegistrableStatus
-) : ActivityBaseDTO(id, name, start, end, closed, cancellable) {
-    constructor(activity: Activity, registrations: List<Double>) :
-            this(activity.id, activity.name, activity.start, activity.end, activity.closed, activity.cancellable, registrations.count(), registrations.sum(), activity.getStatus())
-}
-
-/**
- * DTO for user feedback about the current activity:
- *  - First of all, the activity should be open for registrations. This check should be happened on activity retrieval.
- *  - The user can only register if he hasn't already a paid registration.
- *  - If the user has a pending registration, it should be finished before creating another one.
- *  - The user can only register when he has an active branch membership.
- *  - When he has an active branch, it should have a matching restriction, meaning not both of the options are empty.
- *  - When an option is present for this member, it should be part of the open options (otherwise the limit is reached).
- *  - When it has one or more valid restrictions, its medical info should be present.
- *  - When its medical info is existing, it should still be up to date (according to the up-to-date flag).
- */
-data class ActivityRegistrationStatus(
-    val currentRegistration: ActivityRegistration? = null,
-    val activeMembership: Boolean = true,
-    val openOptions: List<ActivityRestriction> = emptyList(),
-    val closedOptions: List<ActivityRestriction> = emptyList(),
-    val medicsDate: LocalDateTime? = null,
-    val medicalsUpToDate: Boolean = false
 )
 
 data class ActivityRegistrationStatusDTO(

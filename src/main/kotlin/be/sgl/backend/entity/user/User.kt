@@ -1,8 +1,7 @@
 package be.sgl.backend.entity.user
 
 import be.sgl.backend.entity.Address
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.entity.role.UserRole
 import jakarta.persistence.*
 import java.io.Serializable
 import java.time.LocalDate

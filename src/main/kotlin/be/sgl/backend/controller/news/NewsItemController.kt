@@ -4,7 +4,7 @@ import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.config.security.Public
 import be.sgl.backend.dto.news.CreateOrUpdateNewsItemRequest
 import be.sgl.backend.dto.news.NewsItemDTO
-import be.sgl.backend.service.NewsItemService
+import be.sgl.backend.service.news.NewsItemService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema

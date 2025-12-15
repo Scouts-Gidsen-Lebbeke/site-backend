@@ -2,7 +2,8 @@ package be.sgl.backend.controller.calendar
 
 import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.Public
-import be.sgl.backend.dto.calendar.*
+import be.sgl.backend.dto.calendar.CalendarPeriodDTO
+import be.sgl.backend.dto.calendar.CreateOrUpdateCalendarPeriodRequest
 import be.sgl.backend.service.calendar.CalendarPeriodService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation

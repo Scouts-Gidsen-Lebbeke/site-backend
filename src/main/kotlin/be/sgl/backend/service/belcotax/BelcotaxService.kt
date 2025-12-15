@@ -4,8 +4,8 @@ import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.MailService
-import be.sgl.backend.service.exception.LocalizedException
-import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.exception.LocalizedException
+import be.sgl.backend.exception.UserNotFoundException
 import generated.Verzendingen
 import mu.KotlinLogging
 import org.springframework.stereotype.Service

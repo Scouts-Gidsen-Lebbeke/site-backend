@@ -3,7 +3,7 @@ package be.sgl.backend.service.role
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.exception.UserNotFoundException
 import be.sgl.backend.util.Usecase
 
 @Usecase

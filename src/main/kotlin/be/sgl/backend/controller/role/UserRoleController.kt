@@ -6,7 +6,7 @@ import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.dto.role.StaffLinkRequest
-import be.sgl.backend.mapper.BranchMapper
+import be.sgl.backend.mapper.branch.BranchMapper
 import be.sgl.backend.service.role.FindStaffBranchForUser
 import be.sgl.backend.service.role.RoleService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse

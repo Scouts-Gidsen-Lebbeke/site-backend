@@ -1,10 +1,9 @@
 package be.sgl.backend.dto.registrable.event
 
-import be.sgl.backend.util.PhoneNumber
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
+import io.swagger.v3.oas.annotations.media.Schema
 
-// read-only, no validation
+// read-only
+@Schema(name = "EventRegistration")
 data class EventRegistrationDTO(
     val id: Int?,
     val price: Double,
@@ -16,17 +15,4 @@ data class EventRegistrationDTO(
     val email: String,
     val mobile: String?,
     val subscribable: EventBaseDTO
-)
-
-data class EventRegistrationAttemptData(
-    @field:NotBlank(message = "{NotBlank.event.registration.name}")
-    var name: String,
-    @field:NotBlank(message = "{NotBlank.event.registration.firstName}")
-    var firstName: String,
-    @field:NotBlank(message = "{NotBlank.event.registration.email}")
-    @field:Email(message = "{Email.event.registration.email}")
-    var email: String,
-    @PhoneNumber(message = "{PhoneNumber.event.registration.mobile}")
-    var mobile: String?,
-    var additionalData: String?
 )

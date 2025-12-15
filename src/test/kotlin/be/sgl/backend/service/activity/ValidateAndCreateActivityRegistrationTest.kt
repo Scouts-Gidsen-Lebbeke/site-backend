@@ -7,6 +7,8 @@ import be.sgl.backend.entity.user.SiblingRelation
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.SiblingRepository
+import be.sgl.backend.service.registrable.activity.CheckRegistrationStatusForUser
+import be.sgl.backend.service.registrable.activity.ValidateAndCreateActivityRegistration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

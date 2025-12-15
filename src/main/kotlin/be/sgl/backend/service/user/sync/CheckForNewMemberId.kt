@@ -4,7 +4,7 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.MailService
-import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.exception.UserNotFoundException
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 

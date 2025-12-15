@@ -5,7 +5,7 @@ import be.sgl.backend.alert.AlertLogger
 import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.exception.UserNotFoundException
 import be.sgl.backend.util.ForExternalOrganization
 import be.sgl.backend.util.I18nUtil.Companion.i18n
 import mu.KotlinLogging

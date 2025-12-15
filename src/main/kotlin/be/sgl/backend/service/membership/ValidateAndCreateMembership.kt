@@ -5,7 +5,7 @@ import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestriction
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.BranchRepository
+import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.util.Usecase

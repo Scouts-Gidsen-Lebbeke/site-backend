@@ -4,9 +4,9 @@ import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.V
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.Lid
-import be.sgl.backend.repository.RoleRepository
+import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.repository.user.UserRoleRepository
+import be.sgl.backend.repository.role.UserRoleRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder

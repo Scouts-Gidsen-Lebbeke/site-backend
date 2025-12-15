@@ -7,15 +7,15 @@ import org.springframework.core.type.AnnotatedTypeMetadata
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@Conditional(WhenNotBlankCondition::class)
-annotation class WhenNotBlank(val value: String, val not: Boolean = false)
-
-class WhenNotBlankCondition : Condition {
-    override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
-        val attributes = metadata.getAnnotationAttributes(WhenNotBlank::class.java.name) ?: return false
-        val property = context.environment.getProperty(attributes["value"] as String)
-        val not = attributes["not"] as Boolean
-        return (!property.isNullOrBlank() && !not) || (property.isNullOrBlank() && not)
+@Conditional(WhenNotBlank.WhenNotBlankCondition::class)
+annotation class WhenNotBlank(val value: String, val not: Boolean = false) {
+    class WhenNotBlankCondition : Condition {
+        override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
+            val attributes = metadata.getAnnotationAttributes(WhenNotBlank::class.java.name) ?: return false
+            val property = context.environment.getProperty(attributes["value"] as String)
+            val not = attributes["not"] as Boolean
+            return (!property.isNullOrBlank() && !not) || (property.isNullOrBlank() && not)
+        }
     }
 }
 

@@ -1,17 +1,14 @@
 package be.sgl.backend.service
 
 import be.sgl.backend.entity.setting.Setting
-import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.SettingRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
 @Component
-class SettingService {
-
-    @Autowired
-    private lateinit var settingRepository: SettingRepository
+class SettingService(
+    private val settingRepository: SettingRepository
+) {
 
     fun get(id: String): String? {
         return settingRepository.findByIdOrNull(id)?.value

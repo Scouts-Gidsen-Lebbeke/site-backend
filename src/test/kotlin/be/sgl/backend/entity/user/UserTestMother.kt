@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.user
 
 import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.role.UserRole
 import java.time.LocalDate
 
 object UserTestMother {

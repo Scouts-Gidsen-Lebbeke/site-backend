@@ -1,6 +1,8 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.role.Role
+import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.openapi.api.LedenApi

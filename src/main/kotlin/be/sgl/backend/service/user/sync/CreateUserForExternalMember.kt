@@ -1,11 +1,12 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.PersoonsGegevens
-import be.sgl.backend.repository.RoleRepository
+import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value

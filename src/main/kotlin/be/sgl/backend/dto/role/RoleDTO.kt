@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 // read-only
 @Schema(name = "Role")
 data class RoleDTO(
-    val id: Int?,
+    val id: Int,
     val externalId: String?,
     val backupExternalId: String?,
     val name: String,

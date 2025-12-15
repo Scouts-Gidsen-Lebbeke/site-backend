@@ -22,5 +22,5 @@ class CreateOrUpdateCalendarItemRequest(
     var closed: Boolean?,
     var address: AddressDTO?,
     @field:NotEmpty(message = "{NotEmpty.calendarItem.calendars}")
-    var calendars: MutableList<CalendarBaseDTO>
+    var calendars: MutableList<Int>
 ) : StartEndTime

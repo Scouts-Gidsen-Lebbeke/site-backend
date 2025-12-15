@@ -1,14 +1,13 @@
 package be.sgl.backend.service.organization
 
 import be.sgl.backend.dto.organization.OrganizationDTO
-import be.sgl.backend.mapper.AddressMapper
-import be.sgl.backend.mapper.OrganizationMapper
+import be.sgl.backend.mapper.organization.OrganizationMapper
 import be.sgl.backend.repository.AddressRepository
-import be.sgl.backend.repository.OrganizationRepository
+import be.sgl.backend.repository.organization.OrganizationRepository
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.service.ImageService.ImageDirectory.ORGANIZATION
 import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
-import be.sgl.backend.service.exception.OrganizationNotFoundException
+import be.sgl.backend.exception.OrganizationNotFoundException
 import be.sgl.backend.util.nullIfBlank
 import org.springframework.stereotype.Service
 
@@ -18,7 +17,6 @@ class OrganizationService(
     private val organizationProvider: OrganizationProvider,
     private val mapper: OrganizationMapper,
     private val addressRepository: AddressRepository,
-    private val addressMapper: AddressMapper,
     private val imageService: ImageService
 ) {
 
@@ -30,7 +28,7 @@ class OrganizationService(
         return mapper.toDto(organizationProvider.getCertifier())
     }
 
-    fun saveOrganizationDTO(dto: OrganizationDTO): OrganizationDTO {
+    fun createOrganization(dto: OrganizationDTO): OrganizationDTO {
         val organization = mapper.toEntity(dto)
         check(organizationRepository.getByType(dto.type!!) == null) { "This organization already exists!" }
         organization.image = organization.image.nullIfBlank()
@@ -38,13 +36,13 @@ class OrganizationService(
         return mapper.toDto(organizationRepository.save(organization))
     }
 
-    fun mergeOrganizationDTOChanges(id: Int, dto: OrganizationDTO): OrganizationDTO {
+    fun updateOrganization(id: Int, dto: OrganizationDTO): OrganizationDTO {
         val organization = organizationRepository.findById(id).orElseThrow { OrganizationNotFoundException() }
         organization.name = dto.name!!
         organization.kbo = dto.kbo
         if (dto.address!!.id == null) {
             addressRepository.delete(organization.address)
-            organization.address = addressMapper.toEntity(dto.address!!)
+            organization.address = mapper.toEntity(dto.address!!)
         }
         if (organization.image != dto.image.nullIfBlank()) {
             organization.image?.let { imageService.delete(ORGANIZATION, it) }

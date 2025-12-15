@@ -65,7 +65,7 @@ class OrganizationController(
         ]
     )
     fun createOrganization(@Valid @RequestBody organization: OrganizationDTO): ResponseEntity<OrganizationDTO> {
-        return ResponseEntity(organizationService.saveOrganizationDTO(organization), HttpStatus.CREATED)
+        return ResponseEntity(organizationService.createOrganization(organization), HttpStatus.CREATED)
     }
 
     @PutMapping("/{id}", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
@@ -81,6 +81,6 @@ class OrganizationController(
         ]
     )
     fun updateOrganization(@PathVariable id: Int, @Valid @RequestBody organization: OrganizationDTO): OrganizationDTO {
-        return organizationService.mergeOrganizationDTOChanges(id, organization)
+        return organizationService.updateOrganization(id, organization)
     }
 }

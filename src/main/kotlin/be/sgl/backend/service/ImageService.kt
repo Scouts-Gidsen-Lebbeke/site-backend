@@ -1,8 +1,8 @@
 package be.sgl.backend.service
 
-import be.sgl.backend.service.exception.ImageDeleteException
-import be.sgl.backend.service.exception.ImageMoveException
-import be.sgl.backend.service.exception.ImageUploadException
+import be.sgl.backend.exception.ImageDeleteException
+import be.sgl.backend.exception.ImageMoveException
+import be.sgl.backend.exception.ImageUploadException
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile

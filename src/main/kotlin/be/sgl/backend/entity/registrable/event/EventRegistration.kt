@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.registrable.event
 
-import be.sgl.backend.dto.registrable.event.EventRegistrationAttemptData
+import be.sgl.backend.dto.registrable.event.CreateEventRegistrationRequest
 import be.sgl.backend.entity.registrable.Registration
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.Entity
@@ -15,7 +15,7 @@ class EventRegistration() : Registration<Event>() {
     lateinit var email: String
     var mobile: String? = null
 
-    constructor(event: Event, attempt: EventRegistrationAttemptData, price: Double, user: User?) : this() {
+    constructor(event: Event, attempt: CreateEventRegistrationRequest, price: Double, user: User?) : this() {
         this.price = price
         this.subscribable = event
         this.additionalData = attempt.additionalData

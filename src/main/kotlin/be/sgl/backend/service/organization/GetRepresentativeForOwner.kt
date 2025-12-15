@@ -6,7 +6,7 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.service.ImageService.ImageDirectory.ORGANIZATION
 import be.sgl.backend.service.SettingService
-import be.sgl.backend.service.exception.IncompleteConfigurationException
+import be.sgl.backend.exception.IncompleteConfigurationException
 import be.sgl.backend.util.Usecase
 import org.springframework.cache.annotation.Cacheable
 

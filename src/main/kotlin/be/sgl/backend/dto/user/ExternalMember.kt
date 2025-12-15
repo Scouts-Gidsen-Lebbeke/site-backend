@@ -3,6 +3,7 @@ package be.sgl.backend.dto.user
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.service.user.sync.SyncState
 
+// read-only, internal
 data class ExternalMember(
     val userId: Int?,
     val firstName: String?,

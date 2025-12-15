@@ -4,16 +4,15 @@ import be.sgl.backend.dto.calendar.*
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarItem
 import be.sgl.backend.entity.calendar.CalendarPeriod
-import be.sgl.backend.mapper.AddressMapper
 import be.sgl.backend.mapper.calendar.CalendarMapper
 import be.sgl.backend.repository.calendar.CalendarItemRepository
 import be.sgl.backend.repository.calendar.CalendarPeriodRepository
 import be.sgl.backend.repository.calendar.CalendarRepository
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.service.ImageService.ImageDirectory.*
-import be.sgl.backend.service.exception.CalendarItemNotFoundException
-import be.sgl.backend.service.exception.CalendarNotFoundException
-import be.sgl.backend.service.exception.CalendarPeriodNotFoundException
+import be.sgl.backend.exception.CalendarItemNotFoundException
+import be.sgl.backend.exception.CalendarNotFoundException
+import be.sgl.backend.exception.CalendarPeriodNotFoundException
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
@@ -29,7 +28,6 @@ class CalendarService(
     private val calendarRepository: CalendarRepository,
     private val itemRepository: CalendarItemRepository,
     private val mapper: CalendarMapper,
-    private val addressMapper: AddressMapper,
     private val entityManager: EntityManager
 ) {
 
@@ -82,27 +80,28 @@ class CalendarService(
     }
 
     fun createCalendarItem(request: CreateOrUpdateCalendarItemRequest): CalendarItemWithCalendarsDTO {
-        val item = mapper.toEntity(request)
-        item.calendars.addAll(request.calendars.mapNotNull { it.id?.let(calendarRepository::findByIdOrNull) })
-        item.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
-        return mapper.toDtoWithCalendars(itemRepository.save(item))
+        val newItem = mapper.toEntity(request)
+        newItem.calendars.addAll(request.calendars.mapNotNull(calendarRepository::findByIdOrNull))
+        newItem.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
+        return mapper.toDtoWithCalendars(itemRepository.save(newItem))
     }
 
     fun updateCalendarItem(id: Int, request: CreateOrUpdateCalendarItemRequest): CalendarItemWithCalendarsDTO {
-        val item = getItemById(id)
-        request.start?.let { item.start = it }
-        request.end?.let { item.end = it }
-        request.title?.let { item.title = it }
-        request.content?.let { item.content = it }
-        request.closed?.let { item.closed = it }
-        item.calendars = request.calendars.map(mapper::toEntity).toMutableList()
-        item.address = request.address?.let { addressMapper.toEntity(it) }
-        if (item.image != request.image) {
-            item.image?.let { imageService.delete(CALENDAR_ITEMS, it) }
-            request.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
+        val itemToUpdate = getItemById(id)
+        val itemFromDto = mapper.toEntity(request)
+        itemToUpdate.start = itemFromDto.start
+        itemToUpdate.end = itemFromDto.end
+        itemToUpdate.title = itemFromDto.title
+        itemToUpdate.content = itemFromDto.content
+        itemToUpdate.closed = itemFromDto.closed
+        itemToUpdate.calendars = request.calendars.mapNotNull(calendarRepository::findByIdOrNull).toMutableList()
+        itemToUpdate.address = itemFromDto.address
+        if (itemToUpdate.image != itemFromDto.image) {
+            itemToUpdate.image?.let { imageService.delete(CALENDAR_ITEMS, it) }
+            itemFromDto.image?.let { imageService.move(it, TEMPORARY, CALENDAR_ITEMS) }
         }
-        item.image = request.image
-        return mapper.toDtoWithCalendars(itemRepository.save(item))
+        itemToUpdate.image = itemFromDto.image
+        return mapper.toDtoWithCalendars(itemRepository.save(itemToUpdate))
     }
 
     fun deleteCalendarItem(id: Int) {

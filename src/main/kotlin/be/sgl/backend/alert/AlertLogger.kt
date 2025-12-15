@@ -2,7 +2,6 @@ package be.sgl.backend.alert
 
 import be.sgl.backend.service.MailService
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service

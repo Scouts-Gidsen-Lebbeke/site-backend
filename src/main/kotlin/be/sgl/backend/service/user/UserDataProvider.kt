@@ -1,10 +1,10 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.user.Role
+import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserRole
+import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.repository.user.UserRoleRepository
+import be.sgl.backend.repository.role.UserRoleRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 

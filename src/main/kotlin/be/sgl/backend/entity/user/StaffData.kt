@@ -1,11 +1,10 @@
 package be.sgl.backend.entity.user
 
-import be.sgl.backend.entity.Auditable
 import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.*
 
 @Entity
-class StaffData() : Auditable() {
+class StaffData() {
     @Id
     val id: Int? = null
     @OneToOne

@@ -1,212 +1,115 @@
 package be.sgl.backend.controller.registrable.event
 
-import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.OnlyStaff
 import be.sgl.backend.config.security.Public
-import be.sgl.backend.dto.*
-import be.sgl.backend.dto.registrable.event.*
-import be.sgl.backend.service.event.EventRegistrationService
-import be.sgl.backend.service.event.EventService
+import be.sgl.backend.dto.registrable.event.CreateOrUpdateEventRequest
+import be.sgl.backend.dto.registrable.event.EventBaseDTO
+import be.sgl.backend.dto.registrable.event.EventDTO
+import be.sgl.backend.dto.registrable.event.EventResult
+import be.sgl.backend.service.registrable.event.EventService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
+@Validated
 @RestController
 @RequestMapping("/events")
 @Tag(name = "Events", description = "Endpoints for managing events.")
-class EventController {
+class EventController(
+    private val eventService: EventService
+) {
 
-    @Autowired
-    private lateinit var eventService: EventService
-    @Autowired
-    private lateinit var registrationService: EventRegistrationService
-
-    @GetMapping
+    @GetMapping(produces = [APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Get all events",
         description = "Returns a list of all events, regardless of their state.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventResultDTO::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(array = ArraySchema(schema = Schema(implementation = EventResult::class)))]),
         ]
     )
-    fun getAllEvents(): ResponseEntity<List<EventResultDTO>> {
-        return ResponseEntity.ok(eventService.getAllEvents())
+    fun getAllEvents(): List<EventResult> {
+        return eventService.getAllEvents()
     }
 
-    @GetMapping("/visible")
+    @GetMapping("/visible", produces = [APPLICATION_JSON_VALUE])
     @Public
     @Operation(
         summary = "Get all visible events",
         description = "Returns a list of all events that didn't end yet or aren't cancelled, and thus should be visible for everyone.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventDTO::class))])
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(array = ArraySchema(schema = Schema(implementation = EventDTO::class)))])
         ]
     )
-    fun getVisibleEvents(): ResponseEntity<List<EventBaseDTO>> {
-        return ResponseEntity.ok(eventService.getVisibleEvents())
+    fun getVisibleEvents(): List<EventBaseDTO> {
+        return eventService.getVisibleEvents()
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
     @Public
     @Operation(
         summary = "Get a specific event",
         description = "Returns the event with the given id, regardless of its state.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = EventDTO::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(schema = Schema(implementation = EventDTO::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getEvent(@PathVariable id: Int): ResponseEntity<EventDTO> {
-        return ResponseEntity.ok(eventService.getEventDTOById(id))
+    fun getEvent(@PathVariable id: Int): EventDTO {
+        return eventService.getEventDTOById(id)
     }
 
-    @PostMapping
+    @PostMapping(consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Create an event",
         description = "Creates an event with the provided request body and returns it.",
         responses = [
-            ApiResponse(responseCode = "201", description = "Event created", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = EventDTO::class))]),
-            ApiResponse(responseCode = "400", description = "Bad event format", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "201", description = "Event created", content = [Content(schema = Schema(implementation = EventDTO::class))]),
+            ApiResponse(responseCode = "400", description = "Bad event format", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun createEvent(@Valid @RequestBody eventDTO: EventDTO): ResponseEntity<EventDTO> {
-        return ResponseEntity(eventService.saveEventDTO(eventDTO), HttpStatus.CREATED)
+    fun createEvent(@Valid @RequestBody request: CreateOrUpdateEventRequest): ResponseEntity<EventDTO> {
+        return ResponseEntity(eventService.createEvent(request), HttpStatus.CREATED)
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Update an existing event",
         description = "Updates an event, identified with the given id, with the provided request body and returns it. Only event with unopened registrations can be fully edited.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Event updated", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = EventDTO::class))]),
-            ApiResponse(responseCode = "400", description = "Bad event format", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "200", description = "Event updated", content = [Content(schema = Schema(implementation = EventDTO::class))]),
+            ApiResponse(responseCode = "400", description = "Bad event format", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun updateEvent(@PathVariable id: Int, @Valid @RequestBody eventDTO: EventDTO): ResponseEntity<EventDTO> {
-        return ResponseEntity.ok(eventService.mergeEventDTOChanges(id, eventDTO))
+    fun updateEvent(@PathVariable id: Int, @Valid @RequestBody request: CreateOrUpdateEventRequest): EventDTO {
+        return eventService.updateEvent(id, request)
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Cancel an existing event",
         description = "Cancels an event, identified with the given id. The event cannot yet be started. If the event has linked registrations, they will be refunded.",
         responses = [
             ApiResponse(responseCode = "200", description = "Event cancelled"),
-            ApiResponse(responseCode = "400", description = "Event cannot be cancelled", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "400", description = "Event cannot be cancelled", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun cancelEvent(@PathVariable id: Int): ResponseEntity<Unit> {
+    fun cancelEvent(@PathVariable id: Int) {
         eventService.cancelEvent(id)
-        return ResponseEntity.ok().build()
-    }
-
-    @GetMapping("/{id}/registrations")
-    @OnlyStaff
-    @Operation(
-        summary = "Get all registrations for the given event",
-        description = "Returns a list of all valid (i.e. paid and not cancelled) registrations for the given event.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventRegistrationDTO::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
-        ]
-    )
-    fun getAllRegistrationsForActivity(@PathVariable id: Int): ResponseEntity<List<EventRegistrationDTO>> {
-        return ResponseEntity.ok(registrationService.getAllRegistrationsForEvent(id))
-    }
-
-    @GetMapping("/registrations/{registrationId}")
-    @Public
-    @Operation(
-        summary = "Get a specific event registration",
-        description = "Returns the registration identified with the given id.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(type = "array", implementation = EventRegistrationDTO::class))]),
-            ApiResponse(responseCode = "204", description = "Not found")
-        ]
-    )
-    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<EventRegistrationDTO?> {
-        val registration = registrationService.getEventRegistrationDTOById(registrationId)
-        return registration?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
-    }
-
-    @PostMapping("/{id}/register")
-    @Public
-    @Operation(
-        summary = "Create a registration for the given event",
-        description = "Creates a registration for the event with the given id and data and returns the payment url.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = PaymentUrl::class))]),
-            ApiResponse(responseCode = "400", description = "Registration isn't possible", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
-        ]
-    )
-    fun register(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails?, @Valid @RequestBody attempt: EventRegistrationAttemptData): ResponseEntity<PaymentUrl> {
-        val url = registrationService.createPaymentForEvent(id, attempt, userDetails?.username)
-        return ResponseEntity.ok(PaymentUrl(url))
-    }
-
-    @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    @Public
-    @CrossOrigin(origins = ["*"])
-    @Operation(
-        summary = "Trigger a payment update request",
-        description = "Retrieves the payment based on the provided id and updates the payment status of the linked event. This call never fails (except on server errors), to avoid exposing payment data.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok")
-        ]
-    )
-    fun updatePayment(@RequestParam id: String): ResponseEntity<Unit> {
-        registrationService.updatePayment(id)
-        return ResponseEntity.ok().build()
-    }
-
-    @PatchMapping("/registrations/{registrationId}/complete")
-    @OnlyStaff
-    @Operation(
-        summary = "Mark an event registration as completed",
-        description = "Retrieves the registration based on the provided id and marks it as completed. Also notifies the linked customer if configured.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok"),
-            ApiResponse(responseCode = "400", description = "Registration isn't paid", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
-        ]
-    )
-    fun markCompleted(@PathVariable registrationId: Int): ResponseEntity<Unit> {
-        registrationService.markRegistrationAsCompleted(registrationId)
-        return ResponseEntity.ok().build()
-    }
-
-    @DeleteMapping("/registrations/{registrationId}")
-    @Public
-    @Operation(
-        summary = "Refund an event registration",
-        description = "Retrieves the registration based on the provided id and create a payment refund.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "Ok"),
-            ApiResponse(responseCode = "400", description = "Registration isn't eligible for cancellation", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
-        ]
-    )
-    fun cancelRegistration(@PathVariable registrationId: Int): ResponseEntity<Unit> {
-        registrationService.cancelRegistration(registrationId)
-        return ResponseEntity.ok().build()
     }
 }

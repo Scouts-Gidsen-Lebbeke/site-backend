@@ -1,8 +1,7 @@
 package be.sgl.backend.config
 
-import be.sgl.backend.service.exception.LocalizedException
+import be.sgl.backend.exception.LocalizedException
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.ResponseEntity
@@ -11,10 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import java.util.*
 
 @ControllerAdvice
-class LocalizedExceptionHandler {
-
-    @Autowired
-    private lateinit var messageSource: MessageSource
+class LocalizedExceptionHandler(
+    private val messageSource: MessageSource
+) {
 
     @ExceptionHandler(LocalizedException::class)
     fun handleLocalized(ex: LocalizedException, locale: Locale): ResponseEntity<ApiErrorResponse> {
