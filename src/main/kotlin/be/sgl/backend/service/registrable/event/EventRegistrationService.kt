@@ -39,13 +39,16 @@ class EventRegistrationService(
         return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
     }
 
-    fun createPaymentForEvent(id: Int, attempt: CreateEventRegistrationRequest, username: String?): String {
+    fun createPaymentForEvent(id: Int, request: CreateEventRegistrationRequest, username: String?): String {
         val event = getEventById(id)
-        check(!event.needsMobile || attempt.mobile != null) { "No valid mobile number provided!" }
+        check(!event.needsMobile || request.mobile != null) { "No valid mobile number provided!" }
         val user = username?.let { userRepository.findByUsername(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
-        val finalPrice = calculatePriceForEvent(event, attempt.additionalData)
-        var registration = EventRegistration(event, attempt, finalPrice, user)
+        val finalPrice = calculatePriceForEvent(event, request.additionalData)
+        var registration = mapper.toEntity(request)
+        registration.price = finalPrice
+        registration.subscribable = event
+        registration.user = user
         registration = paymentRepository.save(registration)
         logger.info { "Created registration #${registration.id}" }
         if (registration.price == 0.0) {

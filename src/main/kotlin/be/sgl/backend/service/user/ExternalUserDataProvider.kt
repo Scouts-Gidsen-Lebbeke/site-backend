@@ -8,6 +8,7 @@ import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.*
+import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.service.user.sync.CreateExternalFunctions
 import be.sgl.backend.service.user.sync.EndExternalFunctions
 import be.sgl.backend.util.ForExternalOrganization
@@ -23,7 +24,8 @@ class ExternalUserDataProvider(
     val lidaanvragenApi: LidaanvragenApi,
     val ledenApi: LedenApi,
     val createExternalFunctions: CreateExternalFunctions,
-    val endExternalFunctions: EndExternalFunctions
+    val endExternalFunctions: EndExternalFunctions,
+    private val contactRepository: ContactRepository
 ) : UserDataProvider() {
 
     private val logger = KotlinLogging.logger {}
@@ -51,7 +53,8 @@ class ExternalUserDataProvider(
 
     override fun updateUser(user: User): User {
         super.updateUser(user)
-        ledenApi.patchLid(user.externalId, true, user.toDto())
+        var contacts = contactRepository.findContactsByUser(user)
+        ledenApi.patchLid(user.externalId, true, user.toDto(contacts))
         return user
     }
 
@@ -74,7 +77,7 @@ class ExternalUserDataProvider(
 
     companion object {
 
-        fun User.toDto() = Lid().apply {
+        fun User.toDto(contacts: List<Contact>) = Lid().apply {
             persoonsgegevens = PersoonsGegevens().apply {
                 geslacht = sex.toDto()
                 gsm = mobile

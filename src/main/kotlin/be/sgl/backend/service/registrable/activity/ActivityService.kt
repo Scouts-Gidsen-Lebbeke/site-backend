@@ -47,7 +47,7 @@ class ActivityService(
     fun createActivity(request: CreateOrUpdateActivityRequest): ActivityDTO {
         logger.info { "Saving new activity ${request.name} (${request.start} - ${request.end})" }
         check(LocalDateTime.now() < request.closed) { "New activities cannot be closed for registrations yet!" }
-        validateActivityDTO(request)
+        validateActivityRequest(request)
         val newActivity = mapper.toEntity(request)
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
@@ -56,55 +56,56 @@ class ActivityService(
         return mapper.toDto(activityRepository.save(newActivity))
     }
 
-    fun updateActivity(id: Int, dto: CreateOrUpdateActivityRequest): ActivityDTO {
+    fun updateActivity(id: Int, request: CreateOrUpdateActivityRequest): ActivityDTO {
         logger.info { "Updating activity #$id" }
-        validateActivityDTO(dto)
-        val activity = getActivityById(id)
+        validateActivityRequest(request)
+        val activityToUpdate = getActivityById(id)
+        val activityFromDto = mapper.toEntity(request)
         // If it was closed, it can be reopened again. The closing date is always before the start date anyway,
         // and the check hereafter enforces that the closing date is still in the future.
-        activity.closed = dto.closed
-        check(activity.getStatus() != CANCELLED) { "A cancelled activity cannot be edited anymore!" }
-        check(activity.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
-        check(activity.getStatus() != STARTED) { "A started activity cannot be edited anymore!" }
-        check(activity.getStatus() != COMPLETED) { "A completed activity cannot be edited anymore!" }
-        if (activity.getStatus() == NOT_YET_OPEN) {
+        activityToUpdate.closed = activityFromDto.closed
+        check(activityToUpdate.getStatus() != CANCELLED) { "A cancelled activity cannot be edited anymore!" }
+        check(activityToUpdate.getStatus() != REGISTRATIONS_COMPLETED) { "An activity with closed registrations cannot be edited anymore!" }
+        check(activityToUpdate.getStatus() != STARTED) { "A started activity cannot be edited anymore!" }
+        check(activityToUpdate.getStatus() != COMPLETED) { "A completed activity cannot be edited anymore!" }
+        if (activityToUpdate.getStatus() == NOT_YET_OPEN) {
             logger.info { "Activity registrations are not yet open, activity can be fully edited" }
             // price and user data collection can only be altered if no registration was possible yet
-            activity.reductionFactor = dto.reductionFactor
-            activity.siblingReduction = dto.siblingReduction
-            activity.price = dto.price
-            activity.additionalForm = dto.additionalForm
-            activity.additionalFormRule = dto.additionalFormRule
-            check(dto.cancellable || !activity.cancellable) { "A previously cancellable activity cannot be made uncancellable!" }
-            activity.cancellable = dto.cancellable
+            activityToUpdate.reductionFactor = activityFromDto.reductionFactor
+            activityToUpdate.siblingReduction = activityFromDto.siblingReduction
+            activityToUpdate.price = activityFromDto.price
+            activityToUpdate.additionalForm = activityFromDto.additionalForm
+            activityToUpdate.additionalFormRule = activityFromDto.additionalFormRule
+            check(activityFromDto.cancellable || !activityToUpdate.cancellable) { "A previously cancellable activity cannot be made uncancellable!" }
+            activityToUpdate.cancellable = activityFromDto.cancellable
             // Core activity data that is used in certificates, should never be changed when registrations opened
-            activity.name = dto.name
-            activity.start = dto.start
-            activity.end = dto.end
+            activityToUpdate.name = activityFromDto.name
+            activityToUpdate.start = activityFromDto.start
+            activityToUpdate.end = activityFromDto.end
             // One can only delay or advance the registration period when it wasn't open yet
-            activity.open = dto.open
-            restrictionRepository.deleteAll(activity.restrictions)
-            activity.restrictions = dto.restrictions.map(mapper::toEntity).toMutableList()
-            activity.validateRestrictions()
+            activityToUpdate.open = activityFromDto.open
+            restrictionRepository.deleteAll(activityToUpdate.restrictions)
+            activityToUpdate.restrictions = activityFromDto.restrictions
+            activityToUpdate.validateRestrictions()
         } else {
             logger.info { "Activity registrations are already open, only certain restriction modifications are allowed" }
-            val updatedRestrictions = dto.restrictions.map(mapper::toEntity).toMutableList()
-            for (existing in activity.restrictions) {
+            val updatedRestrictions = activityFromDto.restrictions
+            for (existing in activityToUpdate.restrictions) {
                 val updated = updatedRestrictions.find { it.id == existing.id }
                 check(updated != null) { "Existing activity restrictions cannot be removed once the activity has started!" }
                 check(updated.alternativePrice == existing.alternativePrice) { "The price cannot be altered once the activity has started!" }
             }
-            activity.restrictions.addAll(restrictionRepository.saveAll(updatedRestrictions))
-            val registrationCount = registrationRepository.countPaidRegistrationsByActivity(activity)
-            check(dto.registrationLimit == null || registrationCount < dto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
+            activityToUpdate.restrictions.addAll(restrictionRepository.saveAll(updatedRestrictions))
+            val registrationCount = registrationRepository.countPaidRegistrationsByActivity(activityToUpdate)
+            check(activityFromDto.registrationLimit == null || registrationCount < activityFromDto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
-        activity.registrationLimit = dto.registrationLimit
-        activity.address = dto.address?.let { mapper.toEntity(it) }
-        activity.sendConfirmation = dto.sendConfirmation
-        activity.sendCompleteConfirmation = dto.sendCompleteConfirmation
-        activity.communicationCC = dto.communicationCC
-        activity.description = dto.description
-        return mapper.toDto(activityRepository.save(activity))
+        activityToUpdate.registrationLimit = activityFromDto.registrationLimit
+        activityToUpdate.address = activityFromDto.address
+        activityToUpdate.sendConfirmation = activityFromDto.sendConfirmation
+        activityToUpdate.sendCompleteConfirmation = activityFromDto.sendCompleteConfirmation
+        activityToUpdate.communicationCC = activityFromDto.communicationCC
+        activityToUpdate.description = activityFromDto.description
+        return mapper.toDto(activityRepository.save(activityToUpdate))
     }
 
     fun cancelActivity(id: Int) {
@@ -127,11 +128,11 @@ class ActivityService(
         logger.info { "Activity successfully cancelled" }
     }
 
-    private fun validateActivityDTO(dto: ActivityDTO) {
+    private fun validateActivityRequest(request: CreateOrUpdateActivityRequest) {
         logger.debug { "Validating a correct open-closed-start-end sequence" }
-        check(dto.open < dto.closed) { "The closure of registrations should be after the opening of registrations!" }
-        check(dto.closed < dto.start) { "The start date of an activity should be after the closure of registrations!" }
-        check(dto.start < dto.end) { "The start date of an activity should be before its end date!" }
+        check(request.open < request.closed) { "The closure of registrations should be after the opening of registrations!" }
+        check(request.closed < request.start) { "The start date of an activity should be after the closure of registrations!" }
+        check(request.start < request.end) { "The start date of an activity should be before its end date!" }
     }
 
     private fun getActivityById(id: Int): Activity {

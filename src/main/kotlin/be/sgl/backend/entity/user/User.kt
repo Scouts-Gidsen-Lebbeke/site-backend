@@ -6,6 +6,7 @@ import jakarta.persistence.*
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Period
+import kotlin.jvm.Transient
 
 @Entity
 @Table(
@@ -44,9 +45,6 @@ class User : Serializable {
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val addresses: MutableList<Address> = mutableListOf()
-
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    val contacts: MutableList<Contact> = mutableListOf()
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val roles: MutableList<UserRole> = mutableListOf()

@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/medical-records")
-@Tag(name = "Users", description = "Endpoints for managing users.")
-class MedicalRecordController(private val medicalRecordService: MedicalRecordService) {
+@Tag(name = "Users", description = "Endpoints for managing medical records.")
+class MedicalRecordController(
+    private val medicalRecordService: MedicalRecordService
+) {
 
     @GetMapping(produces = [APPLICATION_JSON_VALUE])
     @OnlyAuthenticated

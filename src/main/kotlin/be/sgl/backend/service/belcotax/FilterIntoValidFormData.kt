@@ -3,13 +3,15 @@ package be.sgl.backend.service.belcotax
 import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.service.SettingService
 import be.sgl.backend.util.Usecase
 import mu.KotlinLogging
 
 @Usecase
 class FilterIntoValidFormData(
-    private val settingService: SettingService
+    private val settingService: SettingService,
+    private val contactRepository: ContactRepository
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -24,7 +26,7 @@ class FilterIntoValidFormData(
             logger.debug { "User has no linked postal address, no forms can be made." }
             return forms
         }
-        val parent = user.contacts.firstOrNull { it.nis != null }
+        val parent = contactRepository.findContactsByUserAndNisNotNull(user).firstOrNull()
         if (parent == null) {
             logger.debug { "User has no linked parent with a configured nis, no forms can be made." }
             return forms

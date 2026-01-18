@@ -39,9 +39,9 @@ class MailController(
     )
     fun sendMails(@RequestPart("file", required = false) attachment: MultipartFile?, @Valid @ModelAttribute mailDTO: MailDTO): String {
         val builder = mailService.builder()
-            .from(mailDTO.from)
-            .subject(mailDTO.subject)
-            .body(mailDTO.body)
+        mailDTO.from?.let { builder.from(it) }
+        mailDTO.subject?.let { builder.subject(it) }
+        mailDTO.body?.let { builder.body(it) }
         return sseService.schedule { emitter ->
             attachment?.let { builder.addAttachment(it.inputStream, it.originalFilename ?: it.name) }
             mailDTO.to.onEachIndexed { i, to ->

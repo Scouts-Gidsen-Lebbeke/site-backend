@@ -41,7 +41,7 @@ class AcceptExternalMembershipRequest(
 
     private fun createExternalMemberForUser(user: User, newRole: Role): String {
         logger.info { "Translating internal user #${user.id} into an external user..." }
-        var newLid = user.toDto()
+        var newLid = user.toDto(emptyList())
         newLid.functies = listOf(
             FunctieInstantie().apply {
                 groep = externalOrganizationId
