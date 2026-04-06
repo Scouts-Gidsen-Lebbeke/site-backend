@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MedicalRecordRepository : JpaRepository<MedicalRecord, Int> {
-    fun getMedicalRecordByUser(user: User): MedicalRecord?
+    fun findMedicalRecordByUser(user: User): MedicalRecord?
 }

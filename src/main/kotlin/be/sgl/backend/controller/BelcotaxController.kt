@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.*
 import org.springframework.http.ResponseEntity
@@ -26,12 +25,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/belcotax")
 @Tag(name = "Belcotax", description = "Endpoints for creating Belcotax forms and dispatches.")
-class BelcotaxController {
-
-    @Autowired
-    private lateinit var belcotaxService: BelcotaxService
-    @Autowired
-    private lateinit var sseService: SseService
+class BelcotaxController(
+    private val belcotaxService: BelcotaxService,
+    private val sseService: SseService
+) {
 
     @GetMapping("/dispatch", produces = [APPLICATION_XML_VALUE, APPLICATION_JSON_VALUE])
     @OnlyAdmin
@@ -48,7 +45,7 @@ class BelcotaxController {
         return ResponseEntity.ok(belcotaxService.getDispatchForPreviousYear())
     }
 
-    @GetMapping("/form")
+    @GetMapping("/form", produces = [APPLICATION_PDF_VALUE, APPLICATION_OCTET_STREAM_VALUE])
     @OnlyAuthenticated
     @Operation(
         summary = "Retrieve the Belcotax forms for the current user.",

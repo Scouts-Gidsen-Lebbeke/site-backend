@@ -23,15 +23,21 @@ spring:
     port: # TODO: pass as an environment variable
     username: # TODO: pass as an environment variable
     password: # TODO: pass as an environment variable
-    alert:
-      enabled: true
-      recipient: webmaster@scoutslebbeke.be
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
       mail.smtp.ssl.protocols: TLSv1.2
       mail.smtp.ssl.trust: ${spring.mail.host}
       mail.smtp.timeout: 8000
+
+server:
+  servlet:
+    context-path: /api
+
+sgl:
+  alert:
+    enabled: true
+    recipient: webmaster@scoutslebbeke.be
 
 rest:
   ga:

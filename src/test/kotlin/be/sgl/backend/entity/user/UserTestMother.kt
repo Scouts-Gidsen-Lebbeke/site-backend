@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.user
 
 import be.sgl.backend.entity.Address
+import be.sgl.backend.entity.role.UserRole
 import java.time.LocalDate
 
 object UserTestMother {
@@ -26,7 +27,6 @@ object UserTestMother {
         private var hasReduction = false
         private var hasHandicap = false
         private val addresses = mutableListOf<Address>()
-        private val contacts = mutableListOf<Contact>()
         private val roles = mutableListOf<UserRole>()
         private var staffData = StaffData()
 
@@ -66,8 +66,6 @@ object UserTestMother {
 
         fun addresses(vararg addresses: Address) = apply { this.addresses.addAll(addresses) }
 
-        fun contacts(vararg contacts: Contact) = apply { this.contacts.addAll(contacts) }
-
         fun roles(vararg roles: UserRole) = apply { this.roles.addAll(roles) }
 
         fun staffData(staffData: StaffData) = apply { this.staffData = staffData }
@@ -92,7 +90,6 @@ object UserTestMother {
             user.hasReduction = hasReduction
             user.hasHandicap = hasHandicap
             user.addresses.addAll(addresses)
-            user.contacts.addAll(contacts)
             user.roles.addAll(roles)
             staffData.user = user
             user.staffData = staffData

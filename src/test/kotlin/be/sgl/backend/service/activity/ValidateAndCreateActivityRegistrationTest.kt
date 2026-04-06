@@ -1,12 +1,14 @@
 package be.sgl.backend.service.activity
 
-import be.sgl.backend.dto.ActivityRegistrationStatus
+import be.sgl.backend.dto.registrable.activity.ActivityRegistrationStatus
 import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
 import be.sgl.backend.entity.user.SiblingRelation
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.SiblingRepository
+import be.sgl.backend.service.registrable.activity.CheckRegistrationStatusForUser
+import be.sgl.backend.service.registrable.activity.ValidateAndCreateActivityRegistration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

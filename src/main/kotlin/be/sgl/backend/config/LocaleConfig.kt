@@ -17,6 +17,6 @@ class LocaleConfig {
     }
 
     companion object {
-        val BE_NL = Locale.of("nl", "BE")
+        val BE_NL: Locale = Locale.of("nl", "BE")
     }
 }

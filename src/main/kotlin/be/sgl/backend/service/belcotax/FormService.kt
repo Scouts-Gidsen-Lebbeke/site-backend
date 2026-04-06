@@ -1,25 +1,25 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.dto.DeclarationFormDTO
+import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
+import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
 import be.sgl.backend.util.StampSpecs
 import be.sgl.backend.util.belgian
 import be.sgl.backend.util.fillForm
-import be.sgl.backend.util.priceWithCurrency
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class FormService {
+class FormService(
+    private val organizationProvider: OrganizationProvider,
+    private val getRepresentativeForOwner: GetRepresentativeForOwner
+) {
 
-    @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
-
-    fun createForm(form: DeclarationFormDTO): ByteArray {
+    fun createForm(form: DeclarationForm): ByteArray {
         val owner = organizationProvider.getOwner()
-        val representative = organizationProvider.getRepresentative()
+        val representative = getRepresentativeForOwner.execute()
         val certifier = organizationProvider.getCertifier()
         val formData = mapOf(
             "organization_name" to owner.name,
@@ -55,15 +55,15 @@ class FormService {
             "period1_days" to form.activity1.calculateDays(),
             "period1_rate" to form.dailyPrice(form.activity1).priceWithCurrency(),
             "period1_price" to form.activity1.price.priceWithCurrency(),
-            "period2" to form.activity2.asPeriod(),
+            "period2" to form.activity2?.asPeriod(),
             "period2_days" to form.activity2?.calculateDays(),
             "period2_rate" to form.dailyPrice(form.activity2).priceWithCurrency(),
             "period2_price" to form.activity2?.price.priceWithCurrency(),
-            "period3" to form.activity3.asPeriod(),
+            "period3" to form.activity3?.asPeriod(),
             "period3_days" to form.activity3?.calculateDays(),
             "period3_rate" to form.dailyPrice(form.activity3).priceWithCurrency(),
             "period3_price" to form.activity3?.price.priceWithCurrency(),
-            "period4" to form.activity4.asPeriod(),
+            "period4" to form.activity4?.asPeriod(),
             "period4_ays" to form.activity4?.calculateDays(), // not a typo :(
             "period4_rate" to form.dailyPrice(form.activity4).priceWithCurrency(),
             "period4_price" to form.activity4?.price.priceWithCurrency(),
@@ -76,8 +76,11 @@ class FormService {
         return fillForm("forms/form28186.pdf", formData, StampSpecs(representative.signature, 2, 270f, 110f))
     }
 
-    private fun ActivityRegistration?.asPeriod(): String? {
-        this ?: return null
+    private fun ActivityRegistration.asPeriod(): String {
         return "${start.belgian()} - ${end.belgian()}"
+    }
+
+    private fun Double?.priceWithCurrency(): String? {
+        return this?.let { "€ " + String.format(BE_NL, "%.2f", it) }
     }
 }

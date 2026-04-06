@@ -1,71 +1,57 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.dto.DeclarationFormDTO
-import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.setting.SettingId.LATEST_DISPATCH_RATE
+import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.activity.ActivityRegistrationRepository
+import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.MailService
-import be.sgl.backend.service.SettingService
-import be.sgl.backend.service.exception.LocalizedException
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.exception.LocalizedException
+import be.sgl.backend.exception.UserNotFoundException
 import generated.Verzendingen
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class BelcotaxService {
+class BelcotaxService(
+    private val findRelevantRegistrations: FindRelevantRegistrations,
+    private val filterIntoValidFormData: FilterIntoValidFormData,
+    private val userRepository: UserRepository,
+    private val findRelevantUserRegistrations: FindRelevantUserRegistrations,
+    private val dispatchService: DispatchService,
+    private val formService: FormService,
+    private val mailService: MailService
+) {
 
     private val logger = KotlinLogging.logger {}
 
-    @Autowired
-    private lateinit var settingService: SettingService
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var registrationRepository: ActivityRegistrationRepository
-    @Autowired
-    private lateinit var dispatchService: DispatchService
-    @Autowired
-    private lateinit var formService: FormService
-    @Autowired
-    private lateinit var mailService: MailService
-
     fun getDispatchForPreviousYear(): Verzendingen {
         logger.info { "Creating dispatch for latest fiscal year..." }
-        val (beginOfYear, endOfYear) = getPreviousYearPeriod()
-        val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
-        logger.info { "Found ${activities.size} relevant registrations between ${beginOfYear} and ${endOfYear}." }
-        val forms = activities.groupBy { it.user }
-            .filter { it.key.nis != null && it.key.taxableParent?.address != null }
-            .flatMap { (user, activities) -> activities.asForms(user) }
-        if (forms.isEmpty()) throw LocalizedException("belcotax.service.dispatch.no.activities")
+        val forms = findRelevantRegistrations.forPreviousYear()
+            .groupBy { it.user }
+            .flatMap { (user, registrations) -> filterIntoValidFormData.execute(user, registrations) }
+        if (forms.isEmpty()) {
+            throw LocalizedException("belcotax.service.dispatch.no.activities")
+        }
         logger.info { "Mapped registrations to dispatch data, ${forms.size} forms left." }
         return dispatchService.createDispatch(forms)
     }
 
     fun getFormsForUserAndPreviousYear(username: String): List<ByteArray> {
-        val (beginOfYear, endOfYear) = getPreviousYearPeriod()
-        val user = userDataProvider.getUser(username)
-        user.nis ?: throw LocalizedException("belcotax.service.form.user.no.nis")
-        user.taxableParent ?: throw LocalizedException("belcotax.service.form.user.no.taxable.parent")
-        user.taxableParent?.address ?: throw LocalizedException("belcotax.service.forms.user.no.parent.address")
-        val activities = registrationRepository.getPaidRegistrationsForUserBetween(user, beginOfYear, endOfYear).filter(::relevantActivity)
-        if (activities.isEmpty()) throw LocalizedException("belcotax.service.forms.user.no.activities", getRelevantAge(user))
-        return activities.asForms(user).map(formService::createForm)
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
+        val registrations = findRelevantUserRegistrations.forPreviousYear(user)
+        val forms = filterIntoValidFormData.execute(user, registrations)
+        if (forms.isEmpty()) {
+            throw LocalizedException("belcotax.service.forms.user.no.activities")
+        }
+        return forms.map(formService::createForm)
     }
 
     fun getFormsForPreviousYear(): Map<User, List<ByteArray>> {
         logger.info { "Creating forms for latest fiscal year..." }
-        val (beginOfYear, endOfYear) = getPreviousYearPeriod()
-        val activities = registrationRepository.getPaidRegistrationsBetween(beginOfYear, endOfYear).filter(::relevantActivity)
-        logger.info { "Found ${activities.size} relevant registrations between ${beginOfYear} and ${endOfYear}." }
-        return activities.groupBy { it.user }
-            .filter { it.key.nis != null && it.key.taxableParent?.address != null }
-            .flatMap { (user, activities) -> activities.asForms(user) }
-            .groupBy(DeclarationFormDTO::user, formService::createForm)
+        return findRelevantRegistrations.forPreviousYear()
+            .groupBy { it.user }
+            .flatMap { (user, registrations) -> filterIntoValidFormData.execute(user, registrations) }
+            .groupBy(DeclarationForm::user, formService::createForm)
     }
 
     fun mailFormsToUser(user: User, forms: List<ByteArray>) {
@@ -80,27 +66,5 @@ class BelcotaxService {
             .template("declaration-form-confirmation.html", params)
         forms.forEach { mailBuilder.addAttachment(it, "form.pdf", "application/pdf") }
         mailBuilder.send()
-    }
-
-    private fun getPreviousYearPeriod(): Pair<LocalDateTime, LocalDateTime> {
-        val fiscalYear = LocalDateTime.now().year - 1
-        val beginOfYear = LocalDateTime.of(fiscalYear, 1, 1, 0, 0, 0, 0)
-        val endOfYear = LocalDateTime.of(fiscalYear, 12, 31, 23, 59, 59, 999999999)
-        return beginOfYear to endOfYear
-    }
-
-    private fun getRelevantAge(user: User): Int {
-        return if (user.hasHandicap) 21 else 14
-    }
-
-    private fun relevantActivity(registration: ActivityRegistration): Boolean {
-        return registration.user.getAge(registration.start.toLocalDate()) < getRelevantAge(registration.user)
-    }
-
-    private fun List<ActivityRegistration>.asForms(user: User): List<DeclarationFormDTO> {
-        val rate = settingService.getOrDefault(LATEST_DISPATCH_RATE, 14.4)
-        return chunked(4).mapIndexed { index, it ->
-            DeclarationFormDTO(user, it[0], it.getOrNull(1), it.getOrNull(2), it.getOrNull(3), rate, index)
-        }
     }
 }

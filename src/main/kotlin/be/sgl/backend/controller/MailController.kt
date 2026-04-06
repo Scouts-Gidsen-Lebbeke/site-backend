@@ -9,25 +9,24 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
-import org.springframework.stereotype.Controller
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
-@Controller
+@Validated
+@RestController
 @RequestMapping("/mails")
 @Tag(name = "Mail", description = "Endpoints for managing mails.")
-class MailController {
-
-    @Autowired
-    private lateinit var mailService: MailService
-    @Autowired
-    private lateinit var sseService: SseService
+class MailController(
+    private val mailService: MailService,
+    private val sseService: SseService
+) {
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @OnlyStaff
@@ -40,9 +39,9 @@ class MailController {
     )
     fun sendMails(@RequestPart("file", required = false) attachment: MultipartFile?, @Valid @ModelAttribute mailDTO: MailDTO): String {
         val builder = mailService.builder()
-            .from(mailDTO.from)
-            .subject(mailDTO.subject)
-            .body(mailDTO.body)
+        mailDTO.from?.let { builder.from(it) }
+        mailDTO.subject?.let { builder.subject(it) }
+        mailDTO.body?.let { builder.body(it) }
         return sseService.schedule { emitter ->
             attachment?.let { builder.addAttachment(it.inputStream, it.originalFilename ?: it.name) }
             mailDTO.to.onEachIndexed { i, to ->

@@ -17,7 +17,7 @@ class I18nUtil : ApplicationContextAware {
 
         private lateinit var messageSource: MessageSource
 
-        fun i18n(key: String, vararg args: Any): String {
+        fun i18n(key: String, vararg args: Any?): String {
             return messageSource.getMessage(key, args, BE_NL)
         }
     }

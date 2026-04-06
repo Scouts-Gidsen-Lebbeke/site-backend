@@ -2,7 +2,6 @@ package be.sgl.backend.entity.registrable.activity
 
 import be.sgl.backend.entity.Auditable
 import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.user.Role
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType

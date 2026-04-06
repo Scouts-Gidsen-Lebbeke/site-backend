@@ -9,7 +9,8 @@ class MedicalRecord : Auditable() {
     @Id
     val id: Int? = null
     @OneToOne
-    @PrimaryKeyJoinColumn
+    @MapsId
+    @JoinColumn(name = "id")
     lateinit var user: User
     var mayBePhotographed = false
     var mayTakePainkillers = false

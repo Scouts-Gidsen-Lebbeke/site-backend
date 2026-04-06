@@ -1,15 +1,11 @@
 package be.sgl.backend.repository
 
 import be.sgl.backend.repository.activity.ActivityRepository
-import be.sgl.backend.util.IntegrationTest
-import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 
-@Transactional
-@AutoConfigureTestEntityManager
-@IntegrationTest
+@DataJpaTest
 class ActivityRepositoryTest {
 
     @Autowired

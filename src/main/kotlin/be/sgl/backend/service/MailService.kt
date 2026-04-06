@@ -1,10 +1,9 @@
 package be.sgl.backend.service
 
 import be.sgl.backend.entity.organization.OrganizationType
-import be.sgl.backend.repository.OrganizationRepository
-import be.sgl.backend.service.exception.IncompleteConfigurationException
+import be.sgl.backend.repository.organization.OrganizationRepository
+import be.sgl.backend.exception.IncompleteConfigurationException
 import jakarta.mail.util.ByteArrayDataSource
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.mail.javamail.JavaMailSender
@@ -16,16 +15,13 @@ import java.io.File
 import java.io.InputStream
 
 @Service
-class MailService {
-
-    @Autowired
-    private lateinit var mailSender: JavaMailSender
-    @Autowired
-    private lateinit var templateEngine: SpringTemplateEngine
-    @Autowired
-    private lateinit var organizationRepository: OrganizationRepository
+class MailService(
+    private val mailSender: JavaMailSender,
+    private val templateEngine: SpringTemplateEngine,
+    private val organizationRepository: OrganizationRepository,
     @Value("\${spring.application.base-url}")
-    private lateinit var baseUrl: String
+    private val baseUrl: String
+) {
 
     fun builder(): MailBuilder {
         return MailBuilder()

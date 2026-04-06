@@ -1,8 +1,6 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserRole
 import be.sgl.backend.util.ForInternalOrganization
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -19,50 +17,9 @@ class InternalUserDataProvider : UserDataProvider() {
     override fun acceptRegistration(user: User) {
         logger.debug { "Accepting registration for user ${user.id}..." }
         check(user.username == null) { "Registration acceptance should not be performed on already known users!" }
+        // TODO: This is completely wrong. This should trigger an account creation request in the auth provider instead
         user.username = "${user.name}.${user.firstName}"
         userRepository.save(user)
         logger.debug { "Internal registration finished: username ${user.username} created for user ${user.id}!" }
-    }
-
-    override fun findUser(username: String): User? {
-        logger.debug { "Fetching user data for $username..." }
-        return userRepository.findByUsername(username)
-    }
-
-    override fun getUser(username: String): User {
-        logger.debug { "Fetching user data for $username..." }
-        return userRepository.getByUsername(username)
-    }
-
-    override fun findByNameAndEmail(name: String, firstName: String, email: String): User? {
-        logger.debug { "Trying to find user with name $firstName $name and email $email..." }
-        return userRepository.findByNameAndFirstNameAndEmail(name, firstName, email)
-    }
-
-    override fun updateUser(user: User): User {
-        logger.debug { "Updating user data for ${user.username}..." }
-        return userRepository.save(user)
-    }
-
-    override fun startRole(user: User, role: Role): UserRole? {
-        logger.debug { "Starting role ${role.name} for ${user.username}..." }
-        if (user.roles.none { it.role == role }) {
-            logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
-            return null
-        }
-        val newRole = userRoleRepository.save(UserRole(user, role))
-        user.roles.add(newRole)
-        return newRole
-    }
-
-    override fun endRole(user: User, role: Role) {
-        logger.debug { "Ending role ${role.name} for ${user.username}..." }
-        val userRole = user.roles.find { it.role == role }
-        if (userRole == null) {
-            logger.warn { "${user.username} never had the role ${role.name}! Ending aborted." }
-            return
-        }
-        userRoleRepository.delete(userRole)
-        user.roles.remove(userRole)
     }
 }

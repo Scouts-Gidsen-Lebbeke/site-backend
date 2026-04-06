@@ -9,6 +9,8 @@ class Contact : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null
+    @ManyToOne
+    lateinit var user: User
     var externalId: String? = null
     @Column(nullable = false)
     lateinit var name: String
@@ -20,8 +22,6 @@ class Contact : Auditable() {
     var mobile: String? = null
     var email: String? = null
     var nis: String? = null
-    val taxable
-        get() = nis != null
     @ManyToOne
     var address: Address? = null
 }

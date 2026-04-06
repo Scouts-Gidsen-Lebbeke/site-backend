@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -22,10 +21,9 @@ import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 @RestController
 @RequestMapping("/image")
 @Tag(name = "Image", description = "Endpoints for handling temporarily uploaded images items.")
-class ImageController {
-
-    @Autowired
-    lateinit var imageService: ImageService
+class ImageController(
+    private val imageService: ImageService
+) {
 
     @PostMapping
     @OnlyAuthenticated

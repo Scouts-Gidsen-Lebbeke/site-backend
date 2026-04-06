@@ -1,40 +1,33 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.dto.BranchDTO
-import be.sgl.backend.dto.MedicalRecordDTO
-import be.sgl.backend.dto.UserDTO
+import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.service.ImageService
-import be.sgl.backend.mapper.UserMapper
+import be.sgl.backend.mapper.user.UserMapper
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.repository.user.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
-import be.sgl.backend.service.exception.UserNotFoundException
+import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.service.user.inital.CheckForInitialRun
 import java.nio.file.Path
 
 @Service
-class UserService {
-
-    @Autowired
-    private lateinit var mapper: UserMapper
-    @Autowired
-    private lateinit var userDataProvider: UserDataProvider
-    @Autowired
-    private lateinit var userRepository: UserRepository
-    @Autowired
-    private lateinit var imageService: ImageService
-    @Autowired
-    private lateinit var siblingRepository: SiblingRepository
+class UserService(
+    private val mapper: UserMapper,
+    private val checkForInitialRun: CheckForInitialRun,
+    private val userRepository: UserRepository,
+    private val imageService: ImageService,
+    private val siblingRepository: SiblingRepository
+) {
 
     fun getProfile(username: String): UserDTO {
-        return mapper.toDto(userDataProvider.getUser(username))
+        return mapper.toDto(userRepository.getByUsername(username))
     }
 
     /**
-     * When a user creates an account externally (but linked to the correct organization),
+     * When a user created an account externally (but linked to the correct organization),
      * we didn't receive the username thus cannot find the user with the normal flow.
      * As a workaround, we can try to use the other user details to fetch the correct user.
      * When we find a user in this way, we should update it too before returning the profile,
@@ -42,8 +35,9 @@ class UserService {
      * (except for manual lookup and linking on database).
      */
     fun getUserWithDetails(userDetails: CustomUserDetails): UserDTO {
-        val user = userDataProvider.findUser(userDetails.username)
-            ?: userDataProvider.findByNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
+        val user = userRepository.findByUsername(userDetails.username)
+            ?: userRepository.findByNameAndFirstNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
+            ?: checkForInitialRun.execute(userDetails)
             ?: throw UserNotFoundException(userDetails.username)
         if (user.username == null) {
             userRepository.updateUsername(user.id!!, userDetails.username)
@@ -52,28 +46,19 @@ class UserService {
     }
 
     fun uploadProfilePicture(username: String, image: MultipartFile): Path {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.getByUsername(username)
         val path = imageService.replace(PROFILE_PICTURE, user.image, image)
         user.image = path.fileName.toString()
-        userDataProvider.updateUser(user)
+        userRepository.save(user)
         return path
     }
 
     fun getByQuery(query: String): List<UserDTO> {
-        return userDataProvider.findByQuery(query).map(mapper::toDto)
-    }
-
-    fun getStaffBranch(username: String): BranchDTO? {
-        return userDataProvider.getUser(username).getStaffBranch()?.run(mapper::toDto)
-    }
-
-    fun getMedicalRecord(username: String): MedicalRecordDTO? {
-        val user = userDataProvider.getUser(username)
-        return userDataProvider.getMedicalRecord(user)?.run(mapper::toDto)
+        return userRepository.findByQuery(query).map(mapper::toDto)
     }
 
     fun getSiblings(username: String): List<UserDTO> {
-        val user = userDataProvider.getUser(username)
+        val user = userRepository.getByUsername(username)
         return siblingRepository.getByUser(user).map { mapper.toDto(it.sibling) }
     }
 }

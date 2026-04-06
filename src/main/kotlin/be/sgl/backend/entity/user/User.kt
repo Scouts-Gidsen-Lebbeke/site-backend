@@ -1,12 +1,12 @@
 package be.sgl.backend.entity.user
 
 import be.sgl.backend.entity.Address
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.entity.role.UserRole
 import jakarta.persistence.*
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Period
+import kotlin.jvm.Transient
 
 @Entity
 @Table(
@@ -43,22 +43,16 @@ class User : Serializable {
     var hasReduction = false
     var hasHandicap = false
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val addresses: MutableList<Address> = mutableListOf()
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-    val contacts: MutableList<Contact> = mutableListOf()
-
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val roles: MutableList<UserRole> = mutableListOf()
     val level: RoleLevel
         get() = roles.maxOfOrNull { it.role.level } ?: RoleLevel.GUEST
 
     @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
     var staffData = StaffData(this)
-
-    val taxableParent: Contact?
-        get() = contacts.firstOrNull { it.taxable && it.nis != null }
 
     fun getFullName(): String {
         return "$firstName $name"
@@ -70,9 +64,5 @@ class User : Serializable {
 
     fun getHomeAddress(): Address? {
         return addresses.find { it.postalAdress }
-    }
-
-    fun getStaffBranch(): Branch? {
-        return roles.mapNotNull { it.role.staffBranch }.firstOrNull { it.status == BranchStatus.ACTIVE }
     }
 }

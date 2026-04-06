@@ -1,10 +1,10 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.dto.DeclarationFormDTO
+import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.organization.Organization
+import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
 import generated.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -12,10 +12,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class DispatchService {
-
-    @Autowired
-    private lateinit var organizationProvider: OrganizationProvider
+class DispatchService(
+    private val organizationProvider: OrganizationProvider,
+    private val getRepresentativeForOwner: GetRepresentativeForOwner
+) {
 
     /**
      * Generate the dispatch for the listed [forms] in the official [Verzendingen] format.
@@ -25,10 +25,10 @@ class DispatchService {
      *  - The age restriction of participating members.
      *  - The validity of nis numbers (both on organization level and on user level).
      */
-    fun createDispatch(forms: List<DeclarationFormDTO>, previous: String? = null) : Verzendingen {
+    fun createDispatch(forms: List<DeclarationForm>, previous: String? = null) : Verzendingen {
         check(forms.isNotEmpty()) { "At least one declaration should be present!" }
         val owner = organizationProvider.getOwner()
-        val representative = organizationProvider.getRepresentative()
+        val representative = getRepresentativeForOwner.execute()
         val certifier = organizationProvider.getCertifier()
         val dispatch = Verzending()
         dispatch.v0002Inkomstenjaar = forms.first().year
@@ -122,7 +122,7 @@ class DispatchService {
         return Verzendingen().apply { verzending = dispatch }
     }
 
-    private fun createForm(index: Int, formDTO: DeclarationFormDTO, certifier: Organization, nis: String) = Fiche28186().apply {
+    private fun createForm(index: Int, formDTO: DeclarationForm, certifier: Organization, nis: String) = Fiche28186().apply {
         f2002Inkomstenjaar = formDTO.year
         // f2003Gewestdirectie => Not used for this form
         // f2004Ontvangkantoor => Not used for this form

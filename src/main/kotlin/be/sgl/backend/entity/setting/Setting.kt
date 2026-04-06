@@ -10,8 +10,8 @@ class Setting() : Auditable() {
     lateinit var name: String
     lateinit var value: String
 
-    constructor(id: SettingId, value: Any) : this() {
-        this.name = id.name
+    constructor(id: String, value: Any) : this() {
+        this.name = id
         this.value = value.toString()
     }
 }

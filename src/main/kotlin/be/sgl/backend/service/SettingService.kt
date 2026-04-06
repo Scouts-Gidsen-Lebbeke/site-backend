@@ -1,37 +1,30 @@
 package be.sgl.backend.service
 
 import be.sgl.backend.entity.setting.Setting
-import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.SettingRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
 @Component
-class SettingService {
+class SettingService(
+    private val settingRepository: SettingRepository
+) {
 
-    @Autowired
-    private lateinit var settingRepository: SettingRepository
-
-    fun get(id: SettingId): String? {
-        return settingRepository.findByIdOrNull(id.name)?.value
+    fun get(id: String): String? {
+        return settingRepository.findByIdOrNull(id)?.value
     }
 
-    fun getOrDefault(id: SettingId, default: String): String {
+    fun getOrDefault(id: String, default: String): String {
         return get(id) ?: default
     }
 
-    fun getOrDefault(id: SettingId, default: Double): Double {
+    fun getOrDefault(id: String, default: Double): Double {
         return get(id)?.toDouble() ?: default
     }
 
-    fun getOrDefault(id: SettingId, default: Boolean): Boolean {
-        return get(id)?.toBoolean() ?: default
-    }
-
-    fun update(id: SettingId, value: Any?) {
-        value ?: return settingRepository.deleteById(id.name)
-        val setting = settingRepository.findByIdOrNull(id.name) ?: Setting(id, value)
+    fun update(id: String, value: Any?) {
+        value ?: return settingRepository.deleteById(id)
+        val setting = settingRepository.findByIdOrNull(id) ?: Setting(id, value)
         setting.value = value.toString()
         settingRepository.save(setting)
     }

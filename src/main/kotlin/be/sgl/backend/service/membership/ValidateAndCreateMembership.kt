@@ -5,27 +5,23 @@ import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestriction
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.BranchRepository
+import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.util.Usecase
 import be.sgl.backend.util.reducePrice
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters.lastDayOfYear
 
 @Usecase
-class ValidateAndCreateMembership {
+class ValidateAndCreateMembership(
+    private val membershipRepository: MembershipRepository,
+    private val branchRepository: BranchRepository,
+    private val siblingRepository: SiblingRepository
+) {
 
     private val logger = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var membershipRepository: MembershipRepository
-    @Autowired
-    private lateinit var branchRepository: BranchRepository
-    @Autowired
-    private lateinit var siblingRepository: SiblingRepository
 
     fun execute(period: MembershipPeriod, user: User, at: LocalDate = LocalDate.now()): Membership {
         logger.info { "Creating membership entity for $period and user ${user.username} at $at..." }
