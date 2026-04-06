@@ -1,10 +1,20 @@
 spring:
   application:
     base-url: localhost
-    environment: test
+  datasource:
+    url: # dynamic
+    username: # dynamic
+    password: # dynamic
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
   mail:
-    host: localhost
-    port: 1025
+    host: # dynamic
+    port: # dynamic
     properties:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
+
+sgl:
+  alert:
+    environment: TEST

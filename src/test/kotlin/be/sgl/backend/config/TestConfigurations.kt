@@ -10,11 +10,6 @@ import org.springframework.mail.javamail.JavaMailSender
 @TestConfiguration
 class TestConfigurations {
     @Bean
-    fun javaMailSender(): JavaMailSender {
-        return mock(JavaMailSender::class.java)
-    }
-
-    @Bean
     @Primary
     fun checkoutProvider(): CheckoutProvider {
         return MockedCheckoutProvider()

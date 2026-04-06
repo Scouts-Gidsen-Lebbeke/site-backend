@@ -73,7 +73,7 @@ class UserRoleController(
             ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
-    fun getStaffBranchForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<BranchDTO?> {
+    fun getStaffBranchForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<BranchDTO> {
         val staffBranch = findStaffBranchForUser.execute(userDetails.username)
         return staffBranch?.let { ResponseEntity.ok(branchMapper.toDto(it)) } ?: ResponseEntity.noContent().build()
     }

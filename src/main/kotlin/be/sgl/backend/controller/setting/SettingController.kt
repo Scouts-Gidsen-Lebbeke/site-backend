@@ -27,7 +27,7 @@ class SettingController(
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = TEXT_PLAIN_VALUE)])
         ]
     )
-    fun getSetting(@PathVariable id: String): ResponseEntity<String?> {
+    fun getSetting(@PathVariable id: String): ResponseEntity<String> {
         return ResponseEntity.ok(settingService.get(id))
     }
 

@@ -7,6 +7,7 @@ import be.sgl.backend.entity.user.SiblingRelation
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.SiblingRepository
+import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import be.sgl.backend.service.registrable.activity.CheckRegistrationStatusForUser
 import be.sgl.backend.service.registrable.activity.ValidateAndCreateActivityRegistration
 import org.assertj.core.api.Assertions.assertThat
@@ -22,6 +23,8 @@ class ValidateAndCreateActivityRegistrationTest {
 
     @Mock
     lateinit var checkRegistrationStatusForUser: CheckRegistrationStatusForUser
+    @Mock
+    lateinit var calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
     @Mock
     lateinit var siblingRepository: SiblingRepository
     @Mock

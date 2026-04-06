@@ -57,7 +57,7 @@ class MembershipController(
             ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
-    fun getCurrentMembershipForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MembershipDTO?> {
+    fun getCurrentMembershipForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MembershipDTO> {
         val currentMembership = membershipService.getCurrentMembershipForUser(userDetails.username)
         return currentMembership?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
@@ -72,7 +72,7 @@ class MembershipController(
             ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
-    fun getCurrentMembershipForUser(@PathVariable username: String): ResponseEntity<MembershipDTO?> {
+    fun getCurrentMembershipForUser(@PathVariable username: String): ResponseEntity<MembershipDTO> {
         val currentMembership = membershipService.getCurrentMembershipForUser(username)
         return currentMembership?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
@@ -100,7 +100,7 @@ class MembershipController(
             ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
-    fun getMembershipById(@PathVariable id: Int): ResponseEntity<MembershipDTO?> {
+    fun getMembershipById(@PathVariable id: Int): ResponseEntity<MembershipDTO> {
         val membership = membershipService.getMembershipDTOById(id)
         return membership?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }

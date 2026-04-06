@@ -22,6 +22,10 @@ class SettingService(
         return get(id)?.toDouble() ?: default
     }
 
+    fun getOrDefault(id: String, default: Boolean): Boolean {
+        return get(id)?.toBooleanStrictOrNull() ?: default
+    }
+
     fun update(id: String, value: Any?) {
         value ?: return settingRepository.deleteById(id)
         val setting = settingRepository.findByIdOrNull(id) ?: Setting(id, value)

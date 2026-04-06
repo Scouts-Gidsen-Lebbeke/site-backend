@@ -34,7 +34,7 @@ class MedicalRecordController(
             ApiResponse(responseCode = "404", description = "User not found", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
         ]
     )
-    fun getMedicalRecord(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MedicalRecordDTO?> {
+    fun getMedicalRecord(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<MedicalRecordDTO> {
         val medicalRecord = medicalRecordService.getMedicalRecord(userDetails.username)
         return medicalRecord?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
@@ -50,7 +50,7 @@ class MedicalRecordController(
             ApiResponse(responseCode = "404", description = "User not found", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
         ]
     )
-    fun getMedicalRecord(@PathVariable username: String): ResponseEntity<MedicalRecordDTO?> {
+    fun getMedicalRecord(@PathVariable username: String): ResponseEntity<MedicalRecordDTO> {
         val medicalRecord = medicalRecordService.getMedicalRecord(username)
         return medicalRecord?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }

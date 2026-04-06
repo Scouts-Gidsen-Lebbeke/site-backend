@@ -69,7 +69,7 @@ class ActivityRegistrationController(
             ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
-    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO?> {
+    fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO> {
         val registration = registrationService.getActivityRegistrationDTOById(registrationId)
         return registration?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }

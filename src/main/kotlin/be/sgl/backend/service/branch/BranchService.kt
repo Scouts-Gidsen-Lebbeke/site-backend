@@ -4,6 +4,7 @@ import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.dto.branch.BranchWithStaff
 import be.sgl.backend.dto.branch.CreateOrUpdateBranchRequest
 import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.exception.BranchNotFoundException
@@ -11,6 +12,7 @@ import be.sgl.backend.mapper.branch.BranchMapper
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
 import be.sgl.backend.service.ImageService.ImageDirectory.BRANCH
+import be.sgl.backend.service.SettingService
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,12 +20,15 @@ class BranchService(
     private val branchRepository: BranchRepository,
     private val userRepository: UserRepository,
     private val mapper: BranchMapper,
-    private val imageService: ImageService
+    private val imageService: ImageService,
+    private val settingService: SettingService
 ) {
 
     fun getBranchDTOById(id: Int): BranchWithStaff {
         val branch = getBranchById(id)
-        branch.staff = userRepository.getStaffForBranch(branch)
+        if (settingService.getOrDefault(SettingId.STAFF_VISIBLE.name, true)) {
+            branch.staff = userRepository.getStaffForBranch(branch)
+        }
         return mapper.toBranchWithStaff(branch)
     }
 

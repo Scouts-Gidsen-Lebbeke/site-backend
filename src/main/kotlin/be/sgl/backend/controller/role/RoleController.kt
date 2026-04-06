@@ -96,7 +96,7 @@ class RoleController(
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getRoleToSyncByBranch(@PathVariable branchId: Int): ResponseEntity<RoleDTO?> {
+    fun getRoleToSyncByBranch(@PathVariable branchId: Int): ResponseEntity<RoleDTO> {
         val memberRole = roleService.getRoleToSyncByBranch(branchId)
         return memberRole?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
@@ -112,7 +112,7 @@ class RoleController(
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getStaffRoleToSyncByBranch(@PathVariable branchId: Int): ResponseEntity<RoleDTO?> {
+    fun getStaffRoleToSyncByBranch(@PathVariable branchId: Int): ResponseEntity<RoleDTO> {
         val staffRole = roleService.getStaffRoleToSyncByBranch(branchId)
         return staffRole?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }

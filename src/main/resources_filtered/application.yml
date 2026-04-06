@@ -21,8 +21,8 @@ spring:
   mail:
     host: # TODO: pass as an environment variable
     port: # TODO: pass as an environment variable
-    username: # TODO: pass as an environment variable
-    password: # TODO: pass as an environment variable
+    username:
+    password:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
@@ -48,7 +48,7 @@ keycloak:
   realm: scouts
   auth-server-url: https://login.scoutsengidsenvlaanderen.be/
   public-client: true
-  principal-attribute: preferred_username
+  principal-attribute: preflocerred_username
   bearer-only: true
 
 springdoc:

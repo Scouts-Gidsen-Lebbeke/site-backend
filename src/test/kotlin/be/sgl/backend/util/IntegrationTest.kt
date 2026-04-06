@@ -1,13 +1,14 @@
 package be.sgl.backend.util
 
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import be.sgl.backend.config.DatabaseContainerConfiguration
+import be.sgl.backend.config.MailContainerConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
+@Import(DatabaseContainerConfiguration::class, MailContainerConfiguration::class)
 annotation class IntegrationTest

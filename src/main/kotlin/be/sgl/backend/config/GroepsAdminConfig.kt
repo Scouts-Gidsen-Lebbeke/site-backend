@@ -3,13 +3,6 @@ package be.sgl.backend.config
 import be.sgl.backend.config.security.BearerTokenFilter
 import be.sgl.backend.openapi.ApiClient
 import be.sgl.backend.openapi.api.*
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,20 +12,16 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClient
-import java.time.OffsetDateTime
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 class GroepsAdminConfig {
 
     @Bean
     fun getGroepsAdminApiClient(@Value("\${rest.ga.url}") basePath: String): ApiClient {
-        val module = JavaTimeModule()
-        module.addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer())
-        val objectMapper = ObjectMapper()
-            .registerModule(module)
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+//        val module = JavaTimeModule()
+//        module.addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer())
+        val objectMapper = JsonMapper.builder().build()
         return DynamicAuthApiClient(basePath, objectMapper)
     }
 
@@ -63,13 +52,13 @@ class GroepsAdminConfig {
 
     // apparently bearerToken authentication is still not implemented,
     // see https://openapi-generator.tech/docs/generators/spring/#security-feature
-    private class DynamicAuthApiClient(basePath: String, objectMapper: ObjectMapper) : ApiClient(objectMapper, createDefaultDateFormat()) {
+    private class DynamicAuthApiClient(basePath: String, objectMapper: JsonMapper) : ApiClient(objectMapper, createDefaultDateFormat()) {
 
         init {
             this.basePath = basePath
         }
 
-        override fun <T : Any?> invokeAPI(path: String?, method: HttpMethod?, pathParams: MutableMap<String, Any>?,
+        override fun <T : Any> invokeAPI(path: String?, method: HttpMethod?, pathParams: MutableMap<String, Any>?,
                                           queryParams: MultiValueMap<String, String>?, body: Any?, headerParams: HttpHeaders?,
                                           cookieParams: MultiValueMap<String, String>?, formParams: MultiValueMap<String, Any>?,
                                           accept: MutableList<MediaType>?, contentType: MediaType?, authNames: Array<out String>?,
@@ -80,9 +69,9 @@ class GroepsAdminConfig {
         }
     }
 
-    class OffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
-        override fun deserialize(p0: JsonParser, p1: DeserializationContext): OffsetDateTime {
-            return OffsetDateTime.parse(p0.text)
-        }
-    }
+//    class OffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
+//        override fun deserialize(p0: JsonParser, p1: DeserializationContext): OffsetDateTime {
+//            return OffsetDateTime.parse(p0.text)
+//        }
+//    }
 }
