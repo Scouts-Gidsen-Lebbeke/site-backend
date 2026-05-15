@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 abstract class Payable : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null
+    var id: Int? = null
     lateinit var name: String
     @Lob
     lateinit var description: String

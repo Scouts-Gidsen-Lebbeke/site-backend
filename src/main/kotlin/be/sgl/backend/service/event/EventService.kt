@@ -15,6 +15,7 @@ import be.sgl.backend.service.payment.CheckoutProvider
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -50,6 +51,7 @@ class EventService {
 
     fun saveEventDTO(dto: EventDTO): EventDTO {
         logger.info { "Saving new event ${dto.name} (${dto.start} - ${dto.end})" }
+        check(LocalDateTime.now() < dto.closed) { "New events cannot be closed for registrations yet!" }
         validateEventDTO(dto)
         val newEvent = mapper.toEntity(dto)
         return mapper.toDto(eventRepository.save(newEvent))

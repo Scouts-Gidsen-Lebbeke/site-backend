@@ -155,7 +155,7 @@ class ActivityController {
         description = "Returns the registration identified with the given id.",
         responses = [
             ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationDTO::class))]),
-            ApiResponse(responseCode = "204", description = "Not found", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "204", description = "Not found")
         ]
     )
     fun getRegistration(@PathVariable registrationId: Int): ResponseEntity<ActivityRegistrationDTO?> {
@@ -169,11 +169,11 @@ class ActivityController {
         summary = "Get the registration status for the current user",
         description = "Returns the registration status for the current user and the activity identified with the given id.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationStatus::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationStatusDTO::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getRegistrationStatusForCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ActivityRegistrationStatus> {
+    fun getRegistrationStatusForCurrentUser(@PathVariable id: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<ActivityRegistrationStatusDTO> {
         return ResponseEntity.ok(registrationService.getStatusForActivityAndUser(id, userDetails.username))
     }
 
@@ -183,11 +183,11 @@ class ActivityController {
         summary = "Get the registration status for the given user",
         description = "Returns the registration status for the user with the provided username and the activity identified with the given id.",
         responses = [
-            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationStatus::class))]),
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ActivityRegistrationStatusDTO::class))]),
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun getRegistrationStatusForUser(@PathVariable id: Int, @PathVariable username: String): ResponseEntity<ActivityRegistrationStatus> {
+    fun getRegistrationStatusForUser(@PathVariable id: Int, @PathVariable username: String): ResponseEntity<ActivityRegistrationStatusDTO> {
         return ResponseEntity.ok(registrationService.getStatusForActivityAndUser(id, username))
     }
 
@@ -208,7 +208,7 @@ class ActivityController {
     }
 
     @PostMapping("/{id}/user/{username}/register/{restrictionId}")
-    @OnlyAuthenticated
+    @OnlyStaff
     @Operation(
         summary = "Register the given user to the given activity",
         description = "Creates a registration to the given activity for the given user (if allowed) and returns the payment url.",
@@ -218,7 +218,7 @@ class ActivityController {
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int, @RequestBody data: String): ResponseEntity<PaymentUrl> {
+    fun registerUser(@PathVariable id: Int, @PathVariable username: String, @PathVariable restrictionId: Int, @RequestBody(required = false) data: String?): ResponseEntity<PaymentUrl> {
         val url = registrationService.createPaymentForActivity(id, restrictionId, username, data)
         return ResponseEntity.ok(PaymentUrl(url))
     }

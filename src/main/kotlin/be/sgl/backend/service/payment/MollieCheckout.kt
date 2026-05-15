@@ -88,10 +88,12 @@ class MollieCheckout : CheckoutProvider {
 
     override fun refundPayment(payment: Payment) {
         check(payment.paid)
+        val refundPrice = (payment.price - getRefundCost(payment))
+        if (refundPrice <= 0.0) return
         val request = RefundRequest.builder()
             .description(Optional.of(payment.getDescription()))
             .amount(Amount.builder()
-                .value(BigDecimal(payment.price - 1))
+                .value(BigDecimal(refundPrice))
                 .currency("EUR")
                 .build()
             ).build()

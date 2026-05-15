@@ -10,4 +10,5 @@ interface CheckoutProvider {
     fun getCheckoutUrl(payment: Payment): String
     fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus
     fun refundPayment(payment: Payment)
+    fun getRefundCost(payment: Payment) = 1.0
 }

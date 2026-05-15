@@ -8,10 +8,15 @@ import java.util.*
 
 @Configuration
 class LocaleConfig {
+
     @Bean
     fun localeResolver(): LocaleResolver {
         val resolver = SessionLocaleResolver()
-        resolver.setDefaultLocale(Locale.of("nl", "BE"))
+        resolver.setDefaultLocale(BE_NL)
         return resolver
+    }
+
+    companion object {
+        val BE_NL = Locale.of("nl", "BE")
     }
 }

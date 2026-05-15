@@ -36,6 +36,6 @@ class CreateCertificateForMembership {
             "signatory" to representative.user.getFullName(),
             "id" to "${membership.period.id}-#${membership.id}".base64Encoded()
         )
-        return fillForm("forms/membership.pdf", formData, representative.signature)
+        return fillForm("forms/membership.pdf", formData, StampSpecs(representative.signature))
     }
 }

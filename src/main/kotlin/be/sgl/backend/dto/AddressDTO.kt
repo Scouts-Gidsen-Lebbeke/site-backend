@@ -2,18 +2,17 @@ package be.sgl.backend.dto
 
 import be.sgl.backend.util.CountryCode
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Positive
 import java.io.Serializable
 
 class AddressDTO(
-    val id: Int?,
-    val street: String,
-    val number: String,
-    val subPremise: String?,
-    val zipcode: String,
-    val town: String,
+    var id: Int?,
+    var street: String,
+    var number: String,
+    var subPremise: String?,
+    var zipcode: String,
+    var town: String,
     @NotNull
     @CountryCode
-    val country: String,
-    val description: String?
+    var country: String,
+    var description: String?
 ) : Serializable

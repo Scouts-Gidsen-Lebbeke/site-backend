@@ -90,21 +90,21 @@ class ExternalUserDataProvider : UserDataProvider() {
         return user
     }
 
-    override fun startRole(user: User, role: Role) {
-        if (user.roles.none { it.role == role }) {
+    override fun startRole(user: User, role: Role): UserRole? {
+        if (user.roles.any { it.role == role }) {
             logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
-            return
+            return null
         }
         val newRole = UserRole(user, role)
         val externalRole = role.externalId
         if (externalRole == null) {
-            logger.error { "Trying to end a non-externally linked role ${role.name}!" }
-            return
+            logger.error { "Trying to start a non-externally linked role ${role.name}!" }
+            return null
         }
         val externalFunction = FunctieInstantie().apply {
             groep = externalOrganizationId
             functie = externalRole
-            begin = OffsetDateTime.of(newRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+            begin = OffsetDateTime.of(newRole.startDate ?: return null, LocalTime.MIN, ZoneOffset.UTC)
         }
         val lidPatch = Lid().apply {
             functies = mutableListOf(externalFunction)
@@ -114,12 +114,13 @@ class ExternalUserDataProvider : UserDataProvider() {
             val backupExternalFunction = FunctieInstantie().apply {
                 groep = externalOrganizationId
                 functie = it
-                begin = OffsetDateTime.of(newRole.startDate ?: return, LocalTime.MIN, ZoneOffset.UTC)
+                begin = OffsetDateTime.of(newRole.startDate ?: return null, LocalTime.MIN, ZoneOffset.UTC)
             }
             lidPatch.functies.add(backupExternalFunction)
         }
-        ledenApi.patchLid(user.externalId!!, true, lidPatch)
+        ledenApi.patchLid(user.externalId ?: return null, true, lidPatch)
         user.roles.add(newRole)
+        return newRole
     }
 
     override fun endRole(user: User, role: Role) {
@@ -171,6 +172,7 @@ class ExternalUserDataProvider : UserDataProvider() {
             accountNo = it.persoonsgegevens.rekeningnummer
             birthdate = it.vgagegevens.geboortedatum
             memberId = it.verbondsgegevens.lidnummer
+            nis = it.persoonsgegevens.rijksregisternummer
             addresses.addAll(it.adressen.map { a -> Address().apply {
                 externalId = a.id
                 street = a.straat
@@ -192,9 +194,10 @@ class ExternalUserDataProvider : UserDataProvider() {
                     be.sgl.backend.openapi.model.Contact.RolEnum.VOOGD -> ContactRole.GUARDIAN
                     else -> ContactRole.RESPONSIBLE
                 }
-                contact.address = addresses.firstOrNull { a -> a.externalId == c.id }
+                contact.address = addresses.firstOrNull { a -> a.externalId == c.adres }
                 contact.mobile = c.gsm
                 contact.email = c.email
+                contact.nis = c.rijksregisternummer
                 contact
             })
         }
@@ -207,5 +210,49 @@ class ExternalUserDataProvider : UserDataProvider() {
         val endDate = function.einde?.toLocalDate()
         if (endDate != null && endDate < LocalDate.now()) return null
         return UserRole(user, role, function.begin.toLocalDate(), endDate)
+    }
+
+    override fun getMedicalRecord(user: User): MedicalRecord? {
+        return ledenApi.getLidSteekkaart(user.externalId!!, null)?.run {
+            val record = MedicalRecord()
+            record.user = user
+            record.mayBePhotographed = gegevens.waarden["d5f75e1e463384de014639190ebb00eb"] == "ja"
+            record.mayTakePainkillers = gegevens.waarden["d5f75e1e463384de0146390e395900e2"] == "ja"
+            record.foodAnomalies = gegevens.waarden["d5f75e1e463384de0146391a3b4800ed"].sanitized() // Zo ja, op vlak van voeding (vb. vegetariër, halal):
+            record.allergies = gegevens.waarden["d5f75e1e463384de0146391124af00e5"].sanitized() // Onze zoon of dochter moet een bepaald dieet volgen
+            val impossibleActivities = gegevens.waarden["d5f75e1e4610ed0201461f119f740016"].sanitized()
+            val atSports = gegevens.waarden["d5f75e1e480b9aa901480c7fb70100de"].sanitized()
+            val atHygiene = gegevens.waarden["d5f75e1e4610ed0201461f1464ef001a"].sanitized()
+            val atSocial = gegevens.waarden["d5f75e1e4610ed0201461f14d9de001b"].sanitized()
+            val other = gegevens.waarden["d5f75e1e4610ed0201461f1523c6001c"].sanitized()
+            record.activityRestrictions = listOfNotNull(impossibleActivities, atSports, atHygiene, atSocial, other).joinToString(",").sanitized()
+            record.familyRemarks = gegevens.waarden["d5f75e1e4610ed0201461f026f8e0013"].sanitized()
+            record.socialRemarks = gegevens.waarden["d5f75e1e463384de0146391abdd000ee"].sanitized() // Zo ja, andere aandachtspunten die belang kunnen hebben bij de omgang met ons kind:
+            val diseaseList = gegevens.waarden["d5f75e1e463384de01463905280100de"].sanitized()
+            val diseaseGuidance = gegevens.waarden["d5f75e1e4610ed0201461f1464ef001a"].sanitized()
+            record.diseases = listOfNotNull(diseaseList, diseaseGuidance).joinToString(", ").sanitized()
+            record.medications = gegevens.waarden["d5f75e1e463384de01463901e13c00dc"].sanitized() // ja/nee, but no concrete info
+            // record.physician
+            record.physicianContact = gegevens.waarden["d5f75e1e463384de0146391800f100e9"].sanitized()
+            record.bloodGroup = when(gegevens.waarden["d5f75e1e463384de01463916d21b00e8"]) {
+                "O+" -> BloodGroup.OP
+                "O-" -> BloodGroup.ON
+                "A+" -> BloodGroup.AP
+                "A-" -> BloodGroup.AN
+                "B+ " -> BloodGroup.BP
+                "B-" -> BloodGroup.BN
+                "AB+" -> BloodGroup.ABP
+                "AB-" -> BloodGroup.ABN
+                else -> BloodGroup.UNKNOWN
+            }
+            //record.lastModifiedDate
+            record
+        }
+    }
+
+    private fun String?.sanitized(): String? {
+        return this?.takeIf { it.isNotBlank() && it != "/" && !it.equals("nee", true)
+                && !it.equals("neen", true) && !it.equals("nvt", true)
+                && !it.equals("geen", true) }
     }
 }

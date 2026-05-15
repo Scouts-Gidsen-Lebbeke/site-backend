@@ -1,19 +1,15 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
-import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.service.SettingService
 import be.sgl.backend.service.organization.OrganizationProvider
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.util.StampSpecs
 import be.sgl.backend.util.belgian
 import be.sgl.backend.util.fillForm
-import be.sgl.backend.util.pricePrecision
-import mu.KotlinLogging
+import be.sgl.backend.util.priceWithCurrency
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 
 @Service
 class FormService {
@@ -26,61 +22,58 @@ class FormService {
         val representative = organizationProvider.getRepresentative()
         val certifier = organizationProvider.getCertifier()
         val formData = mapOf(
-            "instanceName" to owner.name,
-            "instanceKBO" to owner.kbo,
-            "instanceStreet" to owner.address.street,
-            "instanceNr" to "${owner.address.number}${owner.address.subPremise}",
-            "instanceZip" to owner.address.zipcode,
-            "instanceTown" to owner.address.town,
-            "certifierName" to certifier.name,
-            "certifierKBO" to certifier.kbo,
-            "certifierStreet" to certifier.address.street,
-            "certifierNr" to "${certifier.address.number}${certifier.address.subPremise}",
-            "certifierZip" to certifier.address.zipcode,
-            "certifierTown" to certifier.address.town,
+            "organization_name" to owner.name,
+            "organization_kbo" to owner.kbo,
+            "organization_street" to owner.address.street,
+            "organization_no" to "${owner.address.number}${owner.address.subPremise ?: ""}",
+            "organization_zip" to owner.address.zipcode,
+            "organization_town" to owner.address.town,
+            "certifier_name" to certifier.name,
+            "certifier_kbo" to certifier.kbo,
+            "certifier_street" to certifier.address.street,
+            "certifier_no" to "${certifier.address.number}${certifier.address.subPremise ?: ""}",
+            "certifier_zip" to certifier.address.zipcode,
+            "certifier_town" to certifier.address.town,
             "name" to form.user.name,
-            "firstName" to form.user.firstName,
-            "birthDate" to form.user.birthdate,
-            "street" to form.parent.address?.street,
-            "nr" to "${form.parent.address?.number}${form.parent.address?.subPremise}",
-            "zip" to form.parent.address?.zipcode,
-            "town" to form.parent.address?.town,
-            "nis" to form.parent.nis,
-            "debtorName" to form.parent.name,
-            "debtorFirstName" to form.parent.firstName,
-            "debtorStreet" to form.parent.address?.street,
-            "debtorNr" to "${form.parent.address?.number}${form.parent.address?.subPremise}",
-            "debtorZip" to form.parent.address?.zipcode,
-            "debtorTown" to form.parent.address?.town,
-            "debtorNis" to form.parent.nis,
+            "first_name" to form.user.firstName,
+            "birth_date" to form.user.birthdate.belgian(),
+            "street" to form.address.street,
+            "no" to "${form.address.number}${form.address.subPremise ?: ""}",
+            "zip" to form.address.zipcode,
+            "town" to form.address.town,
+            "nis_nr" to form.parent.nis,
+            "debtor_name" to form.parent.name,
+            "debtor_first_name" to form.parent.firstName,
+            "debtor_street" to form.address.street,
+            "debtor_no" to "${form.address.number}${form.address.subPremise ?: ""}",
+            "debtor_zip" to form.address.zipcode,
+            "debtor_town" to form.address.town,
+            "debtor_nis_nr" to form.parent.nis,
             "id" to form.id,
-            "taxYear" to form.year,
+            "year" to form.year,
             "period1" to form.activity1.asPeriod(),
-            "period1Days" to form.activity1.calculateDays(),
-            "period1Rate" to form.dailyPrice(form.activity1).pricePrecision(),
-            "period1Price" to form.activity1.price.pricePrecision(),
-            "period1" to form.activity1.asPeriod(),
-            "period1Days" to form.activity1.calculateDays(),
-            "period1Rate" to form.dailyPrice(form.activity1).pricePrecision(),
-            "period1Price" to form.activity1.price.pricePrecision(),
+            "period1_days" to form.activity1.calculateDays(),
+            "period1_rate" to form.dailyPrice(form.activity1).priceWithCurrency(),
+            "period1_price" to form.activity1.price.priceWithCurrency(),
             "period2" to form.activity2.asPeriod(),
-            "period2Days" to form.activity2?.calculateDays(),
-            "period2Rate" to form.dailyPrice(form.activity2).pricePrecision(),
-            "period2Price" to form.activity2?.price.pricePrecision(),
-            "period3" to form.activity2.asPeriod(),
-            "period3Days" to form.activity3?.calculateDays(),
-            "period3Rate" to form.dailyPrice(form.activity3).pricePrecision(),
-            "period3Price" to form.activity3?.price.pricePrecision(),
-            "period4" to form.activity3.asPeriod(),
-            "period4Days" to form.activity4?.calculateDays(),
-            "period4Rate" to form.dailyPrice(form.activity4).pricePrecision(),
-            "period4Price" to form.activity4?.price.pricePrecision(),
-            "totalPrice" to form.totalPrice.pricePrecision(),
+            "period2_days" to form.activity2?.calculateDays(),
+            "period2_rate" to form.dailyPrice(form.activity2).priceWithCurrency(),
+            "period2_price" to form.activity2?.price.priceWithCurrency(),
+            "period3" to form.activity3.asPeriod(),
+            "period3_days" to form.activity3?.calculateDays(),
+            "period3_rate" to form.dailyPrice(form.activity3).priceWithCurrency(),
+            "period3_price" to form.activity3?.price.priceWithCurrency(),
+            "period4" to form.activity4.asPeriod(),
+            "period4_ays" to form.activity4?.calculateDays(), // not a typo :(
+            "period4_rate" to form.dailyPrice(form.activity4).priceWithCurrency(),
+            "period4_price" to form.activity4?.price.priceWithCurrency(),
+            "total_price" to form.totalPrice.priceWithCurrency(),
             "location" to owner.address.town,
-            "authorizer" to representative.user.getFullName(),
-            "authorizationRole" to representative.title
+            "signatory" to representative.user.getFullName(),
+            "signatory_role" to representative.title,
+            "signature_date" to LocalDate.now().belgian()
         )
-        return fillForm("forms/form28186.pdf", formData)
+        return fillForm("forms/form28186.pdf", formData, StampSpecs(representative.signature, 2, 270f, 110f))
     }
 
     private fun ActivityRegistration?.asPeriod(): String? {

@@ -44,7 +44,6 @@ abstract class PaymentService<T : Payment, R> where R : PaymentRepository<T>, R 
                 handlePaymentCanceled(payment)
             }
             SimplifiedPaymentStatus.REFUNDED -> {
-                check(payment.paid) { "This payment should have been marked as paid!" }
                 paymentRepository.delete(payment)
                 handlePaymentRefunded(payment)
             }

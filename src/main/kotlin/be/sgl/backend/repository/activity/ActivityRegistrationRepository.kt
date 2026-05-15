@@ -3,7 +3,6 @@ package be.sgl.backend.repository.activity
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.PaymentRepository
 import org.springframework.data.jpa.repository.JpaRepository
@@ -27,7 +26,7 @@ interface ActivityRegistrationRepository : JpaRepository<ActivityRegistration, I
     fun getRegistrationsByActivity(activity: Activity): List<ActivityRegistration>
     fun getByUser(user: User): List<ActivityRegistration>
     fun existsBySubscribableAndUser(subscribable: Activity, user: User): Boolean
-    fun countByRestriction(restriction: ActivityRestriction): Int
+    fun countByRestriction_Id(restrictionId: Int): Int
     @Query("select count(*) from ActivityRegistration where subscribable = :activity and restriction.branch = :branch")
     fun countByActivityAndBranch(activity: Activity, branch: Branch): Int
     fun getByUserAndSubscribable(user: User, subscribable: Activity): ActivityRegistration?
