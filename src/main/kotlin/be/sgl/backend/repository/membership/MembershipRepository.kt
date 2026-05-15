@@ -25,6 +25,8 @@ interface MembershipRepository : JpaRepository<Membership, Int>, PaymentReposito
     fun countByPeriod(period: MembershipPeriod): Int
     @Query(value = "from Membership where paid and user = :user")
     fun getMembershipsByUser(user: User): MutableList<Membership>
+    @Query("from Membership where period = :period and paid")
+    fun getByPeriod(period: MembershipPeriod): List<Membership>
     @Query("select price from Membership where period = :period and paid")
     fun getPaidByPeriod(period: MembershipPeriod): List<Double>
     fun existsByPeriodAndUser(period: MembershipPeriod, user: User): Boolean

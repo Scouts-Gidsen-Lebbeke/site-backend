@@ -4,6 +4,7 @@ import be.sgl.backend.dto.UserRegistrationDTO
 import be.sgl.backend.entity.user.MedicalRecord
 import be.sgl.backend.entity.user.Role
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.entity.user.UserRole
 import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.repository.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -88,7 +89,7 @@ abstract class UserDataProvider {
         userRepository.deleteByUsername(username)
     }
 
-    abstract fun startRole(user: User, role: Role)
+    abstract fun startRole(user: User, role: Role): UserRole?
 
     abstract fun endRole(user: User, role: Role)
 

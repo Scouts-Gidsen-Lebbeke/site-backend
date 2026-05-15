@@ -13,8 +13,8 @@ import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.service.PaymentService
 import be.sgl.backend.service.exception.EventNotFoundException
 import be.sgl.backend.service.exception.EventRegistrationNotFoundException
+import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import be.sgl.backend.service.user.UserDataProvider
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -33,6 +33,8 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     private lateinit var mapper: EventMapper
     @Autowired
     private lateinit var userDataProvider: UserDataProvider
+    @Autowired
+    private lateinit var calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
 
     fun getAllRegistrationsForEvent(id: Int): List<EventRegistrationDTO> {
         val event = getEventById(id)
@@ -51,19 +53,30 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         val finalPrice = calculatePriceForEvent(event, attempt.additionalData)
         var registration = EventRegistration(event, attempt, finalPrice, user)
         registration = paymentRepository.save(registration)
+        logger.info { "Created registration #${registration.id}" }
+        if (registration.price == 0.0) {
+            logger.info { "Registration was free, marking it paid and returning redirect url immediately" }
+            registration.markPaid()
+            registration = paymentRepository.save(registration)
+            handlePaymentPaid(registration)
+            return checkoutProvider.createRedirectUrl(registration, "events", event.id)
+        }
+        logger.info { "Registration is not free, linking payment via payment provider" }
         val customer = user?.let { Customer(it) } ?: Customer("${registration.firstName} ${registration.name}", registration.email)
         val checkoutUrl = checkoutProvider.createCheckoutUrl(customer, registration, "events", event.id)
+        logger.info { "Registration linked to payment ${registration.paymentId}, saving reference" }
         paymentRepository.save(registration)
+        logger.info { "Redirecting user to payment url $checkoutUrl" }
         return checkoutUrl
     }
 
     private fun isGlobalLimitReached(event: Event): Boolean {
         val globalLimit = event.registrationLimit ?: return false
-        return paymentRepository.countPaidRegistrationsByEvent(event) < globalLimit
+        return paymentRepository.countPaidRegistrationsByEvent(event) >= globalLimit
     }
 
     private fun calculatePriceForEvent(event: Event, additionalData: String?): Double {
-        return event.price + event.readAdditionalData(additionalData)
+        return event.price + calculatePriceFromAdditionalData.execute(event, additionalData)
     }
 
     override fun handlePaymentPaid(payment: EventRegistration) {
@@ -85,7 +98,7 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
     override fun handlePaymentRefunded(payment: EventRegistration) {
         val params = mapOf(
             "customer" to "${payment.firstName} ${payment.name}",
-            "price" to payment.price - 1,
+            "price" to payment.price - checkoutProvider.getRefundCost(payment),
             "eventName" to payment.subscribable.name,
         )
         val mailBuilder = mailService.builder()
@@ -128,7 +141,14 @@ class EventRegistrationService : PaymentService<EventRegistration, EventRegistra
         val registration = getRegistrationById(id)
         check(registration.paid) { "Only a paid event registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
-        checkoutProvider.refundPayment(registration)
+        if (registration.price > 0) {
+            checkoutProvider.refundPayment(registration)
+            registration.markRefunded()
+            paymentRepository.save(registration)
+        } else {
+            paymentRepository.delete(registration)
+            handlePaymentRefunded(registration)
+        }
         logger.info { "Event registration #$id successfully cancelled" }
     }
 
