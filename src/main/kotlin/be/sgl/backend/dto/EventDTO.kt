@@ -19,7 +19,10 @@ open class EventBaseDTO(
     @NotNull(message = "{NotNull.event.start}")
     var start: LocalDateTime,
     @NotNull(message = "{NotNull.event.end}")
-    var end: LocalDateTime
+    var end: LocalDateTime,
+    @NotNull(message = "{NotNull.event.closed}")
+    var closed: LocalDateTime,
+    var cancellable: Boolean
 ) : Serializable
 
 // DTO for registration page and CRUD
@@ -29,12 +32,12 @@ class EventDTO(
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
+    closed: LocalDateTime,
+    cancellable: Boolean,
     @NotBlank(message = "{NotBlank.event.description}")
     var description: String,
     @NotNull(message = "{NotNull.event.open}")
     var open: LocalDateTime,
-    @NotNull(message = "{NotNull.event.closed}")
-    var closed: LocalDateTime,
     @NotNull(message = "{NotNull.event.price}")
     @PositiveOrZero(message = "{PositiveOrZero.event.price}")
     var price: Double,
@@ -45,13 +48,12 @@ class EventDTO(
     var additionalForm: String?,
     @Size(max = 255, message = "{Size.event.additionalFormRule}")
     var additionalFormRule: String?,
-    var cancellable: Boolean,
     var sendConfirmation: Boolean,
     var sendCompleteConfirmation: Boolean,
     @Email(message = "{Email.event.communicationCC}")
     var communicationCC: String?,
     var needsMobile: Boolean
-) : EventBaseDTO(id, name, start, end)
+) : EventBaseDTO(id, name, start, end, closed, cancellable)
 
 // DTO for statistics list overview
 class EventResultDTO(
@@ -59,10 +61,12 @@ class EventResultDTO(
     name: String,
     start: LocalDateTime,
     end: LocalDateTime,
+    closed: LocalDateTime,
+    cancellable: Boolean,
     var registrationCount: Int,
     var totalPrice: Double,
     var status: RegistrableStatus
-) : EventBaseDTO(id, name, start, end) {
+) : EventBaseDTO(id, name, start, end, closed, cancellable) {
     constructor(event: Event, registrations: List<Double>) :
-            this(event.id, event.name, event.start, event.end, registrations.count(), registrations.sum(), event.getStatus())
+            this(event.id, event.name, event.start, event.end, event.closed, event.cancellable, registrations.count(), registrations.sum(), event.getStatus())
 }

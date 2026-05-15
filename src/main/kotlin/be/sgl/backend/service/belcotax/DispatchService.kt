@@ -2,10 +2,7 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationFormDTO
 import be.sgl.backend.entity.organization.Organization
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.service.SettingService
 import be.sgl.backend.service.organization.OrganizationProvider
-import be.sgl.backend.service.user.UserDataProvider
 import generated.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
@@ -73,17 +70,17 @@ class DispatchService {
             a1020Taalcode = dispatch.v0022Taalcode
             if (a1020Taalcode == "1") {
                 a1011Naamnl1 = dispatch.v0014Naam.take(28)
-                a1012Naamnl2 = dispatch.v0014Naam.substring(28)
+                a1012Naamnl2 = dispatch.v0014Naam.takeIf { it.length > 28 }?.substring(28)
                 a1013Adresnl = dispatch.v0015Adres
                 a1015Gemeente = dispatch.v0017Gemeente
             } else if (a1020Taalcode == "2") {
                 a1027Naamfr1 = dispatch.v0014Naam.take(28)
-                a1028Naamfr2 = dispatch.v0014Naam.substring(28)
+                a1028Naamfr2 = dispatch.v0014Naam.takeIf { it.length > 28 }?.substring(28)
                 a1029Adresfr = dispatch.v0015Adres
                 a1030Gemeentefr = dispatch.v0017Gemeente
             } else {
                 a1032Naamde1 = dispatch.v0014Naam.take(28)
-                a1033Naamde2 = dispatch.v0014Naam.substring(28)
+                a1033Naamde2 = dispatch.v0014Naam.takeIf { it.length > 28 }?.substring(28)
                 a1034Adresde = dispatch.v0015Adres
                 a1035Gemeentede = dispatch.v0017Gemeente
             }
@@ -135,7 +132,7 @@ class DispatchService {
         f2009Volgnummer = index.toString()
         f2010Referentie = formDTO.id
         f2011Nationaalnr = formDTO.parent.nis.assertLength("parent nis number for $f2010Referentie", 11)
-        f2012Geboortedatum = f2011Nationaalnr.toNis(f2002Inkomstenjaar)
+        f2012Geboortedatum = f2011Nationaalnr.birthdateFromNis(f2002Inkomstenjaar)
         f2013Naam = formDTO.parent.name.assertMaxLength("parent name for $f2010Referentie", 41)
         // f2014Naampartner => Not used for this form
         f2015Adres = formDTO.address.getStreetAdress().assertMaxLength("street address for $f2010Referentie", 32)
@@ -233,7 +230,7 @@ class DispatchService {
         else -> "1"
     }
 
-    private fun String.toNis(formYear: String): String {
+    private fun String.birthdateFromNis(formYear: String): String {
         val day = substring(4, 6)
         val month = substring(2, 4)
         val year = substring(0, 2)

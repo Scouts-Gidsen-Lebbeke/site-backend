@@ -1,5 +1,6 @@
 package be.sgl.backend.dto
 
+import be.sgl.backend.entity.user.BloodGroup
 import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.util.Nis
@@ -38,4 +39,20 @@ data class StaffDTO(
     val image: String?,
     val nickname: String?,
     val totem: String?,
+)
+
+data class MedicalRecordDTO(
+    var id: Int? = null,
+    var mayBePhotographed: Boolean,
+    var mayTakePainkillers: Boolean,
+    var foodAnomalies: String?,
+    var allergies: String?,
+    var activityRestrictions: String?,
+    var familyRemarks: String?,
+    var socialRemarks: String?,
+    var diseases: String?,
+    var medications: String?,
+    var physician: String?,
+    var physicianContact: String?,
+    var bloodGroup: BloodGroup
 )

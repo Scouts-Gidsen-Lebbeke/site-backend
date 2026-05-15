@@ -35,7 +35,6 @@
         <kotlin.version>2.1.20</kotlin.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <org.keycloak.version>25.0.3</org.keycloak.version>
-        <mysql.version>8.0.33</mysql.version>
         <org.apache.pdfbox.version>3.0.4</org.apache.pdfbox.version>
         <org.springdoc.version>2.8.6</org.springdoc.version>
         <mollie.version>4.6.1</mollie.version>
@@ -103,9 +102,8 @@
             <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>

@@ -3,6 +3,8 @@ package be.sgl.backend.service
 import be.sgl.backend.dto.BranchBaseDTO
 import be.sgl.backend.dto.BranchDTO
 import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.BranchRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.exception.BranchNotFoundException
@@ -22,10 +24,14 @@ class BranchService {
     private lateinit var mapper: BranchMapper
     @Autowired
     private lateinit var imageService: ImageService
+    @Autowired
+    private lateinit var settingService: SettingService
 
     fun getBranchDTOById(id: Int): BranchDTO {
         val branch = getBranchById(id)
-        branch.staff = userRepository.getStaffForBranch(branch)
+        if (branch.status != BranchStatus.ACTIVE || settingService.getOrDefault(SettingId.STAFF_VISIBLE, true)) {
+            branch.staff = userRepository.getStaffForBranch(branch)
+        }
         return mapper.toDto(branch)
     }
 

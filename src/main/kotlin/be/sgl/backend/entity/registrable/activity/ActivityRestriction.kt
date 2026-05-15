@@ -2,6 +2,7 @@ package be.sgl.backend.entity.registrable.activity
 
 import be.sgl.backend.entity.Auditable
 import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.user.Role
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -25,6 +26,9 @@ class ActivityRestriction : Auditable() {
     lateinit var activity: Activity
     @ManyToOne
     lateinit var branch: Branch
+    // TODO: introduce optional role specification for staff roles
+//    @ManyToOne
+//    var role: Role? = null
     var name: String? = null
 
     /**

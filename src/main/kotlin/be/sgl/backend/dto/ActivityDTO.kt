@@ -4,6 +4,7 @@ import be.sgl.backend.entity.registrable.RegistrableStatus
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
+import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.*
 import java.io.Serializable
@@ -70,7 +71,7 @@ data class ActivityRestrictionDTO(
     val name: String?,
     val alternativeStart: LocalDateTime?,
     val alternativeEnd: LocalDateTime?,
-    val alternativePrice: Double?,
+    var alternativePrice: Double?,
     val alternativeLimit: Int?
 )
 
@@ -102,10 +103,19 @@ class ActivityResultDTO(
  *  - When its medical info is existing, it should still be up to date (according to the up-to-date flag).
  */
 data class ActivityRegistrationStatus(
-    val currentRegistration: ActivityRegistrationDTO? = null,
+    val currentRegistration: ActivityRegistration? = null,
     val activeMembership: Boolean = true,
-    val openOptions: List<ActivityRestrictionDTO> = emptyList(),
-    val closedOptions: List<ActivityRestrictionDTO> = emptyList(),
+    val openOptions: List<ActivityRestriction> = emptyList(),
+    val closedOptions: List<ActivityRestriction> = emptyList(),
     val medicsDate: LocalDateTime? = null,
     val medicalsUpToDate: Boolean = false
+)
+
+data class ActivityRegistrationStatusDTO(
+    var currentRegistration: ActivityRegistrationDTO? = null,
+    var activeMembership: Boolean = true,
+    var openOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
+    var closedOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
+    var medicsDate: LocalDateTime? = null,
+    var medicalsUpToDate: Boolean = false
 )

@@ -1,0 +1,23 @@
+<!--/*@thymesVar id="member" type="java.lang.String"*/-->
+<!--/*@thymesVar id="baseUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="price" type="java.lang.Double"*/-->
+<!--/*@thymesVar id="periodName" type="java.lang.String"*/-->
+<p>
+    Dag <span th:text="${member}"></span>,
+</p>
+<p>
+    Het nieuwe werkingsjaar staat voor de deur, wat ook wil zeggen dat iedereen zich opnieuw kan inschrijven.
+    Indien je ook dit jaar lid wil blijven, kan je op onze website naar
+    <a th:href="@{${baseUrl} + '/memberships/membership.html'}" target="_blank">Mijn lidmaatschap</a> gaan
+    en daar jouw lidgeld (€ <span th:text="${#numbers.formatDecimal(price, 1, 2)}"></span>) voor <span th:text="${periodName}"></span>
+    in orde brengen.
+</p>
+<p>
+    Indien we dit lidgeld niet binnen de maand ontvangen hebben, schrijven we jou definitief uit,
+    wat wil zeggen dat je niet meer verzekerd bent en dat je geen communicatie meer van ons
+    of Scouts & Gidsen Vlaanderen zal ontvangen. Je kan dit achteraf nog steeds terug in orde brengen via dezelfde link.
+</p>
+<p>
+    Stevige linker,<br/>
+    De leiding
+</p>
