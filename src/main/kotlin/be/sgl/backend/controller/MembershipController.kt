@@ -226,7 +226,6 @@ class MembershipController {
     }
 
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    @CrossOrigin(origins = ["*"])
     @Public
     @Operation(
         summary = "Trigger a payment update request",

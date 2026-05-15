@@ -225,7 +225,6 @@ class ActivityController {
 
     @PostMapping("/updatePayment", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     @Public
-    @CrossOrigin(origins = ["*"])
     @Operation(
         summary = "Trigger a payment update request",
         description = "Retrieves the payment based on the provided id and updates the payment status of the linked activity. This call never fails (except on server errors), to avoid exposing payment data.",
