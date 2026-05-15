@@ -4,6 +4,7 @@ import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import jakarta.mail.util.ByteArrayDataSource
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
@@ -17,6 +18,8 @@ import java.io.InputStream
 
 @Service
 class MailService {
+
+    private val logger = KotlinLogging.logger {}
 
     @Autowired
     private lateinit var mailSender: JavaMailSender
@@ -98,7 +101,7 @@ class MailService {
                 attachments.forEach { it.addAttachment(helper) }
                 mailSender.send(mimeMessage)
             } catch (e: Exception) {
-                e.printStackTrace()
+                logger.error(e) { "Failed to send mail to $to" }
             }
         }
     }
