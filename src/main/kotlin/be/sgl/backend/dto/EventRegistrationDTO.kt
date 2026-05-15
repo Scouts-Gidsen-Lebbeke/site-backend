@@ -14,7 +14,8 @@ data class EventRegistrationDTO(
     val name: String,
     val firstName: String,
     val email: String,
-    val mobile: String?
+    val mobile: String?,
+    val subscribable: EventBaseDTO
 )
 
 data class EventRegistrationAttemptData(
@@ -25,7 +26,6 @@ data class EventRegistrationAttemptData(
     @field:NotBlank(message = "{NotBlank.event.registration.email}")
     @field:Email(message = "{Email.event.registration.email}")
     var email: String,
-    @field:NotBlank(message = "{NotBlank.event.registration.mobile}")
     @PhoneNumber(message = "{PhoneNumber.event.registration.mobile}")
     var mobile: String?,
     var additionalData: String?

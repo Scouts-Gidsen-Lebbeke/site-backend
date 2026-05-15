@@ -16,7 +16,7 @@ import java.time.LocalDate
 class MembershipRestriction : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null
+    var id: Int? = null
     @ManyToOne
     lateinit var period: MembershipPeriod
     @ManyToOne

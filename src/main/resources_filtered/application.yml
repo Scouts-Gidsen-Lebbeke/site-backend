@@ -1,11 +1,9 @@
-app:
-  version: @project.version@
-
 spring:
   application:
     name: site-backend
     base-url: # TODO: pass as an environment variable
     public-base-url: ${spring.application.base-url}
+    version: @project.version@
   datasource:
     url: # TODO: pass as an environment variable
     username: # TODO: pass as an environment variable
@@ -59,7 +57,6 @@ organization:
   external:
     id: # Pass as an environment variable if external (GA) user data should be used
   api-key:
-    maps: # Not currently used
     mollie: # Pass as an environment variable if Mollie payments should be enabled
     payconiq: # Pass as an environment variable if Payconiq payments should be enabled (ignored if Mollie is present)
 

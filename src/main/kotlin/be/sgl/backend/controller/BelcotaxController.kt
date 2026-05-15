@@ -5,6 +5,7 @@ import be.sgl.backend.config.security.OnlyAdmin
 import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.service.SseService
 import be.sgl.backend.service.belcotax.BelcotaxService
+import be.sgl.backend.util.I18nUtil.Companion.i18n
 import be.sgl.backend.util.zipped
 import generated.Verzendingen
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
@@ -32,7 +33,7 @@ class BelcotaxController {
     @Autowired
     private lateinit var sseService: SseService
 
-    @GetMapping("/dispatch")
+    @GetMapping("/dispatch", produces = [APPLICATION_XML_VALUE, APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Retrieve the Belcotax dispatch xml file.",
@@ -87,10 +88,10 @@ class BelcotaxController {
         val forms = belcotaxService.getFormsForPreviousYear()
         return sseService.schedule { emitter ->
             forms.onEachIndexed { i, (user, userForms) ->
-                emitter.send("Sending email $i of ${forms.size}")
+                emitter.send(i18n("belcotax.controller.send.mail", i + 1, forms.size))
                 belcotaxService.mailFormsToUser(user, userForms)
             }
-            emitter.send("All emails sent successfully!")
+            emitter.send(i18n("belcotax.controller.mails.sent"))
             emitter.complete()
         }
     }

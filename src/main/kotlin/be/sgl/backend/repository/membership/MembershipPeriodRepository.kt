@@ -4,6 +4,7 @@ import be.sgl.backend.entity.membership.MembershipPeriod
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 @Repository
 interface MembershipPeriodRepository : JpaRepository<MembershipPeriod, Int> {
@@ -11,4 +12,8 @@ interface MembershipPeriodRepository : JpaRepository<MembershipPeriod, Int> {
     fun findAllRecentFirst(): List<MembershipPeriod>
     @Query("from MembershipPeriod where now() between start and end")
     fun getActivePeriod(): MembershipPeriod
+    @Query("from MembershipPeriod where now() between start and end")
+    fun findActivePeriod(): MembershipPeriod?
+    @Query("from MembershipPeriod where :date between start and end")
+    fun getPeriodActiveOn(date: LocalDate): MembershipPeriod
 }

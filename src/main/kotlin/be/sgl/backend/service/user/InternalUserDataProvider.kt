@@ -44,14 +44,15 @@ class InternalUserDataProvider : UserDataProvider() {
         return userRepository.save(user)
     }
 
-    override fun startRole(user: User, role: Role) {
+    override fun startRole(user: User, role: Role): UserRole? {
         logger.debug { "Starting role ${role.name} for ${user.username}..." }
         if (user.roles.none { it.role == role }) {
             logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
-            return
+            return null
         }
         val newRole = userRoleRepository.save(UserRole(user, role))
         user.roles.add(newRole)
+        return newRole
     }
 
     override fun endRole(user: User, role: Role) {

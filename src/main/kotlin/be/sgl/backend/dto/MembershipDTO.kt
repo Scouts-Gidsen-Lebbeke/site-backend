@@ -53,7 +53,8 @@ class MembershipPeriodResultDTO(
 @Schema(description = "A limitation on the membership registration ability for a branch.")
 data class MembershipRestrictionDTO(
     val id: Int?,
-    var branch: BranchBaseDTO,
+    var branch: BranchBaseDTO?,
+    var alternativeStart: LocalDate?,
     var alternativePrice: Double?,
     var alternativeLimit: Int?
 )

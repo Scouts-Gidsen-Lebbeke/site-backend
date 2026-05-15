@@ -4,6 +4,7 @@ import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.repository.OrganizationRepository
 import be.sgl.backend.service.exception.IncompleteConfigurationException
 import jakarta.mail.util.ByteArrayDataSource
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
@@ -17,6 +18,8 @@ import java.io.InputStream
 
 @Service
 class MailService {
+
+    private val logger = KotlinLogging.logger {}
 
     @Autowired
     private lateinit var mailSender: JavaMailSender
@@ -55,10 +58,12 @@ class MailService {
             val organization = organizationRepository.getByType(OrganizationType.OWNER)
                 ?: throw IncompleteConfigurationException("No organization configured!")
             return organization.getEmail()
-                ?: throw IncompleteConfigurationException("No organization email configured, not able to send forms!")
+                ?: throw IncompleteConfigurationException("No organization email configured!")
         }
 
         fun to(vararg to: String) = apply { this.to.addAll(to) }
+
+        fun toOrganization() = apply { to(fromDefault()) }
 
         fun cc(vararg cc: String) = apply { this.cc.addAll(cc) }
 
@@ -96,7 +101,7 @@ class MailService {
                 attachments.forEach { it.addAttachment(helper) }
                 mailSender.send(mimeMessage)
             } catch (e: Exception) {
-                e.printStackTrace()
+                logger.error(e) { "Failed to send mail to $to" }
             }
         }
     }
