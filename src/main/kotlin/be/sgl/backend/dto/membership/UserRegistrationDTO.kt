@@ -4,6 +4,7 @@ import be.sgl.backend.dto.AddressDTO
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.util.PhoneNumber
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -26,6 +27,7 @@ data class UserRegistrationDTO(
     var sex: Sex?,
     var hasReduction: Boolean = false,
     //var hasHandicap: Boolean = false,
+    @field:Valid
     @field:NotNull(message = "{NotNull.userRegistration.address}")
     var address: AddressDTO?
 )
