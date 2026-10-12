@@ -25,7 +25,7 @@ data class UserRegistrationDTO(
     @field:NotNull(message = "{NotNull.userRegistration.sex}")
     var sex: Sex?,
     var hasReduction: Boolean = false,
-    var hasHandicap: Boolean = false,
+    //var hasHandicap: Boolean = false,
     @field:NotNull(message = "{NotNull.userRegistration.address}")
     var address: AddressDTO?
 )

@@ -106,7 +106,7 @@ class MembershipService(
         registration.mobile?.let { newUser.mobile = it }
         registration.sex?.let { newUser.sex = it }
         newUser.hasReduction = registration.hasReduction
-        newUser.hasHandicap = registration.hasHandicap
+        //newUser.hasHandicap = registration.hasHandicap
         registration.address?.let { newUser.addresses.add(mapper.toEntity(it)) }
         userRepository.save(newUser)
         return createMembershipForUser(newUser)
