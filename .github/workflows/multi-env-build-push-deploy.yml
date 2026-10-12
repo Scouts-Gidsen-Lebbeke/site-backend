@@ -180,8 +180,3 @@ jobs:
           
             podman image prune -f
           EOF
-      - name: Cloudflare Cache Purge
-        uses: NathanVaughn/actions-cloudflare-purge@v3.1.0
-        with:
-          cf_zone: ${{ secrets.CF_ZONE }}
-          cf_auth: ${{ secrets.CF_TOKEN }}
