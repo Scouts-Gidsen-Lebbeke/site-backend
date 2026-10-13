@@ -28,7 +28,7 @@ class MembershipPeriodController(
     private val membershipPeriodService: MembershipPeriodService
 ) {
 
-    @GetMapping("/periods", produces = [APPLICATION_JSON_VALUE])
+    @GetMapping(produces = [APPLICATION_JSON_VALUE])
     @Public
     @Operation(
         summary = "Get all membership periods",
@@ -41,7 +41,7 @@ class MembershipPeriodController(
         return membershipPeriodService.getAllMembershipPeriods()
     }
 
-    @GetMapping("/periods/{id}", produces = [APPLICATION_JSON_VALUE])
+    @GetMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
     @Public
     @Operation(
         summary = "Get a specific membership period",
@@ -55,7 +55,7 @@ class MembershipPeriodController(
         return membershipPeriodService.getMembershipPeriodDTOById(id)
     }
 
-    @GetMapping("/periods/current", produces = [APPLICATION_JSON_VALUE])
+    @GetMapping("/current", produces = [APPLICATION_JSON_VALUE])
     @Public
     @Operation(
         summary = "Get the current membership period",
@@ -68,7 +68,7 @@ class MembershipPeriodController(
         return membershipPeriodService.getCurrentMembershipPeriod()
     }
 
-    @PostMapping("/periods", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
+    @PostMapping(consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Create a membership period",
@@ -82,7 +82,7 @@ class MembershipPeriodController(
         return ResponseEntity(membershipPeriodService.createPeriod(request), HttpStatus.CREATED)
     }
 
-    @PutMapping("/periods/{id}", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
+    @PutMapping("/{id}", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     @OnlyAdmin
     @Operation(
         summary = "Update an existing membership period",
