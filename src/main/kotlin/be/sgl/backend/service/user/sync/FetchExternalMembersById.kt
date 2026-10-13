@@ -24,6 +24,7 @@ class FetchExternalMembersById(
             criteria = Criteria().apply {
                 // we don't filter on functions, unknown functions should always be unlinked anyway
                 groepen = listOf(externalOrganizationId)
+                oudleden = false
             }
         }
         val memberIds = mutableMapOf<String, ExternalMember>()
