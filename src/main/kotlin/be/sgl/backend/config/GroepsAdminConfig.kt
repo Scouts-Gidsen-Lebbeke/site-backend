@@ -18,7 +18,6 @@ import tools.jackson.databind.ValueDeserializer
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.module.SimpleModule
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @Configuration
 class GroepsAdminConfig {
@@ -43,7 +42,6 @@ class GroepsAdminConfig {
             ctxt: DeserializationContext
         ): OffsetDateTime {
             return OffsetDateTime.parse(p.string)
-                .withOffsetSameInstant(ZoneOffset.ofHours(2))
         }
     }
 
