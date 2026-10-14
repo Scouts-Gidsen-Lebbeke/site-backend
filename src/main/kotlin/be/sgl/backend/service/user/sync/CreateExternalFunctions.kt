@@ -31,6 +31,7 @@ class CreateExternalFunctions(
                     begin = OffsetDateTime.now()
                 }
             }
+            adressen = null
         }
         if (lidPatch.functies.isNotEmpty()) {
             ledenApi.patchLid(externalId, true, lidPatch)

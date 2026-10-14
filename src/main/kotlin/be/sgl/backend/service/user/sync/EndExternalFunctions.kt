@@ -36,6 +36,7 @@ class EndExternalFunctions(
                     logger.debug { "Ending external function $it..." }
                     it.apply { einde = OffsetDateTime.now() }
                 }
+            adressen = null
         }
         if (lidPatch.functies.isNotEmpty()) {
             ledenApi.patchLid(externalId, true, lidPatch)
