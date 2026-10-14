@@ -23,6 +23,7 @@ class RemoveAllExternalFunctions(
             functies = fetchCurrentlyActiveExternalFunctions.execute(externalId).onEach {
                 it.einde = OffsetDateTime.now()
             }
+            adressen = null
         }
         ledenApi.patchLid(externalId, true, lidPatch)
         val params = mapOf(
