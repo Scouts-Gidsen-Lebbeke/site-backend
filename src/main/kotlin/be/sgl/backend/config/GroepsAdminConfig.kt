@@ -12,17 +12,39 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClient
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ValueDeserializer
 import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @Configuration
 class GroepsAdminConfig {
 
     @Bean
     fun getGroepsAdminApiClient(@Value("\${rest.ga.url}") basePath: String): ApiClient {
-//        val module = JavaTimeModule()
-//        module.addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer())
-        val objectMapper = JsonMapper.builder().build()
+        val module = SimpleModule()
+            .addDeserializer(
+                OffsetDateTime::class.java,
+                OffsetDateTimeDeserializer()
+            )
+
+        val objectMapper = JsonMapper.builder()
+            .addModule(module)
+            .build()
         return DynamicAuthApiClient(basePath, objectMapper)
+    }
+
+    class OffsetDateTimeDeserializer : ValueDeserializer<OffsetDateTime>() {
+        override fun deserialize(
+            p: JsonParser,
+            ctxt: DeserializationContext
+        ): OffsetDateTime {
+            return OffsetDateTime.parse(p.string)
+                .withOffsetSameInstant(ZoneOffset.ofHours(2))
+        }
     }
 
     @Bean
@@ -68,10 +90,4 @@ class GroepsAdminConfig {
             return super.invokeAPI(path, method, pathParams, queryParams, body, headerParams, cookieParams, formParams, accept, contentType, authNames, returnType)
         }
     }
-
-//    class OffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
-//        override fun deserialize(p0: JsonParser, p1: DeserializationContext): OffsetDateTime {
-//            return OffsetDateTime.parse(p0.text)
-//        }
-//    }
 }
