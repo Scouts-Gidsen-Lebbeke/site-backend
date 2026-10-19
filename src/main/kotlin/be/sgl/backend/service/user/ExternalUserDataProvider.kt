@@ -90,6 +90,7 @@ class ExternalUserDataProvider(
                 beperking = hasHandicap
                 verminderdlidgeld = hasReduction
                 geboortedatum = birthdate
+                verhoogdekinderbijslag = false
             }
             email = this@toDto.email
             adressen = addresses.map { it.toDto() }
