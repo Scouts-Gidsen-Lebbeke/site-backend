@@ -28,7 +28,7 @@ class CalendarItem() : Auditable() {
     )
     var calendars = mutableListOf<Calendar>()
     var closed = false
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var address: Address? = null
 
     constructor(start: LocalDateTime, end: LocalDateTime, title: String, content: String, calendar: Calendar) : this() {

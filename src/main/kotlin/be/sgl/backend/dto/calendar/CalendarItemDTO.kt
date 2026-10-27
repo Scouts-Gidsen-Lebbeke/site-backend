@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 // read-only
 @Schema(name = "CalendarItem")
 open class CalendarItemDTO(
-    val id: Int,
+    val id: Int?,
     val start: LocalDateTime,
     val end: LocalDateTime,
     val title: String,

@@ -19,5 +19,5 @@ class AddressDTO(
     @field:CountryCode
     var country: String?,
     var description: String?,
-    var postalAdress: Boolean = false
+    var postalAdress: Boolean? = false
 ) : Serializable
