@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - rokeppen/imageBuilding
   workflow_dispatch:
 
 jobs:
