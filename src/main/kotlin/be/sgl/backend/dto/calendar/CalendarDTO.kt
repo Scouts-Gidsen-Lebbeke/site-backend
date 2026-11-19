@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.calendar
 
 import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.entity.calendar.Calendar
 import io.swagger.v3.oas.annotations.media.Schema
 
 // read-only
@@ -12,4 +13,11 @@ class CalendarDTO(
     val intro: String?,
     val outro: String?,
     val items: MutableList<CalendarItemDTO>
-)
+) {
+    companion object {
+        fun of(calendar: Calendar): CalendarDTO {
+            return CalendarDTO(calendar.id, BranchBaseDTO.of(calendar.branch), CalendarPeriodDTO.of(calendar.period),
+                calendar.intro, calendar.outro, calendar.items.map(CalendarItemDTO::of).toMutableList())
+        }
+    }
+}

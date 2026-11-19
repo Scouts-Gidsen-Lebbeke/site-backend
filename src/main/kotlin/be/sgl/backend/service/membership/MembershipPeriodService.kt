@@ -5,7 +5,6 @@ import be.sgl.backend.dto.membership.MembershipPeriodDTO
 import be.sgl.backend.dto.membership.MembershipPeriodResult
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestriction
-import be.sgl.backend.mapper.membership.MembershipPeriodMapper
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.exception.MembershipPeriodNotFoundException
@@ -17,7 +16,6 @@ import java.time.LocalDate
 class MembershipPeriodService(
     private val periodRepository: MembershipPeriodRepository,
     private val membershipRepository: MembershipRepository,
-    private val mapper: MembershipPeriodMapper
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -29,25 +27,25 @@ class MembershipPeriodService(
     }
 
     fun getMembershipPeriodDTOById(id: Int): MembershipPeriodDTO {
-        return mapper.toDto(getPeriodById(id))
+        return MembershipPeriodDTO.of(getPeriodById(id))
     }
 
     fun getCurrentMembershipPeriod(): MembershipPeriodDTO {
-        return mapper.toDto(periodRepository.getActivePeriod())
+        return MembershipPeriodDTO.of(periodRepository.getActivePeriod())
     }
 
     fun createPeriod(request: CreateOrUpdateMembershipPeriodRequest): MembershipPeriodDTO {
-        val newPeriod = mapper.toEntity(request)
+        val newPeriod = request.toEntity()
         validateRestrictions(newPeriod.restrictions)
         for (restriction in newPeriod.restrictions) {
             restriction.period = newPeriod
         }
-        return mapper.toDto(periodRepository.save(newPeriod))
+        return MembershipPeriodDTO.of(periodRepository.save(newPeriod))
     }
 
     fun updatePeriod(id: Int, request: CreateOrUpdateMembershipPeriodRequest): MembershipPeriodDTO {
         val periodToUpdate = getPeriodById(id)
-        val periodFromDto = mapper.toEntity(request)
+        val periodFromDto = request.toEntity()
         if (periodToUpdate.start.isAfter(LocalDate.now())) {
             validateRestrictions(periodFromDto.restrictions)
             periodToUpdate.start = periodFromDto.start
@@ -57,7 +55,7 @@ class MembershipPeriodService(
             periodToUpdate.siblingReduction = periodFromDto.siblingReduction
         }
         periodToUpdate.registrationLimit = periodFromDto.registrationLimit
-        return mapper.toDto(periodRepository.save(periodToUpdate))
+        return MembershipPeriodDTO.of(periodRepository.save(periodToUpdate))
     }
 
     private fun getPeriodById(id: Int): MembershipPeriod {

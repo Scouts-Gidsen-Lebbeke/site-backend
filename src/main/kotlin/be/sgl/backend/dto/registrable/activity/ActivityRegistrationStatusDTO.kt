@@ -12,4 +12,13 @@ data class ActivityRegistrationStatusDTO(
     var closedOptions: MutableList<ActivityRestrictionDTO> = mutableListOf(),
     var medicsDate: LocalDateTime? = null,
     var medicalsUpToDate: Boolean = false
-)
+) {
+    companion object {
+        fun of(status: ActivityRegistrationStatus): ActivityRegistrationStatusDTO {
+            return ActivityRegistrationStatusDTO(status.currentRegistration?.let(ActivityRegistrationDTO::of),
+                status.activeMembership, status.openOptions.map(ActivityRestrictionDTO::of).toMutableList(),
+                status.closedOptions.map(ActivityRestrictionDTO::of).toMutableList(), status.medicsDate,
+                status.medicalsUpToDate)
+        }
+    }
+}

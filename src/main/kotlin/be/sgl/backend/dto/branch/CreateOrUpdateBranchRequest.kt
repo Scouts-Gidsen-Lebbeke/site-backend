@@ -1,5 +1,6 @@
 package be.sgl.backend.dto.branch
 
+import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.user.Sex
 import jakarta.validation.constraints.Email
@@ -26,4 +27,17 @@ data class CreateOrUpdateBranchRequest(
     @field:NotNull
     var status: BranchStatus?,
     var staffTitle: String?
-)
+) {
+    fun toEntity() = Branch().also {
+        it.name = name!!
+        it.email = email!!
+        minimumAge?.let { age -> it.minimumAge = age }
+        it.maximumAge = maximumAge
+        it.sex = sex
+        it.description = description
+        it.law = law
+        it.image = image!!
+        it.status = status!!
+        it.staffTitle = staffTitle
+    }
+}

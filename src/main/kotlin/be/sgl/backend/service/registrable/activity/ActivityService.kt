@@ -11,7 +11,6 @@ import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
 import be.sgl.backend.exception.ActivityNotFoundException
-import be.sgl.backend.mapper.registrable.activity.ActivityMapper
 import be.sgl.backend.service.payment.CheckoutProvider
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -22,7 +21,6 @@ class ActivityService(
     private val activityRepository: ActivityRepository,
     private val registrationRepository: ActivityRegistrationRepository,
     private val restrictionRepository: ActivityRestrictionRepository,
-    private val mapper: ActivityMapper,
     private val checkoutProvider: CheckoutProvider
 ) {
 
@@ -36,31 +34,31 @@ class ActivityService(
 
     fun getVisibleActivities(): List<ActivityBaseDTO> {
         logger.debug { "Fetching all visible activities" }
-        return activityRepository.findAllVisibleActivities().map(mapper::toBaseDto)
+        return activityRepository.findAllVisibleActivities().map(ActivityBaseDTO::of)
     }
 
     fun getActivityDTOById(id: Int): ActivityDTO {
         logger.debug { "Fetching activity #$id" }
-        return mapper.toDto(getActivityById(id))
+        return ActivityDTO.of(getActivityById(id))
     }
 
     fun createActivity(request: CreateOrUpdateActivityRequest): ActivityDTO {
         logger.info { "Saving new activity ${request.name} (${request.start} - ${request.end})" }
         check(LocalDateTime.now() < request.closed) { "New activities cannot be closed for registrations yet!" }
         validateActivityRequest(request)
-        val newActivity = mapper.toEntity(request)
+        val newActivity = request.toEntity()
         for (restriction in newActivity.restrictions) {
             restriction.activity = newActivity
         }
         newActivity.validateRestrictions()
-        return mapper.toDto(activityRepository.save(newActivity))
+        return ActivityDTO.of(activityRepository.save(newActivity))
     }
 
     fun updateActivity(id: Int, request: CreateOrUpdateActivityRequest): ActivityDTO {
         logger.info { "Updating activity #$id" }
         validateActivityRequest(request)
         val activityToUpdate = getActivityById(id)
-        val activityFromDto = mapper.toEntity(request)
+        val activityFromDto = request.toEntity()
         // If it was closed, it can be reopened again. The closing date is always before the start date anyway,
         // and the check hereafter enforces that the closing date is still in the future.
         activityToUpdate.closed = activityFromDto.closed
@@ -105,7 +103,7 @@ class ActivityService(
         activityToUpdate.sendCompleteConfirmation = activityFromDto.sendCompleteConfirmation
         activityToUpdate.communicationCC = activityFromDto.communicationCC
         activityToUpdate.description = activityFromDto.description
-        return mapper.toDto(activityRepository.save(activityToUpdate))
+        return ActivityDTO.of(activityRepository.save(activityToUpdate))
     }
 
     fun cancelActivity(id: Int) {

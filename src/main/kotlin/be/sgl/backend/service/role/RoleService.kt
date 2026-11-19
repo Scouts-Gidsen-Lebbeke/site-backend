@@ -9,7 +9,6 @@ import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.Role.Companion.memberRole
 import be.sgl.backend.entity.role.Role.Companion.staffRole
 import be.sgl.backend.entity.user.RoleLevel
-import be.sgl.backend.mapper.role.RoleMapper
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service
 @Service
 class RoleService(
     private val roleRepository: RoleRepository,
-    private val mapper: RoleMapper,
     private val userDataProvider: UserDataProvider,
     private val branchRepository: BranchRepository,
     private val userRoleRepository: UserRoleRepository,
@@ -34,23 +32,23 @@ class RoleService(
 ) {
 
     fun getAllRoles(): List<RoleDTO> {
-        return roleRepository.findAll().map(mapper::toDto)
+        return roleRepository.findAll().map(RoleDTO::of)
     }
 
     fun getAdminRole(): RoleDTO {
-        return mapper.toDto(findAdminRole())
+        return RoleDTO.of(findAdminRole())
     }
 
     fun createMemberRole(branchId: Int, dto: MemberRoleChangeRequest): RoleDTO {
         val branch = getBranchById(branchId)
         val newRole = memberRole(dto.name!!, dto.externalId!!, dto.backupExternalId, branch)
-        return mapper.toDto(roleRepository.save(newRole))
+        return RoleDTO.of(roleRepository.save(newRole))
     }
 
     fun createStaffRole(branchId: Int, dto: StaffRoleChangeRequest): RoleDTO {
         val branch = getBranchById(branchId)
         val newRole = staffRole(dto.name!!, dto.externalId, dto.backupExternalId, branch, dto.staffLevel)
-        return mapper.toDto(roleRepository.save(newRole))
+        return RoleDTO.of(roleRepository.save(newRole))
     }
 
     fun updateMemberRole(id: Int, dto: MemberRoleChangeRequest): RoleDTO {
@@ -59,7 +57,7 @@ class RoleService(
         role.name = dto.name!!
         role.externalId = dto.externalId
         role.backupExternalId = dto.backupExternalId
-        return mapper.toDto(roleRepository.save(role))
+        return RoleDTO.of(roleRepository.save(role))
     }
 
     fun updateStaffRole(id: Int, dto: StaffRoleChangeRequest): RoleDTO {
@@ -69,7 +67,7 @@ class RoleService(
         role.externalId = dto.externalId
         role.backupExternalId = dto.backupExternalId
         role.level = if (dto.staffLevel) RoleLevel.STAFF else RoleLevel.GUEST
-        return mapper.toDto(roleRepository.save(role))
+        return RoleDTO.of(roleRepository.save(role))
     }
 
     fun deleteRole(id: Int) {
@@ -94,7 +92,7 @@ class RoleService(
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         val newRole = userDataProvider.startRole(user, role)
         checkNotNull(newRole) { "User already has this role!" }
-        return mapper.toDto(newRole)
+        return UserRoleDTO.of(newRole)
     }
 
     fun deassignRoleFromUser(id: Int) {
@@ -106,17 +104,17 @@ class RoleService(
 
     fun getRoleToSyncByBranch(branchId: Int): RoleDTO? {
         val branch = getBranchById(branchId)
-        return roleRepository.getRoleToSyncByBranch(branch)?.let(mapper::toDto)
+        return roleRepository.getRoleToSyncByBranch(branch)?.let(RoleDTO::of)
     }
 
     fun getStaffRoleToSyncByBranch(branchId: Int): RoleDTO? {
         val branch = getBranchById(branchId)
-        return roleRepository.getStaffRoleToSyncByBranch(branch)?.let(mapper::toDto)
+        return roleRepository.getStaffRoleToSyncByBranch(branch)?.let(RoleDTO::of)
     }
 
     fun getUserRolesByRole(roleId: Int): List<UserRoleDTO> {
         val role = getRoleById(roleId)
-        return userRoleRepository.findByRole(role).map(mapper::toDto)
+        return userRoleRepository.findByRole(role).map(UserRoleDTO::of)
     }
 
     private fun findAdminRole(): Role {

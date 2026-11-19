@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.registrable.activity
 
 import be.sgl.backend.dto.AddressDTO
-import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.entity.registrable.activity.Activity
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
@@ -28,4 +28,15 @@ data class ActivityDTO(
     val siblingReduction: Double,
     val restrictions: List<ActivityRestrictionDTO>,
     val cancelled: Boolean
-)
+) {
+    companion object {
+        fun of(activity: Activity): ActivityDTO {
+            return ActivityDTO(activity.id!!, activity.name, activity.start, activity.end, activity.closed,
+                activity.cancellable, activity.description, activity.open, activity.price, activity.registrationLimit,
+                activity.address?.let(AddressDTO::of), activity.additionalForm, activity.additionalFormRule,
+                activity.sendConfirmation, activity.sendCompleteConfirmation, activity.communicationCC,
+                activity.reductionFactor, activity.siblingReduction,
+                activity.restrictions.map(ActivityRestrictionDTO::of), activity.cancelled)
+        }
+    }
+}

@@ -1,5 +1,6 @@
 package be.sgl.backend.dto.branch
 
+import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.user.Sex
 import io.swagger.v3.oas.annotations.media.Schema
@@ -17,4 +18,11 @@ data class BranchDTO(
     val law: String?,
     val status: BranchStatus,
     val staffTitle: String?
-)
+) {
+    companion object {
+        fun of(branch: Branch): BranchDTO {
+            return BranchDTO(branch.id!!, branch.name, branch.image, branch.email, branch.minimumAge,
+                branch.maximumAge ?: 0, branch.sex, branch.description, branch.law, branch.status, branch.staffTitle)
+        }
+    }
+}

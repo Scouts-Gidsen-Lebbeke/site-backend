@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.calendar
 
 import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.entity.calendar.CalendarItem
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
@@ -15,4 +16,11 @@ class CalendarItemWithCalendarsDTO(
     val closed: Boolean,
     val address: AddressDTO?,
     val calendars: MutableList<CalendarBaseDTO>
-)
+) {
+    companion object {
+        fun of(item: CalendarItem): CalendarItemWithCalendarsDTO {
+            return CalendarItemWithCalendarsDTO(item.id!!, item.start, item.end, item.title, item.content, item.image,
+                item.closed, item.address?.let(AddressDTO::of), item.calendars.map(CalendarBaseDTO::of).toMutableList())
+        }
+    }
+}
