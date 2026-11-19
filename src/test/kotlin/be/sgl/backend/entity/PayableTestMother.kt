@@ -184,7 +184,7 @@ object PayableTestMother {
 
         override fun build(): Activity {
             val activity = super.build()
-            activity.reductionFactor = siblingReduction
+            activity.reductionFactor = reductionFactor
             activity.siblingReduction = siblingReduction
             activity.restrictions = restrictions
             return activity
