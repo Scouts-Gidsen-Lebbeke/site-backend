@@ -13,6 +13,9 @@ import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother
 import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.entity.registrable.event.EventRegistration
+import be.sgl.backend.entity.shop.DeliveryOption
+import be.sgl.backend.entity.shop.Shop
+import be.sgl.backend.entity.shop.ShopOrder
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.entity.user.UserTestMother
 import java.time.LocalDateTime
@@ -25,13 +28,16 @@ object PaymentTestMother {
 
     fun membership() = MembershipBuilder()
 
+    fun shopOrder() = ShopOrderBuilder()
+
     abstract class PaymentBuilder<T : PaymentBuilder<T, R>, R : Payment> {
         private var id: Int? = 1
         private var paid = false
         private var price: Double = 0.0
         private var paymentId: String? = "paymentId"
+        private var createdDate: LocalDateTime? = LocalDateTime.of(2024, 1, 1, 10, 0)
 
-        fun id(id: Int): T {
+        fun id(id: Int?): T {
             this.id = id
             return self()
         }
@@ -46,8 +52,15 @@ object PaymentTestMother {
             return self()
         }
 
-        fun paymentId(paymentId: String): T {
+        fun paymentId(paymentId: String?): T {
             this.paymentId = paymentId
+            return self()
+        }
+
+        fun paid(): T = paid(true)
+
+        fun createdDate(createdDate: LocalDateTime?): T {
+            this.createdDate = createdDate
             return self()
         }
 
@@ -61,6 +74,7 @@ object PaymentTestMother {
             payment.paid = paid
             payment.price = price
             payment.paymentId = paymentId
+            payment.createdDate = createdDate
             return payment
         }
     }
@@ -145,6 +159,11 @@ object PaymentTestMother {
         private var email = "email@domain.com"
         private var mobile: String? = null
 
+        fun event(event: Event): EventRegistrationBuilder {
+            this.event = event
+            return this
+        }
+
         fun user(user: User): EventRegistrationBuilder {
             this.user = user
             return this
@@ -217,6 +236,55 @@ object PaymentTestMother {
             membership.period = period
             membership.branch = branch
             return membership
+        }
+    }
+
+    class ShopOrderBuilder : PaymentBuilder<ShopOrderBuilder, ShopOrder>() {
+
+        private var shop = PayableTestMother.shop().build()
+        private var user: User? = null
+        private var name = "lastName"
+        private var firstName = "firstName"
+        private var email = "email@domain.com"
+        private var mobile: String? = null
+        private var deliveryOption = DeliveryOption.PICKUP
+        private var deliveryDetails: String? = null
+        private var remarks: String? = null
+
+        fun shop(shop: Shop) = apply { this.shop = shop }
+
+        fun user(user: User) = apply { this.user = user }
+
+        fun name(name: String) = apply { this.name = name }
+
+        fun firstName(firstName: String) = apply { this.firstName = firstName }
+
+        fun email(email: String) = apply { this.email = email }
+
+        fun mobile(mobile: String) = apply { this.mobile = mobile }
+
+        fun deliveryOption(deliveryOption: DeliveryOption) = apply { this.deliveryOption = deliveryOption }
+
+        fun deliveryDetails(deliveryDetails: String) = apply { this.deliveryDetails = deliveryDetails }
+
+        fun remarks(remarks: String) = apply { this.remarks = remarks }
+
+        override fun create() = ShopOrder()
+
+        override fun self() = this
+
+        override fun build(): ShopOrder {
+            val order = super.build()
+            order.shop = shop
+            order.user = user
+            order.name = name
+            order.firstName = firstName
+            order.email = email
+            order.mobile = mobile
+            order.deliveryOption = deliveryOption
+            order.deliveryDetails = deliveryDetails
+            order.remarks = remarks
+            return order
         }
     }
 }

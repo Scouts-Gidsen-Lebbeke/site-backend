@@ -187,6 +187,7 @@ object PayableTestMother {
             activity.reductionFactor = reductionFactor
             activity.siblingReduction = siblingReduction
             activity.restrictions = restrictions
+            restrictions.forEach { it.activity = activity }
             return activity
         }
     }
@@ -194,6 +195,8 @@ object PayableTestMother {
     class EventBuilder : RegistrableBuilder<EventBuilder, Event>() {
 
         private var needsMobile = false
+
+        fun needsMobile() = apply { this.needsMobile = true }
 
         override fun create() = Event()
 

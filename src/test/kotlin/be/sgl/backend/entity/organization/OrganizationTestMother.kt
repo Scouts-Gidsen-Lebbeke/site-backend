@@ -2,12 +2,14 @@ package be.sgl.backend.entity.organization
 
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.AddressTestMother
+import org.springframework.test.util.ReflectionTestUtils
 
 object OrganizationTestMother {
 
     fun organization() = OrganizationBuilder()
 
     class OrganizationBuilder {
+        private var id: Int? = 1
         private var name = "organizationName"
         private var type = OrganizationType.OWNER
         private var kbo: String? = "0123456789"
@@ -15,6 +17,8 @@ object OrganizationTestMother {
         private val contactMethods = mutableListOf<Pair<ContactMethodType, String>>()
         private var image: String? = null
         private var description: String? = null
+
+        fun id(id: Int?) = apply { this.id = id }
 
         fun name(name: String) = apply { this.name = name }
 
@@ -40,6 +44,8 @@ object OrganizationTestMother {
 
         fun build(): Organization {
             val organization = Organization()
+            // id is a val on the entity, so it can only be set through reflection
+            ReflectionTestUtils.setField(organization, "id", id)
             organization.name = name
             organization.type = type
             organization.kbo = kbo
