@@ -1,5 +1,6 @@
 package be.sgl.backend.dto.membership
 
+import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.util.StartEndDate
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
@@ -21,4 +22,18 @@ class CreateOrUpdateMembershipPeriodRequest(
     @field:NotNull(message = "{NotNull.membershipPeriod.siblingReduction}")
     var siblingReduction: Double?,
     var restrictions: List<MembershipRestrictionDTO>
-) : StartEndDate
+) : StartEndDate {
+
+    /**
+     * The period of the restrictions is not set, as the period is not persisted yet.
+     */
+    fun toEntity() = MembershipPeriod().also {
+        it.start = start!!
+        it.end = end!!
+        price?.let { price -> it.price = price }
+        it.registrationLimit = registrationLimit
+        reductionFactor?.let { factor -> it.reductionFactor = factor }
+        siblingReduction?.let { reduction -> it.siblingReduction = reduction }
+        it.restrictions = restrictions.map(MembershipRestrictionDTO::toEntity).toMutableList()
+    }
+}

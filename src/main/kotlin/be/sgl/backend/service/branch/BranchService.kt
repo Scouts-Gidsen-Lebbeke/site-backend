@@ -8,7 +8,6 @@ import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.exception.BranchNotFoundException
-import be.sgl.backend.mapper.branch.BranchMapper
 import be.sgl.backend.service.ImageService
 import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
 import be.sgl.backend.service.ImageService.ImageDirectory.BRANCH
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service
 class BranchService(
     private val branchRepository: BranchRepository,
     private val userRepository: UserRepository,
-    private val mapper: BranchMapper,
     private val imageService: ImageService,
     private val settingService: SettingService
 ) {
@@ -29,30 +27,30 @@ class BranchService(
         if (settingService.getOrDefault(SettingId.STAFF_VISIBLE.name, true)) {
             branch.staff = userRepository.getStaffForBranch(branch)
         }
-        return mapper.toBranchWithStaff(branch)
+        return BranchWithStaff.of(branch)
     }
 
     fun getBranchesWithCalendar(): List<BranchDTO> {
-        return branchRepository.getBranchesWithCalendar().map(mapper::toDto)
+        return branchRepository.getBranchesWithCalendar().map(BranchDTO::of)
     }
 
     fun getVisibleBranches(): List<BranchDTO> {
-        return branchRepository.getVisibleBranches().map(mapper::toDto)
+        return branchRepository.getVisibleBranches().map(BranchDTO::of)
     }
 
     fun getAllBranches(): List<BranchDTO> {
-        return branchRepository.findAll().map(mapper::toDto)
+        return branchRepository.findAll().map(BranchDTO::of)
     }
 
     fun createBranch(dto: CreateOrUpdateBranchRequest): BranchDTO {
-        val newBranch = mapper.toEntity(dto)
+        val newBranch = dto.toEntity()
         imageService.move(newBranch.image, TEMPORARY, BRANCH)
-        return mapper.toDto(branchRepository.save(newBranch))
+        return BranchDTO.of(branchRepository.save(newBranch))
     }
 
     fun updateBranch(id: Int, request: CreateOrUpdateBranchRequest): BranchDTO {
         val branch = getBranchById(id)
-        val branchFromDto = mapper.toEntity(request)
+        val branchFromDto = request.toEntity()
         branch.name = branchFromDto.name
         branch.email = branchFromDto.email
         branch.minimumAge = branchFromDto.minimumAge
@@ -67,7 +65,7 @@ class BranchService(
         }
         branch.status = branchFromDto.status
         branch.staffTitle = branchFromDto.staffTitle
-        return mapper.toDto(branchRepository.save(branch))
+        return BranchDTO.of(branchRepository.save(branch))
     }
 
     private fun getBranchById(id: Int): Branch {

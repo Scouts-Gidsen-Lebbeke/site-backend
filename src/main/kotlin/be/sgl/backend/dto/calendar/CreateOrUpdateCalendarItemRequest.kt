@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.calendar
 
 import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.entity.calendar.CalendarItem
 import be.sgl.backend.util.StartEndTime
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
@@ -23,4 +24,18 @@ class CreateOrUpdateCalendarItemRequest(
     var address: AddressDTO?,
     @field:NotEmpty(message = "{NotEmpty.calendarItem.calendars}")
     var calendars: MutableList<Int>
-) : StartEndTime
+) : StartEndTime {
+
+    /**
+     * Calendars are not mapped, as they need to be resolved by id.
+     */
+    fun toEntity() = CalendarItem().also {
+        it.start = start!!
+        it.end = end!!
+        it.title = title!!
+        it.content = content!!
+        it.image = image
+        closed?.let { closed -> it.closed = closed }
+        it.address = address?.toEntity()
+    }
+}

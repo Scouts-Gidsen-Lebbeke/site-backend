@@ -3,7 +3,6 @@ package be.sgl.backend.service.user
 import be.sgl.backend.config.CustomUserDetails
 import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.service.ImageService
-import be.sgl.backend.mapper.user.UserMapper
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.repository.user.UserRepository
 import org.springframework.stereotype.Service
@@ -15,7 +14,6 @@ import java.nio.file.Path
 
 @Service
 class UserService(
-    private val mapper: UserMapper,
     private val checkForInitialRun: CheckForInitialRun,
     private val userRepository: UserRepository,
     private val imageService: ImageService,
@@ -23,7 +21,7 @@ class UserService(
 ) {
 
     fun getProfile(username: String): UserDTO {
-        return mapper.toDto(userRepository.getByUsername(username))
+        return UserDTO.of(userRepository.getByUsername(username))
     }
 
     /**
@@ -42,7 +40,7 @@ class UserService(
         if (user.username == null) {
             userRepository.updateUsername(user.id!!, userDetails.username)
         }
-        return mapper.toDto(user)
+        return UserDTO.of(user)
     }
 
     fun uploadProfilePicture(username: String, image: MultipartFile): Path {
@@ -54,11 +52,11 @@ class UserService(
     }
 
     fun getByQuery(query: String): List<UserDTO> {
-        return userRepository.findByQuery(query).map(mapper::toDto)
+        return userRepository.findByQuery(query).map(UserDTO::of)
     }
 
     fun getSiblings(username: String): List<UserDTO> {
         val user = userRepository.getByUsername(username)
-        return siblingRepository.getByUser(user).map { mapper.toDto(it.sibling) }
+        return siblingRepository.getByUser(user).map { UserDTO.of(it.sibling) }
     }
 }

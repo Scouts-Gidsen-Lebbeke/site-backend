@@ -1,5 +1,6 @@
 package be.sgl.backend.dto.calendar
 
+import be.sgl.backend.entity.calendar.CalendarPeriod
 import be.sgl.backend.util.StartEndDate
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -14,4 +15,11 @@ data class CreateOrUpdateCalendarPeriodRequest(
     override var start: LocalDate?,
     @field:NotNull(message = "{NotNull.calendarPeriod.end}")
     override var end: LocalDate?
-) : StartEndDate
+) : StartEndDate {
+
+    fun toEntity() = CalendarPeriod().also {
+        it.name = name!!
+        it.start = start!!
+        it.end = end!!
+    }
+}

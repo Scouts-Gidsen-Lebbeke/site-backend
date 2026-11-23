@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.registrable.event
 
 import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.entity.registrable.event.Event
 import jakarta.validation.constraints.*
 import java.time.LocalDateTime
 
@@ -34,4 +35,24 @@ data class CreateOrUpdateEventRequest(
     @field:Email(message = "{Email.event.communicationCC}")
     var communicationCC: String?,
     var needsMobile: Boolean
-)
+) {
+
+    fun toEntity() = Event().also {
+        it.name = name!!
+        it.description = description!!
+        it.open = open
+        it.closed = closed!!
+        it.start = start!!
+        it.end = end!!
+        it.price = price
+        it.registrationLimit = registrationLimit
+        it.address = address?.toEntity()
+        it.additionalForm = additionalForm
+        it.additionalFormRule = additionalFormRule
+        it.cancellable = cancellable
+        it.sendConfirmation = sendConfirmation
+        it.sendCompleteConfirmation = sendCompleteConfirmation
+        it.communicationCC = communicationCC
+        it.needsMobile = needsMobile
+    }
+}

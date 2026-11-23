@@ -3,7 +3,6 @@ package be.sgl.backend.service.calendar
 import be.sgl.backend.dto.calendar.*
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarPeriod
-import be.sgl.backend.mapper.calendar.CalendarPeriodMapper
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.calendar.CalendarItemRepository
 import be.sgl.backend.repository.calendar.CalendarPeriodRepository
@@ -19,26 +18,25 @@ class CalendarPeriodService(
     private val periodRepository: CalendarPeriodRepository,
     private val calendarRepository: CalendarRepository,
     private val itemRepository: CalendarItemRepository,
-    private val mapper: CalendarPeriodMapper,
     private val branchRepository: BranchRepository,
 ) {
 
     fun getAllCalendarPeriods(): List<CalendarPeriodDTO> {
-        return periodRepository.findAll().map(mapper::toDto)
+        return periodRepository.findAll().map(CalendarPeriodDTO::of)
     }
 
     fun getCalendarPeriodDTOById(id: Int): CalendarPeriodDTO {
-        return mapper.toDto(getPeriodById(id))
+        return CalendarPeriodDTO.of(getPeriodById(id))
     }
 
     fun createCalendarPeriod(request: CreateOrUpdateCalendarPeriodRequest): CalendarPeriodDTO {
-        var newPeriod = mapper.toEntity(request)
+        var newPeriod = request.toEntity()
         verifyNoOverlaps(newPeriod.start, newPeriod.end)
         newPeriod = periodRepository.save(newPeriod)
         branchRepository.getBranchesWithCalendar().forEach {
             calendarRepository.save(Calendar(newPeriod, it))
         }
-        return mapper.toDto(newPeriod)
+        return CalendarPeriodDTO.of(newPeriod)
     }
 
     fun updateCalendarPeriod(id: Int, request: CreateOrUpdateCalendarPeriodRequest): CalendarPeriodDTO {
@@ -47,7 +45,7 @@ class CalendarPeriodService(
         request.start?.let { periodToUpdate.start = it }
         request.end?.let { periodToUpdate.end = it }
         verifyNoOverlaps(periodToUpdate.start, periodToUpdate.end, id)
-        return mapper.toDto(periodRepository.save(periodToUpdate))
+        return CalendarPeriodDTO.of(periodRepository.save(periodToUpdate))
     }
 
     fun deleteCalendarPeriod(id: Int) {

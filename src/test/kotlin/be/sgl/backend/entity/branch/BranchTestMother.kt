@@ -1,6 +1,7 @@
 package be.sgl.backend.entity.branch
 
 import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.entity.user.User
 
 object BranchTestMother {
 
@@ -13,12 +14,13 @@ object BranchTestMother {
         private var email = "branch@group.com"
         private var minimumAge = 0
         private var maximumAge: Int? = null
-        private var sex = Sex.MALE
+        private var sex: Sex? = Sex.MALE
         private var description = "branchDescription"
         private var law: String? = null
         private var image = "branch.jpg"
         private var status = BranchStatus.ACTIVE
         private var staffTitle: String? = null
+        private val staff = mutableListOf<User>()
 
         fun id(id: Int) = apply { this.id = id }
 
@@ -31,6 +33,9 @@ object BranchTestMother {
         fun maximumAge(maximumAge: Int) = apply { this.maximumAge = maximumAge }
 
         fun sex(sex: Sex) = apply { this.sex = sex }
+
+        /** No sex restriction on the branch: it accepts users of any sex. */
+        fun anySex() = apply { this.sex = null }
 
         fun description(description: String) = apply { this.description = description }
 
@@ -48,6 +53,8 @@ object BranchTestMother {
 
         fun staffTitle(staffTitle: String) = apply { this.staffTitle = staffTitle }
 
+        fun staff(vararg staff: User) = apply { this.staff.addAll(staff) }
+
         fun build(): Branch {
             val branch = Branch()
             branch.id = id
@@ -61,6 +68,7 @@ object BranchTestMother {
             branch.image = image
             branch.status = status
             branch.staffTitle = staffTitle
+            branch.staff = staff.toList()
             return branch
         }
     }

@@ -5,7 +5,6 @@ import be.sgl.backend.dto.news.NewsItemDTO
 import be.sgl.backend.entity.news.NewsItem
 import be.sgl.backend.repository.news.NewsItemRepository
 import be.sgl.backend.exception.NewsItemNotFoundException
-import be.sgl.backend.mapper.news.NewsItemMapper
 import be.sgl.backend.service.ImageService
 import org.springframework.stereotype.Service
 import be.sgl.backend.service.ImageService.ImageDirectory.*
@@ -13,17 +12,16 @@ import be.sgl.backend.util.nullIfBlank
 
 @Service
 class NewsItemService(
-    private val mapper: NewsItemMapper,
     private val newsItemRepository: NewsItemRepository,
     private val imageService: ImageService
 ) {
 
     fun getVisibleItems(): List<NewsItemDTO> {
-        return newsItemRepository.getNewsItemByVisibleTrue().map(mapper::toDto)
+        return newsItemRepository.getNewsItemByVisibleTrue().map(NewsItemDTO::of)
     }
 
     fun getNewsItemDTOById(id: Int): NewsItemDTO {
-        return mapper.toDto(getNewsItemById(id))
+        return NewsItemDTO.of(getNewsItemById(id))
     }
 
     fun createNewsItem(request: CreateOrUpdateNewsItemRequest): NewsItemDTO {
@@ -32,7 +30,7 @@ class NewsItemService(
         request.content?.let { item.content = it }
         item.image = request.image.nullIfBlank()
         item.image?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
-        return mapper.toDto(newsItemRepository.save(item))
+        return NewsItemDTO.of(newsItemRepository.save(item))
     }
 
     fun updateNewsItem(id: Int, request: CreateOrUpdateNewsItemRequest): NewsItemDTO {
@@ -44,7 +42,7 @@ class NewsItemService(
             request.image.nullIfBlank()?.let { imageService.move(it, TEMPORARY, NEWS_ITEMS) }
             item.image = request.image.nullIfBlank()
         }
-        return mapper.toDto(newsItemRepository.save(item))
+        return NewsItemDTO.of(newsItemRepository.save(item))
     }
 
     fun deleteNewsItem(id: Int) {

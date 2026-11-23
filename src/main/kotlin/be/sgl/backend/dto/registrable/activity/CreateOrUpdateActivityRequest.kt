@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.registrable.activity
 
 import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.entity.registrable.activity.Activity
 import jakarta.validation.constraints.*
 import java.time.LocalDateTime
 
@@ -42,4 +43,30 @@ class CreateOrUpdateActivityRequest(
     @field:NotEmpty(message = "{NotNull.activity.restrictions}")
     var restrictions: List<ActivityRestrictionDTO>,
     var cancelled: Boolean
-)
+) {
+
+    /**
+     * The activity of the restrictions is not set, as the activity is not persisted yet.
+     */
+    fun toEntity() = Activity().also {
+        it.name = name
+        it.description = description
+        it.open = open
+        it.closed = closed
+        it.start = start
+        it.end = end
+        it.price = price
+        it.registrationLimit = registrationLimit
+        it.address = address?.toEntity()
+        it.additionalForm = additionalForm
+        it.additionalFormRule = additionalFormRule
+        it.cancellable = cancellable
+        it.sendConfirmation = sendConfirmation
+        it.sendCompleteConfirmation = sendCompleteConfirmation
+        it.communicationCC = communicationCC
+        it.cancelled = cancelled
+        it.reductionFactor = reductionFactor
+        it.siblingReduction = siblingReduction
+        it.restrictions = restrictions.map(ActivityRestrictionDTO::toEntity).toMutableList()
+    }
+}

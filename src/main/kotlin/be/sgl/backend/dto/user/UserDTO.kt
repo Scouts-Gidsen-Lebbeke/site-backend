@@ -2,6 +2,7 @@ package be.sgl.backend.dto.user
 
 import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.entity.user.User
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
@@ -22,4 +23,11 @@ data class UserDTO(
     val sex: Sex?,
     val hasReduction: Boolean,
     val hasHandicap: Boolean
-)
+) {
+    companion object {
+        fun of(user: User): UserDTO {
+            return UserDTO(user.username, user.name, user.firstName, user.email, user.image, user.level, user.memberId,
+                user.birthdate, user.mobile, user.nis, user.accountNo, user.sex, user.hasReduction, user.hasHandicap)
+        }
+    }
+}

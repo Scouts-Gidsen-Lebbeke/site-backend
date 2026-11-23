@@ -7,7 +7,6 @@ import be.sgl.backend.entity.registrable.RegistrableStatus
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.entity.registrable.event.EventRegistration
-import be.sgl.backend.mapper.registrable.event.EventRegistrationMapper
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -23,7 +22,6 @@ import java.time.LocalDateTime
 class EventRegistrationService(
     override var paymentRepository: EventRegistrationRepository,
     private val eventRepository: EventRepository,
-    private val mapper: EventRegistrationMapper,
     private val userRepository: UserRepository,
     private val calculatePriceFromAdditionalData: CalculatePriceFromAdditionalData
 ) : PaymentService<EventRegistration, EventRegistrationRepository>() {
@@ -32,11 +30,11 @@ class EventRegistrationService(
 
     fun getAllRegistrationsForEvent(id: Int): List<EventRegistrationDTO> {
         val event = getEventById(id)
-        return paymentRepository.getPaidRegistrationsByEvent(event).map(mapper::toDto)
+        return paymentRepository.getPaidRegistrationsByEvent(event).map(EventRegistrationDTO::of)
     }
 
     fun getEventRegistrationDTOById(id: Int) : EventRegistrationDTO? {
-        return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
+        return paymentRepository.findById(id).map(EventRegistrationDTO::of).orElse(null)
     }
 
     fun createPaymentForEvent(id: Int, request: CreateEventRegistrationRequest, username: String?): String {
@@ -45,7 +43,7 @@ class EventRegistrationService(
         val user = username?.let { userRepository.findByUsername(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
         val finalPrice = calculatePriceForEvent(event, request.additionalData)
-        var registration = mapper.toEntity(request)
+        var registration = request.toEntity()
         registration.price = finalPrice
         registration.subscribable = event
         registration.user = user

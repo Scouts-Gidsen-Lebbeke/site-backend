@@ -9,7 +9,6 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.exception.AddressNotFoundException
 import be.sgl.backend.exception.ContactNotFoundException
 import be.sgl.backend.exception.UserNotFoundException
-import be.sgl.backend.mapper.user.ContactMapper
 import be.sgl.backend.repository.AddressRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class ContactService(
-    private val mapper: ContactMapper,
     private val contactRepository: ContactRepository,
     private val addressRepository: AddressRepository,
     private val userRepository: UserRepository
@@ -26,28 +24,28 @@ class ContactService(
     fun getContactsForUser(userId: Int, currentUsername: String): List<ContactDTO> {
         val user = userRepository.findById(userId).orElseThrow { UserNotFoundException("") }
         validateOwnerOrAdmin(user, currentUsername)
-        return contactRepository.findContactsByUser(user).map(mapper::toDto)
+        return contactRepository.findContactsByUser(user).map(ContactDTO::of)
     }
 
     fun getContactDTOById(id: Int, currentUsername: String): ContactDTO {
         val contact = getContactById(id)
         validateOwnerOrAdmin(contact.user, currentUsername)
-        return mapper.toDto(contact)
+        return ContactDTO.of(contact)
     }
 
     fun createContact(request: CreateOrUpdateContactRequest, currentUsername: String): ContactDTO {
-        val newContact = mapper.toEntity(request)
+        val newContact = request.toEntity()
         newContact.user = userRepository.findById(request.userId!!)
             .orElseThrow { UserNotFoundException("") }
         validateOwnerOrAdmin(newContact.user, currentUsername)
         request.addressId?.let { newContact.address = getAddressById(it) }
-        return mapper.toDto(contactRepository.save(newContact))
+        return ContactDTO.of(contactRepository.save(newContact))
     }
 
     fun updateContact(id: Int, request: CreateOrUpdateContactRequest, currentUsername: String): ContactDTO {
         val contactToUpdate = getContactById(id)
         validateOwnerOrAdmin(contactToUpdate.user, currentUsername)
-        val contactFromRequest = mapper.toEntity(request)
+        val contactFromRequest = request.toEntity()
         contactToUpdate.firstName = contactFromRequest.firstName
         contactToUpdate.name = contactFromRequest.name
         contactToUpdate.role = contactFromRequest.role
@@ -55,7 +53,7 @@ class ContactService(
         contactToUpdate.email = contactFromRequest.email
         contactToUpdate.nis = contactFromRequest.nis
         request.addressId?.let { contactToUpdate.address = getAddressById(it) }
-        return mapper.toDto(contactRepository.save(contactToUpdate))
+        return ContactDTO.of(contactRepository.save(contactToUpdate))
     }
 
     fun deleteContact(id: Int, currentUsername: String) {

@@ -1,5 +1,7 @@
 package be.sgl.backend.dto.user
 
+import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.user.User
 import io.swagger.v3.oas.annotations.media.Schema
 
 // read-only
@@ -10,4 +12,10 @@ data class StaffDTO(
     val image: String?,
     val nickname: String?,
     val totem: String?,
-)
+) {
+    companion object {
+        fun of(user: User, branch: Branch): StaffDTO {
+            return StaffDTO(user.name, user.firstName, user.image, user.staffData.nicknames[branch], user.staffData.totem)
+        }
+    }
+}

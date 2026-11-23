@@ -6,7 +6,6 @@ import be.sgl.backend.config.security.OnlyAuthenticated
 import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.dto.role.StaffLinkRequest
-import be.sgl.backend.mapper.branch.BranchMapper
 import be.sgl.backend.service.role.FindStaffBranchForUser
 import be.sgl.backend.service.role.RoleService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.*
 class UserRoleController(
     private val roleService: RoleService,
     private val findStaffBranchForUser: FindStaffBranchForUser,
-    private val branchMapper: BranchMapper
 ) {
 
     @GetMapping("/role/{roleId}", produces = [APPLICATION_JSON_VALUE])
@@ -75,7 +73,7 @@ class UserRoleController(
     )
     fun getStaffBranchForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<BranchDTO> {
         val staffBranch = findStaffBranchForUser.execute(userDetails.username)
-        return staffBranch?.let { ResponseEntity.ok(branchMapper.toDto(it)) } ?: ResponseEntity.noContent().build()
+        return staffBranch?.let { ResponseEntity.ok(BranchDTO.of(it)) } ?: ResponseEntity.noContent().build()
     }
 
     @PostMapping("/admin", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])

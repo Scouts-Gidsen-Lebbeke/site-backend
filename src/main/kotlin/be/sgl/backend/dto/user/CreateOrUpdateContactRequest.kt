@@ -1,5 +1,6 @@
 package be.sgl.backend.dto.user
 
+import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.util.Nis
 import be.sgl.backend.util.PhoneNumber
@@ -23,4 +24,17 @@ data class CreateOrUpdateContactRequest(
     @field:Nis(message = "{Nis.contact.nis}")
     var nis: String?,
     var addressId: Int?
-)
+) {
+
+    /**
+     * The user and address are not set, as they need to be resolved by id.
+     */
+    fun toEntity() = Contact().also {
+        it.name = name!!
+        it.firstName = firstName!!
+        it.role = role!!
+        it.mobile = mobile
+        it.email = email
+        it.nis = nis
+    }
+}

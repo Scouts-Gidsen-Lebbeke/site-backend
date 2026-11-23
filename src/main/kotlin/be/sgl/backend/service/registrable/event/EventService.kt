@@ -7,7 +7,6 @@ import be.sgl.backend.dto.registrable.event.EventResult
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
-import be.sgl.backend.mapper.registrable.event.EventMapper
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.exception.EventNotFoundException
@@ -20,7 +19,6 @@ import java.time.LocalDateTime
 class EventService(
     private val eventRepository: EventRepository,
     private val registrationRepository: EventRegistrationRepository,
-    private val mapper: EventMapper,
     private val checkoutProvider: CheckoutProvider
 ) {
 
@@ -34,25 +32,25 @@ class EventService(
 
     fun getVisibleEvents(): List<EventBaseDTO> {
         logger.debug { "Fetching all visible events" }
-        return eventRepository.findAllVisibleEvents().map(mapper::toBaseDto)
+        return eventRepository.findAllVisibleEvents().map(EventBaseDTO::of)
     }
 
     fun getEventDTOById(id: Int): EventDTO {
         logger.debug { "Fetching event #$id" }
-        return mapper.toDto(getEventById(id))
+        return EventDTO.of(getEventById(id))
     }
 
     fun createEvent(request: CreateOrUpdateEventRequest): EventDTO {
         logger.info { "Saving new event ${request.name} (${request.start} - ${request.end})" }
         check(LocalDateTime.now() < request.closed) { "New events cannot be closed for registrations yet!" }
-        val newEvent = mapper.toEntity(request)
+        val newEvent = request.toEntity()
         validateEvent(newEvent)
-        return mapper.toDto(eventRepository.save(newEvent))
+        return EventDTO.of(eventRepository.save(newEvent))
     }
 
     fun updateEvent(id: Int, request: CreateOrUpdateEventRequest): EventDTO {
         logger.info { "Updating event #$id" }
-        val eventFromDto = mapper.toEntity(request)
+        val eventFromDto = request.toEntity()
         validateEvent(eventFromDto)
         val eventToUpdate = getEventById(id)
         // update this first, maybe the status alters
@@ -87,7 +85,7 @@ class EventService(
         eventToUpdate.sendCompleteConfirmation = eventFromDto.sendCompleteConfirmation
         eventToUpdate.communicationCC = eventFromDto.communicationCC
         eventToUpdate.description = eventFromDto.description
-        return mapper.toDto(eventRepository.save(eventToUpdate))
+        return EventDTO.of(eventRepository.save(eventToUpdate))
     }
 
     fun cancelEvent(id: Int) {

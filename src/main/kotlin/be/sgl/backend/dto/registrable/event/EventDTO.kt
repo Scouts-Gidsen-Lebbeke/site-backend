@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.registrable.event
 
 import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.entity.registrable.event.Event
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
@@ -24,4 +25,13 @@ data class EventDTO(
     val sendCompleteConfirmation: Boolean,
     val communicationCC: String?,
     val needsMobile: Boolean
-)
+) {
+    companion object {
+        fun of(event: Event): EventDTO {
+            return EventDTO(event.id!!, event.name, event.start, event.end, event.closed, event.cancellable,
+                event.description, event.open, event.price, event.registrationLimit, event.address?.let(AddressDTO::of),
+                event.additionalForm, event.additionalFormRule, event.sendConfirmation, event.sendCompleteConfirmation,
+                event.communicationCC, event.needsMobile)
+        }
+    }
+}

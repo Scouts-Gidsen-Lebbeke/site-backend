@@ -1,6 +1,8 @@
 package be.sgl.backend.dto.organization
 
+import be.sgl.backend.entity.organization.ContactMethod
 import be.sgl.backend.entity.organization.ContactMethodType
+import be.sgl.backend.entity.organization.Organization
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotNull
 
@@ -11,4 +13,13 @@ data class ContactMethodDTO(
     var value: String?,
     @field:NotNull
     var type: ContactMethodType?
-)
+) {
+
+    fun toEntity(organization: Organization) = ContactMethod(organization, type!!, value!!)
+
+    companion object {
+        fun of(contactMethod: ContactMethod): ContactMethodDTO {
+            return ContactMethodDTO(contactMethod.id, contactMethod.value, contactMethod.type)
+        }
+    }
+}

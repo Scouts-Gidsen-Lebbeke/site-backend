@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.user
 
 import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.util.Nis
 import be.sgl.backend.util.PhoneNumber
@@ -25,4 +26,11 @@ data class ContactDTO(
     @field:Nis
     val nis: String?,
     val address: AddressDTO?
-)
+) {
+    companion object {
+        fun of(contact: Contact): ContactDTO {
+            return ContactDTO(contact.id, contact.name, contact.firstName, contact.role, contact.mobile, contact.email,
+                contact.nis, contact.address?.let(AddressDTO::of))
+        }
+    }
+}

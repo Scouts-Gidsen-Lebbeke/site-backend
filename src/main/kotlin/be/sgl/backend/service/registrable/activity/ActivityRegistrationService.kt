@@ -17,7 +17,6 @@ import be.sgl.backend.exception.ActivityNotFoundException
 import be.sgl.backend.exception.ActivityRegistrationNotFoundException
 import be.sgl.backend.exception.RestrictionNotFoundException
 import be.sgl.backend.exception.UserNotFoundException
-import be.sgl.backend.mapper.registrable.activity.ActivityRegistrationMapper
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -28,7 +27,6 @@ class ActivityRegistrationService(
     private val userRepository: UserRepository,
     private val activityRepository: ActivityRepository,
     private val restrictionRepository: ActivityRestrictionRepository,
-    private val mapper: ActivityRegistrationMapper,
     private val checkRegistrationStatusForUser: CheckRegistrationStatusForUser,
     private val validateAndCreateActivityRegistration: ValidateAndCreateActivityRegistration,
     private val createCertificateForActivityRegistration: CreateCertificateForActivityRegistration
@@ -39,25 +37,25 @@ class ActivityRegistrationService(
     fun getAllRegistrationsForActivity(id: Int): List<ActivityRegistrationDTO> {
         logger.info { "Fetching all registrations for activity #$id" }
         val activity = getActivityById(id)
-        return paymentRepository.getPaidRegistrationsByActivity(activity).map(mapper::toDto)
+        return paymentRepository.getPaidRegistrationsByActivity(activity).map(ActivityRegistrationDTO::of)
     }
 
     fun getAllRegistrationsForUser(username: String): List<ActivityRegistrationDTO> {
         logger.info { "Fetching all registrations for user $username" }
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
-        return paymentRepository.getByUser(user).map(mapper::toDto)
+        return paymentRepository.getByUser(user).map(ActivityRegistrationDTO::of)
     }
 
     fun getActivityRegistrationDTOById(id: Int) : ActivityRegistrationDTO? {
         logger.info { "Fetching registration #$id" }
-        return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
+        return paymentRepository.findById(id).map(ActivityRegistrationDTO::of).orElse(null)
     }
 
     fun getStatusForActivityAndUser(activityId: Int, username: String): ActivityRegistrationStatusDTO {
         logger.info { "Fetching status for activity $activityId and user $username" }
         val activity = getActivityById(activityId)
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
-        return mapper.toDto(checkRegistrationStatusForUser.execute(activity, user))
+        return ActivityRegistrationStatusDTO.of(checkRegistrationStatusForUser.execute(activity, user))
     }
 
     fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {

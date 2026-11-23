@@ -8,7 +8,6 @@ import be.sgl.backend.dto.membership.UserRegistrationDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.mapper.membership.MembershipMapper
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
@@ -31,7 +30,6 @@ class MembershipService(
     private val membershipPeriodRepository: MembershipPeriodRepository,
     private val branchRepository: BranchRepository,
     private val roleRepository: RoleRepository,
-    private val mapper: MembershipMapper,
     private val userRepository: UserRepository,
     private val userDataProvider: UserDataProvider,
     private val alertLogger: AlertLogger,
@@ -43,24 +41,24 @@ class MembershipService(
 
     fun getAllMembershipsForUser(username: String): List<MembershipDTO> {
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
-        return paymentRepository.getMembershipsByUser(user).map(mapper::toDto)
+        return paymentRepository.getMembershipsByUser(user).map(MembershipDTO::of)
     }
 
     fun getCurrentMembershipForUser(username: String): MembershipDTO? {
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
-        return paymentRepository.getCurrentByUser(user)?.run(mapper::toDto)
+        return paymentRepository.getCurrentByUser(user)?.run(MembershipDTO::of)
     }
 
     fun getCurrentMembershipsForBranch(branchId: Int?): List<MembershipDTO> {
         if (branchId == null) {
-            return paymentRepository.getCurrent().map(mapper::toDto)
+            return paymentRepository.getCurrent().map(MembershipDTO::of)
         }
         val branch = getBranchById(branchId)
-        return paymentRepository.getCurrentByBranch(branch).map(mapper::toDto)
+        return paymentRepository.getCurrentByBranch(branch).map(MembershipDTO::of)
     }
 
     fun getMembershipDTOById(id: Int): MembershipDTO? {
-        return paymentRepository.findById(id).map(mapper::toDto).orElse(null)
+        return paymentRepository.findById(id).map(MembershipDTO::of).orElse(null)
     }
 
     fun createMembershipForExistingUser(username: String): String {
@@ -107,7 +105,7 @@ class MembershipService(
         registration.sex?.let { newUser.sex = it }
         newUser.hasReduction = registration.hasReduction
         //newUser.hasHandicap = registration.hasHandicap
-        registration.address?.let { newUser.addresses.add(mapper.toEntity(it)) }
+        registration.address?.let { newUser.addresses.add(it.toEntity()) }
         userRepository.save(newUser)
         return createMembershipForUser(newUser)
     }

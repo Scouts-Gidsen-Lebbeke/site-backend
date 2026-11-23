@@ -1,5 +1,6 @@
 package be.sgl.backend.entity.membership
 
+import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDate
 
 object MembershipPeriodTestMother {
@@ -8,7 +9,7 @@ object MembershipPeriodTestMother {
 
     class MembershipPeriodBuilder {
 
-        private var id: Int? = null
+        private var id: Int? = 1
         private var start = LocalDate.now()
         private var end = LocalDate.now().plusYears(1)
         private var price = 100.0
@@ -17,7 +18,7 @@ object MembershipPeriodTestMother {
         private var siblingReduction = 0.0
         private var restrictions = mutableListOf<MembershipRestriction>()
 
-        fun id(id: Int) = apply { this.id = id }
+        fun id(id: Int?) = apply { this.id = id }
 
         fun start(start: LocalDate) = apply { this.start = start }
 
@@ -35,12 +36,15 @@ object MembershipPeriodTestMother {
 
         fun build(): MembershipPeriod {
             val period = MembershipPeriod()
+            // id is a val on the entity, so it can only be set through reflection
+            ReflectionTestUtils.setField(period, "id", id)
             period.start = start
             period.end = end
             period.price = price
             period.registrationLimit = registrationLimit
             period.reductionFactor = reductionFactor
             period.siblingReduction = siblingReduction
+            restrictions.forEach { it.period = period }
             period.restrictions = restrictions
             return period
         }

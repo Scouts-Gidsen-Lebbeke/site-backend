@@ -1,5 +1,6 @@
 package be.sgl.backend.dto.registrable.event
 
+import be.sgl.backend.entity.registrable.event.EventRegistration
 import io.swagger.v3.oas.annotations.media.Schema
 
 // read-only
@@ -15,4 +16,12 @@ data class EventRegistrationDTO(
     val email: String,
     val mobile: String?,
     val subscribable: EventBaseDTO
-)
+) {
+    companion object {
+        fun of(registration: EventRegistration): EventRegistrationDTO {
+            return EventRegistrationDTO(registration.id, registration.price, registration.paid, registration.completed,
+                registration.additionalData, registration.name, registration.firstName, registration.email,
+                registration.mobile, EventBaseDTO.of(registration.subscribable))
+        }
+    }
+}

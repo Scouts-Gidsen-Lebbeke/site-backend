@@ -1,6 +1,7 @@
 package be.sgl.backend.dto.user
 
 import be.sgl.backend.entity.user.BloodGroup
+import be.sgl.backend.entity.user.MedicalRecord
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(name = "MedicalRecord")
@@ -18,4 +19,13 @@ data class MedicalRecordDTO(
     val physician: String?,
     val physicianContact: String?,
     val bloodGroup: BloodGroup
-)
+) {
+    companion object {
+        fun of(record: MedicalRecord): MedicalRecordDTO {
+            return MedicalRecordDTO(record.id!!, record.mayBePhotographed, record.mayTakePainkillers,
+                record.foodAnomalies, record.allergies, record.activityRestrictions, record.familyRemarks,
+                record.socialRemarks, record.diseases, record.medications, record.physician, record.physicianContact,
+                record.bloodGroup)
+        }
+    }
+}
