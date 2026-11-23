@@ -23,7 +23,7 @@ object DeclarationFormTestMother {
             .nis("15031512383")
             .build()
         private var address = AddressTestMother.address().postalAddress().build()
-        private var parent = ContactTestMother.contact().user(user).build()
+        private var parent = ContactTestMother.contact().user(user).nis("85031512369").build()
         private var activity1 = PaymentTestMother.activityRegistration()
             .user(user)
             .paid(true)
