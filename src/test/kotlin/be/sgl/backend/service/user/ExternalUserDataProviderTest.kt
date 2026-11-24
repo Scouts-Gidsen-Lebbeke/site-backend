@@ -33,7 +33,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -181,7 +180,6 @@ class ExternalUserDataProviderTest {
         }
 
         @Test
-        @Disabled("Possible bug: startRole uses user.externalId!! and throws NPE for users not (yet) linked to Groepsadmin")
         fun `should not fail when the user has no external id`() {
             // given
             val user = user().build()
@@ -221,6 +219,19 @@ class ExternalUserDataProviderTest {
 
             // then
             then(endExternalFunctions).should().execute("ext-1", "member", null)
+        }
+
+        @Test
+        fun `should only delete the role when the user has no external id`() {
+            // given
+            val userRole = userRole().user(user().build()).role(staffRole(branch().build()).externalId("func").build()).build()
+
+            // when
+            testee.endRole(userRole)
+
+            // then
+            then(userRoleRepository).should().delete(userRole)
+            then(endExternalFunctions).shouldHaveNoInteractions()
         }
     }
 

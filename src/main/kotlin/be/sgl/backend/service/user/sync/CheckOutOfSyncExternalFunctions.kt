@@ -20,9 +20,11 @@ class CheckOutOfSyncExternalFunctions(
         val functionsToAssign = mutableListOf<String>()
         for (role in user.roles.map { it.role }) {
             if (role.adminRole) {
-                if (!uncheckedActiveExternalFunctions.remove(role.externalId) &&
-                    !uncheckedActiveExternalFunctions.remove(role.backupExternalId)) {
-                    functionsToAssign.add(role.backupExternalId!!)
+                // remove both, an admin may hold VGA and AVGA at the same time
+                val hasFunction = uncheckedActiveExternalFunctions.remove(role.externalId)
+                val hasBackupFunction = uncheckedActiveExternalFunctions.remove(role.backupExternalId)
+                if (!hasFunction && !hasBackupFunction) {
+                    role.backupExternalId?.let(functionsToAssign::add)
                 }
                 continue
             }

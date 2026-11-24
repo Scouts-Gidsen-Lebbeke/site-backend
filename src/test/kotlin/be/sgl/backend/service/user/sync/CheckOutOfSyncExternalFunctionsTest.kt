@@ -12,7 +12,6 @@ import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.A
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -176,7 +175,6 @@ class CheckOutOfSyncExternalFunctionsTest {
         }
 
         @Test
-        @Disabled("Possible bug: an admin with both VGA and AVGA gets AVGA reported (and ended) as unknown because the check short-circuits")
         fun `should keep AVGA when the admin has both VGA and AVGA`() {
             // given
             val user = userWithExternalFunctions(VGA_FUNCTION, AVGA_FUNCTION)
@@ -190,7 +188,6 @@ class CheckOutOfSyncExternalFunctionsTest {
         }
 
         @Test
-        @Disabled("Possible bug: backupExternalId!! throws NPE for an admin role without backup external id (e.g. created by the internal initial run)")
         fun `should not fail when the admin role has no backup external id`() {
             // given
             val user = userWithExternalFunctions()

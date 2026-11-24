@@ -66,13 +66,21 @@ class ExternalUserDataProvider(
             logger.info { "Staring a role synchronized automatically, skipping external synchronization." }
             return newRole
         }
-        createExternalFunctions.execute(user.externalId!!, role.externalId, role.backupExternalId)
+        val externalId = user.externalId ?: run {
+            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external synchronization of role ${role.name}." }
+            return newRole
+        }
+        createExternalFunctions.execute(externalId, role.externalId, role.backupExternalId)
         return newRole
     }
 
     override fun endRole(userRole: UserRole) {
         super.endRole(userRole)
-        endExternalFunctions.execute(userRole.user.externalId!!, userRole.role.externalId, userRole.role.backupExternalId)
+        val externalId = userRole.user.externalId ?: run {
+            logger.warn { "User ${userRole.user.username} is not linked to Groepsadmin, skipping external synchronization of role ${userRole.role.name}." }
+            return
+        }
+        endExternalFunctions.execute(externalId, userRole.role.externalId, userRole.role.backupExternalId)
     }
 
     companion object {
