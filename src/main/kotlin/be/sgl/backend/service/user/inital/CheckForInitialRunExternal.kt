@@ -53,7 +53,7 @@ class CheckForInitialRunExternal(
     }
 
     private fun createOrganizationIfNeeded() {
-        organizationRepository.getByType(OrganizationType.OWNER) ?: return
+        if (organizationRepository.getByType(OrganizationType.OWNER) != null) return
         val group = groepenApi.getGroep(externalOrganizationId)
             ?: throw IncompleteConfigurationException("No valid external organization found!")
         organizationRepository.save(translateGroup(group))
@@ -81,7 +81,7 @@ class CheckForInitialRunExternal(
 
     fun createAdminRoleIfNeeded(externalSync: Boolean) {
         if (roleRepository.count() == 0L) {
-            adminRole("Admin", VGA_FUNCTION.takeIf { externalSync }, AVGA_FUNCTION.takeIf { externalSync })
+            roleRepository.save(adminRole("Admin", VGA_FUNCTION.takeIf { externalSync }, AVGA_FUNCTION.takeIf { externalSync }))
         }
     }
 

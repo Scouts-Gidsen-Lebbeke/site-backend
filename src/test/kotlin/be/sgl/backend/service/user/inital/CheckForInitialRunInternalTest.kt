@@ -2,6 +2,7 @@ package be.sgl.backend.service.user.inital
 
 import be.sgl.backend.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.entity.role.Role
+import be.sgl.backend.entity.role.RoleTestMother.adminRole
 import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.role.RoleRepository
@@ -9,7 +10,6 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.util.anyValue
 import be.sgl.backend.util.argThatValue
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
@@ -79,7 +79,6 @@ class CheckForInitialRunInternalTest {
     }
 
     @Test
-    @Disabled("Possible bug: createAdminRoleIfNeeded builds the admin role but never saves it")
     fun `should save an admin role when no roles exist`() {
         // given
         given(roleRepository.count()).willReturn(0L)
@@ -92,7 +91,6 @@ class CheckForInitialRunInternalTest {
     }
 
     @Test
-    @Disabled("Possible bug: the first (initial run) user never receives the admin role, so no one can administer the app")
     fun `should give the initial user the admin level`() {
         // given
         given(userRepository.count()).willReturn(0L)
@@ -105,5 +103,22 @@ class CheckForInitialRunInternalTest {
 
         // then
         assertThat(result!!.level).isEqualTo(RoleLevel.ADMIN)
+    }
+
+    @Test
+    fun `should give the initial user the existing admin role when roles already exist`() {
+        // given
+        val existingAdminRole = adminRole().build()
+        given(userRepository.count()).willReturn(0L)
+        given(roleRepository.count()).willReturn(1L)
+        given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf(existingAdminRole))
+        given(userRepository.save(anyValue<User>())).willAnswer { it.arguments[0] }
+        testee.checkInitialRun()
+
+        // when
+        val result = testee.execute(userDetails().build())
+
+        // then
+        assertThat(result!!.roles).extracting("role").containsExactly(existingAdminRole)
     }
 }
