@@ -15,7 +15,6 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
@@ -107,7 +106,6 @@ class FetchExternalDataTest {
     }
 
     @Test
-    @Disabled("Possible bug: a known address is updated in place but also added to the list again, duplicating it")
     fun `should not duplicate a known address`() {
         // given
         val known = address().externalId("a-1").build()
@@ -140,7 +138,6 @@ class FetchExternalDataTest {
     }
 
     @Test
-    @Disabled("Possible bug: every sync saves brand new Contact entities, duplicating the contacts the user already has")
     fun `should not create a new contact when the contact is already known`() {
         // given
         val user = user().externalId("ext-1").build()

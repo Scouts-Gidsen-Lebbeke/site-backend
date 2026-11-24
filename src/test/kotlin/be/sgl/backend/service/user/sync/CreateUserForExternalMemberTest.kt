@@ -22,7 +22,6 @@ import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -153,7 +152,6 @@ class CreateUserForExternalMemberTest {
     }
 
     @Test
-    @Disabled("Possible bug: name, firstName and email are never copied from the external member (lateinit fields stay uninitialized, DB insert fails)")
     fun `should copy the name and email of the external member`() {
         // given
         given(ledenApi.getLid("ext-1")).willReturn(lid().voornaam("John").achternaam("Doe").email("john@doe.com").build())
@@ -167,7 +165,6 @@ class CreateUserForExternalMemberTest {
     }
 
     @Test
-    @Disabled("Possible bug: the external id is never stored on the new user, so every sync recreates the same member")
     fun `should link the new user to the external member`() {
         // given
         given(ledenApi.getLid("ext-1")).willReturn(lid().id("ext-1").build())
@@ -181,7 +178,6 @@ class CreateUserForExternalMemberTest {
     }
 
     @Test
-    @Disabled("Possible bug: ended external functions (einde set) are still translated into roles")
     fun `should not add roles for ended functions`() {
         // given
         given(ledenApi.getLid("ext-1")).willReturn(lid().functies(functie().functie("known").ended().build()).build())
