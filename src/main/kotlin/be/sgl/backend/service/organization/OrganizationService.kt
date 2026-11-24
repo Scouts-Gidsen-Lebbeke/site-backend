@@ -48,6 +48,8 @@ class OrganizationService(
             organization.image = dto.image.nullIfBlank()
         }
         organization.description = dto.description
+        organization.contactMethods.clear()
+        organization.contactMethods.addAll(dto.contactMethods.map { it.toEntity(organization) })
         return OrganizationDTO.of(organizationRepository.save(organization))
     }
 }
