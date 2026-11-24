@@ -45,7 +45,7 @@ class AcceptExternalMembershipRequest(
         newLid.functies = listOf(
             FunctieInstantie().apply {
                 groep = externalOrganizationId
-                functie = newRole.externalId
+                functie = checkNotNull(newRole.externalId) { "Role ${newRole.name} has no external function to assign!" }
                 begin = OffsetDateTime.now()
             }
         )

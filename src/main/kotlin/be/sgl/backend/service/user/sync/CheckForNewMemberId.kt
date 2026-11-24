@@ -17,7 +17,11 @@ class CheckForNewMemberId(
 
     fun execute(user: User, saveAndNotifyUser: Boolean): Boolean {
         logger.info { "Checking if ${user.username} has a new external member id ..." }
-        val newMemberId = ledenApi.getLid(user.externalId).verbondsgegevens.lidnummer
+        val externalId = user.externalId ?: run {
+            logger.info { "User is not linked to Groepsadmin" }
+            return false
+        }
+        val newMemberId = ledenApi.getLid(externalId).verbondsgegevens.lidnummer
         if (newMemberId == null) {
             logger.info { "User has no external member id yet" }
             return false

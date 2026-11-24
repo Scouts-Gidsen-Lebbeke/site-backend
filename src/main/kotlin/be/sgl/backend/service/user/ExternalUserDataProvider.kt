@@ -53,8 +53,12 @@ class ExternalUserDataProvider(
 
     override fun updateUser(user: User): User {
         super.updateUser(user)
-        var contacts = contactRepository.findContactsByUser(user)
-        ledenApi.patchLid(user.externalId, true, user.toDto(contacts))
+        val externalId = user.externalId ?: run {
+            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external update." }
+            return user
+        }
+        val contacts = contactRepository.findContactsByUser(user)
+        ledenApi.patchLid(externalId, true, user.toDto(contacts))
         return user
     }
 
@@ -140,7 +144,9 @@ class ExternalUserDataProvider(
             email = this@toDto.email
             rijksregisternummer = nis
             lidtenlaste = nis != null
-            adres = address?.externalId
+            // Groepsadmin requires an address, assume the contact lives at the member's postal address when unknown
+            val contactAddress = address ?: user.addresses.firstOrNull { it.postalAdress } ?: user.addresses.firstOrNull()
+            adres = checkNotNull(contactAddress?.externalId) { "Contact $firstName $name has no address known in Groepsadmin!" }
         }
     }
 }

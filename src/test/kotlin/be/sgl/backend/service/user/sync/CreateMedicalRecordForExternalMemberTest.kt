@@ -186,4 +186,17 @@ class CreateMedicalRecordForExternalMemberTest {
         private const val PHYSICIAN_CONTACT = "d5f75e1e463384de0146391800f100e9"
         private const val BLOOD_GROUP = "d5f75e1e463384de01463916d21b00e8"
     }
+
+    @Test
+    fun `should not create a medical record when the user is not linked to Groepsadmin`() {
+        // given
+        val unlinkedUser = user().build()
+
+        // when
+        testee.execute(unlinkedUser)
+
+        // then
+        then(ledenApi).shouldHaveNoInteractions()
+        then(medicalRecordRepository).shouldHaveNoInteractions()
+    }
 }

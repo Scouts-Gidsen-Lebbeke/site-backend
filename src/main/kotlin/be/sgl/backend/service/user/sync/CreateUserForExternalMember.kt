@@ -32,7 +32,7 @@ class CreateUserForExternalMember(
             this.externalId = externalMember.id
             name = externalMember.vgagegevens.achternaam
             firstName = externalMember.vgagegevens.voornaam
-            email = externalMember.email ?: "" // young members often have no email of their own
+            email = externalMember.email
             roles.addAll(externalMember.functies.mapNotNull { f -> translateFunction(this, f) })
             sex = when(externalMember.persoonsgegevens.geslacht) {
                 PersoonsGegevens.GeslachtEnum.MAN -> Sex.MALE

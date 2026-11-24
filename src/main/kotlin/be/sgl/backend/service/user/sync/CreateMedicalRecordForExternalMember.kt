@@ -17,7 +17,11 @@ class CreateMedicalRecordForExternalMember(
 
     fun execute(user: User) {
         logger.info { "Translating medical record..." }
-        val externalMedicalRecord = ledenApi.getLidSteekkaart(user.externalId, null).gegevens
+        val externalId = user.externalId ?: run {
+            logger.info { "User is not linked to Groepsadmin, no medical record to translate" }
+            return
+        }
+        val externalMedicalRecord = ledenApi.getLidSteekkaart(externalId, null).gegevens
         val medicalRecord = MedicalRecord().apply {
             this.user = user
             mayBePhotographed = externalMedicalRecord.waarden["d5f75e1e463384de014639190ebb00eb"] == "ja"

@@ -115,7 +115,7 @@ class ExternalUserDataProviderTest {
         fun `should save the user and patch the external member with its contacts`() {
             // given
             val user = user().externalId("ext-1").build()
-            val contact = contact().user(user).build()
+            val contact = contact().user(user).address(address().externalId("a-1").build()).build()
             val captor = argumentCaptor<Lid>()
             given(userRepository.save(user)).willReturn(user)
             given(contactRepository.findContactsByUser(user)).willReturn(listOf(contact))
@@ -128,6 +128,20 @@ class ExternalUserDataProviderTest {
             then(userRepository).should().save(user)
             then(ledenApi).should().patchLid(eqValue("ext-1"), eqValue(true), captureValue(captor))
             assertThat(captor.value.contacten).extracting("voornaam").containsExactly(contact.firstName)
+        }
+
+        @Test
+        fun `should only save the user when it is not linked to Groepsadmin`() {
+            // given
+            val user = user().build()
+            given(userRepository.save(user)).willReturn(user)
+
+            // when
+            testee.updateUser(user)
+
+            // then
+            then(userRepository).should().save(user)
+            then(ledenApi).shouldHaveNoInteractions()
         }
     }
 
@@ -256,7 +270,7 @@ class ExternalUserDataProviderTest {
         fun `should translate the contact role`(role: ContactRole, expected: RolEnum) {
             // given
             val user = user().build()
-            val contact = contact().user(user).role(role).build()
+            val contact = contact().user(user).role(role).address(address().externalId("a-1").build()).build()
 
             // when
             val lid = user.toDto(listOf(contact))
@@ -301,16 +315,42 @@ class ExternalUserDataProviderTest {
         }
 
         @Test
-        fun `should not mark the contact as dependent and leave the address empty when the contact has no nis nor address`() {
+        fun `should not mark the contact as dependent when the contact has no nis`() {
             // given
             val user = user().build()
+            val contact = contact().user(user).address(address().externalId("a-1").build()).build()
+
+            // when
+            val lid = user.toDto(listOf(contact))
+
+            // then
+            assertThat(lid.contacten.single().lidtenlaste).isFalse()
+        }
+
+        @Test
+        fun `should use the postal address of the user when the contact has no address`() {
+            // given
+            val postalAddress = address().externalId("postal").postalAddress().build()
+            val user = user().addresses(address().externalId("other").build(), postalAddress).build()
             val contact = contact().user(user).build()
 
             // when
             val lid = user.toDto(listOf(contact))
 
             // then
-            assertThat(lid.contacten.single()).extracting("lidtenlaste", "adres").containsExactly(false, null)
+            assertThat(lid.contacten.single().adres).isEqualTo(postalAddress.externalId)
+        }
+
+        @Test
+        fun `should fail when neither the contact nor the user has an address known in Groepsadmin`() {
+            // given
+            val user = user().build()
+            val contact = contact().user(user).build()
+
+            // when / then
+            assertThatThrownBy { user.toDto(listOf(contact)) }
+                .isInstanceOf(IllegalStateException::class.java)
+                .hasMessageContaining("has no address known in Groepsadmin")
         }
     }
 }
