@@ -36,8 +36,8 @@ class CreateMedicalRecordForExternalMember(
             // Zo ja, andere aandachtspunten die belang kunnen hebben bij de omgang met ons kind:
             socialRemarks = externalMedicalRecord.waarden["d5f75e1e463384de0146391abdd000ee"].sanitized()
             val diseaseList = externalMedicalRecord.waarden["d5f75e1e463384de01463905280100de"].sanitized()
-            val diseaseGuidance = externalMedicalRecord.waarden["d5f75e1e4610ed0201461f1464ef001a"].sanitized()
-            diseases = listOfNotNull(diseaseList, diseaseGuidance).joinToString(", ").sanitized()
+            // TODO: also read the disease guidance once its Groepsadmin key is known (it used to read the hygiene key)
+            diseases = diseaseList
             // ja/nee, but no concrete info
             medications = externalMedicalRecord.waarden["d5f75e1e463384de01463901e13c00dc"].sanitized()
             // physician field not derivable
@@ -47,7 +47,7 @@ class CreateMedicalRecordForExternalMember(
                 "O-" -> BloodGroup.ON
                 "A+" -> BloodGroup.AP
                 "A-" -> BloodGroup.AN
-                "B+ " -> BloodGroup.BP
+                "B+" -> BloodGroup.BP
                 "B-" -> BloodGroup.BN
                 "AB+" -> BloodGroup.ABP
                 "AB-" -> BloodGroup.ABN
