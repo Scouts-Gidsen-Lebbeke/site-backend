@@ -1,7 +1,6 @@
 package be.sgl.backend.exception
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.http.HttpStatus
@@ -64,7 +63,6 @@ class ExceptionsTest {
     }
 
     @Test
-    @Disabled("Possible bug: ImageDeleteException extends Throwable instead of ImageException, so it has no @ResponseStatus and escapes catch (e: Exception) blocks")
     fun `should map image delete failures to 500 like the other image exceptions`() {
         // given
         val delete = ImageDeleteException("a.png", "tmp")

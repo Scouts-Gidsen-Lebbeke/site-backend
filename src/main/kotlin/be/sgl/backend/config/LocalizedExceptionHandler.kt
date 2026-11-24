@@ -17,7 +17,7 @@ class LocalizedExceptionHandler(
     @ExceptionHandler(LocalizedException::class)
     fun handleLocalized(ex: LocalizedException, locale: Locale): ResponseEntity<ApiErrorResponse> {
         val localizedMessage = messageSource.getMessage(ex.messageKey, ex.params, locale)
-        val response = ApiErrorResponse(BAD_REQUEST, BAD_REQUEST.ordinal.toString(), localizedMessage)
+        val response = ApiErrorResponse(BAD_REQUEST, BAD_REQUEST.value().toString(), localizedMessage)
         return ResponseEntity.status(BAD_REQUEST).body(response)
     }
 }
