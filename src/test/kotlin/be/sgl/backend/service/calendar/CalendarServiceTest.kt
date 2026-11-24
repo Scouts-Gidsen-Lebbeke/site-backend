@@ -22,7 +22,6 @@ import be.sgl.backend.util.captureValue
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -159,7 +158,6 @@ class CalendarServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: items are counted cumulatively, so two items on one sunday suppress the default for the next empty sunday")
         fun `should add a default for an empty sunday when an earlier sunday has two items`() {
             // given
             val period = calendarPeriod().start(LocalDate.of(2025, 9, 1)).end(thirdSunday).build()

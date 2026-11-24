@@ -41,8 +41,10 @@ class CalendarService(
     fun getCalendarDTOById(id: Int, withDefaults: Boolean): CalendarDTO {
         val calendar = getCalendarById(id)
         if (withDefaults) {
-            for ((i, sunday) in getSundaysBetween(calendar.period.start, calendar.period.end).withIndex()) {
-                if (calendar.items.count { it.end < sunday.atTime(23, 59) } <= i) {
+            val existingItems = calendar.items.toList()
+            for (sunday in getSundaysBetween(calendar.period.start, calendar.period.end)) {
+                // Each week (monday until sunday) without any item gets a default item on its sunday
+                if (existingItems.none { it.start.toLocalDate() <= sunday && it.end.toLocalDate() >= sunday.minusDays(6) }) {
                     val newItem = CalendarItem.defaultItem(sunday, calendar)
                     calendar.items.add(newItem)
                 }
