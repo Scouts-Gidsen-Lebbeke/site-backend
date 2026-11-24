@@ -8,6 +8,7 @@ import be.sgl.backend.entity.registrable.event.EventRegistration
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.exception.EventNotFoundException
 import be.sgl.backend.exception.EventRegistrationNotFoundException
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -82,6 +83,17 @@ class EventRegistrationServiceTest {
             // when / then
             assertThatThrownBy { testee.createPaymentForEvent(4, eventRegistrationRequest().build(), null) }
                 .isInstanceOf(EventNotFoundException::class.java)
+        }
+
+        @Test
+        fun `should fail when registrations for the event are not open`() {
+            // given
+            given(eventRepository.findById(4)).willReturn(Optional.of(event().id(4).open(now.plusDays(1)).closed(now.plusDays(5)).start(now.plusDays(10)).end(now.plusDays(11)).build()))
+
+            // when / then
+            assertThatThrownBy { testee.createPaymentForEvent(4, eventRegistrationRequest().build(), null) }
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("registrable.registrations.not.open")
         }
 
         @Test
@@ -198,7 +210,8 @@ class EventRegistrationServiceTest {
 
             // when / then
             assertThatThrownBy { testee.createPaymentForEvent(4, eventRegistrationRequest().build(), null) }
-                .isInstanceOf(IllegalStateException::class.java)
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("registrable.registrations.not.open")
         }
     }
 
@@ -392,6 +405,7 @@ class EventRegistrationServiceTest {
             val registration = eventRegistration().paid().price(10.0).event(openedEvent().build()).build()
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistration(1)
@@ -400,6 +414,23 @@ class EventRegistrationServiceTest {
             then(checkoutProvider).should().refundPayment(registration)
             then(paymentRepository).should().save(registration)
             assertThat(registration.paid).isFalse()
+        }
+
+        @Test
+        fun `should delete the registration and send the cancellation mail when nothing is refunded`() {
+            // given
+            val registration = eventRegistration().paid().price(1.0).event(openedEvent().build()).build()
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(checkoutProvider.refundPayment(registration)).willReturn(false)
+            given(mailService.builder()).willReturn(mailBuilder)
+
+            // when
+            testee.cancelRegistration(1)
+
+            // then
+            then(paymentRepository).should().delete(registration)
+            then(paymentRepository).should(never()).save(anyValue())
+            then(mailBuilder).should().send()
         }
 
         @Test
@@ -425,6 +456,7 @@ class EventRegistrationServiceTest {
             val token = registration.cancelToken!!
             given(paymentRepository.findByCancelToken(token)).willReturn(registration)
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistrationByToken(token)
@@ -465,8 +497,8 @@ class EventRegistrationServiceTest {
 
             // when / then
             assertThatThrownBy { testee.cancelRegistrationByToken(token) }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessage("Registrations for this event cannot be cancelled!")
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("registrable.registration.not.cancellable")
             then(checkoutProvider).should(never()).refundPayment(anyValue())
         }
 
@@ -476,6 +508,7 @@ class EventRegistrationServiceTest {
             val registration = eventRegistration().paid().price(10.0).event(openedEvent().cancellable(false).build()).build()
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistration(1)

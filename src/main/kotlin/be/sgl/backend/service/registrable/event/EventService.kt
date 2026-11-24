@@ -10,7 +10,6 @@ import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.exception.EventNotFoundException
-import be.sgl.backend.service.payment.CheckoutProvider
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -19,7 +18,7 @@ import java.time.LocalDateTime
 class EventService(
     private val eventRepository: EventRepository,
     private val registrationRepository: EventRegistrationRepository,
-    private val checkoutProvider: CheckoutProvider
+    private val registrationService: EventRegistrationService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -94,15 +93,13 @@ class EventService(
         check(event.getStatus() != CANCELLED) { "This event is already cancelled!" }
         check(event.getStatus() != STARTED) { "A started event cannot be cancelled anymore!" }
         check(event.getStatus() != COMPLETED) { "A completed event cannot be cancelled anymore!" }
-        val registrations = registrationRepository.getRegistrationsByEvent(event).filter { it.paid } // nothing to refund otherwise
+        // unpaid (or already refunded) registrations have nothing to cancel
+        val registrations = registrationRepository.getRegistrationsByEvent(event).filter { it.paid }
         if (registrations.isNotEmpty()) {
-            logger.info { "Event has ${registrations.size} linked registrations needing a refund..." }
-            // free registrations are marked paid at creation, but have nothing to refund
-            registrations.filter { it.price > 0 }.forEach {
-                checkoutProvider.refundPayment(it)
-                it.markRefunded()
-                registrationRepository.save(it)
-                logger.info { "Refund request sent for registration #${it.id}" }
+            logger.info { "Event has ${registrations.size} linked registrations to refund or remove..." }
+            registrations.forEach {
+                registrationService.refundOrRemove(it)
+                logger.info { "Registration #${it.id} refunded or removed" }
             }
         }
         logger.info { "Registrations fully checked, marking event as cancelled..." }

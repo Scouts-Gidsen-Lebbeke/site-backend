@@ -26,7 +26,7 @@ class PayconiqCheckout : CheckoutProvider {
         TODO("Not yet implemented")
     }
 
-    override fun refundPayment(payment: Payment) {
+    override fun refundPayment(payment: Payment): Boolean {
         TODO("Not yet implemented")
     }
 }

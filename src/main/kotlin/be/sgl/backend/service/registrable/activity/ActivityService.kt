@@ -13,7 +13,7 @@ import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
 import be.sgl.backend.exception.ActivityNotFoundException
-import be.sgl.backend.service.payment.CheckoutProvider
+import be.sgl.backend.exception.LocalizedException
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -23,7 +23,7 @@ class ActivityService(
     private val activityRepository: ActivityRepository,
     private val registrationRepository: ActivityRegistrationRepository,
     private val restrictionRepository: ActivityRestrictionRepository,
-    private val checkoutProvider: CheckoutProvider
+    private val registrationService: ActivityRegistrationService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -90,14 +90,21 @@ class ActivityService(
             logger.info { "Activity registrations are already open, only certain restriction modifications are allowed" }
             val updatedRestrictions = activityFromDto.restrictions
             val existingIds = activityToUpdate.restrictions.mapNotNull { it.id }.toSet()
-            check(updatedRestrictions.all { it.id == null || it.id in existingIds }) { "Restrictions of another activity cannot be used!" }
+            if (updatedRestrictions.any { it.id != null && it.id !in existingIds }) {
+                throw LocalizedException("activity.restriction.foreign")
+            }
             for (existing in activityToUpdate.restrictions) {
                 val updated = updatedRestrictions.find { it.id == existing.id }
                 check(updated != null) { "Existing activity restrictions cannot be removed once the activity has started!" }
                 check(updated.alternativePrice == existing.alternativePrice) { "The price cannot be altered once the activity has started!" }
-                check(updated.branch.isSameAs(existing.branch)) { "The branch of a restriction cannot be altered once the activity has started!" }
+                val restrictionName = existing.name ?: existing.branch.name
+                if (!updated.branch.isSameAs(existing.branch)) {
+                    throw LocalizedException("activity.restriction.branch.altered", restrictionName)
+                }
                 val restrictionCount = registrationRepository.countByRestriction_Id(existing.id!!)
-                check(updated.alternativeLimit == null || restrictionCount <= updated.alternativeLimit!!) { "The limit of a restriction cannot be lowered below its current registration count!" }
+                if (updated.alternativeLimit != null && restrictionCount > updated.alternativeLimit!!) {
+                    throw LocalizedException("activity.restriction.limit.below.count", restrictionName, restrictionCount)
+                }
                 // copy the editable fields onto the managed restriction, so its version and audit data are kept
                 existing.name = updated.name
                 existing.alternativeStart = updated.alternativeStart
@@ -126,16 +133,13 @@ class ActivityService(
         check(activity.getStatus() != CANCELLED) { "This activity is already cancelled!" }
         check(activity.getStatus() != STARTED) { "A started activity cannot be cancelled anymore!" }
         check(activity.getStatus() != COMPLETED) { "A completed activity cannot be cancelled anymore!" }
-        // unpaid (or already refunded) registrations have nothing to refund
+        // unpaid (or already refunded) registrations have nothing to cancel
         val registrations = registrationRepository.getRegistrationsByActivity(activity).filter { it.paid }
         if (registrations.isNotEmpty()) {
-            logger.info { "Activity has ${registrations.size} linked registrations needing a refund..." }
-            // free registrations are marked paid at creation, but have nothing to refund
-            registrations.filter { it.price > 0 }.forEach {
-                checkoutProvider.refundPayment(it)
-                it.markRefunded()
-                registrationRepository.save(it)
-                logger.info { "Refund request sent for registration #${it.id}" }
+            logger.info { "Activity has ${registrations.size} linked registrations to refund or remove..." }
+            registrations.forEach {
+                registrationService.refundOrRemove(it)
+                logger.info { "Registration #${it.id} refunded or removed" }
             }
         }
         logger.info { "Registrations fully checked, marking activity as cancelled..." }

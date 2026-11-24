@@ -11,6 +11,7 @@ import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.exception.ActivityNotFoundException
 import be.sgl.backend.exception.ActivityRegistrationNotFoundException
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.exception.RestrictionNotFoundException
 import be.sgl.backend.exception.UserNotFoundException
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
@@ -249,8 +250,8 @@ class ActivityRegistrationServiceTest {
 
             // when / then
             assertThatThrownBy { testee.createPaymentForActivity(1, 1, "member", null) }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessageContaining("are not open")
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("registrable.registrations.not.open")
             then(paymentRepository).shouldHaveNoInteractions()
         }
     }
@@ -441,6 +442,7 @@ class ActivityRegistrationServiceTest {
             val registration = activityRegistration().paid().price(100.0).activity(openedActivity().build()).build()
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistration(1)
@@ -450,6 +452,23 @@ class ActivityRegistrationServiceTest {
             then(paymentRepository).should().save(registration)
             assertThat(registration.paid).isFalse()
             then(mailService).shouldHaveNoInteractions()
+        }
+
+        @Test
+        fun `should delete the registration and send the cancellation mail when nothing is refunded`() {
+            // given
+            val registration = activityRegistration().paid().price(1.0).activity(openedActivity().build()).user(user).build()
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(checkoutProvider.refundPayment(registration)).willReturn(false)
+            given(mailService.builder()).willReturn(mailBuilder)
+
+            // when
+            testee.cancelRegistration(1)
+
+            // then
+            then(paymentRepository).should().delete(registration)
+            then(paymentRepository).should(never()).save(anyValue())
+            then(mailBuilder).should().send()
         }
 
         @Test
@@ -494,6 +513,7 @@ class ActivityRegistrationServiceTest {
             val registration = activityRegistration().paid().price(100.0).activity(openedActivity().cancellable(false).build()).build()
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistration(1)
@@ -513,6 +533,7 @@ class ActivityRegistrationServiceTest {
             given(userRepository.findByUsername("member")).willReturn(user)
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistrationForUser(1, "member")
@@ -544,6 +565,7 @@ class ActivityRegistrationServiceTest {
             given(userRepository.findByUsername("staff")).willReturn(staff)
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistrationForUser(1, "staff")
@@ -561,8 +583,8 @@ class ActivityRegistrationServiceTest {
 
             // when / then
             assertThatThrownBy { testee.cancelRegistrationForUser(1, "member") }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessage("Registrations for this activity cannot be cancelled!")
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("registrable.registration.not.cancellable")
             then(checkoutProvider).should(never()).refundPayment(anyValue())
         }
 
@@ -575,6 +597,7 @@ class ActivityRegistrationServiceTest {
             given(userRepository.findByUsername("staff")).willReturn(staff)
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)
+            given(checkoutProvider.refundPayment(registration)).willReturn(true)
 
             // when
             testee.cancelRegistrationForUser(1, "staff")

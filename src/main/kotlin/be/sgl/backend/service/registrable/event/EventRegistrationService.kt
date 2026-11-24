@@ -13,6 +13,7 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.exception.EventNotFoundException
 import be.sgl.backend.exception.EventRegistrationNotFoundException
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -39,7 +40,9 @@ class EventRegistrationService(
 
     fun createPaymentForEvent(id: Int, request: CreateEventRegistrationRequest, username: String?): String {
         val event = getEventById(id)
-        check(event.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Registrations for ${event.name} are not open!" }
+        if (event.getStatus() != RegistrableStatus.REGISTRATIONS_OPENED) {
+            throw LocalizedException("registrable.registrations.not.open", event.name)
+        }
         check(!event.needsMobile || request.mobile != null) { "No valid mobile number provided!" }
         val user = username?.let { userRepository.findByUsername(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
@@ -139,7 +142,9 @@ class EventRegistrationService(
     fun cancelRegistrationByToken(cancelToken: String) {
         val registration = paymentRepository.findByCancelToken(cancelToken) ?: throw EventRegistrationNotFoundException()
         // only the registrant is bound to the cancellable flag, staff can always cancel (and refund)
-        check(registration.subscribable.cancellable) { "Registrations for this event cannot be cancelled!" }
+        if (!registration.subscribable.cancellable) {
+            throw LocalizedException("registrable.registration.not.cancellable", registration.subscribable.name)
+        }
         cancelRegistration(registration)
     }
 
@@ -148,15 +153,23 @@ class EventRegistrationService(
         logger.info { "Cancelling event registration #$id..." }
         check(registration.paid) { "Only a paid event registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
-        if (registration.price > 0) {
-            checkoutProvider.refundPayment(registration)
+        refundOrRemove(registration)
+        logger.info { "Event registration #$id successfully cancelled" }
+    }
+
+    /**
+     * Refunds a paid [registration], the refund webhook then removes it and mails the registrant.
+     * When nothing is refunded (a free registration, or a price not exceeding the refund cost),
+     * no webhook follows, so it is removed and the registrant is mailed right away.
+     */
+    fun refundOrRemove(registration: EventRegistration) {
+        if (registration.price > 0 && checkoutProvider.refundPayment(registration)) {
             registration.markRefunded()
             paymentRepository.save(registration)
         } else {
             paymentRepository.delete(registration)
             handlePaymentRefunded(registration)
         }
-        logger.info { "Event registration #$id successfully cancelled" }
     }
 
     private fun getRegistrationById(id: Int): EventRegistration {

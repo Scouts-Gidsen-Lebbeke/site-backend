@@ -16,6 +16,7 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.exception.ActivityNotFoundException
 import be.sgl.backend.exception.ActivityRegistrationNotFoundException
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.exception.RestrictionNotFoundException
 import be.sgl.backend.exception.UserNotFoundException
 import mu.KotlinLogging
@@ -62,7 +63,9 @@ class ActivityRegistrationService(
     fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         val restriction = getActivityRestrictionById(restrictionId)
-        check(restriction.activity.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Registrations for ${restriction.activity.name} are not open!" }
+        if (restriction.activity.getStatus() != RegistrableStatus.REGISTRATIONS_OPENED) {
+            throw LocalizedException("registrable.registrations.not.open", restriction.activity.name)
+        }
         var registration = validateAndCreateActivityRegistration.execute(restriction, user, additionalData)
         registration = paymentRepository.save(registration)
         logger.info { "Created registration #${registration.id}" }
@@ -152,8 +155,8 @@ class ActivityRegistrationService(
             throw ActivityRegistrationNotFoundException()
         }
         // only the registered user is bound to the cancellable flag, staff can always cancel (and refund)
-        if (user.level < RoleLevel.STAFF) {
-            check(registration.subscribable.cancellable) { "Registrations for this activity cannot be cancelled!" }
+        if (user.level < RoleLevel.STAFF && !registration.subscribable.cancellable) {
+            throw LocalizedException("registrable.registration.not.cancellable", registration.subscribable.name)
         }
         cancelRegistration(registration)
     }
@@ -167,15 +170,23 @@ class ActivityRegistrationService(
         logger.info { "Cancelling activity registration #$id..." }
         check(registration.paid) { "Only a paid activity registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
-        if (registration.price > 0) {
-            checkoutProvider.refundPayment(registration)
+        refundOrRemove(registration)
+        logger.info { "Activity registration #$id successfully cancelled" }
+    }
+
+    /**
+     * Refunds a paid [registration], the refund webhook then removes it and mails the user.
+     * When nothing is refunded (a free registration, or a price not exceeding the refund cost),
+     * no webhook follows, so it is removed and the user is mailed right away.
+     */
+    fun refundOrRemove(registration: ActivityRegistration) {
+        if (registration.price > 0 && checkoutProvider.refundPayment(registration)) {
             registration.markRefunded()
             paymentRepository.save(registration)
         } else {
             paymentRepository.delete(registration)
             handlePaymentRefunded(registration)
         }
-        logger.info { "Activity registration #$id successfully cancelled" }
     }
 
     fun getCertificateForRegistration(id: Int): ByteArray {

@@ -285,9 +285,10 @@ class MollieCheckoutTest {
             val payment = activityRegistration().paid().price(testee.getRefundCost(activityRegistration().build())).build()
 
             // when
-            testee.refundPayment(payment)
+            val refunded = testee.refundPayment(payment)
 
             // then
+            assertThat(refunded).isFalse()
             then(mollieApiClient).shouldHaveNoInteractions()
         }
 
@@ -300,9 +301,10 @@ class MollieCheckoutTest {
             given(mollieApiClient.refunds()).willReturn(refundHandler)
 
             // when
-            testee.refundPayment(payment)
+            val refunded = testee.refundPayment(payment)
 
             // then
+            assertThat(refunded).isTrue()
             then(refundHandler).should().createRefund(eqValue("tr_123"), captureValue(captor))
             assertThat(captor.value.amount.value).isEqualByComparingTo(BigDecimal.valueOf(payment.price - testee.getRefundCost(payment)))
             assertThat(captor.value.amount.currency).isEqualTo("EUR")

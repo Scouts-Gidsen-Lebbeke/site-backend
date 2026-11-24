@@ -10,7 +10,7 @@ import be.sgl.backend.exception.ActivityNotFoundException
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
-import be.sgl.backend.service.payment.CheckoutProvider
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.util.anyValue
 import be.sgl.backend.util.argThatValue
 import be.sgl.backend.util.argumentCaptor
@@ -39,7 +39,7 @@ class ActivityServiceTest {
     @Mock
     lateinit var restrictionRepository: ActivityRestrictionRepository
     @Mock
-    lateinit var checkoutProvider: CheckoutProvider
+    lateinit var registrationService: ActivityRegistrationService
     @InjectMocks
     lateinit var testee: ActivityService
 
@@ -438,8 +438,8 @@ class ActivityServiceTest {
 
                 // when / then
                 assertThatThrownBy { testee.updateActivity(1, request) }
-                    .isInstanceOf(IllegalStateException::class.java)
-                    .hasMessage("Restrictions of another activity cannot be used!")
+                    .isInstanceOf(LocalizedException::class.java)
+                    .hasMessage("activity.restriction.foreign")
             }
 
             @Test
@@ -453,8 +453,8 @@ class ActivityServiceTest {
 
                 // when / then
                 assertThatThrownBy { testee.updateActivity(1, request) }
-                    .isInstanceOf(IllegalStateException::class.java)
-                    .hasMessage("The branch of a restriction cannot be altered once the activity has started!")
+                    .isInstanceOf(LocalizedException::class.java)
+                    .hasMessage("activity.restriction.branch.altered")
             }
 
             @Test
@@ -470,8 +470,8 @@ class ActivityServiceTest {
 
                 // when / then
                 assertThatThrownBy { testee.updateActivity(1, request) }
-                    .isInstanceOf(IllegalStateException::class.java)
-                    .hasMessage("The limit of a restriction cannot be lowered below its current registration count!")
+                    .isInstanceOf(LocalizedException::class.java)
+                    .hasMessage("activity.restriction.limit.below.count")
             }
 
             @Test
@@ -590,20 +590,20 @@ class ActivityServiceTest {
         }
 
         @Test
-        fun `should refund every registration and mark the activity cancelled`() {
+        fun `should refund or remove every paid registration and mark the activity cancelled`() {
             // given
             val activity = openedActivity().build()
             val registration = activityRegistration().id(1).activity(activity).paid().price(100.0).build()
-            val otherRegistration = activityRegistration().id(2).activity(activity).paid().price(50.0).build()
+            val freeRegistration = activityRegistration().id(2).activity(activity).paid().price(0.0).build()
             given(activityRepository.findById(1)).willReturn(Optional.of(activity))
-            given(registrationRepository.getRegistrationsByActivity(activity)).willReturn(listOf(registration, otherRegistration))
+            given(registrationRepository.getRegistrationsByActivity(activity)).willReturn(listOf(registration, freeRegistration))
 
             // when
             testee.cancelActivity(1)
 
             // then
-            then(checkoutProvider).should().refundPayment(registration)
-            then(checkoutProvider).should().refundPayment(otherRegistration)
+            then(registrationService).should().refundOrRemove(registration)
+            then(registrationService).should().refundOrRemove(freeRegistration)
             then(activityRepository).should().save(activity)
             assertThat(activity.cancelled).isTrue()
         }
@@ -619,12 +619,12 @@ class ActivityServiceTest {
             testee.cancelActivity(1)
 
             // then
-            then(checkoutProvider).shouldHaveNoInteractions()
+            then(registrationService).shouldHaveNoInteractions()
             assertThat(activity.cancelled).isTrue()
         }
 
         @Test
-        fun `should only refund paid registrations`() {
+        fun `should only refund or remove paid registrations`() {
             // given
             val activity = openedActivity().build()
             val unpaid = activityRegistration().id(1).activity(activity).paid(false).price(100.0).build()
@@ -635,39 +635,7 @@ class ActivityServiceTest {
             testee.cancelActivity(1)
 
             // then
-            then(checkoutProvider).should(org.mockito.Mockito.never()).refundPayment(unpaid)
-        }
-
-        @Test
-        fun `should mark a refunded registration as refunded`() {
-            // given
-            val activity = openedActivity().build()
-            val registration = activityRegistration().id(1).activity(activity).paid().price(100.0).build()
-            given(activityRepository.findById(1)).willReturn(Optional.of(activity))
-            given(registrationRepository.getRegistrationsByActivity(activity)).willReturn(listOf(registration))
-
-            // when
-            testee.cancelActivity(1)
-
-            // then
-            assertThat(registration.paid).isFalse()
-            then(registrationRepository).should().save(registration)
-        }
-
-        @Test
-        fun `should not refund a free registration`() {
-            // given
-            val activity = openedActivity().build()
-            val free = activityRegistration().id(1).activity(activity).paid().price(0.0).build()
-            given(activityRepository.findById(1)).willReturn(Optional.of(activity))
-            given(registrationRepository.getRegistrationsByActivity(activity)).willReturn(listOf(free))
-
-            // when
-            testee.cancelActivity(1)
-
-            // then
-            then(checkoutProvider).shouldHaveNoInteractions()
-            assertThat(activity.cancelled).isTrue()
+            then(registrationService).shouldHaveNoInteractions()
         }
     }
 }

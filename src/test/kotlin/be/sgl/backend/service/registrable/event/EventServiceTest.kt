@@ -7,7 +7,6 @@ import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.exception.EventNotFoundException
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -19,7 +18,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDateTime
 import java.util.Optional
@@ -32,7 +30,7 @@ class EventServiceTest {
     @Mock
     lateinit var registrationRepository: EventRegistrationRepository
     @Mock
-    lateinit var checkoutProvider: CheckoutProvider
+    lateinit var registrationService: EventRegistrationService
     @InjectMocks
     lateinit var testee: EventService
 
@@ -346,51 +344,21 @@ class EventServiceTest {
         }
 
         @Test
-        fun `should refund every registration and mark the event cancelled`() {
+        fun `should refund or remove every paid registration and mark the event cancelled`() {
             // given
             val event = openedEvent().build()
             val registration = eventRegistration().event(event).paid().price(10.0).build()
+            val freeRegistration = eventRegistration().event(event).paid().price(0.0).build()
             given(eventRepository.findById(1)).willReturn(Optional.of(event))
-            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(registration))
+            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(registration, freeRegistration))
 
             // when
             testee.cancelEvent(1)
 
             // then
-            then(checkoutProvider).should().refundPayment(registration)
+            then(registrationService).should().refundOrRemove(registration)
+            then(registrationService).should().refundOrRemove(freeRegistration)
             then(eventRepository).should().save(event)
-            assertThat(event.cancelled).isTrue()
-        }
-
-        @Test
-        fun `should mark a refunded registration as refunded`() {
-            // given
-            val event = openedEvent().build()
-            val registration = eventRegistration().event(event).paid().price(10.0).build()
-            given(eventRepository.findById(1)).willReturn(Optional.of(event))
-            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(registration))
-
-            // when
-            testee.cancelEvent(1)
-
-            // then
-            assertThat(registration.paid).isFalse()
-            then(registrationRepository).should().save(registration)
-        }
-
-        @Test
-        fun `should not refund a free registration`() {
-            // given
-            val event = openedEvent().build()
-            val free = eventRegistration().event(event).paid().price(0.0).build()
-            given(eventRepository.findById(1)).willReturn(Optional.of(event))
-            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(free))
-
-            // when
-            testee.cancelEvent(1)
-
-            // then
-            then(checkoutProvider).shouldHaveNoInteractions()
             assertThat(event.cancelled).isTrue()
         }
 
@@ -405,12 +373,12 @@ class EventServiceTest {
             testee.cancelEvent(1)
 
             // then
-            then(checkoutProvider).shouldHaveNoInteractions()
+            then(registrationService).shouldHaveNoInteractions()
             assertThat(event.cancelled).isTrue()
         }
 
         @Test
-        fun `should only refund paid registrations`() {
+        fun `should only refund or remove paid registrations`() {
             // given
             val event = openedEvent().build()
             val unpaid = eventRegistration().event(event).paid(false).price(10.0).build()
@@ -421,7 +389,7 @@ class EventServiceTest {
             testee.cancelEvent(1)
 
             // then
-            then(checkoutProvider).should(never()).refundPayment(unpaid)
+            then(registrationService).shouldHaveNoInteractions()
         }
     }
 }
