@@ -22,11 +22,13 @@ class GenerateNewMembershipPeriod(
         newPeriod.registrationLimit = previousPeriod.registrationLimit
         newPeriod.reductionFactor = previousPeriod.reductionFactor
         newPeriod.siblingReduction = previousPeriod.siblingReduction
+        // time restrictions move along with the period, so they keep the same position within it
+        val shiftInDays = ChronoUnit.DAYS.between(previousPeriod.start, newPeriod.start)
         previousPeriod.restrictions.forEach { previousRestriction ->
             val newRestriction = MembershipRestriction()
             newRestriction.period = newPeriod
             newRestriction.branch = previousRestriction.branch
-            newRestriction.alternativeStart = previousRestriction.alternativeStart
+            newRestriction.alternativeStart = previousRestriction.alternativeStart?.plusDays(shiftInDays)
             newRestriction.alternativePrice = previousRestriction.alternativePrice
             newRestriction.registrationLimit = previousRestriction.registrationLimit
             newPeriod.restrictions.add(newRestriction)

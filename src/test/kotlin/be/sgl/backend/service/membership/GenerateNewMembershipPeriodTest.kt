@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.context.support.StaticMessageSource
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockitoExtension::class)
 class GenerateNewMembershipPeriodTest {
@@ -107,6 +108,21 @@ class GenerateNewMembershipPeriodTest {
         assertThat(restriction.branch).isSameAs(branch)
         assertThat(restriction.alternativePrice).isEqualTo(80.0)
         assertThat(restriction.registrationLimit).isEqualTo(20)
+    }
+
+    @Test
+    fun `should move time restrictions along with the new period`() {
+        // given
+        val lateRegistrationStart = previousStart.plusMonths(4)
+        val previous = membershipPeriod().start(previousStart).end(previousEnd)
+            .restrictions(membershipRestriction().alternativeStart(lateRegistrationStart).alternativePrice(150.0).build()).build()
+
+        // when
+        val newPeriod = executeAndCaptureSavedPeriod(previous)
+
+        // then
+        val periodShift = ChronoUnit.DAYS.between(previous.start, newPeriod.start)
+        assertThat(newPeriod.restrictions.single().alternativeStart).isEqualTo(lateRegistrationStart.plusDays(periodShift))
     }
 
     @Test
