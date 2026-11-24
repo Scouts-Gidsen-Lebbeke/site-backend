@@ -9,6 +9,6 @@ interface CheckoutProvider {
     fun createCheckoutUrl(customer: Customer, payment: Payment, domain: String, payableId: Int?): String
     fun getCheckoutUrl(payment: Payment): String
     fun getPaymentStatusById(paymentId: String): SimplifiedPaymentStatus
-    fun refundPayment(payment: Payment)
+    fun refundPayment(payment: Payment): Boolean
     fun getRefundCost(payment: Payment) = 1.0
 }

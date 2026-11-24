@@ -11,6 +11,7 @@ import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
+import java.time.OffsetDateTime
 
 @ExternalUsecase
 class CreateUserForExternalMember(
@@ -28,6 +29,10 @@ class CreateUserForExternalMember(
         logger.info { "Creating new user based on external id $externalId..." }
         val externalMember = ledenApi.getLid(externalId)
         var newUser = User().apply {
+            this.externalId = externalMember.id
+            name = externalMember.vgagegevens.achternaam
+            firstName = externalMember.vgagegevens.voornaam
+            email = externalMember.email
             roles.addAll(externalMember.functies.mapNotNull { f -> translateFunction(this, f) })
             sex = when(externalMember.persoonsgegevens.geslacht) {
                 PersoonsGegevens.GeslachtEnum.MAN -> Sex.MALE
@@ -53,25 +58,13 @@ class CreateUserForExternalMember(
             } } )
         }
         newUser = userRepository.save(newUser)
-        externalMember.contacten.map { c -> Contact().apply {
-            name = c.achternaam
-            firstName = c.voornaam
-            user = newUser
-            role = when(c.rol) {
-                be.sgl.backend.openapi.model.Contact.RolEnum.VADER -> ContactRole.FATHER
-                be.sgl.backend.openapi.model.Contact.RolEnum.MOEDER -> ContactRole.MOTHER
-                be.sgl.backend.openapi.model.Contact.RolEnum.VOOGD -> ContactRole.GUARDIAN
-                else -> ContactRole.RESPONSIBLE
-            }
-            address = newUser.addresses.firstOrNull { a -> a.externalId == c.adres }
-            mobile = c.gsm
-            email = c.email
-        } }.forEach(contactRepository::save)
+        externalMember.contacten.map { Contact().updateFrom(it, newUser) }.forEach(contactRepository::save)
         return newUser
     }
 
     private fun translateFunction(user: User, function: FunctieInstantie): UserRole? {
         if (function.groep != externalOrganizationId) return null
+        if (function.einde?.isBefore(OffsetDateTime.now()) == true) return null
         val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
         return UserRole(user, role)
     }

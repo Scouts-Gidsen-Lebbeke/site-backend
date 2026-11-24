@@ -11,7 +11,6 @@ import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
 import be.sgl.backend.service.user.inital.CheckForInitialRun
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -111,7 +110,6 @@ class UserServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: user matched on name+email is returned even when already linked to another username")
         fun `should not return a user linked to another username when matching on name and email`() {
             // given
             val details = userDetails().username("jdoe").build()
@@ -125,7 +123,6 @@ class UserServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: after linking the username in the DB, the returned profile still has a null username")
         fun `should return the newly linked username when the user is found by name and email`() {
             // given
             val details = userDetails().username("jdoe").build()

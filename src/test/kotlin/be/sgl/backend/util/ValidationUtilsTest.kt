@@ -2,7 +2,6 @@ package be.sgl.backend.util
 
 import jakarta.validation.ConstraintValidatorContext
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -105,7 +104,6 @@ class ValidationUtilsTest {
         }
 
         @Test
-        @Disabled("Possible bug: base is parsed to Long before prefixing '2', so leading zeros are lost for people born 2000-2009 and their valid nis is rejected")
         fun `should accept nis when person is born between 2000 and 2009`() {
             // given
             val nisBornIn2005 = "05031512367"
@@ -190,7 +188,6 @@ class ValidationUtilsTest {
         }
 
         @Test
-        @Disabled("Possible bug: KboValidator only checks the format, not the mod-97 checksum of the enterprise number")
         fun `should reject kbo when checksum is invalid`() {
             // given
             val invalidChecksum = "0417035069"
@@ -203,7 +200,6 @@ class ValidationUtilsTest {
         }
 
         @Test
-        @Disabled("Possible bug: enterprise numbers starting with 1 are issued since the 0-range was exhausted, but the regex requires a leading 0")
         fun `should accept kbo when it starts with 1`() {
             // given
             val newRangeKbo = "1001234592"

@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.util.UUID
 
 @Validated
 @RestController
@@ -105,7 +106,7 @@ class EventRegistrationController(
     }
 
     @DeleteMapping("/registrations/{registrationId}", produces = [APPLICATION_JSON_VALUE])
-    @Public
+    @OnlyStaff
     @Operation(
         summary = "Refund an event registration",
         description = "Retrieves the registration based on the provided id and create a payment refund.",
@@ -117,5 +118,20 @@ class EventRegistrationController(
     )
     fun cancelRegistration(@PathVariable registrationId: Int) {
         registrationService.cancelRegistration(registrationId)
+    }
+
+    @DeleteMapping("/registrations/cancel/{cancelToken}", produces = [APPLICATION_JSON_VALUE])
+    @Public
+    @Operation(
+        summary = "Refund an event registration via its cancellation link",
+        description = "Retrieves the registration based on the secret cancellation token (sent to the registrant by e-mail) and creates a payment refund. No login is needed: knowing the token proves ownership.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok"),
+            ApiResponse(responseCode = "400", description = "Registration isn't eligible for cancellation", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid token", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
+    fun cancelRegistrationByToken(@PathVariable cancelToken: UUID) {
+        registrationService.cancelRegistrationByToken(cancelToken.toString())
     }
 }

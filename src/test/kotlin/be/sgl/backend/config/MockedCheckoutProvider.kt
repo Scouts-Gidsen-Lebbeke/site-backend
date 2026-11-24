@@ -27,8 +27,9 @@ class MockedCheckoutProvider : CheckoutProvider {
         return SimplifiedPaymentStatus.valueOf(paymentId)
     }
 
-    override fun refundPayment(payment: Payment) {
+    override fun refundPayment(payment: Payment): Boolean {
         check(payment.paid)
+        return true
     }
 
     companion object {

@@ -19,7 +19,6 @@ import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -254,7 +253,6 @@ class OrganizationServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: updateOrganization ignores the contact methods (e.g. the email used as mail sender can't be changed)")
         fun `should replace the contact methods`() {
             // given
             val organization = organization().email("old@group.com").build()

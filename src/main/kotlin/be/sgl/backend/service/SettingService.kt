@@ -19,7 +19,7 @@ class SettingService(
     }
 
     fun getOrDefault(id: String, default: Double): Double {
-        return get(id)?.toDouble() ?: default
+        return get(id)?.toDoubleOrNull() ?: default
     }
 
     fun getOrDefault(id: String, default: Boolean): Boolean {

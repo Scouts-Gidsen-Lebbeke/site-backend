@@ -10,7 +10,6 @@ import be.sgl.backend.util.captureValue
 import be.sgl.backend.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.then
@@ -84,7 +83,6 @@ class CreateExternalFunctionsTest {
     }
 
     @Test
-    @Disabled("Possible bug: mapNotNull's lambda never returns null, so null ids (e.g. a role without backupExternalId) become functions with functie=null")
     fun `should skip null function ids`() {
         // given
         val captor = argumentCaptor<Lid>()

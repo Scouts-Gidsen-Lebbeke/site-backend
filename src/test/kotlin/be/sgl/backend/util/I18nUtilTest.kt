@@ -3,7 +3,6 @@ package be.sgl.backend.util
 import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
@@ -56,7 +55,6 @@ class I18nUtilTest {
     }
 
     @Test
-    @Disabled("Possible bug: i18n wraps the vararg array in arrayOf(args), so {0} receives the whole array and {1} is never filled")
     fun `should fill the placeholders when arguments are given`() {
         // given
 

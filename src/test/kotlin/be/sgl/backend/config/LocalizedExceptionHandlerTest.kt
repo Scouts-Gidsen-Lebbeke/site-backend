@@ -3,7 +3,6 @@ package be.sgl.backend.config
 import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
 import be.sgl.backend.exception.LocalizedException
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.context.support.StaticMessageSource
 import org.springframework.http.HttpStatus
@@ -57,7 +56,6 @@ class LocalizedExceptionHandlerTest {
     }
 
     @Test
-    @Disabled("Possible bug: the error code is HttpStatus.BAD_REQUEST.ordinal (the enum index) instead of the status code or a meaningful code")
     fun `should use the http status code as error code`() {
         // given
         val exception = LocalizedException("error.simple")

@@ -5,6 +5,7 @@ import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.*
@@ -52,9 +53,13 @@ class ExternalUserDataProvider(
     }
 
     override fun updateUser(user: User): User {
+        val externalId = user.externalId ?: run {
+            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external update." }
+            return super.updateUser(user)
+        }
+        val lid = user.toDto(contactRepository.findContactsByUser(user))
         super.updateUser(user)
-        var contacts = contactRepository.findContactsByUser(user)
-        ledenApi.patchLid(user.externalId, true, user.toDto(contacts))
+        ledenApi.patchLid(externalId, true, lid)
         return user
     }
 
@@ -66,13 +71,21 @@ class ExternalUserDataProvider(
             logger.info { "Staring a role synchronized automatically, skipping external synchronization." }
             return newRole
         }
-        createExternalFunctions.execute(user.externalId!!, role.externalId, role.backupExternalId)
+        val externalId = user.externalId ?: run {
+            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external synchronization of role ${role.name}." }
+            return newRole
+        }
+        createExternalFunctions.execute(externalId, role.externalId, role.backupExternalId)
         return newRole
     }
 
     override fun endRole(userRole: UserRole) {
         super.endRole(userRole)
-        endExternalFunctions.execute(userRole.user.externalId!!, userRole.role.externalId, userRole.role.backupExternalId)
+        val externalId = userRole.user.externalId ?: run {
+            logger.warn { "User ${userRole.user.username} is not linked to Groepsadmin, skipping external synchronization of role ${userRole.role.name}." }
+            return
+        }
+        endExternalFunctions.execute(externalId, userRole.role.externalId, userRole.role.backupExternalId)
     }
 
     companion object {
@@ -132,7 +145,10 @@ class ExternalUserDataProvider(
             email = this@toDto.email
             rijksregisternummer = nis
             lidtenlaste = nis != null
-            adres = address?.externalId
+            val knownAddresses = user.addresses.filter { it.externalId != null }
+            val contactAddress = address?.takeIf { it.externalId != null }
+                ?: knownAddresses.firstOrNull { it.postalAdress } ?: knownAddresses.firstOrNull()
+            adres = contactAddress?.externalId ?: throw LocalizedException("user.contact.address.unknown", firstName, name)
         }
     }
 }

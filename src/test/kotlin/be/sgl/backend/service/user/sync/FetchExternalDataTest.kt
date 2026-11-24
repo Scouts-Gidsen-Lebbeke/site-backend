@@ -15,7 +15,6 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
@@ -107,7 +106,6 @@ class FetchExternalDataTest {
     }
 
     @Test
-    @Disabled("Possible bug: a known address is updated in place but also added to the list again, duplicating it")
     fun `should not duplicate a known address`() {
         // given
         val known = address().externalId("a-1").build()
@@ -140,7 +138,6 @@ class FetchExternalDataTest {
     }
 
     @Test
-    @Disabled("Possible bug: every sync saves brand new Contact entities, duplicating the contacts the user already has")
     fun `should not create a new contact when the contact is already known`() {
         // given
         val user = user().externalId("ext-1").build()
@@ -155,5 +152,53 @@ class FetchExternalDataTest {
         // then
         then(contactRepository).should().save(captureValue(captor))
         assertThat(captor.value.id).isEqualTo(5)
+    }
+
+    @Test
+    fun `should link a known contact without external id on its name instead of duplicating it`() {
+        // given
+        val user = user().externalId("ext-1").build()
+        val unlinked = ContactTestMother.contact().id(5).user(user).firstName("Papa").name("Doe").build()
+        val captor = argumentCaptor<Contact>()
+        given(contactRepository.findContactsByUser(user)).willReturn(listOf(unlinked))
+        given(ledenApi.getLid("ext-1")).willReturn(lid().contacten(contact().id("c-1").voornaam("Papa").achternaam("Doe").build()).build())
+
+        // when
+        testee.execute(user)
+
+        // then
+        then(contactRepository).should().save(captureValue(captor))
+        assertThat(captor.value).isSameAs(unlinked)
+        assertThat(unlinked.externalId).isEqualTo("c-1")
+    }
+
+    @Test
+    fun `should delete a linked contact that was removed in Groepsadmin`() {
+        // given
+        val user = user().externalId("ext-1").build()
+        val removed = ContactTestMother.contact().id(5).user(user).externalId("c-gone").build()
+        given(contactRepository.findContactsByUser(user)).willReturn(listOf(removed))
+        given(ledenApi.getLid("ext-1")).willReturn(lid().build())
+
+        // when
+        testee.execute(user)
+
+        // then
+        then(contactRepository).should().deleteAll(listOf(removed))
+    }
+
+    @Test
+    fun `should keep a local contact that was not pushed to Groepsadmin yet`() {
+        // given
+        val user = user().externalId("ext-1").build()
+        val local = ContactTestMother.contact().id(5).user(user).firstName("Oma").build()
+        given(contactRepository.findContactsByUser(user)).willReturn(listOf(local))
+        given(ledenApi.getLid("ext-1")).willReturn(lid().build())
+
+        // when
+        testee.execute(user)
+
+        // then
+        then(contactRepository).should().deleteAll(emptyList())
     }
 }

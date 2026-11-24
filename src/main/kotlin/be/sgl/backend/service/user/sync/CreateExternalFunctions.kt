@@ -23,7 +23,7 @@ class CreateExternalFunctions(
             // The VGA function is assumed to be assigned to the first user on initial run
             // every new admin assignment should only have effect by assigning its backup AVGA
             // VGA thus only needs to be considered when deleting the root admin role and syncing, not at creation
-            functies = functionIds.filter { it != VGA_FUNCTION }.mapNotNull {
+            functies = functionIds.filterNotNull().filter { it != VGA_FUNCTION }.map {
                 logger.debug { "Creating external function $it..." }
                 FunctieInstantie().apply {
                     groep = externalOrganizationId

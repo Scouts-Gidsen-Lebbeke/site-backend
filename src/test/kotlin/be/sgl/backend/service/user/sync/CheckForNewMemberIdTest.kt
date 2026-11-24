@@ -91,4 +91,17 @@ class CheckForNewMemberIdTest {
         then(mailBuilder).should().template("member-id-confirmation.html", mapOf("member" to "John", "memberId" to "123"))
         then(mailBuilder).should().send()
     }
+
+    @Test
+    fun `should return false without calling Groepsadmin when the user is not linked`() {
+        // given
+        val user = user().build()
+
+        // when
+        val result = testee.execute(user, true)
+
+        // then
+        assertThat(result).isFalse()
+        then(ledenApi).shouldHaveNoInteractions()
+    }
 }

@@ -56,9 +56,11 @@ class CheckRegistrationStatusForUser(
             logger.info { "Limit is reached for each applicable restriction for ${user.username}" }
             return ActivityRegistrationStatus(closedOptions = closed)
         }
-        if (user.hasReduction) {
+        val openOptions = if (user.hasReduction) {
             logger.info { "User is eligible for reduced tariff, altering open option prices..." }
-            open.onEach(::reducePrice)
+            open.map(::reducePrice)
+        } else {
+            open
         }
         logger.info { "User has ${open.size} open activity options" }
         val medicalRecord = medicalRecordRepository.findMedicalRecordByUser(user)
@@ -68,7 +70,7 @@ class CheckRegistrationStatusForUser(
             logger.info { "Medical record for ${user.username} is older than one year" }
         }
         return ActivityRegistrationStatus(
-            openOptions = open,
+            openOptions = openOptions,
             closedOptions = closed,
             medicsDate = medicalRecord?.lastModifiedDate,
             medicalsUpToDate = medicalRecord?.isUpToDate ?: false
@@ -90,7 +92,11 @@ class CheckRegistrationStatusForUser(
         return registrationRepository.countByActivityAndBranch(activity, branch) >= branchLimit
     }
 
+    /**
+     * A detached copy for display only, it keeps the id so the chosen option can still be matched.
+     */
     private fun reducePrice(restriction: ActivityRestriction) = ActivityRestriction().apply {
+        id = restriction.id
         activity = restriction.activity
         branch = restriction.branch
         name = restriction.name

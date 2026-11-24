@@ -10,7 +10,6 @@ import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.util.reducePrice
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -189,7 +188,6 @@ class CheckRegistrationStatusForUserTest {
     inner class OpenOptions {
 
         @Test
-        @Disabled("Possible bug: open.onEach(::reducePrice) discards the reduced copies, so open options keep the full price for users with reduction")
         fun `should show reduced prices when the user is entitled to reduction`() {
             // given
             val reducedUser = user().username("reduced").hasReduction().build()

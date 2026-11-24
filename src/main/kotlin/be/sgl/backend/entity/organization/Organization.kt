@@ -19,7 +19,7 @@ class Organization : Auditable() {
     var kbo: String? = null
     @ManyToOne
     lateinit var address: Address
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "organization", cascade = [(CascadeType.ALL)])
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "organization", cascade = [(CascadeType.ALL)], orphanRemoval = true)
     val contactMethods: MutableList<ContactMethod> = mutableListOf()
     var image: String? = null
     @Column(length = 1000)

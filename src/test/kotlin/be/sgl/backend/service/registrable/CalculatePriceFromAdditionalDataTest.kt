@@ -2,7 +2,6 @@ package be.sgl.backend.service.registrable
 
 import be.sgl.backend.entity.PayableTestMother.event
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.json.JsonMapper
 
@@ -83,7 +82,6 @@ class CalculatePriceFromAdditionalDataTest {
     }
 
     @Test
-    @Disabled("Possible bug: jsonata evaluate() returns null for an undefined result and .toString() on the platform type throws a NullPointerException")
     fun `should return zero when the rule refers to a missing field`() {
         // given
         val event = event().additionalFormRule("missing * 2").build()
@@ -96,7 +94,6 @@ class CalculatePriceFromAdditionalDataTest {
     }
 
     @Test
-    @Disabled("Possible bug: values are read as Map<String, String>, so a JSON number/boolean causes a ClassCastException on toDoubleOrNull()")
     fun `should evaluate the rule when the additional data contains json numbers`() {
         // given
         val event = event().additionalFormRule("count * 2.5").build()

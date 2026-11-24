@@ -24,7 +24,6 @@ import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -340,7 +339,6 @@ class RoleServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: the 'at least one admin' check counts the admin being removed, so the last admin can be removed")
         fun `should fail when removing the last admin`() {
             // given
             val adminRole = adminRole().build()

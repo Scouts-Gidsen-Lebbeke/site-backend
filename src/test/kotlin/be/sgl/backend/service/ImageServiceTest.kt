@@ -7,7 +7,6 @@ import be.sgl.backend.service.ImageService.ImageDirectory
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.springframework.mock.web.MockMultipartFile
@@ -52,6 +51,28 @@ class ImageServiceTest {
         assertThatThrownBy { testee.upload(ImageDirectory.TEMPORARY, file) }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessage("Only image files are allowed.")
+    }
+
+    @Test
+    fun `should reject upload when the extension is not a raster image`() {
+        // given: content type is chosen by the client, so it can't be trusted on its own
+        val file = MockMultipartFile("file", "evil.svg", "image/svg+xml", byteArrayOf(1))
+
+        // when / then
+        assertThatThrownBy { testee.upload(ImageDirectory.TEMPORARY, file) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("files are allowed")
+    }
+
+    @Test
+    fun `should reject upload when the file has no extension`() {
+        // given
+        val file = MockMultipartFile("file", "photo", "image/png", byteArrayOf(1))
+
+        // when / then
+        assertThatThrownBy { testee.upload(ImageDirectory.TEMPORARY, file) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("files are allowed")
     }
 
     @Test
@@ -130,7 +151,6 @@ class ImageServiceTest {
     }
 
     @Test
-    @Disabled("Possible bug: get() does not sanitize the file name, so '../' sequences read files outside the image directory")
     fun `should not return files outside the image directory when the file name contains path traversal`() {
         // given
         val secret = tempDir.resolve("secret.txt").toFile().apply { writeText("secret") }
@@ -143,7 +163,6 @@ class ImageServiceTest {
     }
 
     @Test
-    @Disabled("Possible bug: delete() does not sanitize the file name, so '../' sequences delete files outside the image directory")
     fun `should not delete files outside the image directory when the file name contains path traversal`() {
         // given
         val secret = tempDir.resolve("secret.txt").toFile().apply { writeText("secret") }
@@ -152,6 +171,17 @@ class ImageServiceTest {
         runCatching { testee.delete(ImageDirectory.NEWS_ITEMS, traversalTo(secret.toPath(), ImageDirectory.NEWS_ITEMS)) }
 
         // then
+        assertThat(secret).exists()
+    }
+
+    @Test
+    fun `should not move files from outside the image directory when the file name contains path traversal`() {
+        // given
+        val secret = tempDir.resolve("secret.txt").toFile().apply { writeText("secret") }
+
+        // when / then
+        assertThatThrownBy { testee.move(traversalTo(secret.toPath(), ImageDirectory.TEMPORARY), ImageDirectory.TEMPORARY, ImageDirectory.NEWS_ITEMS) }
+            .isInstanceOf(IllegalStateException::class.java)
         assertThat(secret).exists()
     }
 }

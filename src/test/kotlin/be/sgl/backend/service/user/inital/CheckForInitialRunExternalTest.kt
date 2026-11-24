@@ -3,6 +3,7 @@ package be.sgl.backend.service.user.inital
 import be.sgl.backend.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.entity.organization.ContactMethodType
 import be.sgl.backend.entity.organization.Organization
+import be.sgl.backend.entity.organization.OrganizationTestMother.organization
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.user.UserTestMother.user
@@ -27,7 +28,6 @@ import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -89,7 +89,7 @@ class CheckForInitialRunExternalTest {
             startInitialRun()
             val details = userDetails().externalId("ext-1").build()
             val createdUser = user().externalId("ext-1").build()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(null)
+            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().owner().build())
             given(ledenApi.getLid("ext-1")).willReturn(lid().id("ext-1").functies(functie().functie(VGA_FUNCTION).build()).build())
             given(roleRepository.count()).willReturn(1L)
             given(createUserForExternalMember.execute("ext-1")).willReturn(createdUser)
@@ -106,7 +106,7 @@ class CheckForInitialRunExternalTest {
             // given
             startInitialRun()
             val details = userDetails().externalId("ext-1").build()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(null)
+            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().owner().build())
             given(ledenApi.getLid("ext-1")).willReturn(lid().id("ext-1").functies(functie().functie(VGA_FUNCTION).build()).build())
             given(roleRepository.count()).willReturn(1L)
             given(createUserForExternalMember.execute("ext-1")).willReturn(user().build())
@@ -124,7 +124,7 @@ class CheckForInitialRunExternalTest {
         fun `should return null when the external member is VGA of another group`() {
             // given
             startInitialRun()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(null)
+            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().owner().build())
             given(ledenApi.getLid("externalId")).willReturn(lid().functies(functie().groep("OTHER").functie(VGA_FUNCTION).build()).build())
 
             // when
@@ -139,7 +139,7 @@ class CheckForInitialRunExternalTest {
         fun `should return null and keep the initial run when the external member has another function`() {
             // given
             startInitialRun()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(null)
+            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().owner().build())
             given(ledenApi.getLid("externalId")).willReturn(lid().functies(functie().functie(AVGA_FUNCTION).build()).build())
 
             // when
@@ -155,7 +155,6 @@ class CheckForInitialRunExternalTest {
     inner class CreateOrganization {
 
         @Test
-        @Disabled("Possible bug: createOrganizationIfNeeded check is inverted ('?: return'), so it only creates when an OWNER already exists")
         fun `should create the owner organization from the external group when none exists`() {
             // given
             startInitialRun()
@@ -181,11 +180,10 @@ class CheckForInitialRunExternalTest {
         }
 
         @Test
-        @Disabled("Possible bug: createOrganizationIfNeeded check is inverted, so an existing OWNER organization gets duplicated")
         fun `should not fetch the external group when the owner organization already exists`() {
             // given
             startInitialRun()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(Organization())
+            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().owner().build())
             given(ledenApi.getLid("externalId")).willReturn(lid().build())
 
             // when
@@ -197,7 +195,6 @@ class CheckForInitialRunExternalTest {
         }
 
         @Test
-        @Disabled("Possible bug: createOrganizationIfNeeded check is inverted, so the missing address check is unreachable when no OWNER exists")
         fun `should fail when the external group has no address`() {
             // given
             startInitialRun()
@@ -228,7 +225,6 @@ class CheckForInitialRunExternalTest {
         }
 
         @Test
-        @Disabled("Possible bug: createAdminRoleIfNeeded builds the admin role but never saves it")
         fun `should save an admin role linked to VGA and AVGA when no roles exist`() {
             // given
             given(roleRepository.count()).willReturn(0L)

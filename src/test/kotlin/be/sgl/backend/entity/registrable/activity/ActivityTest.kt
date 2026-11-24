@@ -6,7 +6,6 @@ import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -62,7 +61,6 @@ class ActivityTest {
         }
 
         @Test
-        @Disabled("Possible bug: ActivityRestriction.isBranchLimit() is hardcoded to false (TODO), so an unnamed limit-only restriction never acts as branch limit")
         fun `should return the limit of the unnamed restriction when it serves as branch limit`() {
             // given
             val branchLimit = activityRestriction().id(3).branch(branch).alternativeLimit(10).build()
@@ -105,7 +103,6 @@ class ActivityTest {
         }
 
         @Test
-        @Disabled("Possible bug: two named restrictions pass the 'all named' check but then fail the 'exactly one unnamed' check, so 2 options per branch are always rejected")
         fun `should accept two named restrictions for the same branch`() {
             // given
             val activity = activity().restrictions(
@@ -145,7 +142,7 @@ class ActivityTest {
         }
 
         @Test
-        fun `should reject more than two restrictions for a branch when none is unnamed`() {
+        fun `should accept more than two named restrictions for a branch without branch limit`() {
             // given
             val activity = activity().restrictions(
                 activityRestriction().id(1).branch(branch).name("a").build(),
@@ -154,9 +151,7 @@ class ActivityTest {
             ).build()
 
             // when / then
-            assertThatThrownBy { activity.validateRestrictions() }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessage("At most one restriction (serving as branch limit) should be unnamed for branch Kapoenen")
+            assertThatCode { activity.validateRestrictions() }.doesNotThrowAnyException()
         }
 
         @Test

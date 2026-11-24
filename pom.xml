@@ -261,6 +261,8 @@
                     <modelPackage>be.sgl.backend.openapi.model</modelPackage>
                     <inputSpecRootDirectory>${project.basedir}/src/main/resources/openapi</inputSpecRootDirectory>
                     <generatorName>java</generatorName>
+                    <!-- marks required fields with JSpecify @NonNull, which Kotlin enforces (it ignores jakarta.annotation) -->
+                    <templateDirectory>${project.basedir}/src/main/openapi-templates</templateDirectory>
                     <configOptions>
                         <library>restclient</library>
                         <useJackson3>true</useJackson3>

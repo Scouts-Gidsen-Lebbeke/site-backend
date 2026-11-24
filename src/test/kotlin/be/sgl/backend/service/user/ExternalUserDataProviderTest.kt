@@ -11,6 +11,7 @@ import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.Adres
@@ -33,7 +34,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -116,7 +116,7 @@ class ExternalUserDataProviderTest {
         fun `should save the user and patch the external member with its contacts`() {
             // given
             val user = user().externalId("ext-1").build()
-            val contact = contact().user(user).build()
+            val contact = contact().user(user).address(address().externalId("a-1").build()).build()
             val captor = argumentCaptor<Lid>()
             given(userRepository.save(user)).willReturn(user)
             given(contactRepository.findContactsByUser(user)).willReturn(listOf(contact))
@@ -129,6 +129,33 @@ class ExternalUserDataProviderTest {
             then(userRepository).should().save(user)
             then(ledenApi).should().patchLid(eqValue("ext-1"), eqValue(true), captureValue(captor))
             assertThat(captor.value.contacten).extracting("voornaam").containsExactly(contact.firstName)
+        }
+
+        @Test
+        fun `should only save the user when it is not linked to Groepsadmin`() {
+            // given
+            val user = user().build()
+            given(userRepository.save(user)).willReturn(user)
+
+            // when
+            testee.updateUser(user)
+
+            // then
+            then(userRepository).should().save(user)
+            then(ledenApi).shouldHaveNoInteractions()
+        }
+
+        @Test
+        fun `should not save the user locally when Groepsadmin can't accept the update`() {
+            // given
+            val user = user().externalId("ext-1").build()
+            val contact = contact().user(user).build()
+            given(contactRepository.findContactsByUser(user)).willReturn(listOf(contact))
+
+            // when / then
+            assertThatThrownBy { testee.updateUser(user) }.isInstanceOf(LocalizedException::class.java)
+            then(userRepository).shouldHaveNoInteractions()
+            then(ledenApi).shouldHaveNoInteractions()
         }
     }
 
@@ -181,7 +208,6 @@ class ExternalUserDataProviderTest {
         }
 
         @Test
-        @Disabled("Possible bug: startRole uses user.externalId!! and throws NPE for users not (yet) linked to Groepsadmin")
         fun `should not fail when the user has no external id`() {
             // given
             val user = user().build()
@@ -222,6 +248,19 @@ class ExternalUserDataProviderTest {
             // then
             then(endExternalFunctions).should().execute("ext-1", "member", null)
         }
+
+        @Test
+        fun `should only delete the role when the user has no external id`() {
+            // given
+            val userRole = userRole().user(user().build()).role(staffRole(branch().build()).externalId("func").build()).build()
+
+            // when
+            testee.endRole(userRole)
+
+            // then
+            then(userRoleRepository).should().delete(userRole)
+            then(endExternalFunctions).shouldHaveNoInteractions()
+        }
     }
 
     @Nested
@@ -245,7 +284,7 @@ class ExternalUserDataProviderTest {
         fun `should translate the contact role`(role: ContactRole, expected: RolEnum) {
             // given
             val user = user().build()
-            val contact = contact().user(user).role(role).build()
+            val contact = contact().user(user).role(role).address(address().externalId("a-1").build()).build()
 
             // when
             val lid = user.toDto(listOf(contact))
@@ -290,16 +329,57 @@ class ExternalUserDataProviderTest {
         }
 
         @Test
-        fun `should not mark the contact as dependent and leave the address empty when the contact has no nis nor address`() {
+        fun `should not mark the contact as dependent when the contact has no nis`() {
             // given
             val user = user().build()
+            val contact = contact().user(user).address(address().externalId("a-1").build()).build()
+
+            // when
+            val lid = user.toDto(listOf(contact))
+
+            // then
+            assertThat(lid.contacten.single().lidtenlaste).isFalse()
+        }
+
+        @Test
+        fun `should use the postal address of the user when the contact has no address`() {
+            // given
+            val postalAddress = address().externalId("postal").postalAddress().build()
+            val user = user().addresses(address().externalId("other").build(), postalAddress).build()
             val contact = contact().user(user).build()
 
             // when
             val lid = user.toDto(listOf(contact))
 
             // then
-            assertThat(lid.contacten.single()).extracting("lidtenlaste", "adres").containsExactly(false, null)
+            assertThat(lid.contacten.single().adres).isEqualTo(postalAddress.externalId)
+        }
+
+        @Test
+        fun `should fail when neither the contact nor the user has an address known in Groepsadmin`() {
+            // given
+            val user = user().build()
+            val contact = contact().user(user).build()
+
+            // when / then
+            assertThatThrownBy { user.toDto(listOf(contact)) }
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("user.contact.address.unknown")
+        }
+
+        @Test
+        fun `should fall back to a known address when the contact's address is not in Groepsadmin yet`() {
+            // given
+            val knownAddress = address().externalId("known").build()
+            val newAddress = address().postalAddress().build()
+            val user = user().addresses(newAddress, knownAddress).build()
+            val contact = contact().user(user).address(newAddress).build()
+
+            // when
+            val lid = user.toDto(listOf(contact))
+
+            // then
+            assertThat(lid.contacten.single().adres).isEqualTo(knownAddress.externalId)
         }
     }
 }

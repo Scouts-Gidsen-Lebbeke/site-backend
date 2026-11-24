@@ -31,11 +31,11 @@ object GroepsadminTestMother {
     class LidBuilder {
         private var id: String? = "externalId"
         private var gebruikersnaam: String? = null
-        private var email: String? = "firstName.lastName@corp.com"
+        private var email = "firstName.lastName@corp.com"
         private var voornaam = "firstName"
         private var achternaam = "lastName"
         private var geboortedatum: LocalDate = LocalDate.of(2004, 1, 27)
-        private var geslacht: PersoonsGegevens.GeslachtEnum? = PersoonsGegevens.GeslachtEnum.MAN
+        private var geslacht = PersoonsGegevens.GeslachtEnum.MAN
         private var gsm: String? = null
         private var rekeningnummer: String? = null
         private var beperking = false
@@ -49,7 +49,7 @@ object GroepsadminTestMother {
 
         fun gebruikersnaam(gebruikersnaam: String) = apply { this.gebruikersnaam = gebruikersnaam }
 
-        fun email(email: String?) = apply { this.email = email }
+        fun email(email: String) = apply { this.email = email }
 
         fun voornaam(voornaam: String) = apply { this.voornaam = voornaam }
 
@@ -57,7 +57,7 @@ object GroepsadminTestMother {
 
         fun geboortedatum(geboortedatum: LocalDate) = apply { this.geboortedatum = geboortedatum }
 
-        fun geslacht(geslacht: PersoonsGegevens.GeslachtEnum?) = apply { this.geslacht = geslacht }
+        fun geslacht(geslacht: PersoonsGegevens.GeslachtEnum) = apply { this.geslacht = geslacht }
 
         fun gsm(gsm: String) = apply { this.gsm = gsm }
 
@@ -174,16 +174,16 @@ object GroepsadminTestMother {
 
     class ContactBuilder {
         private var id: String? = "contactExternalId"
-        private var adres: String? = null
+        private var adres = "adresExternalId"
         private var voornaam = "contactFirstName"
         private var achternaam = "contactName"
         private var gsm: String? = null
         private var email: String? = null
-        private var rol: Contact.RolEnum? = Contact.RolEnum.MOEDER
+        private var rol = Contact.RolEnum.MOEDER
 
         fun id(id: String?) = apply { this.id = id }
 
-        fun adres(adres: String?) = apply { this.adres = adres }
+        fun adres(adres: String) = apply { this.adres = adres }
 
         fun voornaam(voornaam: String) = apply { this.voornaam = voornaam }
 
@@ -193,7 +193,7 @@ object GroepsadminTestMother {
 
         fun email(email: String) = apply { this.email = email }
 
-        fun rol(rol: Contact.RolEnum?) = apply { this.rol = rol }
+        fun rol(rol: Contact.RolEnum) = apply { this.rol = rol }
 
         fun build(): Contact {
             val contact = Contact()

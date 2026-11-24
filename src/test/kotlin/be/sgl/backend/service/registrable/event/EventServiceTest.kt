@@ -7,12 +7,10 @@ import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.exception.EventNotFoundException
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,7 +18,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDateTime
 import java.util.Optional
@@ -33,7 +30,7 @@ class EventServiceTest {
     @Mock
     lateinit var registrationRepository: EventRegistrationRepository
     @Mock
-    lateinit var checkoutProvider: CheckoutProvider
+    lateinit var registrationService: EventRegistrationService
     @InjectMocks
     lateinit var testee: EventService
 
@@ -295,7 +292,6 @@ class EventServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: check uses count < limit, so setting the limit equal to the current count (not lower) is rejected")
         fun `should accept a registration limit equal to the registration count`() {
             // given
             val event = openedEvent().build()
@@ -348,18 +344,20 @@ class EventServiceTest {
         }
 
         @Test
-        fun `should refund every registration and mark the event cancelled`() {
+        fun `should refund or remove every paid registration and mark the event cancelled`() {
             // given
             val event = openedEvent().build()
             val registration = eventRegistration().event(event).paid().price(10.0).build()
+            val freeRegistration = eventRegistration().event(event).paid().price(0.0).build()
             given(eventRepository.findById(1)).willReturn(Optional.of(event))
-            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(registration))
+            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(registration, freeRegistration))
 
             // when
             testee.cancelEvent(1)
 
             // then
-            then(checkoutProvider).should().refundPayment(registration)
+            then(registrationService).should().refundOrRemove(registration)
+            then(registrationService).should().refundOrRemove(freeRegistration)
             then(eventRepository).should().save(event)
             assertThat(event.cancelled).isTrue()
         }
@@ -375,13 +373,12 @@ class EventServiceTest {
             testee.cancelEvent(1)
 
             // then
-            then(checkoutProvider).shouldHaveNoInteractions()
+            then(registrationService).shouldHaveNoInteractions()
             assertThat(event.cancelled).isTrue()
         }
 
         @Test
-        @Disabled("Possible bug: getRegistrationsByEvent includes unpaid registrations; refunding them fails (MollieCheckout checks paid) and aborts the cancellation")
-        fun `should only refund paid registrations`() {
+        fun `should only refund or remove paid registrations`() {
             // given
             val event = openedEvent().build()
             val unpaid = eventRegistration().event(event).paid(false).price(10.0).build()
@@ -392,7 +389,7 @@ class EventServiceTest {
             testee.cancelEvent(1)
 
             // then
-            then(checkoutProvider).should(never()).refundPayment(unpaid)
+            then(registrationService).shouldHaveNoInteractions()
         }
     }
 }

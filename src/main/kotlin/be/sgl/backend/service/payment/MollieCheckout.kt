@@ -86,10 +86,10 @@ class MollieCheckout : CheckoutProvider {
         return mollieApiClient.refunds().listRefunds(paymentId).count > 0
     }
 
-    override fun refundPayment(payment: Payment) {
+    override fun refundPayment(payment: Payment): Boolean {
         check(payment.paid)
         val refundPrice = (payment.price - getRefundCost(payment))
-        if (refundPrice <= 0.0) return
+        if (refundPrice <= 0.0) return false
         val request = RefundRequest.builder()
             .description(Optional.of(payment.getDescription()))
             .amount(Amount.builder()
@@ -98,5 +98,6 @@ class MollieCheckout : CheckoutProvider {
                 .build()
             ).build()
         mollieApiClient.refunds().createRefund(payment.paymentId, request)
+        return true
     }
 }

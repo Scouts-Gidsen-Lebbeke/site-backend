@@ -62,6 +62,6 @@ class EndExternalFunctions(
         val lidPatch = Lid().apply {
             functies = listOf(vgaFunction)
         }
-        ledenApi.patchLid(externalIdOfNewRootAdmin, true, lidPatch)
+        ledenApi.patchLid(checkNotNull(externalIdOfNewRootAdmin) { "The new root admin is not linked to Groepsadmin!" }, true, lidPatch)
     }
 }

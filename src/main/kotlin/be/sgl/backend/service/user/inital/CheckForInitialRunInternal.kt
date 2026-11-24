@@ -1,7 +1,10 @@
 package be.sgl.backend.service.user.inital
 
 import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.Role.Companion.adminRole
+import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -26,7 +29,7 @@ class CheckForInitialRunInternal(
 
     override fun execute(userDetails: CustomUserDetails): User? {
         if (!isInitialRun) return null
-        createAdminRoleIfNeeded()
+        val adminRole = createAdminRoleIfNeeded()
         var user = User().apply {
             name = userDetails.lastName
             firstName = userDetails.firstName
@@ -35,13 +38,22 @@ class CheckForInitialRunInternal(
             birthdate = LocalDate.now() // non-null
         }
         user = userRepository.save(user)
+        // the first user administers the app, the role can only be linked once the user has an id
+        adminRole?.let {
+            user.roles.add(UserRole(user, it))
+            user = userRepository.save(user)
+        }
         isInitialRun = false
         return user
     }
 
-    fun createAdminRoleIfNeeded() {
+    /**
+     * Saves a new admin role when no roles exist yet, otherwise returns the existing admin role (if any).
+     */
+    fun createAdminRoleIfNeeded(): Role? {
         if (roleRepository.count() == 0L) {
-            adminRole("Admin", null, null)
+            return adminRole("Admin", null, null).also(roleRepository::save)
         }
+        return roleRepository.findByLevel(RoleLevel.ADMIN).firstOrNull()
     }
 }

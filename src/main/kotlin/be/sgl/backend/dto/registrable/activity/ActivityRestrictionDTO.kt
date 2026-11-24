@@ -20,6 +20,7 @@ data class ActivityRestrictionDTO(
      * The activity is not set, it should be linked by the caller.
      */
     fun toEntity() = ActivityRestriction().also {
+        it.id = id
         it.branch = branch.toEntity()
         it.name = name
         it.alternativeStart = alternativeStart

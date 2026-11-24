@@ -9,7 +9,6 @@ import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -126,7 +125,6 @@ class CreateMedicalRecordForExternalMemberTest {
     }
 
     @Test
-    @Disabled("Possible bug: diseaseGuidance reads the same key as atHygiene (...1f1464ef001a), so hygiene remarks leak into diseases")
     fun `should not copy hygiene remarks into the diseases`() {
         // given
 
@@ -161,7 +159,6 @@ class CreateMedicalRecordForExternalMemberTest {
     }
 
     @Test
-    @Disabled("Possible bug: the B+ branch matches \"B+ \" (trailing space), so B+ maps to UNKNOWN")
     fun `should translate blood group B+`() {
         // given
 
@@ -188,5 +185,18 @@ class CreateMedicalRecordForExternalMemberTest {
         private const val MEDICATIONS = "d5f75e1e463384de01463901e13c00dc"
         private const val PHYSICIAN_CONTACT = "d5f75e1e463384de0146391800f100e9"
         private const val BLOOD_GROUP = "d5f75e1e463384de01463916d21b00e8"
+    }
+
+    @Test
+    fun `should not create a medical record when the user is not linked to Groepsadmin`() {
+        // given
+        val unlinkedUser = user().build()
+
+        // when
+        testee.execute(unlinkedUser)
+
+        // then
+        then(ledenApi).shouldHaveNoInteractions()
+        then(medicalRecordRepository).shouldHaveNoInteractions()
     }
 }

@@ -13,7 +13,6 @@ import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Answers
@@ -26,6 +25,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.context.support.StaticMessageSource
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockitoExtension::class)
 class GenerateNewMembershipPeriodTest {
@@ -63,7 +63,6 @@ class GenerateNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: Duration.between on LocalDate throws UnsupportedTemporalTypeException, and the computed end is one day too late")
     fun `should start the day after the previous period and last equally long`() {
         // given
         val previous = membershipPeriod().start(previousStart).end(previousEnd).build()
@@ -77,7 +76,6 @@ class GenerateNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: Duration.between on LocalDate throws UnsupportedTemporalTypeException")
     fun `should copy the price settings of the previous period`() {
         // given
         val previous = membershipPeriod().start(previousStart).end(previousEnd).price(120.0).registrationLimit(200)
@@ -94,7 +92,6 @@ class GenerateNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: copied restrictions are never added to the new period, so they are lost (besides Duration.between throwing)")
     fun `should copy the restrictions of the previous period to the new period`() {
         // given
         val branch = branch().build()
@@ -111,6 +108,21 @@ class GenerateNewMembershipPeriodTest {
         assertThat(restriction.branch).isSameAs(branch)
         assertThat(restriction.alternativePrice).isEqualTo(80.0)
         assertThat(restriction.registrationLimit).isEqualTo(20)
+    }
+
+    @Test
+    fun `should move time restrictions along with the new period`() {
+        // given
+        val lateRegistrationStart = previousStart.plusMonths(4)
+        val previous = membershipPeriod().start(previousStart).end(previousEnd)
+            .restrictions(membershipRestriction().alternativeStart(lateRegistrationStart).alternativePrice(150.0).build()).build()
+
+        // when
+        val newPeriod = executeAndCaptureSavedPeriod(previous)
+
+        // then
+        val periodShift = ChronoUnit.DAYS.between(previous.start, newPeriod.start)
+        assertThat(newPeriod.restrictions.single().alternativeStart).isEqualTo(lateRegistrationStart.plusDays(periodShift))
     }
 
     @Test

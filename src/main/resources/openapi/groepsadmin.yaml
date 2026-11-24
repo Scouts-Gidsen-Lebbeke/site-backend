@@ -2852,6 +2852,8 @@ components:
       description: De groepseigen velden en gegevens van het lid in de groep met dit
         groepsnummer (opgedeeld per groep)
     Lid:
+      required:
+        - email
       type: object
       properties:
         links:

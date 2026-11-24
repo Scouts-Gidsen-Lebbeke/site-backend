@@ -13,6 +13,7 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.exception.EventNotFoundException
 import be.sgl.backend.exception.EventRegistrationNotFoundException
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -39,6 +40,9 @@ class EventRegistrationService(
 
     fun createPaymentForEvent(id: Int, request: CreateEventRegistrationRequest, username: String?): String {
         val event = getEventById(id)
+        if (event.getStatus() != RegistrableStatus.REGISTRATIONS_OPENED) {
+            throw LocalizedException("registrable.registrations.not.open", event.name)
+        }
         check(!event.needsMobile || request.mobile != null) { "No valid mobile number provided!" }
         val user = username?.let { userRepository.findByUsername(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
@@ -93,7 +97,7 @@ class EventRegistrationService(
     override fun handlePaymentRefunded(payment: EventRegistration) {
         val params = mapOf(
             "customer" to "${payment.firstName} ${payment.name}",
-            "price" to payment.price - checkoutProvider.getRefundCost(payment),
+            "price" to (payment.price - checkoutProvider.getRefundCost(payment)).coerceAtLeast(0.0),
             "eventName" to payment.subscribable.name,
         )
         val mailBuilder = mailService.builder()
@@ -132,19 +136,34 @@ class EventRegistrationService(
     }
 
     fun cancelRegistration(id: Int) {
+        cancelRegistration(getRegistrationById(id))
+    }
+
+    fun cancelRegistrationByToken(cancelToken: String) {
+        val registration = paymentRepository.findByCancelToken(cancelToken) ?: throw EventRegistrationNotFoundException()
+        if (!registration.subscribable.cancellable) {
+            throw LocalizedException("registrable.registration.not.cancellable", registration.subscribable.name)
+        }
+        cancelRegistration(registration)
+    }
+
+    private fun cancelRegistration(registration: EventRegistration) {
+        val id = registration.id
         logger.info { "Cancelling event registration #$id..." }
-        val registration = getRegistrationById(id)
         check(registration.paid) { "Only a paid event registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
-        if (registration.price > 0) {
-            checkoutProvider.refundPayment(registration)
+        refundOrRemove(registration)
+        logger.info { "Event registration #$id successfully cancelled" }
+    }
+
+    fun refundOrRemove(registration: EventRegistration) {
+        if (registration.price > 0 && checkoutProvider.refundPayment(registration)) {
             registration.markRefunded()
             paymentRepository.save(registration)
         } else {
             paymentRepository.delete(registration)
             handlePaymentRefunded(registration)
         }
-        logger.info { "Event registration #$id successfully cancelled" }
     }
 
     private fun getRegistrationById(id: Int): EventRegistration {

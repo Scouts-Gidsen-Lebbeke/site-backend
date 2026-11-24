@@ -43,9 +43,9 @@ class NisValidator : ConstraintValidator<Nis, String> {
         if (!value.matches(Regex("[0-9]{11}"))) {
             return false
         }
-        val base = value.substring(0, 9).toLong()
+        val base = value.substring(0, 9)
         val check = value.substring(9, 11).toLong()
-        return checksum(base, check) || checksum("2$base".toLong(), check)
+        return checksum(base.toLong(), check) || checksum("2$base".toLong(), check)
     }
 
     private fun checksum(base: Long, check: Long) = 97 - (base % 97) == check
@@ -79,7 +79,11 @@ annotation class Kbo(
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class KboValidator : ConstraintValidator<Kbo, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        return value.nullIfBlank()?.matches(Regex("^0[0-9]{9}\$")) ?: true
+        val kbo = value.nullIfBlank() ?: return true
+        if (!kbo.matches(Regex("^[01][0-9]{9}\$"))) {
+            return false
+        }
+        return 97 - kbo.take(8).toLong() % 97 == kbo.takeLast(2).toLong()
     }
 }
 

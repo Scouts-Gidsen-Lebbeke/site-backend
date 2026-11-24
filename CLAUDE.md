@@ -42,6 +42,8 @@ Package root: `be.sgl.backend`. Layers are split by domain (branch, calendar, me
 
 These end up under `target/`. Don't edit them. Change the spec or XSD and regenerate.
 
+`src/main/openapi-templates/` overrides generator templates: required, non-nullable spec fields get JSpecify `@NonNull`, which Kotlin enforces (it ignores the generator's default `jakarta.annotation` ones). Optional fields stay platform types. To make a Groepsadmin field non-null in Kotlin, add it to the schema's `required` list in the YAML.
+
 ## Tests
 - `@IntegrationTest` (`src/test/kotlin/.../util/IntegrationTest.kt`) = `@SpringBootTest` + `test` profile + MockMvc + MariaDB and mail Testcontainers.
 - `TestConfigurations` replaces `CheckoutProvider` with `MockedCheckoutProvider`.

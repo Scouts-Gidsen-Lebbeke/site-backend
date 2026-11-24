@@ -15,7 +15,6 @@ import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.util.reducePrice
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -162,7 +161,6 @@ class ValidateAndCreateMembershipTest {
         }
 
         @Test
-        @Disabled("Possible bug: MembershipPeriod.getLimitForBranch returns the limit of the first branch restriction, which can be a limitless time-branch restriction")
         fun `should throw when the branch limit is reached and a time branch restriction comes first`() {
             // given
             val user = user().birthdate(birthdate).build()
@@ -328,7 +326,6 @@ class ValidateAndCreateMembershipTest {
         }
 
         @Test
-        @Disabled("Possible bug: time-branch restrictions of other branches are applied to users of a branch without restrictions")
         fun `should ignore the time restriction of another branch when the branch has no restrictions`() {
             // given
             val otherBranch = branch().id(2).build()
@@ -344,7 +341,6 @@ class ValidateAndCreateMembershipTest {
         }
 
         @Test
-        @Disabled("Possible bug: NoSuchElementException from first() when the branch only has time-branch restrictions that have not started yet")
         fun `should use the period price when the branch only has a time restriction that has not started`() {
             // given
             val period = period().restrictions(
@@ -359,7 +355,6 @@ class ValidateAndCreateMembershipTest {
         }
 
         @Test
-        @Disabled("Possible bug: a branch restriction that only sets a limit discards the started general time restriction price")
         fun `should use the general time restriction price when the branch restriction only has a limit`() {
             // given
             val period = period().restrictions(

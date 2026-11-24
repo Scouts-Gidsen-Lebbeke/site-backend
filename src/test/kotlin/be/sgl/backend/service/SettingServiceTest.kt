@@ -6,7 +6,6 @@ import be.sgl.backend.repository.SettingRepository
 import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -111,7 +110,6 @@ class SettingServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: an unparsable double setting throws NumberFormatException, while an unparsable boolean falls back to the default")
         fun `should return the default double when the stored value is not a number`() {
             // given
             givenStored("not a number")
