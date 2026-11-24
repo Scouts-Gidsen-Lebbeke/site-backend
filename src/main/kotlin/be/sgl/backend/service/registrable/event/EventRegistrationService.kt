@@ -132,8 +132,17 @@ class EventRegistrationService(
     }
 
     fun cancelRegistration(id: Int) {
+        cancelRegistration(getRegistrationById(id))
+    }
+
+    fun cancelRegistrationByToken(cancelToken: String) {
+        val registration = paymentRepository.findByCancelToken(cancelToken) ?: throw EventRegistrationNotFoundException()
+        cancelRegistration(registration)
+    }
+
+    private fun cancelRegistration(registration: EventRegistration) {
+        val id = registration.id
         logger.info { "Cancelling event registration #$id..." }
-        val registration = getRegistrationById(id)
         check(registration.paid) { "Only a paid event registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
         if (registration.price > 0) {

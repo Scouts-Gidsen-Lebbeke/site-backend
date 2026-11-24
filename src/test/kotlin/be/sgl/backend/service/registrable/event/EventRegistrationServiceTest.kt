@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDateTime
 import java.util.Optional
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class EventRegistrationServiceTest {
@@ -398,6 +399,44 @@ class EventRegistrationServiceTest {
             then(paymentRepository).should().delete(registration)
             then(checkoutProvider).should(never()).refundPayment(anyValue())
             then(mailBuilder).should().send()
+        }
+
+        @Test
+        fun `should cancel the registration identified by its cancel token`() {
+            // given
+            val registration = eventRegistration().paid().price(10.0).event(openedEvent().build()).build()
+            val token = registration.cancelToken!!
+            given(paymentRepository.findByCancelToken(token)).willReturn(registration)
+            given(paymentRepository.save(registration)).willReturn(registration)
+
+            // when
+            testee.cancelRegistrationByToken(token)
+
+            // then
+            then(checkoutProvider).should().refundPayment(registration)
+            assertThat(registration.paid).isFalse()
+        }
+
+        @Test
+        fun `should fail when the cancel token is unknown`() {
+            // given
+            given(paymentRepository.findByCancelToken("unknown")).willReturn(null)
+
+            // when / then
+            assertThatThrownBy { testee.cancelRegistrationByToken("unknown") }
+                .isInstanceOf(EventRegistrationNotFoundException::class.java)
+            then(checkoutProvider).should(never()).refundPayment(anyValue())
+        }
+
+        @Test
+        fun `should give every registration its own random cancel token`() {
+            // when
+            val first = eventRegistration().build()
+            val second = eventRegistration().build()
+
+            // then
+            assertThat(first.cancelToken).isNotNull().isNotEqualTo(second.cancelToken)
+            assertThat(UUID.fromString(first.cancelToken)).isNotNull()
         }
 
         @Test

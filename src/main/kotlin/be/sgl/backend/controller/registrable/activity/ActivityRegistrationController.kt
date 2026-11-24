@@ -176,8 +176,8 @@ class ActivityRegistrationController(
             ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(mediaType = APPLICATION_JSON_VALUE, schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun cancelRegistration(@PathVariable registrationId: Int): ResponseEntity<Unit> {
-        registrationService.cancelRegistration(registrationId)
+    fun cancelRegistration(@PathVariable registrationId: Int, @AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<Unit> {
+        registrationService.cancelRegistrationForUser(registrationId, userDetails.username)
         return ResponseEntity.ok().build()
     }
 

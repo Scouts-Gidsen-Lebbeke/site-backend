@@ -8,6 +8,7 @@ import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
+import be.sgl.backend.entity.user.RoleLevel
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
@@ -138,9 +139,27 @@ class ActivityRegistrationService(
         logger.info { "Registration #$id successfully marked as completed" }
     }
 
-    fun cancelRegistration(id: Int) {
-        logger.info { "Cancelling activity registration #$id..." }
+    /**
+     * Cancels the registration on behalf of [username]: only the registered user or staff may do so.
+     * Others get a not found, so registration ids of other users can't be probed.
+     */
+    fun cancelRegistrationForUser(id: Int, username: String) {
+        val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         val registration = getRegistrationById(id)
+        if (registration.user.id != user.id && user.level < RoleLevel.STAFF) {
+            logger.warn { "$username tried to cancel activity registration #$id of another user!" }
+            throw ActivityRegistrationNotFoundException()
+        }
+        cancelRegistration(registration)
+    }
+
+    fun cancelRegistration(id: Int) {
+        cancelRegistration(getRegistrationById(id))
+    }
+
+    private fun cancelRegistration(registration: ActivityRegistration) {
+        val id = registration.id
+        logger.info { "Cancelling activity registration #$id..." }
         check(registration.paid) { "Only a paid activity registration can be cancelled!" }
         check(registration.subscribable.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Cancellation is only possible when registrations are still open!" }
         if (registration.price > 0) {

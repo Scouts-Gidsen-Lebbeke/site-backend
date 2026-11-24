@@ -17,4 +17,5 @@ interface EventRegistrationRepository : JpaRepository<EventRegistration, Int>, P
     fun countPaidRegistrationsByEvent(event: Event): Int
     @Query("from EventRegistration where subscribable = :event")
     fun getRegistrationsByEvent(event: Event): List<EventRegistration>
+    fun findByCancelToken(cancelToken: String): EventRegistration?
 }

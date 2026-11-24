@@ -6,6 +6,8 @@ import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
+import be.sgl.backend.entity.role.RoleTestMother.staffRole
+import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.exception.ActivityNotFoundException
 import be.sgl.backend.exception.ActivityRegistrationNotFoundException
@@ -500,6 +502,66 @@ class ActivityRegistrationServiceTest {
             // when / then
             assertThatThrownBy { testee.cancelRegistration(1) }
                 .isInstanceOf(IllegalStateException::class.java)
+        }
+    }
+
+    @Nested
+    inner class CancelRegistrationForUser {
+
+        @Test
+        fun `should cancel the registration of the user itself`() {
+            // given
+            val registration = activityRegistration().paid().price(100.0).activity(openedActivity().build()).user(user).build()
+            given(userRepository.findByUsername("member")).willReturn(user)
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(paymentRepository.save(registration)).willReturn(registration)
+
+            // when
+            testee.cancelRegistrationForUser(1, "member")
+
+            // then
+            then(checkoutProvider).should().refundPayment(registration)
+        }
+
+        @Test
+        fun `should hide the registration of another user`() {
+            // given
+            val owner = user().id(2).username("owner").build()
+            val registration = activityRegistration().paid().price(100.0).activity(openedActivity().build()).user(owner).build()
+            given(userRepository.findByUsername("member")).willReturn(user)
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+
+            // when / then
+            assertThatThrownBy { testee.cancelRegistrationForUser(1, "member") }
+                .isInstanceOf(ActivityRegistrationNotFoundException::class.java)
+            then(checkoutProvider).should(never()).refundPayment(anyValue())
+        }
+
+        @Test
+        fun `should let staff cancel the registration of another user`() {
+            // given
+            val staff = user().id(3).username("staff").build()
+            userRole().user(staff).role(staffRole(branch().build()).build()).build()
+            val registration = activityRegistration().paid().price(100.0).activity(openedActivity().build()).user(user).build()
+            given(userRepository.findByUsername("staff")).willReturn(staff)
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(paymentRepository.save(registration)).willReturn(registration)
+
+            // when
+            testee.cancelRegistrationForUser(1, "staff")
+
+            // then
+            then(checkoutProvider).should().refundPayment(registration)
+        }
+
+        @Test
+        fun `should fail when the user is unknown`() {
+            // given
+            given(userRepository.findByUsername("unknown")).willReturn(null)
+
+            // when / then
+            assertThatThrownBy { testee.cancelRegistrationForUser(1, "unknown") }
+                .isInstanceOf(UserNotFoundException::class.java)
         }
     }
 
