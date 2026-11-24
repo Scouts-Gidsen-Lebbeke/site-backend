@@ -13,7 +13,6 @@ import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Answers
@@ -63,7 +62,6 @@ class GenerateNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: Duration.between on LocalDate throws UnsupportedTemporalTypeException, and the computed end is one day too late")
     fun `should start the day after the previous period and last equally long`() {
         // given
         val previous = membershipPeriod().start(previousStart).end(previousEnd).build()
@@ -77,7 +75,6 @@ class GenerateNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: Duration.between on LocalDate throws UnsupportedTemporalTypeException")
     fun `should copy the price settings of the previous period`() {
         // given
         val previous = membershipPeriod().start(previousStart).end(previousEnd).price(120.0).registrationLimit(200)
@@ -94,7 +91,6 @@ class GenerateNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: copied restrictions are never added to the new period, so they are lost (besides Duration.between throwing)")
     fun `should copy the restrictions of the previous period to the new period`() {
         // given
         val branch = branch().build()

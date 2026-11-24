@@ -26,7 +26,8 @@ class NotifyMembersOfNewMembershipPeriod(
         logger.info { "Checking if yesterdays active membership period ended, denoting a new active period..." }
         val yesterday = LocalDate.now().minusDays(1)
         val yesterdaysActivePeriod = membershipPeriodRepository.getPeriodActiveOn(yesterday)
-        if (yesterdaysActivePeriod.end.isAfter(LocalDate.now())) {
+        // A period ending today is still active today, so only a period that ended yesterday denotes a new one
+        if (!yesterdaysActivePeriod.end.isBefore(LocalDate.now())) {
             logger.info { "Yesterdays active period did not end by today, no notification needed." }
             return
         }

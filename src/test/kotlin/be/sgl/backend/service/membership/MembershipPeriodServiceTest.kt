@@ -17,7 +17,6 @@ import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -106,7 +105,6 @@ class MembershipPeriodServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: restrictions are validated before their period is linked, so a time restriction hits an uninitialized lateinit period")
         fun `should save the period when it has a valid time restriction`() {
             // given
             val request = membershipPeriodRequest().start(LocalDate.of(2025, 9, 1)).end(LocalDate.of(2026, 8, 31))
@@ -118,7 +116,6 @@ class MembershipPeriodServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: restrictions from a request get distinct Branch instances (no equals), so two non-time restrictions for the same branch are never grouped")
         fun `should reject the period when a branch has two non time restrictions in the request`() {
             // given
             val request = membershipPeriodRequest().restrictions(
@@ -270,7 +267,6 @@ class MembershipPeriodServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: updatePeriod validates the new restrictions but never applies them to the period")
         fun `should replace the restrictions when the period has not started yet`() {
             // given
             val period = membershipPeriod().start(today.plusDays(1)).end(today.plusYears(1)).build()

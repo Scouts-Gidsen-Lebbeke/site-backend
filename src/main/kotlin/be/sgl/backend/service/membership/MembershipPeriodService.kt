@@ -36,10 +36,8 @@ class MembershipPeriodService(
 
     fun createPeriod(request: CreateOrUpdateMembershipPeriodRequest): MembershipPeriodDTO {
         val newPeriod = request.toEntity()
+        linkRestrictions(newPeriod)
         validateRestrictions(newPeriod.restrictions)
-        for (restriction in newPeriod.restrictions) {
-            restriction.period = newPeriod
-        }
         return MembershipPeriodDTO.of(periodRepository.save(newPeriod))
     }
 
@@ -47,12 +45,16 @@ class MembershipPeriodService(
         val periodToUpdate = getPeriodById(id)
         val periodFromDto = request.toEntity()
         if (periodToUpdate.start.isAfter(LocalDate.now())) {
+            linkRestrictions(periodFromDto)
             validateRestrictions(periodFromDto.restrictions)
             periodToUpdate.start = periodFromDto.start
             periodToUpdate.end = periodFromDto.end
             periodToUpdate.price = periodFromDto.price
             periodToUpdate.reductionFactor = periodFromDto.reductionFactor
             periodToUpdate.siblingReduction = periodFromDto.siblingReduction
+            periodToUpdate.restrictions.clear()
+            periodToUpdate.restrictions.addAll(periodFromDto.restrictions)
+            linkRestrictions(periodToUpdate)
         }
         periodToUpdate.registrationLimit = periodFromDto.registrationLimit
         return MembershipPeriodDTO.of(periodRepository.save(periodToUpdate))
@@ -62,9 +64,14 @@ class MembershipPeriodService(
         return periodRepository.findById(id).orElseThrow { MembershipPeriodNotFoundException() }
     }
 
+    private fun linkRestrictions(period: MembershipPeriod) {
+        period.restrictions.forEach { it.period = period }
+    }
+
     fun validateRestrictions(restrictions: List<MembershipRestriction>) {
         // TODO: validate overlaps and futureness
-        restrictions.onEach { it.validate() }.filter { it.branch != null }.groupBy { it.branch }.forEach { (_, restrictions) ->
+        // Branches from a request are distinct instances without equals, so group them on id
+        restrictions.onEach { it.validate() }.filter { it.branch != null }.groupBy { it.branch?.id ?: it.branch }.forEach { (_, restrictions) ->
             check(restrictions.filterNot { it.isTimeRestriction }.size <= 1) { "A branch should at most have one single non-time related restriction!" }
         }
     }

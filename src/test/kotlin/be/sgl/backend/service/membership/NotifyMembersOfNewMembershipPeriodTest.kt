@@ -10,7 +10,6 @@ import be.sgl.backend.service.MailService
 import be.sgl.backend.util.I18nUtil
 import be.sgl.backend.util.anyValue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Answers
@@ -152,7 +151,6 @@ class NotifyMembersOfNewMembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: a period ending today is treated as ended (end.isAfter(today) is false), so members are notified a day early")
     fun `should not notify anyone when yesterdays period ends today`() {
         // given
         val period = membershipPeriod().start(today.minusYears(1)).end(today).build()

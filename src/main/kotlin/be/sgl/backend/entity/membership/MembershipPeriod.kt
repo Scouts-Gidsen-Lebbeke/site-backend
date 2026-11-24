@@ -18,7 +18,7 @@ class MembershipPeriod : Auditable() {
     var registrationLimit: Int? = null
     var reductionFactor: Double = 3.0
     var siblingReduction: Double = 0.0
-    @OneToMany(mappedBy = "period", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "period", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     var restrictions = mutableListOf<MembershipRestriction>()
 
     /**

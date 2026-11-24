@@ -6,7 +6,7 @@ import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.service.MailService
 import be.sgl.backend.util.I18nUtil
 import be.sgl.backend.util.Usecase
-import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 @Usecase
 class GenerateNewMembershipPeriod(
@@ -17,7 +17,7 @@ class GenerateNewMembershipPeriod(
     fun execute(previousPeriod: MembershipPeriod): MembershipPeriod {
         var newPeriod = MembershipPeriod()
         newPeriod.start = previousPeriod.end.plusDays(1)
-        newPeriod.end = newPeriod.start.plusDays(Duration.between(previousPeriod.start, newPeriod.start).toDays())
+        newPeriod.end = newPeriod.start.plusDays(ChronoUnit.DAYS.between(previousPeriod.start, previousPeriod.end))
         newPeriod.price = previousPeriod.price
         newPeriod.registrationLimit = previousPeriod.registrationLimit
         newPeriod.reductionFactor = previousPeriod.reductionFactor
@@ -29,6 +29,7 @@ class GenerateNewMembershipPeriod(
             newRestriction.alternativeStart = previousRestriction.alternativeStart
             newRestriction.alternativePrice = previousRestriction.alternativePrice
             newRestriction.registrationLimit = previousRestriction.registrationLimit
+            newPeriod.restrictions.add(newRestriction)
         }
         newPeriod = membershipPeriodRepository.save(newPeriod)
         notifyOrganizationAboutNewPeriod(newPeriod)
