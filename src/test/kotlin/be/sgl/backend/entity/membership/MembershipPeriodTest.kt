@@ -4,7 +4,6 @@ import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestrictionTestMother.membershipRestriction
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -50,7 +49,6 @@ class MembershipPeriodTest {
     }
 
     @Test
-    @Disabled("Possible bug: getLimitForBranch takes the first restriction of the branch, which can be a limitless time-branch restriction hiding the branch limit")
     fun `should return the branch limit when a time branch restriction for the same branch comes first`() {
         // given
         val branch = branch().build()

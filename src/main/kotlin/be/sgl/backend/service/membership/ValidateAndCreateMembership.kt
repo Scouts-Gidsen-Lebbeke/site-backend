@@ -1,6 +1,7 @@
 package be.sgl.backend.service.membership
 
 import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.entity.branch.isSameAs
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestriction
@@ -61,29 +62,27 @@ class ValidateAndCreateMembership(
             ?: throw IllegalStateException("No active branch can be linked to a user of this age and sex!")
     }
 
+    /**
+     * Applies the restrictions in their order of importance (see [MembershipRestriction]):
+     * a started time-branch restriction, the branch restriction, a started general time restriction and finally the period price.
+     */
     private fun calculateBasePriceForBranch(period: MembershipPeriod, branch: Branch, at: LocalDate): Double {
         logger.info { "Calculating price for a membership in $period for $branch at $at..." }
-        val branchRestrictions = period.restrictions.filter { it.branch == branch }
-        if (branchRestrictions.isEmpty()) {
-            logger.info { "No restrictions in period applicable to $branch specifically, looking at time restrictions..." }
-            findApplicableTimeRestrictionPrice(period.restrictions, at)?.let {
-                logger.info { "Applicable time restriction found with price €${it}" }
-                return it
-            }
-            logger.info { "No applicable time restriction found, returning base price €${period.price} for period" }
-            return period.price
-        }
-        logger.info { "Found ${branchRestrictions.size} restrictions in period applicable to $branch" }
-        findApplicableTimeRestrictionPrice(branchRestrictions, at)?.let {
-            logger.info { "Applicable branch time restriction found with price €${it}" }
+        val branchTimeRestrictions = period.restrictions.filter { it.branch.isSameAs(branch) && it.isTimeRestriction }
+        val generalTimeRestrictions = period.restrictions.filter { it.branch == null && it.isTimeRestriction }
+        findApplicableTimeRestrictionPrice(branchTimeRestrictions, at)?.let {
+            logger.info { "Applicable branch time restriction found with price €$it" }
             return it
         }
-        logger.info { "No applicable branch time restriction found, looking at branch restriction price" }
-        branchRestrictions.filterNot { it.isTimeRestriction }.first().alternativePrice?.let {
-            logger.info { "Applicable branch restriction has price €${it} configured" }
+        period.getBranchRestriction(branch)?.alternativePrice?.let {
+            logger.info { "Applicable branch restriction has price €$it configured" }
             return it
         }
-        logger.info { "Applicable branch restriction has no price configured, returning base price €${period.price} for period" }
+        findApplicableTimeRestrictionPrice(generalTimeRestrictions, at)?.let {
+            logger.info { "Applicable time restriction found with price €$it" }
+            return it
+        }
+        logger.info { "No applicable restriction with a price found, returning base price €${period.price} for period" }
         return period.price
     }
 

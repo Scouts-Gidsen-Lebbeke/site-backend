@@ -35,3 +35,10 @@ class Branch : Auditable() {
 
     override fun toString() = name
 }
+/**
+ * [Branch] has no equals (JPA entity), so branches built from DTOs or loaded in another persistence context
+ * are never `==`. Compare on id instead, falling back to identity for unsaved branches.
+ */
+fun Branch?.isSameAs(other: Branch?): Boolean {
+    return this === other || (this?.id != null && this.id == other?.id)
+}
