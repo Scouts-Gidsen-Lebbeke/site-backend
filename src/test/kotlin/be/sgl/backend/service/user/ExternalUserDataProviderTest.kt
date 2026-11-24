@@ -11,6 +11,7 @@ import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.Adres
@@ -141,6 +142,19 @@ class ExternalUserDataProviderTest {
 
             // then
             then(userRepository).should().save(user)
+            then(ledenApi).shouldHaveNoInteractions()
+        }
+
+        @Test
+        fun `should not save the user locally when Groepsadmin can't accept the update`() {
+            // given
+            val user = user().externalId("ext-1").build()
+            val contact = contact().user(user).build()
+            given(contactRepository.findContactsByUser(user)).willReturn(listOf(contact))
+
+            // when / then
+            assertThatThrownBy { testee.updateUser(user) }.isInstanceOf(LocalizedException::class.java)
+            then(userRepository).shouldHaveNoInteractions()
             then(ledenApi).shouldHaveNoInteractions()
         }
     }
@@ -349,8 +363,23 @@ class ExternalUserDataProviderTest {
 
             // when / then
             assertThatThrownBy { user.toDto(listOf(contact)) }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessageContaining("has no address known in Groepsadmin")
+                .isInstanceOf(LocalizedException::class.java)
+                .hasMessage("user.contact.address.unknown")
+        }
+
+        @Test
+        fun `should fall back to a known address when the contact's address is not in Groepsadmin yet`() {
+            // given
+            val knownAddress = address().externalId("known").build()
+            val newAddress = address().postalAddress().build()
+            val user = user().addresses(newAddress, knownAddress).build()
+            val contact = contact().user(user).address(newAddress).build()
+
+            // when
+            val lid = user.toDto(listOf(contact))
+
+            // then
+            assertThat(lid.contacten.single().adres).isEqualTo(knownAddress.externalId)
         }
     }
 }

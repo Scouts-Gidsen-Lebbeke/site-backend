@@ -32,10 +32,17 @@ class FetchExternalData(
             address.postalAdress = a.postadres
         }
         userRepository.save(userToUpdate)
-        val knownContacts = contactRepository.findContactsByUser(userToUpdate)
+        val unmatchedContacts = contactRepository.findContactsByUser(userToUpdate).toMutableList()
         lid.contacten.map { c ->
-            val contact = knownContacts.firstOrNull { it.externalId != null && it.externalId == c.id } ?: Contact()
+            // Contacts saved before their Groepsadmin id was known (older syncs, or created locally and pushed since)
+            // are matched on name, so they get linked instead of duplicated.
+            val contact = unmatchedContacts.firstOrNull { it.externalId != null && it.externalId == c.id }
+                ?: unmatchedContacts.firstOrNull { it.externalId == null && it.firstName == c.voornaam && it.name == c.achternaam }
+                ?: Contact()
+            unmatchedContacts.remove(contact)
             contact.updateFrom(c, userToUpdate)
         }.forEach(contactRepository::save)
+        // Linked contacts Groepsadmin no longer has were removed there. Unlinked ones are local and not pushed yet.
+        contactRepository.deleteAll(unmatchedContacts.filter { it.externalId != null })
     }
 }

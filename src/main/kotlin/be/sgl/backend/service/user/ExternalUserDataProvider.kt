@@ -5,6 +5,7 @@ import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.*
@@ -52,13 +53,14 @@ class ExternalUserDataProvider(
     }
 
     override fun updateUser(user: User): User {
-        super.updateUser(user)
         val externalId = user.externalId ?: run {
             logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external update." }
-            return user
+            return super.updateUser(user)
         }
-        val contacts = contactRepository.findContactsByUser(user)
-        ledenApi.patchLid(externalId, true, user.toDto(contacts))
+        // map before saving locally, so an update Groepsadmin can't accept leaves no local changes behind
+        val lid = user.toDto(contactRepository.findContactsByUser(user))
+        super.updateUser(user)
+        ledenApi.patchLid(externalId, true, lid)
         return user
     }
 
@@ -144,9 +146,12 @@ class ExternalUserDataProvider(
             email = this@toDto.email
             rijksregisternummer = nis
             lidtenlaste = nis != null
-            // Groepsadmin requires an address, assume the contact lives at the member's postal address when unknown
-            val contactAddress = address ?: user.addresses.firstOrNull { it.postalAdress } ?: user.addresses.firstOrNull()
-            adres = checkNotNull(contactAddress?.externalId) { "Contact $firstName $name has no address known in Groepsadmin!" }
+            // Groepsadmin requires an address it already knows. When the contact has none (yet), assume it lives at
+            // the member's (postal) address. Addresses only created by this update have no Groepsadmin id yet.
+            val knownAddresses = user.addresses.filter { it.externalId != null }
+            val contactAddress = address?.takeIf { it.externalId != null }
+                ?: knownAddresses.firstOrNull { it.postalAdress } ?: knownAddresses.firstOrNull()
+            adres = contactAddress?.externalId ?: throw LocalizedException("user.contact.address.unknown", firstName, name)
         }
     }
 }
