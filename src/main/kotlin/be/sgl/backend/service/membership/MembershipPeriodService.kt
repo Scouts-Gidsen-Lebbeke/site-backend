@@ -70,7 +70,6 @@ class MembershipPeriodService(
 
     fun validateRestrictions(restrictions: List<MembershipRestriction>) {
         // TODO: validate overlaps and futureness
-        // Branches from a request are distinct instances without equals, so group them on id
         restrictions.onEach { it.validate() }.filter { it.branch != null }.groupBy { it.branch?.id ?: it.branch }.forEach { (_, restrictions) ->
             check(restrictions.filterNot { it.isTimeRestriction }.size <= 1) { "A branch should at most have one single non-time related restriction!" }
         }

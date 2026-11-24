@@ -105,7 +105,6 @@ class ActivityService(
                 if (updated.alternativeLimit != null && restrictionCount > updated.alternativeLimit!!) {
                     throw LocalizedException("activity.restriction.limit.below.count", restrictionName, restrictionCount)
                 }
-                // copy the editable fields onto the managed restriction, so its version and audit data are kept
                 existing.name = updated.name
                 existing.alternativeStart = updated.alternativeStart
                 existing.alternativeEnd = updated.alternativeEnd
@@ -133,7 +132,6 @@ class ActivityService(
         check(activity.getStatus() != CANCELLED) { "This activity is already cancelled!" }
         check(activity.getStatus() != STARTED) { "A started activity cannot be cancelled anymore!" }
         check(activity.getStatus() != COMPLETED) { "A completed activity cannot be cancelled anymore!" }
-        // unpaid (or already refunded) registrations have nothing to cancel
         val registrations = registrationRepository.getRegistrationsByActivity(activity).filter { it.paid }
         if (registrations.isNotEmpty()) {
             logger.info { "Activity has ${registrations.size} linked registrations to refund or remove..." }

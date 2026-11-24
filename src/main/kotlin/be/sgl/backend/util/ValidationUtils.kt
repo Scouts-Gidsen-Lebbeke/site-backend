@@ -43,7 +43,6 @@ class NisValidator : ConstraintValidator<Nis, String> {
         if (!value.matches(Regex("[0-9]{11}"))) {
             return false
         }
-        // Build the 2000+ variant on the string, so the leading zeros of the base are kept
         val base = value.substring(0, 9)
         val check = value.substring(9, 11).toLong()
         return checksum(base.toLong(), check) || checksum("2$base".toLong(), check)
@@ -81,7 +80,6 @@ annotation class Kbo(
 class KboValidator : ConstraintValidator<Kbo, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
         val kbo = value.nullIfBlank() ?: return true
-        // Numbers starting with 1 are issued since the 0-range ran out
         if (!kbo.matches(Regex("^[01][0-9]{9}\$"))) {
             return false
         }

@@ -57,7 +57,6 @@ class ExternalUserDataProvider(
             logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external update." }
             return super.updateUser(user)
         }
-        // map before saving locally, so an update Groepsadmin can't accept leaves no local changes behind
         val lid = user.toDto(contactRepository.findContactsByUser(user))
         super.updateUser(user)
         ledenApi.patchLid(externalId, true, lid)
@@ -146,8 +145,6 @@ class ExternalUserDataProvider(
             email = this@toDto.email
             rijksregisternummer = nis
             lidtenlaste = nis != null
-            // Groepsadmin requires an address it already knows. When the contact has none (yet), assume it lives at
-            // the member's (postal) address. Addresses only created by this update have no Groepsadmin id yet.
             val knownAddresses = user.addresses.filter { it.externalId != null }
             val contactAddress = address?.takeIf { it.externalId != null }
                 ?: knownAddresses.firstOrNull { it.postalAdress } ?: knownAddresses.firstOrNull()

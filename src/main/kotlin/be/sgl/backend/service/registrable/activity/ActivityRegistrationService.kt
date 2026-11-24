@@ -154,7 +154,6 @@ class ActivityRegistrationService(
             logger.warn { "$username tried to cancel activity registration #$id of another user!" }
             throw ActivityRegistrationNotFoundException()
         }
-        // only the registered user is bound to the cancellable flag, staff can always cancel (and refund)
         if (user.level < RoleLevel.STAFF && !registration.subscribable.cancellable) {
             throw LocalizedException("registrable.registration.not.cancellable", registration.subscribable.name)
         }
@@ -174,11 +173,6 @@ class ActivityRegistrationService(
         logger.info { "Activity registration #$id successfully cancelled" }
     }
 
-    /**
-     * Refunds a paid [registration], the refund webhook then removes it and mails the user.
-     * When nothing is refunded (a free registration, or a price not exceeding the refund cost),
-     * no webhook follows, so it is removed and the user is mailed right away.
-     */
     fun refundOrRemove(registration: ActivityRegistration) {
         if (registration.price > 0 && checkoutProvider.refundPayment(registration)) {
             registration.markRefunded()

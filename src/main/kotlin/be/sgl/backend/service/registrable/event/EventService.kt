@@ -93,7 +93,6 @@ class EventService(
         check(event.getStatus() != CANCELLED) { "This event is already cancelled!" }
         check(event.getStatus() != STARTED) { "A started event cannot be cancelled anymore!" }
         check(event.getStatus() != COMPLETED) { "A completed event cannot be cancelled anymore!" }
-        // unpaid (or already refunded) registrations have nothing to cancel
         val registrations = registrationRepository.getRegistrationsByEvent(event).filter { it.paid }
         if (registrations.isNotEmpty()) {
             logger.info { "Event has ${registrations.size} linked registrations to refund or remove..." }

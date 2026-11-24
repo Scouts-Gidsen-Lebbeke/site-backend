@@ -141,7 +141,6 @@ class EventRegistrationService(
 
     fun cancelRegistrationByToken(cancelToken: String) {
         val registration = paymentRepository.findByCancelToken(cancelToken) ?: throw EventRegistrationNotFoundException()
-        // only the registrant is bound to the cancellable flag, staff can always cancel (and refund)
         if (!registration.subscribable.cancellable) {
             throw LocalizedException("registrable.registration.not.cancellable", registration.subscribable.name)
         }
@@ -157,11 +156,6 @@ class EventRegistrationService(
         logger.info { "Event registration #$id successfully cancelled" }
     }
 
-    /**
-     * Refunds a paid [registration], the refund webhook then removes it and mails the registrant.
-     * When nothing is refunded (a free registration, or a price not exceeding the refund cost),
-     * no webhook follows, so it is removed and the registrant is mailed right away.
-     */
     fun refundOrRemove(registration: EventRegistration) {
         if (registration.price > 0 && checkoutProvider.refundPayment(registration)) {
             registration.markRefunded()
