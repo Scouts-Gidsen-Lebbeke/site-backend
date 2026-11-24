@@ -12,7 +12,6 @@ import be.sgl.backend.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -295,7 +294,6 @@ class EventServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: check uses count < limit, so setting the limit equal to the current count (not lower) is rejected")
         fun `should accept a registration limit equal to the registration count`() {
             // given
             val event = openedEvent().build()
@@ -365,6 +363,38 @@ class EventServiceTest {
         }
 
         @Test
+        fun `should mark a refunded registration as refunded`() {
+            // given
+            val event = openedEvent().build()
+            val registration = eventRegistration().event(event).paid().price(10.0).build()
+            given(eventRepository.findById(1)).willReturn(Optional.of(event))
+            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(registration))
+
+            // when
+            testee.cancelEvent(1)
+
+            // then
+            assertThat(registration.paid).isFalse()
+            then(registrationRepository).should().save(registration)
+        }
+
+        @Test
+        fun `should not refund a free registration`() {
+            // given
+            val event = openedEvent().build()
+            val free = eventRegistration().event(event).paid().price(0.0).build()
+            given(eventRepository.findById(1)).willReturn(Optional.of(event))
+            given(registrationRepository.getRegistrationsByEvent(event)).willReturn(listOf(free))
+
+            // when
+            testee.cancelEvent(1)
+
+            // then
+            then(checkoutProvider).shouldHaveNoInteractions()
+            assertThat(event.cancelled).isTrue()
+        }
+
+        @Test
         fun `should mark the event cancelled without refunds when there are no registrations`() {
             // given
             val event = notYetOpenEvent().build()
@@ -380,7 +410,6 @@ class EventServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: getRegistrationsByEvent includes unpaid registrations; refunding them fails (MollieCheckout checks paid) and aborts the cancellation")
         fun `should only refund paid registrations`() {
             // given
             val event = openedEvent().build()

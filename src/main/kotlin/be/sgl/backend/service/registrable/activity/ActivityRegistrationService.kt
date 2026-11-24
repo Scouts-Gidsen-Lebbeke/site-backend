@@ -62,6 +62,7 @@ class ActivityRegistrationService(
     fun createPaymentForActivity(id: Int, restrictionId: Int, username: String, additionalData: String?): String {
         val user = userRepository.findByUsername(username) ?: throw UserNotFoundException(username)
         val restriction = getActivityRestrictionById(restrictionId)
+        check(restriction.activity.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Registrations for ${restriction.activity.name} are not open!" }
         var registration = validateAndCreateActivityRegistration.execute(restriction, user, additionalData)
         registration = paymentRepository.save(registration)
         logger.info { "Created registration #${registration.id}" }
@@ -101,7 +102,7 @@ class ActivityRegistrationService(
     override fun handlePaymentRefunded(payment: ActivityRegistration) {
         val params = mapOf(
             "member" to payment.user.firstName,
-            "price" to payment.price - checkoutProvider.getRefundCost(payment),
+            "price" to (payment.price - checkoutProvider.getRefundCost(payment)).coerceAtLeast(0.0),
             "activityName" to payment.subscribable.name,
         )
         val mailBuilder = mailService.builder()
@@ -149,6 +150,10 @@ class ActivityRegistrationService(
         if (registration.user.id != user.id && user.level < RoleLevel.STAFF) {
             logger.warn { "$username tried to cancel activity registration #$id of another user!" }
             throw ActivityRegistrationNotFoundException()
+        }
+        // only the registered user is bound to the cancellable flag, staff can always cancel (and refund)
+        if (user.level < RoleLevel.STAFF) {
+            check(registration.subscribable.cancellable) { "Registrations for this activity cannot be cancelled!" }
         }
         cancelRegistration(registration)
     }

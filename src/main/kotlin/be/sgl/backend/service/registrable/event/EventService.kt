@@ -77,7 +77,7 @@ class EventService(
         } else {
             logger.info { "Event registrations are already open, registration limit should respect current registration count" }
             val registrationCount = registrationRepository.countPaidRegistrationsByEvent(eventToUpdate)
-            check(eventFromDto.registrationLimit == null || registrationCount < eventFromDto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
+            check(eventFromDto.registrationLimit == null || registrationCount <= eventFromDto.registrationLimit!!) { "The registration limit cannot be lowered below the current registration count!" }
         }
         eventToUpdate.registrationLimit = eventFromDto.registrationLimit
         eventToUpdate.address = eventFromDto.address
@@ -94,11 +94,14 @@ class EventService(
         check(event.getStatus() != CANCELLED) { "This event is already cancelled!" }
         check(event.getStatus() != STARTED) { "A started event cannot be cancelled anymore!" }
         check(event.getStatus() != COMPLETED) { "A completed event cannot be cancelled anymore!" }
-        val registrations = registrationRepository.getRegistrationsByEvent(event)
+        val registrations = registrationRepository.getRegistrationsByEvent(event).filter { it.paid } // nothing to refund otherwise
         if (registrations.isNotEmpty()) {
             logger.info { "Event has ${registrations.size} linked registrations needing a refund..." }
-            registrations.forEach {
+            // free registrations are marked paid at creation, but have nothing to refund
+            registrations.filter { it.price > 0 }.forEach {
                 checkoutProvider.refundPayment(it)
+                it.markRefunded()
+                registrationRepository.save(it)
                 logger.info { "Refund request sent for registration #${it.id}" }
             }
         }

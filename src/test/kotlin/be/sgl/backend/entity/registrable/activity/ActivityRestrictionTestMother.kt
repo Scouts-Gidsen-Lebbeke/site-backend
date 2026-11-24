@@ -3,7 +3,6 @@ package be.sgl.backend.entity.registrable.activity
 import be.sgl.backend.entity.PayableTestMother
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchTestMother
-import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDateTime
 
 object ActivityRestrictionTestMother {
@@ -39,8 +38,7 @@ object ActivityRestrictionTestMother {
 
         fun build(): ActivityRestriction {
             val restriction = ActivityRestriction()
-            // the id is a generated val without setter
-            ReflectionTestUtils.setField(restriction, "id", id)
+            restriction.id = id
             restriction.activity = activity
             restriction.branch = branch
             restriction.name = name

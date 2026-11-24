@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 class ActivityRestriction : Auditable() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null
+    var id: Int? = null
     @ManyToOne
     lateinit var activity: Activity
     @ManyToOne
@@ -55,10 +55,4 @@ class ActivityRestriction : Auditable() {
      * For the other named options, the alternative limit is then discarded if their total exceeds the branch limit.
      */
     var alternativeLimit: Int? = null
-
-    fun isBranchLimit(): Boolean {
-        // TODO: this should check if there are more then one first
-        return false
-        // return alternativePrice == null && alternativeStart == null && alternativeEnd == null && name == null
-    }
 }

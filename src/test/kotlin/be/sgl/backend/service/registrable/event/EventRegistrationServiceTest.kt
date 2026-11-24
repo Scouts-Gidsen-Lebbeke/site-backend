@@ -21,7 +21,6 @@ import be.sgl.backend.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -192,7 +191,6 @@ class EventRegistrationServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: the event status is never checked, so registrations are accepted for closed, not yet open or cancelled events")
         fun `should fail when registrations for the event are closed`() {
             // given
             val closedEvent = event().open(now.minusDays(10)).closed(now.minusDays(1)).start(now.plusDays(5)).end(now.plusDays(6)).build()
@@ -259,6 +257,25 @@ class EventRegistrationServiceTest {
                 "eventName" to event.name
             ))
             then(mailBuilder).should().send()
+        }
+
+        @Test
+        fun `should not mention a negative refund when cancelling a free registration`() {
+            // given
+            val event = event().name("Quiz").build()
+            val registration = eventRegistration().event(event).firstName("Jan").name("Peeters").price(0.0).build()
+            given(mailService.builder()).willReturn(mailBuilder)
+            given(checkoutProvider.getRefundCost(registration)).willReturn(1.0)
+
+            // when
+            testee.handlePaymentRefunded(registration)
+
+            // then
+            then(mailBuilder).should().template("cancel-event-confirmation.html", mapOf(
+                "customer" to "Jan Peeters",
+                "price" to 0.0,
+                "eventName" to event.name
+            ))
         }
     }
 
@@ -440,15 +457,31 @@ class EventRegistrationServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: Registrable.cancellable is never checked, so registrations of an uncancellable event can be cancelled and refunded")
-        fun `should fail when the event is not cancellable`() {
+        fun `should fail when the registrant cancels a registration of a non cancellable event by token`() {
+            // given
+            val registration = eventRegistration().paid().price(10.0).event(openedEvent().cancellable(false).build()).build()
+            val token = registration.cancelToken!!
+            given(paymentRepository.findByCancelToken(token)).willReturn(registration)
+
+            // when / then
+            assertThatThrownBy { testee.cancelRegistrationByToken(token) }
+                .isInstanceOf(IllegalStateException::class.java)
+                .hasMessage("Registrations for this event cannot be cancelled!")
+            then(checkoutProvider).should(never()).refundPayment(anyValue())
+        }
+
+        @Test
+        fun `should let staff refund a registration of a non cancellable event`() {
             // given
             val registration = eventRegistration().paid().price(10.0).event(openedEvent().cancellable(false).build()).build()
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(paymentRepository.save(registration)).willReturn(registration)
 
-            // when / then
-            assertThatThrownBy { testee.cancelRegistration(1) }
-                .isInstanceOf(IllegalStateException::class.java)
+            // when
+            testee.cancelRegistration(1)
+
+            // then
+            then(checkoutProvider).should().refundPayment(registration)
         }
     }
 }

@@ -39,6 +39,7 @@ class EventRegistrationService(
 
     fun createPaymentForEvent(id: Int, request: CreateEventRegistrationRequest, username: String?): String {
         val event = getEventById(id)
+        check(event.getStatus() == RegistrableStatus.REGISTRATIONS_OPENED) { "Registrations for ${event.name} are not open!" }
         check(!event.needsMobile || request.mobile != null) { "No valid mobile number provided!" }
         val user = username?.let { userRepository.findByUsername(it) }
         check(!isGlobalLimitReached(event)) { "The limit for this event is reached!" }
@@ -93,7 +94,7 @@ class EventRegistrationService(
     override fun handlePaymentRefunded(payment: EventRegistration) {
         val params = mapOf(
             "customer" to "${payment.firstName} ${payment.name}",
-            "price" to payment.price - checkoutProvider.getRefundCost(payment),
+            "price" to (payment.price - checkoutProvider.getRefundCost(payment)).coerceAtLeast(0.0),
             "eventName" to payment.subscribable.name,
         )
         val mailBuilder = mailService.builder()
@@ -137,6 +138,8 @@ class EventRegistrationService(
 
     fun cancelRegistrationByToken(cancelToken: String) {
         val registration = paymentRepository.findByCancelToken(cancelToken) ?: throw EventRegistrationNotFoundException()
+        // only the registrant is bound to the cancellable flag, staff can always cancel (and refund)
+        check(registration.subscribable.cancellable) { "Registrations for this event cannot be cancelled!" }
         cancelRegistration(registration)
     }
 

@@ -15,10 +15,11 @@ class CalculatePriceFromAdditionalData(
         additionalData ?: return 0.0
         val values = jsonMapper
             .readerFor(Map::class.java)
-            .readValue<Map<String, String>>(additionalData)
-            .mapValues { it.value.toDoubleOrNull() ?: it.value }
-        return jsonata(registrable.additionalFormRule)
-            .evaluate(values)
-            .toString().toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
+            .readValue<Map<String, Any?>>(additionalData)
+            // form values can be json numbers or numeric strings
+            .mapValues { (_, value) -> (value as? String)?.toDoubleOrNull() ?: value }
+        // an undefined result (e.g. a missing field) evaluates to null
+        val result: Any? = jsonata(registrable.additionalFormRule).evaluate(values)
+        return result?.toString()?.toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
     }
 }

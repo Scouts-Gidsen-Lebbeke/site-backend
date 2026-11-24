@@ -23,7 +23,6 @@ import be.sgl.backend.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -241,20 +240,18 @@ class ActivityRegistrationServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: neither the service nor CheckRegistrationStatusForUser checks the activity status, so registrations are accepted for closed/not yet open/cancelled activities")
         fun `should fail when registrations for the activity are closed`() {
             // given
             val closedActivity = activity().open(now.minusDays(10)).closed(now.minusDays(1)).start(now.plusDays(5)).end(now.plusDays(6)).build()
             val restriction = activityRestriction().activity(closedActivity).build()
-            val registration = activityRegistration().activity(closedActivity).user(user).restriction(restriction).price(100.0).build()
             given(userRepository.findByUsername("member")).willReturn(user)
             given(restrictionRepository.findById(1)).willReturn(Optional.of(restriction))
-            given(validateAndCreateActivityRegistration.execute(restriction, user, null)).willReturn(registration)
-            given(paymentRepository.save(registration)).willReturn(registration)
 
             // when / then
             assertThatThrownBy { testee.createPaymentForActivity(1, 1, "member", null) }
                 .isInstanceOf(IllegalStateException::class.java)
+                .hasMessageContaining("are not open")
+            then(paymentRepository).shouldHaveNoInteractions()
         }
     }
 
@@ -472,7 +469,6 @@ class ActivityRegistrationServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: the cancellation mail of a free registration states price - refundCost, i.e. a refund of -1.0")
         fun `should not mention a negative refund when cancelling a free registration`() {
             // given
             val activity = activity().name("Kamp").open(now.minusDays(1)).closed(now.plusDays(5)).start(now.plusDays(10)).end(now.plusDays(12)).build()
@@ -493,15 +489,17 @@ class ActivityRegistrationServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: Registrable.cancellable is never checked, so registrations of an uncancellable activity can be cancelled and refunded")
-        fun `should fail when the activity is not cancellable`() {
+        fun `should refund a registration of a non cancellable activity when staff cancels it by id`() {
             // given
             val registration = activityRegistration().paid().price(100.0).activity(openedActivity().cancellable(false).build()).build()
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(paymentRepository.save(registration)).willReturn(registration)
 
-            // when / then
-            assertThatThrownBy { testee.cancelRegistration(1) }
-                .isInstanceOf(IllegalStateException::class.java)
+            // when
+            testee.cancelRegistration(1)
+
+            // then
+            then(checkoutProvider).should().refundPayment(registration)
         }
     }
 
@@ -543,6 +541,37 @@ class ActivityRegistrationServiceTest {
             val staff = user().id(3).username("staff").build()
             userRole().user(staff).role(staffRole(branch().build()).build()).build()
             val registration = activityRegistration().paid().price(100.0).activity(openedActivity().build()).user(user).build()
+            given(userRepository.findByUsername("staff")).willReturn(staff)
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+            given(paymentRepository.save(registration)).willReturn(registration)
+
+            // when
+            testee.cancelRegistrationForUser(1, "staff")
+
+            // then
+            then(checkoutProvider).should().refundPayment(registration)
+        }
+
+        @Test
+        fun `should fail when the user cancels a registration of a non cancellable activity`() {
+            // given
+            val registration = activityRegistration().paid().price(100.0).activity(openedActivity().cancellable(false).build()).user(user).build()
+            given(userRepository.findByUsername("member")).willReturn(user)
+            given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
+
+            // when / then
+            assertThatThrownBy { testee.cancelRegistrationForUser(1, "member") }
+                .isInstanceOf(IllegalStateException::class.java)
+                .hasMessage("Registrations for this activity cannot be cancelled!")
+            then(checkoutProvider).should(never()).refundPayment(anyValue())
+        }
+
+        @Test
+        fun `should let staff cancel a registration of a non cancellable activity`() {
+            // given
+            val staff = user().id(3).username("staff").build()
+            userRole().user(staff).role(staffRole(branch().build()).build()).build()
+            val registration = activityRegistration().paid().price(100.0).activity(openedActivity().cancellable(false).build()).user(user).build()
             given(userRepository.findByUsername("staff")).willReturn(staff)
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
             given(paymentRepository.save(registration)).willReturn(registration)

@@ -12,12 +12,12 @@ import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
 import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.util.anyValue
+import be.sgl.backend.util.argThatValue
 import be.sgl.backend.util.argumentCaptor
 import be.sgl.backend.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -92,6 +92,21 @@ class ActivityServiceTest {
     inner class CreateActivity {
 
         @Test
+        fun `should create the restrictions anew and link them to the new activity`() {
+            // given
+            val request = activityRequest().restrictions(activityRestriction().id(7).build()).build()
+            givenSaveReturnsArgument()
+
+            // when
+            testee.createActivity(request)
+
+            // then
+            then(activityRepository).should().save(argThatValue<Activity> { activity ->
+                activity.restrictions.single().let { it.id == null && it.activity === activity }
+            })
+        }
+
+        @Test
         fun `should fail when the closing date is already in the past`() {
             // given
             val request = activityRequest().open(now.minusDays(10)).closed(now.minusDays(1)).build()
@@ -154,7 +169,6 @@ class ActivityServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: restrictions from the request get a new Branch instance each (BranchBaseDTO.toEntity, no equals), so validateRestrictions groups nothing and never rejects")
         fun `should reject invalid restrictions for the same branch`() {
             // given
             val branch = branch().id(5).build()
@@ -317,7 +331,6 @@ class ActivityServiceTest {
             }
 
             @Test
-            @Disabled("Possible bug: updated restrictions from the request are never linked to the activity (lateinit activity stays uninitialized), unlike in createActivity")
             fun `should link the new restrictions to the updated activity`() {
                 // given
                 val activity = notYetOpenActivity().build()
@@ -366,13 +379,112 @@ class ActivityServiceTest {
             }
 
             @Test
-            @Disabled("Possible bug: ActivityRestrictionDTO.toEntity() drops the id, so existing restrictions are never found and every update of an opened activity with restrictions fails")
             fun `should allow updating an opened activity when the existing restrictions are kept`() {
                 // given
                 val existing = activityRestriction().id(7).alternativePrice(50.0).build()
                 val activity = openedActivity().restrictions(existing).build()
                 given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                givenSaveReturnsArgument()
                 val request = activityRequest().open(activity.open).restrictions(existing).build()
+
+                // when / then
+                assertThatCode { testee.updateActivity(1, request) }.doesNotThrowAnyException()
+            }
+
+            @Test
+            fun `should link a new restriction to the opened activity`() {
+                // given
+                val existing = activityRestriction().id(7).name("weekend").build()
+                val activity = openedActivity().restrictions(existing).build()
+                given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                givenSaveReturnsArgument()
+                val request = activityRequest().open(activity.open)
+                    .restrictions(existing, activityRestriction().id(null).name("week").build()).build()
+
+                // when
+                testee.updateActivity(1, request)
+
+                // then
+                assertThat(activity.restrictions).hasSize(2).allSatisfy { assertThat(it.activity).isSameAs(activity) }
+            }
+
+            @Test
+            fun `should keep the existing restriction instance and update its editable fields`() {
+                // given
+                val existing = activityRestriction().id(7).name("weekend").build()
+                val activity = openedActivity().restrictions(existing).build()
+                given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                givenSaveReturnsArgument()
+                val renamed = activityRestriction().id(7).name("long weekend").alternativeLimit(20).build()
+                val request = activityRequest().open(activity.open).restrictions(renamed).build()
+
+                // when
+                testee.updateActivity(1, request)
+
+                // then
+                assertThat(activity.restrictions).containsExactly(existing)
+                assertThat(existing.name).isEqualTo(renamed.name)
+                assertThat(existing.alternativeLimit).isEqualTo(renamed.alternativeLimit)
+            }
+
+            @Test
+            fun `should fail when a restriction of another activity is used`() {
+                // given
+                val existing = activityRestriction().id(7).name("weekend").build()
+                val activity = openedActivity().restrictions(existing).build()
+                given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                val foreign = activityRestriction().id(8).name("other activity").build()
+                val request = activityRequest().open(activity.open).restrictions(existing, foreign).build()
+
+                // when / then
+                assertThatThrownBy { testee.updateActivity(1, request) }
+                    .isInstanceOf(IllegalStateException::class.java)
+                    .hasMessage("Restrictions of another activity cannot be used!")
+            }
+
+            @Test
+            fun `should fail when the branch of an existing restriction is altered`() {
+                // given
+                val existing = activityRestriction().id(7).branch(branch().id(1).build()).build()
+                val activity = openedActivity().restrictions(existing).build()
+                given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                val moved = activityRestriction().id(7).branch(branch().id(2).build()).build()
+                val request = activityRequest().open(activity.open).restrictions(moved).build()
+
+                // when / then
+                assertThatThrownBy { testee.updateActivity(1, request) }
+                    .isInstanceOf(IllegalStateException::class.java)
+                    .hasMessage("The branch of a restriction cannot be altered once the activity has started!")
+            }
+
+            @Test
+            fun `should fail when the limit of a restriction is lowered below its registration count`() {
+                // given
+                val registrationCount = 10
+                val existing = activityRestriction().id(7).alternativeLimit(registrationCount).build()
+                val activity = openedActivity().restrictions(existing).build()
+                given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                given(registrationRepository.countByRestriction_Id(7)).willReturn(registrationCount)
+                val lowered = activityRestriction().id(7).alternativeLimit(registrationCount - 1).build()
+                val request = activityRequest().open(activity.open).restrictions(lowered).build()
+
+                // when / then
+                assertThatThrownBy { testee.updateActivity(1, request) }
+                    .isInstanceOf(IllegalStateException::class.java)
+                    .hasMessage("The limit of a restriction cannot be lowered below its current registration count!")
+            }
+
+            @Test
+            fun `should accept a restriction limit equal to its registration count`() {
+                // given
+                val registrationCount = 10
+                val existing = activityRestriction().id(7).alternativeLimit(registrationCount + 5).build()
+                val activity = openedActivity().restrictions(existing).build()
+                given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+                given(registrationRepository.countByRestriction_Id(7)).willReturn(registrationCount)
+                givenSaveReturnsArgument()
+                val lowered = activityRestriction().id(7).alternativeLimit(registrationCount).build()
+                val request = activityRequest().open(activity.open).restrictions(lowered).build()
 
                 // when / then
                 assertThatCode { testee.updateActivity(1, request) }.doesNotThrowAnyException()
@@ -425,7 +537,6 @@ class ActivityServiceTest {
             }
 
             @Test
-            @Disabled("Possible bug: check uses count < limit, so setting the limit equal to the current count (not lower) is rejected")
             fun `should accept a registration limit equal to the registration count`() {
                 // given
                 val activity = openedActivity().build()
@@ -513,7 +624,6 @@ class ActivityServiceTest {
         }
 
         @Test
-        @Disabled("Possible bug: getRegistrationsByActivity includes unpaid registrations; refunding them fails (MollieCheckout checks paid) and aborts the cancellation")
         fun `should only refund paid registrations`() {
             // given
             val activity = openedActivity().build()
@@ -526,6 +636,38 @@ class ActivityServiceTest {
 
             // then
             then(checkoutProvider).should(org.mockito.Mockito.never()).refundPayment(unpaid)
+        }
+
+        @Test
+        fun `should mark a refunded registration as refunded`() {
+            // given
+            val activity = openedActivity().build()
+            val registration = activityRegistration().id(1).activity(activity).paid().price(100.0).build()
+            given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+            given(registrationRepository.getRegistrationsByActivity(activity)).willReturn(listOf(registration))
+
+            // when
+            testee.cancelActivity(1)
+
+            // then
+            assertThat(registration.paid).isFalse()
+            then(registrationRepository).should().save(registration)
+        }
+
+        @Test
+        fun `should not refund a free registration`() {
+            // given
+            val activity = openedActivity().build()
+            val free = activityRegistration().id(1).activity(activity).paid().price(0.0).build()
+            given(activityRepository.findById(1)).willReturn(Optional.of(activity))
+            given(registrationRepository.getRegistrationsByActivity(activity)).willReturn(listOf(free))
+
+            // when
+            testee.cancelActivity(1)
+
+            // then
+            then(checkoutProvider).shouldHaveNoInteractions()
+            assertThat(activity.cancelled).isTrue()
         }
     }
 }
