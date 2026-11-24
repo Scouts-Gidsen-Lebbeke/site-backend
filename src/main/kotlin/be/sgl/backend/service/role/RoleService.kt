@@ -98,7 +98,9 @@ class RoleService(
     fun deassignRoleFromUser(id: Int) {
         val userRole = userRoleRepository.findById(id).orElseThrow { UserRoleNotFoundException() }
         check(!userRole.role.memberRole) { "Member roles can't be manually deassigned!" }
-        check(!userRole.role.adminRole || userRoleRepository.findByRole(userRole.role).isNotEmpty()) { "At least one admin should exist!" }
+        check(!userRole.role.adminRole || userRoleRepository.findByRole(userRole.role).any { it.user.id != userRole.user.id }) {
+            "At least one admin should exist!"
+        }
         userDataProvider.endRole(userRole)
     }
 

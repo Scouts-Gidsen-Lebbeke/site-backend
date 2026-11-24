@@ -34,11 +34,14 @@ class UserService(
      */
     fun getUserWithDetails(userDetails: CustomUserDetails): UserDTO {
         val user = userRepository.findByUsername(userDetails.username)
+            // a match on name and email may only claim a user that isn't linked to another account yet
             ?: userRepository.findByNameAndFirstNameAndEmail(userDetails.lastName, userDetails.firstName, userDetails.email)
+                ?.takeIf { it.username == null }
             ?: checkForInitialRun.execute(userDetails)
             ?: throw UserNotFoundException(userDetails.username)
         if (user.username == null) {
             userRepository.updateUsername(user.id!!, userDetails.username)
+            user.username = userDetails.username
         }
         return UserDTO.of(user)
     }
