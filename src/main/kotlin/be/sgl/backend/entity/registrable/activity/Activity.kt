@@ -20,7 +20,7 @@ class Activity : Registrable() {
      * This reduction has no effect on members that are entitled to reduction.
      */
     var siblingReduction: Double = 0.0
-    @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     var restrictions = mutableListOf<ActivityRestriction>()
 
     fun getRestrictionsForBranches(branches: List<Branch>): List<ActivityRestriction> {
