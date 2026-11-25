@@ -1,0 +1,38 @@
+package be.sgl.backend.calendar.web
+
+import be.sgl.backend.shared.address.AddressDTO
+import be.sgl.backend.calendar.domain.CalendarItem
+import be.sgl.backend.shared.util.StartEndTime
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
+import java.time.LocalDateTime
+
+class CreateOrUpdateCalendarItemRequest(
+    @field:NotNull(message = "{NotNull.calendarItem.start}")
+    override var start: LocalDateTime?,
+    @field:NotNull(message = "{NotNull.calendarItem.end}")
+    override var end: LocalDateTime?,
+    @field:NotBlank(message = "{NotBlank.calendarItem.title}")
+    @field:Size(max = 50, message = "{Size.calendarItem.title}")
+    var title: String?,
+    @field:NotBlank(message = "{NotBlank.calendarItem.content}")
+    var content: String?,
+    var image: String?,
+    var closed: Boolean?,
+    var address: AddressDTO?,
+    @field:NotEmpty(message = "{NotEmpty.calendarItem.calendars}")
+    var calendars: MutableList<Int>
+) : StartEndTime {
+
+    fun toEntity() = CalendarItem().also {
+        it.start = start!!
+        it.end = end!!
+        it.title = title!!
+        it.content = content!!
+        it.image = image
+        closed?.let { closed -> it.closed = closed }
+        it.address = address?.toEntity()
+    }
+}

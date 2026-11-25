@@ -33,6 +33,6 @@ class ModularityTest {
     }
 
     companion object {
-        val STRICT_MODULES = listOf("shared", "setting", "news", "organization", "access")
+        val STRICT_MODULES = listOf("shared", "setting", "news", "organization", "access", "calendar")
     }
 }
