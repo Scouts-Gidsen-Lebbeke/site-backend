@@ -8,6 +8,12 @@ spring:
     url: # TODO: pass as an environment variable
     username: # TODO: pass as an environment variable
     password: # TODO: pass as an environment variable
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
   messages:
     fallback-to-system-locale: false
   servlet:
