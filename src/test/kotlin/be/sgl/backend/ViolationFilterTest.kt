@@ -56,9 +56,45 @@ class ViolationFilterTest {
         assertThat(offending).containsOnly(false)
     }
 
+    @Test
+    fun `should flag violation when the message wording is not recognised`() {
+        // given
+        val message = "Unexpected wording from a newer Modulith version"
+
+        // when
+        val offending = ViolationFilter.isOffending(message, strictModules)
+
+        // then
+        assertThat(offending).isTrue()
+    }
+
+    @Test
+    fun `should flag field injection when it happens in a strict module`() {
+        // given
+        val message = "Module Shared uses field injection in be.sgl.backend.shared.mail.MailService.sender. Prefer constructor injection instead!"
+
+        // when
+        val offending = ViolationFilter.isOffending(message, strictModules)
+
+        // then
+        assertThat(offending).isTrue()
+    }
+
+    @Test
+    fun `should tolerate field injection when it happens in a legacy module`() {
+        // given
+        val message = "Module Service uses field injection in be.sgl.backend.service.payment.PaymentService.mailService. Prefer constructor injection instead!"
+
+        // when
+        val offending = ViolationFilter.isOffending(message, strictModules)
+
+        // then
+        assertThat(offending).isFalse()
+    }
+
     companion object {
         const val STRICT_SOURCE_VIOLATION =
-            "Module 'news' depends on module 'entity' via be.sgl.backend.news.domain.TmpN -> be.sgl.backend.shared.address.Address. Allowed targets: shared."
+            "Module 'news' depends on module 'entity' via be.sgl.backend.news.domain.TmpN -> be.sgl.backend.entity.Address. Allowed targets: shared."
 
         const val LEGACY_SOURCE_VIOLATION =
             "Module 'tmpa' depends on non-exposed type be.sgl.backend.news.domain.NewsItem within module 'news'!\n" +
