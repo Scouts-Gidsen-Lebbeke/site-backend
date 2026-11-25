@@ -31,6 +31,7 @@ object UserTestMother {
         private val addresses = mutableListOf<Address>()
         private var level = RoleLevel.GUEST
         private var staffData = StaffData()
+        private var withoutStaffData = false
 
         fun id(id: Int?) = apply { this.id = id }
 
@@ -72,6 +73,8 @@ object UserTestMother {
 
         fun staffData(staffData: StaffData) = apply { this.staffData = staffData }
 
+        fun withoutStaffData() = apply { withoutStaffData = true }
+
         fun build(): User {
             val user = User()
             user.id = id
@@ -95,6 +98,7 @@ object UserTestMother {
             ReflectionTestUtils.setField(user, "levelOrdinal", level.ordinal)
             staffData.user = user
             user.staffData = staffData
+            if (withoutStaffData) ReflectionTestUtils.setField(user, "staffData", null)
             return user
         }
     }

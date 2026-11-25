@@ -74,6 +74,23 @@ class GetBranchWithStaffTest {
     }
 
     @Test
+    fun `should skip staff without staff data when listing staff`() {
+        // given
+        val withData = user().id(1).name("withData").build()
+        val withoutData = user().id(2).name("withoutData").withoutStaffData().build()
+        given(branchService.getBranch(id)).willReturn(BranchDTO.of(branch))
+        given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
+        given(accessApi.staffUserIdsOf(id)).willReturn(listOf(1, 2))
+        given(userRepository.findAllById(listOf(1, 2))).willReturn(listOf(withData, withoutData))
+
+        // when
+        val result = testee.execute(id)
+
+        // then
+        assertThat(result.staff).extracting("name").containsExactly(withData.name)
+    }
+
+    @Test
     fun `should omit staff without loading it when staff is hidden`() {
         // given
         given(branchService.getBranch(id)).willReturn(BranchDTO.of(branch))

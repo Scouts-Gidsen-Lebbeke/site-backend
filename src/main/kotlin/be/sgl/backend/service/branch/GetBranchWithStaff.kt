@@ -3,6 +3,8 @@ package be.sgl.backend.service.branch
 import be.sgl.backend.access.AccessApi
 import be.sgl.backend.dto.branch.BranchWithStaff
 import be.sgl.backend.dto.user.StaffDTO
+import be.sgl.backend.entity.user.StaffData
+import be.sgl.backend.entity.user.User
 import be.sgl.backend.organization.application.BranchService
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.setting.SettingApi
@@ -20,10 +22,15 @@ class GetBranchWithStaff(
     fun execute(id: Int): BranchWithStaff {
         val branch = branchService.getBranch(id)
         val staff = if (settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)) {
-            userRepository.findAllById(accessApi.staffUserIdsOf(id)).map { StaffDTO.of(it, id) }
+            userRepository.findAllById(accessApi.staffUserIdsOf(id)).filter(::hasStaffData).map { StaffDTO.of(it, id) }
         } else {
             emptyList()
         }
         return BranchWithStaff.of(branch, staff)
+    }
+
+    private fun hasStaffData(user: User): Boolean {
+        val staffData: StaffData? = user.staffData
+        return staffData != null
     }
 }
