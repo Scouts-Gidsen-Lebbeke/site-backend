@@ -56,7 +56,6 @@ object MedicalRecordTestMother {
 
         fun build(): MedicalRecord {
             val record = MedicalRecord()
-            // id is a JPA-managed val (@MapsId), so it can only be set reflectively
             ReflectionTestUtils.setField(record, "id", id)
             record.user = user
             record.mayBePhotographed = mayBePhotographed
