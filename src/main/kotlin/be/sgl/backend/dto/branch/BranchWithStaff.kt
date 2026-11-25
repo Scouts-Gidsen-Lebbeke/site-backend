@@ -1,8 +1,8 @@
 package be.sgl.backend.dto.branch
 
 import be.sgl.backend.dto.user.StaffDTO
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.organization.domain.BranchStatus
+import be.sgl.backend.organization.web.BranchDTO
 import be.sgl.backend.shared.Sex
 
 data class BranchWithStaff(
@@ -20,10 +20,9 @@ data class BranchWithStaff(
     val staff: List<StaffDTO>
 ) {
     companion object {
-        fun of(branch: Branch): BranchWithStaff {
-            return BranchWithStaff(branch.id!!, branch.name, branch.image, branch.email, branch.minimumAge,
-                branch.maximumAge ?: 0, branch.sex, branch.description, branch.law, branch.status, branch.staffTitle,
-                branch.staff.map { StaffDTO.of(it, branch) })
+        fun of(branch: BranchDTO, staff: List<StaffDTO>): BranchWithStaff {
+            return BranchWithStaff(branch.id, branch.name, branch.image, branch.email, branch.minimumAge,
+                branch.maximumAge, branch.sex, branch.description, branch.law, branch.status, branch.staffTitle, staff)
         }
     }
 }

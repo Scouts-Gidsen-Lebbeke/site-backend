@@ -4,9 +4,9 @@ import be.sgl.backend.dto.Customer
 import be.sgl.backend.dto.registrable.activity.ActivityRegistrationStatus
 import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
-import be.sgl.backend.entity.role.RoleTestMother.staffRole
+import be.sgl.backend.organization.domain.RoleTestMother.staffRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.shared.exception.ActivityNotFoundException

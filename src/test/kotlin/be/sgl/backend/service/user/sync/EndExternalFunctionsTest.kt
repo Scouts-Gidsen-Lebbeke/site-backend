@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.role.RoleTestMother.adminRole
+import be.sgl.backend.organization.domain.RoleTestMother.adminRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
@@ -8,7 +8,7 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_
 import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.openapi.model.Lid
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION

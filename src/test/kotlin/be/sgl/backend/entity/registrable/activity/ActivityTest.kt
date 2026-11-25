@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.registrable.activity
 
 import be.sgl.backend.entity.PayableTestMother.activity
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode

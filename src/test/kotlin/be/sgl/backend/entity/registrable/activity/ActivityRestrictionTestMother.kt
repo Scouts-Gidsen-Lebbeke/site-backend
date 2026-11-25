@@ -1,8 +1,8 @@
 package be.sgl.backend.entity.registrable.activity
 
 import be.sgl.backend.entity.PayableTestMother
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchTestMother
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.BranchTestMother
 import java.time.LocalDateTime
 
 object ActivityRestrictionTestMother {

@@ -5,11 +5,11 @@ import be.sgl.backend.shared.alert.AlertLogger
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.dto.membership.MembershipDTO
 import be.sgl.backend.dto.membership.UserRegistrationDTO
-import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.organization.domain.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.branch.BranchRepository
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.BranchRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository

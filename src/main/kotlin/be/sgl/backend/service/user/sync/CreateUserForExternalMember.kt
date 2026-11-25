@@ -7,7 +7,7 @@ import be.sgl.backend.entity.user.*
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.PersoonsGegevens
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
 import mu.KotlinLogging

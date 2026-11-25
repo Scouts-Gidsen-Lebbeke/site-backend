@@ -1,6 +1,6 @@
 package be.sgl.backend.repository.activity
 
-import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.organization.domain.Branch
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User

@@ -1,7 +1,7 @@
 package be.sgl.backend.service.role
 
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.BranchStatus
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.shared.util.Usecase

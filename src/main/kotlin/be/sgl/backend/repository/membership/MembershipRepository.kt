@@ -1,6 +1,6 @@
 package be.sgl.backend.repository.membership
 
-import be.sgl.backend.entity.branch.Branch
+import be.sgl.backend.organization.domain.Branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.user.User

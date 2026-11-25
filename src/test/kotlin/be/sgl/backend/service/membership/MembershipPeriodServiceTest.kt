@@ -1,10 +1,10 @@
 package be.sgl.backend.service.membership
 
-import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.organization.web.BranchBaseDTO
 import be.sgl.backend.dto.membership.CreateOrUpdateMembershipPeriodRequestTestMother.membershipPeriodRequest
 import be.sgl.backend.dto.membership.MembershipPeriodResult
 import be.sgl.backend.dto.membership.MembershipRestrictionDTO
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestrictionTestMother.membershipRestriction

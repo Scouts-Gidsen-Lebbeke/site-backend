@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.membership
 
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestrictionTestMother.membershipRestriction
 import org.assertj.core.api.Assertions.assertThat

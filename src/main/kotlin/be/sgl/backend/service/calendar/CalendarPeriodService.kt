@@ -3,7 +3,7 @@ package be.sgl.backend.service.calendar
 import be.sgl.backend.dto.calendar.*
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarPeriod
-import be.sgl.backend.repository.branch.BranchRepository
+import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.repository.calendar.CalendarItemRepository
 import be.sgl.backend.repository.calendar.CalendarPeriodRepository
 import be.sgl.backend.repository.calendar.CalendarRepository

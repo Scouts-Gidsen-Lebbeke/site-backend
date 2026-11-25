@@ -5,12 +5,12 @@ import be.sgl.backend.dto.DeclarationFormTestMother.declarationForm
 import be.sgl.backend.dto.organization.RepresentativeTestMother.representative
 import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
-import be.sgl.backend.entity.organization.Organization
-import be.sgl.backend.entity.organization.OrganizationTestMother.organization
+import be.sgl.backend.organization.domain.Organization
+import be.sgl.backend.organization.domain.OrganizationTestMother.organization
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
-import be.sgl.backend.service.organization.OrganizationProvider
+import be.sgl.backend.organization.application.OrganizationProvider
 import generated.Fiche28186
 import generated.Verzendingen
 import jakarta.xml.bind.JAXBContext

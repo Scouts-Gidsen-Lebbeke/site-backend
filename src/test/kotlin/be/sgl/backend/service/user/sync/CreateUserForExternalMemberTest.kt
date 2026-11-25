@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.role.RoleTestMother.memberRole
+import be.sgl.backend.organization.domain.BranchTestMother.branch
+import be.sgl.backend.organization.domain.RoleTestMother.memberRole
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.shared.Sex
@@ -14,7 +14,7 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.contact
 import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.openapi.model.PersoonsGegevens.GeslachtEnum
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.util.anyValue

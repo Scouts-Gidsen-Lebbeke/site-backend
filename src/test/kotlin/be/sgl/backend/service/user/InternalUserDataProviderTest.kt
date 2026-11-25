@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.role.RoleTestMother.staffRole
+import be.sgl.backend.organization.domain.BranchTestMother.branch
+import be.sgl.backend.organization.domain.RoleTestMother.staffRole
 import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user

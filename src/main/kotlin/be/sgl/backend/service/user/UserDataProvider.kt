@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.role.Role
+import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.repository.user.UserRepository

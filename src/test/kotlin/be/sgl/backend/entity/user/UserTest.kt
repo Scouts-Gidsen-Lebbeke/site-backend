@@ -2,10 +2,10 @@ package be.sgl.backend.entity.user
 
 import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.shared.address.AddressTestMother.address
-import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.role.RoleTestMother.adminRole
-import be.sgl.backend.entity.role.RoleTestMother.memberRole
-import be.sgl.backend.entity.role.RoleTestMother.staffRole
+import be.sgl.backend.organization.domain.BranchTestMother.branch
+import be.sgl.backend.organization.domain.RoleTestMother.adminRole
+import be.sgl.backend.organization.domain.RoleTestMother.memberRole
+import be.sgl.backend.organization.domain.RoleTestMother.staffRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import org.assertj.core.api.Assertions.assertThat

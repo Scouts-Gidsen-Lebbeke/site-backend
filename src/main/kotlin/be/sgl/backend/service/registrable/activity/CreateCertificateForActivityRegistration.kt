@@ -2,7 +2,7 @@ package be.sgl.backend.service.registrable.activity
 
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
-import be.sgl.backend.service.organization.OrganizationProvider
+import be.sgl.backend.organization.application.OrganizationProvider
 import be.sgl.backend.shared.util.*
 import java.time.LocalDate
 

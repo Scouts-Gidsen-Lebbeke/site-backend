@@ -1,9 +1,9 @@
 package be.sgl.backend.shared.util
 
-import be.sgl.backend.entity.role.RoleTestMother.adminRole
+import be.sgl.backend.organization.domain.RoleTestMother.adminRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 
 class PersistedUsers(

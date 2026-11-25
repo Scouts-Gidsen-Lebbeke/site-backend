@@ -4,7 +4,7 @@ import be.sgl.backend.dto.registrable.activity.ActivityBaseDTO
 import be.sgl.backend.dto.registrable.activity.ActivityDTO
 import be.sgl.backend.dto.registrable.activity.ActivityResult
 import be.sgl.backend.dto.registrable.activity.CreateOrUpdateActivityRequest
-import be.sgl.backend.entity.branch.isSameAs
+import be.sgl.backend.organization.domain.isSameAs
 import be.sgl.backend.entity.registrable.RegistrableStatus.*
 import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.activity.Activity

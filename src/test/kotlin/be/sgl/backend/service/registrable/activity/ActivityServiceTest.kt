@@ -3,7 +3,7 @@ package be.sgl.backend.service.registrable.activity
 import be.sgl.backend.dto.registrable.activity.CreateOrUpdateActivityRequestTestMother.activityRequest
 import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
 import be.sgl.backend.shared.exception.ActivityNotFoundException

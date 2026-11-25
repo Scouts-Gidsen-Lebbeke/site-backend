@@ -1,9 +1,9 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationForm
-import be.sgl.backend.entity.organization.Organization
+import be.sgl.backend.organization.domain.Organization
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
-import be.sgl.backend.service.organization.OrganizationProvider
+import be.sgl.backend.organization.application.OrganizationProvider
 import generated.*
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service

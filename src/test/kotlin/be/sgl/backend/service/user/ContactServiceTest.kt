@@ -2,7 +2,7 @@ package be.sgl.backend.service.user
 
 import be.sgl.backend.dto.user.CreateOrUpdateContactRequestTestMother.contactRequest
 import be.sgl.backend.shared.address.AddressTestMother.address
-import be.sgl.backend.entity.role.RoleTestMother.adminRole
+import be.sgl.backend.organization.domain.RoleTestMother.adminRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole

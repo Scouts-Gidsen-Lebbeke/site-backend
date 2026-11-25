@@ -3,11 +3,11 @@ package be.sgl.backend.controller.role
 import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.shared.security.OnlyAdmin
 import be.sgl.backend.shared.security.OnlyAuthenticated
-import be.sgl.backend.dto.branch.BranchDTO
+import be.sgl.backend.organization.web.BranchDTO
 import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.dto.role.StaffLinkRequest
 import be.sgl.backend.service.role.FindStaffBranchForUser
-import be.sgl.backend.service.role.RoleService
+import be.sgl.backend.service.role.UserRoleService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/user-roles")
 @Tag(name = "User roles", description = "Endpoints for managing user roles.")
 class UserRoleController(
-    private val roleService: RoleService,
+    private val userRoleService: UserRoleService,
     private val findStaffBranchForUser: FindStaffBranchForUser,
 ) {
 
@@ -43,7 +43,7 @@ class UserRoleController(
         ]
     )
     fun getUserRolesByRole(@PathVariable roleId: Int): ResponseEntity<List<UserRoleDTO>> {
-        return ResponseEntity.ok(roleService.getUserRolesByRole(roleId))
+        return ResponseEntity.ok(userRoleService.getUserRolesByRole(roleId))
     }
 
     @PostMapping("/staff", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
@@ -58,7 +58,7 @@ class UserRoleController(
         ]
     )
     fun markUserAsStaff(@Valid @RequestBody link: StaffLinkRequest): ResponseEntity<UserRoleDTO> {
-        return ResponseEntity(roleService.markUserAsStaff(link.branchId!!, link.username!!), HttpStatus.CREATED)
+        return ResponseEntity(userRoleService.markUserAsStaff(link.branchId!!, link.username!!), HttpStatus.CREATED)
     }
 
     @GetMapping("/staff-branch", produces = [APPLICATION_JSON_VALUE])
@@ -89,7 +89,7 @@ class UserRoleController(
         ]
     )
     fun markUserAsAdmin(@Valid @RequestBody username: String): ResponseEntity<UserRoleDTO> {
-        return ResponseEntity(roleService.markUserAsAdmin(username), HttpStatus.CREATED)
+        return ResponseEntity(userRoleService.markUserAsAdmin(username), HttpStatus.CREATED)
     }
 
     @DeleteMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
@@ -104,6 +104,6 @@ class UserRoleController(
         ]
     )
     fun deassignRoleFromUser(@PathVariable id: Int) {
-        roleService.deassignRoleFromUser(id)
+        userRoleService.deassignRoleFromUser(id)
     }
 }

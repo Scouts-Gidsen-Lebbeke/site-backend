@@ -2,6 +2,7 @@ package be.sgl.backend.dto.role
 
 import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.entity.role.UserRole
+import be.sgl.backend.organization.web.RoleDTO
 
 // read-only
 data class UserRoleDTO(

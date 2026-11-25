@@ -2,17 +2,17 @@ package be.sgl.backend.service.user.inital
 
 import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.organization.ContactMethod
-import be.sgl.backend.entity.organization.ContactMethodType
-import be.sgl.backend.entity.organization.Organization
-import be.sgl.backend.entity.organization.OrganizationType
-import be.sgl.backend.entity.role.Role.Companion.adminRole
+import be.sgl.backend.organization.domain.ContactMethod
+import be.sgl.backend.organization.domain.ContactMethodType
+import be.sgl.backend.organization.domain.Organization
+import be.sgl.backend.organization.domain.OrganizationType
+import be.sgl.backend.organization.domain.Role.Companion.adminRole
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.GroepenApi
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Groep
-import be.sgl.backend.repository.organization.OrganizationRepository
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.OrganizationRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import be.sgl.backend.service.user.sync.CreateUserForExternalMember

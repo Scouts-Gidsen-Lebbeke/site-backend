@@ -4,7 +4,7 @@ import be.sgl.backend.shared.config.LocaleConfig.Companion.BE_NL
 import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
-import be.sgl.backend.service.organization.OrganizationProvider
+import be.sgl.backend.organization.application.OrganizationProvider
 import be.sgl.backend.shared.util.StampSpecs
 import be.sgl.backend.shared.util.belgian
 import be.sgl.backend.shared.util.fillForm

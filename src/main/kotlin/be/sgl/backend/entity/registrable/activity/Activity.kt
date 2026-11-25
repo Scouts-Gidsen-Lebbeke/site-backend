@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.registrable.activity
 
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.isSameAs
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.isSameAs
 import be.sgl.backend.entity.registrable.Registrable
 import jakarta.persistence.*
 

@@ -1,14 +1,14 @@
 package be.sgl.backend.service.calendar
 
 import be.sgl.backend.dto.calendar.CalendarRequestTestMother.calendarPeriodRequest
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.calendar.Calendar
 import be.sgl.backend.entity.calendar.CalendarItemTestMother.calendarItem
 import be.sgl.backend.entity.calendar.CalendarPeriod
 import be.sgl.backend.entity.calendar.CalendarPeriodTestMother.calendarPeriod
 import be.sgl.backend.entity.calendar.CalendarTestMother.calendar
 import be.sgl.backend.shared.exception.CalendarPeriodNotFoundException
-import be.sgl.backend.repository.branch.BranchRepository
+import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.repository.calendar.CalendarItemRepository
 import be.sgl.backend.repository.calendar.CalendarPeriodRepository
 import be.sgl.backend.repository.calendar.CalendarRepository

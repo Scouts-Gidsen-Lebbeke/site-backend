@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.calendar
 
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchTestMother
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.BranchTestMother
 
 object CalendarTestMother {
 

@@ -1,7 +1,7 @@
 package be.sgl.backend.entity
 
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchTestMother
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.BranchTestMother
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother

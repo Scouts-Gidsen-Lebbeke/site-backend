@@ -1,6 +1,8 @@
 package be.sgl.backend.entity.role
 
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.organization.domain.Role
+import be.sgl.backend.organization.domain.RoleTestMother
 import be.sgl.backend.entity.user.UserTestMother
 
 object UserRoleTestMother {

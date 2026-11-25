@@ -1,8 +1,8 @@
 package be.sgl.backend.service.registrable.activity
 
 import be.sgl.backend.dto.registrable.activity.ActivityRegistrationStatus
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchStatus
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.BranchStatus
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.user.User

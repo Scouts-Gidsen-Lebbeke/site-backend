@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.registrable.activity
 
-import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.organization.web.BranchBaseDTO
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime

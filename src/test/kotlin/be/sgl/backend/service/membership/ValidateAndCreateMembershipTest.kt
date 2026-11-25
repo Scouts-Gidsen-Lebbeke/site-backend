@@ -1,7 +1,7 @@
 package be.sgl.backend.service.membership
 
-import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.branch.BranchTestMother.branch
+import be.sgl.backend.organization.domain.Branch
+import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestrictionTestMother.membershipRestriction
@@ -9,7 +9,7 @@ import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.SiblingRelationTestMother.siblingRelation
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.repository.branch.BranchRepository
+import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.shared.util.reducePrice

@@ -2,7 +2,7 @@ package be.sgl.backend.service.membership
 
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
-import be.sgl.backend.service.organization.OrganizationProvider
+import be.sgl.backend.organization.application.OrganizationProvider
 import be.sgl.backend.shared.util.*
 import java.time.LocalDate
 

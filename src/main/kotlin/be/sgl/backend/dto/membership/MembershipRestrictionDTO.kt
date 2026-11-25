@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.membership
 
-import be.sgl.backend.dto.branch.BranchBaseDTO
+import be.sgl.backend.organization.web.BranchBaseDTO
 import be.sgl.backend.entity.membership.MembershipRestriction
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate

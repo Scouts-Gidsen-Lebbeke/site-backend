@@ -2,7 +2,7 @@ package be.sgl.backend.news.web
 
 import be.sgl.backend.news.domain.NewsItemRepository
 import be.sgl.backend.news.domain.NewsItemTestMother.newsItem
-import be.sgl.backend.repository.role.RoleRepository
+import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.util.IntegrationTest
 import be.sgl.backend.shared.util.PersistedUsers
