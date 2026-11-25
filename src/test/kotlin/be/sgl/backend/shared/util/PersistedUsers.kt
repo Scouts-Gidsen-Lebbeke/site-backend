@@ -13,10 +13,11 @@ class PersistedUsers(
     private val userRoleRepository: UserRoleRepository
 ) {
 
-    fun admin(username: String) {
+    fun admin(username: String): Int {
         val role = roleRepository.save(adminRole().id(null).build())
         val admin = userRepository.save(user().id(null).username(username).build())
         userRoleRepository.save(userRole().userId(admin.id!!).roleId(role.id!!).build())
+        return role.id!!
     }
 
     fun withoutRoles(username: String) {

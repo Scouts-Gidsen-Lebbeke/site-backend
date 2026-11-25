@@ -7,7 +7,6 @@ import be.sgl.backend.organization.web.BranchDTO
 import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.dto.role.StaffLinkRequest
 import be.sgl.backend.service.role.UserRoleService
-import be.sgl.backend.shared.exception.UserRoleNotFoundException
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -20,12 +19,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.stereotype.Controller
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @Validated
-@Controller
+@RestController
 @RequestMapping("/user-roles")
 @Tag(name = "User roles", description = "Endpoints for managing user roles.")
 class UserRoleController(
@@ -91,18 +89,18 @@ class UserRoleController(
         return ResponseEntity(userRoleService.markUserAsAdmin(username), HttpStatus.CREATED)
     }
 
-    @DeleteMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
+    @DeleteMapping("/role/{roleId}/user/{username}")
     @OnlyAdmin
     @Operation(
-        summary = "Delete a user role",
-        description = "Deletes the user role, identified with the provided id. Only admin and staff roles can be manually unlinked.",
+        summary = "Deassign a role from a user",
+        description = "Unlinks the role with the given id from the user with the given username. Only admin and staff roles can be manually unlinked.",
         responses = [
-            ApiResponse(responseCode = "200", description = "User role deleted"),
-            ApiResponse(responseCode = "400", description = "Invalid role or bad deassign request", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
-            ApiResponse(responseCode = "404", description = "User role not found", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
+            ApiResponse(responseCode = "200", description = "Role deassigned"),
+            ApiResponse(responseCode = "400", description = "Member role or last admin", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))]),
+            ApiResponse(responseCode = "404", description = "User, role or user role not found", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
         ]
     )
-    fun deassignRoleFromUser(@PathVariable id: Int) {
-        throw UserRoleNotFoundException()
+    fun deassignRoleFromUser(@PathVariable roleId: Int, @PathVariable username: String) {
+        userRoleService.deassignRoleFromUser(roleId, username)
     }
 }
