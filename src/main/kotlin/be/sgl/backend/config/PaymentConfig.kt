@@ -1,6 +1,6 @@
 package be.sgl.backend.config
 
-import be.sgl.backend.util.WhenNotBlank
+import be.sgl.backend.shared.util.WhenNotBlank
 import be.woutschoovaerts.mollie.Client
 import be.woutschoovaerts.mollie.ClientBuilder
 import org.springframework.beans.factory.annotation.Value

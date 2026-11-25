@@ -8,7 +8,7 @@ import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.MedicalRecordRepository
-import be.sgl.backend.util.reducePrice
+import be.sgl.backend.shared.util.reducePrice
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 

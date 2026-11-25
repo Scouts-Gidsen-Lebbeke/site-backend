@@ -3,7 +3,7 @@ package be.sgl.backend.service.payment
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
-import be.sgl.backend.util.WhenNotBlank
+import be.sgl.backend.shared.util.WhenNotBlank
 import org.springframework.stereotype.Service
 
 @Service

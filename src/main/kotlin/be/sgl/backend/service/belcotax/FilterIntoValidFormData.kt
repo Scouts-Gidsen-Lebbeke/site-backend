@@ -5,7 +5,7 @@ import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.service.SettingService
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.shared.util.Usecase
 import mu.KotlinLogging
 
 @Usecase

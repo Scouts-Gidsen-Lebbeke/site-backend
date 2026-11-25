@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.role
 
-import be.sgl.backend.entity.Auditable
+import be.sgl.backend.shared.persistence.Auditable
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.*
 import java.io.Serializable

@@ -1,5 +1,6 @@
 package be.sgl.backend.entity.user
 
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.AddressTestMother.address
 import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.role.RoleTestMother.adminRole

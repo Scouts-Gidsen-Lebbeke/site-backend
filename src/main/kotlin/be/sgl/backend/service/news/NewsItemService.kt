@@ -4,11 +4,11 @@ import be.sgl.backend.dto.news.CreateOrUpdateNewsItemRequest
 import be.sgl.backend.dto.news.NewsItemDTO
 import be.sgl.backend.entity.news.NewsItem
 import be.sgl.backend.repository.news.NewsItemRepository
-import be.sgl.backend.exception.NewsItemNotFoundException
-import be.sgl.backend.service.ImageService
+import be.sgl.backend.shared.exception.NewsItemNotFoundException
+import be.sgl.backend.shared.image.ImageService
 import org.springframework.stereotype.Service
-import be.sgl.backend.service.ImageService.ImageDirectory.*
-import be.sgl.backend.util.nullIfBlank
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.*
+import be.sgl.backend.shared.util.nullIfBlank
 
 @Service
 class NewsItemService(

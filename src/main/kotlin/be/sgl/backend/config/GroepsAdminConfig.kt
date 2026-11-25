@@ -1,6 +1,6 @@
 package be.sgl.backend.config
 
-import be.sgl.backend.config.security.BearerTokenFilter
+import be.sgl.backend.shared.security.BearerTokenFilter
 import be.sgl.backend.openapi.ApiClient
 import be.sgl.backend.openapi.api.*
 import org.springframework.beans.factory.annotation.Value

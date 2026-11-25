@@ -3,11 +3,11 @@ package be.sgl.backend.service.organization
 import be.sgl.backend.dto.organization.OrganizationDTO
 import be.sgl.backend.repository.AddressRepository
 import be.sgl.backend.repository.organization.OrganizationRepository
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.ORGANIZATION
-import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
-import be.sgl.backend.exception.OrganizationNotFoundException
-import be.sgl.backend.util.nullIfBlank
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.ORGANIZATION
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.TEMPORARY
+import be.sgl.backend.shared.exception.OrganizationNotFoundException
+import be.sgl.backend.shared.util.nullIfBlank
 import org.springframework.stereotype.Service
 
 @Service

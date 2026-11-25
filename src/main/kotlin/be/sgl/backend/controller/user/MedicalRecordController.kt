@@ -1,8 +1,8 @@
 package be.sgl.backend.controller.user
 
-import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.OnlyAuthenticated
-import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.shared.config.CustomUserDetails
+import be.sgl.backend.shared.security.OnlyAuthenticated
+import be.sgl.backend.shared.security.OnlyStaff
 import be.sgl.backend.dto.user.MedicalRecordDTO
 import be.sgl.backend.service.user.MedicalRecordService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse

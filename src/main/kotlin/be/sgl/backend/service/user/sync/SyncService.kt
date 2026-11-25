@@ -1,13 +1,13 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.alert.AlertCode
-import be.sgl.backend.alert.AlertLogger
+import be.sgl.backend.shared.alert.AlertCode
+import be.sgl.backend.shared.alert.AlertLogger
 import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.exception.UserNotFoundException
-import be.sgl.backend.util.ForExternalOrganization
-import be.sgl.backend.util.I18nUtil.Companion.i18n
+import be.sgl.backend.shared.exception.UserNotFoundException
+import be.sgl.backend.shared.util.ForExternalOrganization
+import be.sgl.backend.shared.util.I18nUtil.Companion.i18n
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter

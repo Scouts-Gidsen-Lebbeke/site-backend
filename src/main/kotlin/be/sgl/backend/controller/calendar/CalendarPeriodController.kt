@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.calendar
 
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.calendar.CalendarPeriodDTO
 import be.sgl.backend.dto.calendar.CreateOrUpdateCalendarPeriodRequest
 import be.sgl.backend.service.calendar.CalendarPeriodService

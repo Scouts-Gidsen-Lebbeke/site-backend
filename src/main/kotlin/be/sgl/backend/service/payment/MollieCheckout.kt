@@ -3,7 +3,7 @@ package be.sgl.backend.service.payment
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
-import be.sgl.backend.util.appendRequestParameters
+import be.sgl.backend.shared.util.appendRequestParameters
 import be.woutschoovaerts.mollie.Client
 import be.woutschoovaerts.mollie.data.common.Amount
 import be.woutschoovaerts.mollie.data.customer.CustomerRequest

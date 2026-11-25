@@ -3,7 +3,7 @@ package be.sgl.backend.service.payment
 import be.sgl.backend.entity.Payment
 import be.sgl.backend.entity.SimplifiedPaymentStatus
 import be.sgl.backend.repository.PaymentRepository
-import be.sgl.backend.service.MailService
+import be.sgl.backend.shared.mail.MailService
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired

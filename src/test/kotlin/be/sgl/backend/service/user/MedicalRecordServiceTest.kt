@@ -3,7 +3,7 @@ package be.sgl.backend.service.user
 import be.sgl.backend.entity.user.BloodGroup
 import be.sgl.backend.entity.user.MedicalRecordTestMother.medicalRecord
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.repository.user.UserRepository
 import org.assertj.core.api.Assertions.assertThat

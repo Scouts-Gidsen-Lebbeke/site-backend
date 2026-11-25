@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.registrable.activity
 
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.registrable.activity.ActivityBaseDTO
 import be.sgl.backend.dto.registrable.activity.ActivityDTO
 import be.sgl.backend.dto.registrable.activity.ActivityResult

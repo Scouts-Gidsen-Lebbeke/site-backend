@@ -12,8 +12,8 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.contact
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

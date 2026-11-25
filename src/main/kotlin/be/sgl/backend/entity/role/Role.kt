@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.role
 
 import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import jakarta.persistence.*
 
 /**

@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.inital
 
-import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.organization.ContactMethod
 import be.sgl.backend.entity.organization.ContactMethodType
@@ -14,7 +14,7 @@ import be.sgl.backend.openapi.model.Groep
 import be.sgl.backend.repository.organization.OrganizationRepository
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.exception.IncompleteConfigurationException
+import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import be.sgl.backend.service.user.sync.CreateUserForExternalMember
 import be.sgl.backend.service.user.sync.ExternalUsecase
 import jakarta.annotation.PostConstruct

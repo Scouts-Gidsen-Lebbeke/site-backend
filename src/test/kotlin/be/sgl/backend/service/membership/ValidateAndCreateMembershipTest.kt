@@ -12,7 +12,7 @@ import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.SiblingRepository
-import be.sgl.backend.util.reducePrice
+import be.sgl.backend.shared.util.reducePrice
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested

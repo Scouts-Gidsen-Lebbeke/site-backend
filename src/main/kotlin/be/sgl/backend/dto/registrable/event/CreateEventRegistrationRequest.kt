@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.registrable.event
 
 import be.sgl.backend.entity.registrable.event.EventRegistration
-import be.sgl.backend.util.PhoneNumber
+import be.sgl.backend.shared.util.PhoneNumber
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 

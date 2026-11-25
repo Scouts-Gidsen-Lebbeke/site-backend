@@ -1,9 +1,9 @@
 package be.sgl.backend.controller.registrable.activity
 
-import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.OnlyAuthenticated
-import be.sgl.backend.config.security.OnlyStaff
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.config.CustomUserDetails
+import be.sgl.backend.shared.security.OnlyAuthenticated
+import be.sgl.backend.shared.security.OnlyStaff
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.PaymentUrl
 import be.sgl.backend.dto.registrable.activity.ActivityRegistrationDTO
 import be.sgl.backend.dto.registrable.activity.ActivityRegistrationStatusDTO

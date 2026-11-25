@@ -7,7 +7,7 @@ import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.util.anyValue
+import be.sgl.backend.shared.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested

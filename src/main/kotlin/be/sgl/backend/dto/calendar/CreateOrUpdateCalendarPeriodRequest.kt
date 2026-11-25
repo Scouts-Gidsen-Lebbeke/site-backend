@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.calendar
 
 import be.sgl.backend.entity.calendar.CalendarPeriod
-import be.sgl.backend.util.StartEndDate
+import be.sgl.backend.shared.util.StartEndDate
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size

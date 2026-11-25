@@ -1,12 +1,12 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.OnlyAuthenticated
-import be.sgl.backend.service.SseService
+import be.sgl.backend.shared.config.CustomUserDetails
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.OnlyAuthenticated
+import be.sgl.backend.shared.sse.SseService
 import be.sgl.backend.service.belcotax.BelcotaxService
-import be.sgl.backend.util.I18nUtil.Companion.i18n
-import be.sgl.backend.util.zipped
+import be.sgl.backend.shared.util.I18nUtil.Companion.i18n
+import be.sgl.backend.shared.util.zipped
 import generated.Verzendingen
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation

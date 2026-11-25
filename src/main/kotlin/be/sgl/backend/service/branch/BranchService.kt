@@ -7,10 +7,10 @@ import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.exception.BranchNotFoundException
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
-import be.sgl.backend.service.ImageService.ImageDirectory.BRANCH
+import be.sgl.backend.shared.exception.BranchNotFoundException
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.TEMPORARY
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.BRANCH
 import be.sgl.backend.service.SettingService
 import org.springframework.stereotype.Service
 

@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.branch
 
-import be.sgl.backend.entity.Auditable
+import be.sgl.backend.shared.persistence.Auditable
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.User
 import jakarta.persistence.*

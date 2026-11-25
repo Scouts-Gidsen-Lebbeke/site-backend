@@ -4,10 +4,10 @@ import be.sgl.backend.dto.registrable.event.CreateOrUpdateEventRequestTestMother
 import be.sgl.backend.entity.PayableTestMother.event
 import be.sgl.backend.entity.PaymentTestMother.eventRegistration
 import be.sgl.backend.entity.registrable.event.Event
-import be.sgl.backend.exception.EventNotFoundException
+import be.sgl.backend.shared.exception.EventNotFoundException
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.util.anyValue
+import be.sgl.backend.shared.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy

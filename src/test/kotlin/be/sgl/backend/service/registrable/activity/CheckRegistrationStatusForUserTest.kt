@@ -8,7 +8,7 @@ import be.sgl.backend.entity.user.MedicalRecordTestMother.medicalRecord
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.MedicalRecordRepository
-import be.sgl.backend.util.reducePrice
+import be.sgl.backend.shared.util.reducePrice
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

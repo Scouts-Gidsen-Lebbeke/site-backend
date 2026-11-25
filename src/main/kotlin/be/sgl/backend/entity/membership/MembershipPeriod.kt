@@ -1,9 +1,9 @@
 package be.sgl.backend.entity.membership
 
-import be.sgl.backend.entity.Auditable
+import be.sgl.backend.shared.persistence.Auditable
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.isSameAs
-import be.sgl.backend.util.belgian
+import be.sgl.backend.shared.util.belgian
 import jakarta.persistence.*
 import java.time.LocalDate
 

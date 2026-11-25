@@ -8,15 +8,15 @@ import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.Role.Companion.memberRole
 import be.sgl.backend.entity.role.Role.Companion.staffRole
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.repository.role.UserRoleRepository
-import be.sgl.backend.exception.BranchNotFoundException
-import be.sgl.backend.exception.RoleNotFoundException
-import be.sgl.backend.exception.UserNotFoundException
-import be.sgl.backend.exception.UserRoleNotFoundException
+import be.sgl.backend.shared.exception.BranchNotFoundException
+import be.sgl.backend.shared.exception.RoleNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.UserRoleNotFoundException
 import be.sgl.backend.service.user.UserDataProvider
 import org.springframework.stereotype.Service
 

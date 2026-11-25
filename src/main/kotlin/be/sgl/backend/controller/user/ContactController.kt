@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.user
 
-import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.OnlyAuthenticated
+import be.sgl.backend.shared.config.CustomUserDetails
+import be.sgl.backend.shared.security.OnlyAuthenticated
 import be.sgl.backend.dto.user.ContactDTO
 import be.sgl.backend.dto.user.CreateOrUpdateContactRequest
 import be.sgl.backend.service.user.ContactService

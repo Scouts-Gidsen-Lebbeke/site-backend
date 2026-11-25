@@ -25,7 +25,7 @@ Prefer the cheapest test that proves the behavior:
 
 | What | Test type |
 |---|---|
-| Entity/DTO logic, `util/*` functions | Plain unit test, no Spring and no mocks |
+| Entity/DTO logic, `shared/util/*` functions | Plain unit test, no Spring and no mocks |
 | `@Usecase` / `*Service` logic | Unit test with `@ExtendWith(MockitoExtension::class)`, `@Mock` collaborators and `@InjectMocks lateinit var testee` |
 | Custom repository queries (`@Query`, derived queries with logic) | Repository slice (see §3) |
 | Endpoint mapping, validation, security annotations, JSON shape | Web slice or `@IntegrationTest` (see §3) |
@@ -37,7 +37,7 @@ Prefer the cheapest test that proves the behavior:
 
 ## 3. Integration tests: keep the number of Spring contexts small
 Each distinct context configuration starts a new Spring context and new containers, which is slow.
-- **Every full-context test uses `@IntegrationTest`** (`src/test/kotlin/be/sgl/backend/util/IntegrationTest.kt`) and nothing else at class level.
+- **Every full-context test uses `@IntegrationTest`** (`src/test/kotlin/be/sgl/backend/shared/util/IntegrationTest.kt`) and nothing else at class level.
 - On individual test classes, **don't add** any of these, because each one forks a new context:
   - `@MockitoBean`, `@MockBean` or `@SpyBean`
   - `@TestPropertySource` or `@DynamicPropertySource`
@@ -46,7 +46,7 @@ Each distinct context configuration starts a new Spring context and new containe
   - an extra `@Import`
 - If an integration test needs a replacement bean (for example `MockedCheckoutProvider` for `CheckoutProvider`), put it in a shared test configuration that `@IntegrationTest` imports, so every integration test shares one context.
 - Isolate tests through data, not through contexts. Each test creates the data it needs (with test mothers, saved via repositories) and must not depend on other tests or their order. Clean up in `@AfterEach`, or use `@Transactional` when the flow under test doesn't depend on commit behavior.
-- **Slices:** when a narrower context is enough, define a **meta-annotation once** in `be.sgl.backend.util` and reuse it, just like `@IntegrationTest`:
+- **Slices:** when a narrower context is enough, define a **meta-annotation once** in `be.sgl.backend.shared.util` and reuse it, just like `@IntegrationTest`:
   - `@RepositoryTest` = `@DataJpaTest` + `@AutoConfigureTestDatabase(replace = NONE)` + `@ActiveProfiles("test")` + `@Import(DatabaseContainerConfiguration::class)`. There's no embedded DB on the classpath and the queries target MariaDB, so plain `@DataJpaTest` (as in `ActivityRepositoryTest`) doesn't work.
   - `@ControllerTest` = `@WebMvcTest` + the security config and the shared mocks the controllers need.
 

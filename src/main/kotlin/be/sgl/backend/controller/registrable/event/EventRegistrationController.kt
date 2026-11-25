@@ -1,8 +1,8 @@
 package be.sgl.backend.controller.registrable.event
 
-import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.OnlyStaff
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.config.CustomUserDetails
+import be.sgl.backend.shared.security.OnlyStaff
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.PaymentUrl
 import be.sgl.backend.dto.registrable.event.CreateEventRegistrationRequest
 import be.sgl.backend.dto.registrable.event.EventRegistrationDTO

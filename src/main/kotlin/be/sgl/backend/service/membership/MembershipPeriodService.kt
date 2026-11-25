@@ -7,7 +7,7 @@ import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestriction
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
-import be.sgl.backend.exception.MembershipPeriodNotFoundException
+import be.sgl.backend.shared.exception.MembershipPeriodNotFoundException
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDate

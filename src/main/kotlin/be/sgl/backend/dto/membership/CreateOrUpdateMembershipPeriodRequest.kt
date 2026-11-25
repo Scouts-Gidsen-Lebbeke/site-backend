@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.membership
 
 import be.sgl.backend.entity.membership.MembershipPeriod
-import be.sgl.backend.util.StartEndDate
+import be.sgl.backend.shared.util.StartEndDate
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero

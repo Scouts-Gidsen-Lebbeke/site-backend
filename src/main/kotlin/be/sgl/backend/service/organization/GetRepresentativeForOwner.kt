@@ -3,11 +3,11 @@ package be.sgl.backend.service.organization
 import be.sgl.backend.dto.organization.Representative
 import be.sgl.backend.entity.setting.SettingId
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.ORGANIZATION
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.ORGANIZATION
 import be.sgl.backend.service.SettingService
-import be.sgl.backend.exception.IncompleteConfigurationException
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.shared.exception.IncompleteConfigurationException
+import be.sgl.backend.shared.util.Usecase
 import org.springframework.cache.annotation.Cacheable
 
 @Usecase

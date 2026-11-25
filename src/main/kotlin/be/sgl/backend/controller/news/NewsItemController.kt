@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.news
 
-import be.sgl.backend.config.security.OnlyStaff
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyStaff
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.news.CreateOrUpdateNewsItemRequest
 import be.sgl.backend.dto.news.NewsItemDTO
 import be.sgl.backend.service.news.NewsItemService

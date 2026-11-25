@@ -3,9 +3,9 @@ package be.sgl.backend.service.membership
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestriction
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
-import be.sgl.backend.service.MailService
-import be.sgl.backend.util.I18nUtil
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.shared.mail.MailService
+import be.sgl.backend.shared.util.I18nUtil
+import be.sgl.backend.shared.util.Usecase
 import java.time.temporal.ChronoUnit
 
 @Usecase

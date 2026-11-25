@@ -4,7 +4,7 @@ import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.MailService
+import be.sgl.backend.shared.mail.MailService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

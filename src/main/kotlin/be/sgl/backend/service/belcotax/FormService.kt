@@ -1,13 +1,13 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
+import be.sgl.backend.shared.config.LocaleConfig.Companion.BE_NL
 import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.service.organization.OrganizationProvider
-import be.sgl.backend.util.StampSpecs
-import be.sgl.backend.util.belgian
-import be.sgl.backend.util.fillForm
+import be.sgl.backend.shared.util.StampSpecs
+import be.sgl.backend.shared.util.belgian
+import be.sgl.backend.shared.util.fillForm
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

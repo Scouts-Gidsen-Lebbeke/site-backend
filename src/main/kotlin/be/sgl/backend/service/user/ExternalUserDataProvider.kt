@@ -5,14 +5,14 @@ import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.exception.LocalizedException
+import be.sgl.backend.shared.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.*
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.service.user.sync.CreateExternalFunctions
 import be.sgl.backend.service.user.sync.EndExternalFunctions
-import be.sgl.backend.util.ForExternalOrganization
+import be.sgl.backend.shared.util.ForExternalOrganization
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

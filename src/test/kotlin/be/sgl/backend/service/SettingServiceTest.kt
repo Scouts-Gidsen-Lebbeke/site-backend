@@ -3,8 +3,8 @@ package be.sgl.backend.service
 import be.sgl.backend.entity.setting.Setting
 import be.sgl.backend.entity.setting.SettingTestMother.setting
 import be.sgl.backend.repository.SettingRepository
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

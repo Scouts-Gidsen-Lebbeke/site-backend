@@ -1,5 +1,6 @@
 package be.sgl.backend.entity
 
+import be.sgl.backend.shared.persistence.Auditable
 import jakarta.persistence.*
 
 @MappedSuperclass
