@@ -46,6 +46,7 @@ class UserRoleService(
         return UserRoleDTO.of(user, role)
     }
 
+    @Transactional
     fun deassignRoleFromUser(roleId: Int, username: String) {
         val user = getUserByUsername(username)
         val role = roleService.getRoleById(roleId)
