@@ -10,7 +10,9 @@ import be.sgl.backend.organization.web.BranchDTO
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.shared.exception.UserNotFoundException
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserRoleService(
@@ -19,15 +21,18 @@ class UserRoleService(
     private val branchService: BranchService,
     private val userDataProvider: UserDataProvider,
     private val accessApi: AccessApi,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val entityManager: EntityManager
 ) {
 
+    @Transactional
     fun markUserAsStaff(branchId: Int, username: String): UserRoleDTO {
         val role = roleRepository.getStaffRoleToSyncByBranch(roleService.getBranchById(branchId))
         checkNotNull(role) { "No staff role configured for the given branch!" }
         return assignRole(username, role)
     }
 
+    @Transactional
     fun markUserAsAdmin(username: String): UserRoleDTO {
         val role = roleService.findAdminRole()
         return assignRole(username, role)
@@ -36,6 +41,8 @@ class UserRoleService(
     private fun assignRole(username: String, role: Role): UserRoleDTO {
         val user = getUserByUsername(username)
         check(userDataProvider.startRole(user, role)) { "User already has this role!" }
+        entityManager.flush()
+        entityManager.refresh(user)
         return UserRoleDTO.of(user, role)
     }
 

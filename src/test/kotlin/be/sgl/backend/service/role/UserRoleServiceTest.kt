@@ -13,6 +13,7 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.shared.exception.RoleNotFoundException
 import be.sgl.backend.shared.exception.UserNotFoundException
+import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -22,6 +23,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.inOrder
 import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
@@ -39,6 +41,8 @@ class UserRoleServiceTest {
     lateinit var accessApi: AccessApi
     @Mock
     lateinit var userRepository: UserRepository
+    @Mock
+    lateinit var entityManager: EntityManager
     @InjectMocks
     lateinit var testee: UserRoleService
 
@@ -97,6 +101,25 @@ class UserRoleServiceTest {
         }
 
         @Test
+        fun `should refresh the user after starting the role when assigning a role`() {
+            // given
+            val user = user().username(username).build()
+            val role = adminRole().id(2).build()
+            given(roleService.findAdminRole()).willReturn(role)
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(userDataProvider.startRole(user, role)).willReturn(true)
+
+            // when
+            testee.markUserAsAdmin(username)
+
+            // then
+            val order = inOrder(userDataProvider, entityManager)
+            order.verify(userDataProvider).startRole(user, role)
+            order.verify(entityManager).flush()
+            order.verify(entityManager).refresh(user)
+        }
+
+        @Test
         fun `should fail when the user already has the role`() {
             // given
             val user = user().username(username).build()
@@ -109,6 +132,7 @@ class UserRoleServiceTest {
             assertThatThrownBy { testee.markUserAsAdmin(username) }
                 .isInstanceOf(IllegalStateException::class.java)
                 .hasMessage("User already has this role!")
+            then(entityManager).shouldHaveNoInteractions()
         }
 
         @Test
