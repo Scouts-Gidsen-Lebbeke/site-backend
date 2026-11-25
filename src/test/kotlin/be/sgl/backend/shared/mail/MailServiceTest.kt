@@ -1,9 +1,6 @@
 package be.sgl.backend.shared.mail
 
-import be.sgl.backend.entity.organization.OrganizationTestMother.organization
-import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.shared.exception.IncompleteConfigurationException
-import be.sgl.backend.repository.organization.OrganizationRepository
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
@@ -42,7 +39,7 @@ class MailServiceTest {
     @Mock
     lateinit var templateEngine: SpringTemplateEngine
     @Mock
-    lateinit var organizationRepository: OrganizationRepository
+    lateinit var defaultSenderProvider: DefaultSenderProvider
 
     lateinit var testee: MailService
 
@@ -51,7 +48,7 @@ class MailServiceTest {
 
     @BeforeEach
     fun setUp() {
-        testee = MailService(mailSender, templateEngine, organizationRepository, baseUrl)
+        testee = MailService(mailSender, templateEngine, defaultSenderProvider, baseUrl)
     }
 
     @AfterEach
@@ -100,14 +97,14 @@ class MailServiceTest {
             assertThat(message.getRecipients(Message.RecipientType.CC).map { it.toString() }).containsExactly("c@mail.be")
             assertThat(message.subject).isEqualTo("Onderwerp")
             assertThat(htmlBody(message)).isEqualTo("<p>Hallo</p>")
-            then(organizationRepository).shouldHaveNoInteractions()
+            then(defaultSenderProvider).shouldHaveNoInteractions()
         }
 
         @Test
         fun `should send from the organization email when no sender is given`() {
             // given
             val message = givenMimeMessage()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().email(organizationEmail).build())
+            given(defaultSenderProvider.defaultSenderEmail()).willReturn(organizationEmail)
 
             // when
             testee.builder().to("a@mail.be").subject("Onderwerp").body("body").send()
@@ -119,10 +116,10 @@ class MailServiceTest {
         }
 
         @Test
-        fun `should swallow the failure and not send when no organization is configured and no sender is given`() {
+        fun `should swallow the failure and not send when no default sender is available and no sender is given`() {
             // given
             givenMimeMessage()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(null)
+            given(defaultSenderProvider.defaultSenderEmail()).willAnswer { throw IncompleteConfigurationException("No organization configured!") }
 
             // when
             assertThatCode { testee.builder().to("a@mail.be").subject("Onderwerp").body("body").send() }.doesNotThrowAnyException()
@@ -173,7 +170,7 @@ class MailServiceTest {
         fun `should add the organization email as recipient when it is configured`() {
             // given
             val message = givenMimeMessage()
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().email(organizationEmail).build())
+            given(defaultSenderProvider.defaultSenderEmail()).willReturn(organizationEmail)
 
             // when
             testee.builder().from("leiding@scouts.be").toOrganization().subject("Onderwerp").body("body").send()
@@ -183,25 +180,14 @@ class MailServiceTest {
         }
 
         @Test
-        fun `should fail when no organization is configured`() {
+        fun `should fail when no default sender is available`() {
             // given
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(null)
+            given(defaultSenderProvider.defaultSenderEmail()).willAnswer { throw IncompleteConfigurationException("No organization configured!") }
 
             // when / then
             assertThatThrownBy { testee.builder().toOrganization() }
                 .isInstanceOf(IncompleteConfigurationException::class.java)
                 .hasMessage("No organization configured!")
-        }
-
-        @Test
-        fun `should fail when the organization has no email`() {
-            // given
-            given(organizationRepository.getByType(OrganizationType.OWNER)).willReturn(organization().build())
-
-            // when / then
-            assertThatThrownBy { testee.builder().toOrganization() }
-                .isInstanceOf(IncompleteConfigurationException::class.java)
-                .hasMessage("No organization email configured!")
         }
     }
 

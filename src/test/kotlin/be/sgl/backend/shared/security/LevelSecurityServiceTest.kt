@@ -1,12 +1,5 @@
 package be.sgl.backend.shared.security
 
-import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.role.RoleTestMother.adminRole
-import be.sgl.backend.entity.role.RoleTestMother.memberRole
-import be.sgl.backend.entity.role.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
-import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.repository.user.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -24,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 class LevelSecurityServiceTest {
 
     @Mock
-    lateinit var userRepository: UserRepository
+    lateinit var userLevelProvider: UserLevelProvider
     @InjectMocks
     lateinit var testee: LevelSecurityService
 
@@ -41,12 +34,10 @@ class LevelSecurityServiceTest {
     inner class IsAdmin {
 
         @Test
-        fun `should be true when the current user has an admin role`() {
+        fun `should be true when the current user has admin level`() {
             // given
             authenticateAs(USERNAME)
-            val user = user().username(USERNAME).build()
-            userRole().user(user).role(adminRole().build()).build()
-            given(userRepository.findByUsername(USERNAME)).willReturn(user)
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(RoleLevel.ADMIN)
 
             // when
             val isAdmin = testee.isAdmin()
@@ -56,12 +47,10 @@ class LevelSecurityServiceTest {
         }
 
         @Test
-        fun `should be false when the current user only has a staff role`() {
+        fun `should be false when the current user has staff level`() {
             // given
             authenticateAs(USERNAME)
-            val user = user().username(USERNAME).build()
-            userRole().user(user).role(staffRole(branch().build()).build()).build()
-            given(userRepository.findByUsername(USERNAME)).willReturn(user)
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(RoleLevel.STAFF)
 
             // when
             val isAdmin = testee.isAdmin()
@@ -79,14 +68,14 @@ class LevelSecurityServiceTest {
 
             // then
             assertThat(isAdmin).isFalse()
-            then(userRepository).shouldHaveNoInteractions()
+            then(userLevelProvider).shouldHaveNoInteractions()
         }
 
         @Test
         fun `should be false when the authenticated user is unknown`() {
             // given
             authenticateAs(USERNAME)
-            given(userRepository.findByUsername(USERNAME)).willReturn(null)
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(null)
 
             // when
             val isAdmin = testee.isAdmin()
@@ -100,12 +89,10 @@ class LevelSecurityServiceTest {
     inner class IsStaff {
 
         @Test
-        fun `should be true when the current user has a staff role`() {
+        fun `should be true when the current user has staff level`() {
             // given
             authenticateAs(USERNAME)
-            val user = user().username(USERNAME).build()
-            userRole().user(user).role(staffRole(branch().build()).build()).build()
-            given(userRepository.findByUsername(USERNAME)).willReturn(user)
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(RoleLevel.STAFF)
 
             // when
             val isStaff = testee.isStaff()
@@ -118,9 +105,7 @@ class LevelSecurityServiceTest {
         fun `should be true when the current user is admin`() {
             // given
             authenticateAs(USERNAME)
-            val user = user().username(USERNAME).build()
-            userRole().user(user).role(adminRole().build()).build()
-            given(userRepository.findByUsername(USERNAME)).willReturn(user)
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(RoleLevel.ADMIN)
 
             // when
             val isStaff = testee.isStaff()
@@ -130,12 +115,10 @@ class LevelSecurityServiceTest {
         }
 
         @Test
-        fun `should be false when the current user only has a member role`() {
+        fun `should be false when the current user only has guest level`() {
             // given
             authenticateAs(USERNAME)
-            val user = user().username(USERNAME).build()
-            userRole().user(user).role(memberRole(branch().build()).build()).build()
-            given(userRepository.findByUsername(USERNAME)).willReturn(user)
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(RoleLevel.GUEST)
 
             // when
             val isStaff = testee.isStaff()
@@ -145,10 +128,10 @@ class LevelSecurityServiceTest {
         }
 
         @Test
-        fun `should be false when the current user has no roles`() {
+        fun `should be false when the current user has no level`() {
             // given
             authenticateAs(USERNAME)
-            given(userRepository.findByUsername(USERNAME)).willReturn(user().username(USERNAME).build())
+            given(userLevelProvider.levelOf(USERNAME)).willReturn(RoleLevel.GUEST)
 
             // when
             val isStaff = testee.isStaff()

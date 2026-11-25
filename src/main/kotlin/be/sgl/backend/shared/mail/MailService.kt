@@ -1,8 +1,5 @@
 package be.sgl.backend.shared.mail
 
-import be.sgl.backend.entity.organization.OrganizationType
-import be.sgl.backend.repository.organization.OrganizationRepository
-import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import jakarta.mail.util.ByteArrayDataSource
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
@@ -18,7 +15,7 @@ import java.io.InputStream
 class MailService(
     private val mailSender: JavaMailSender,
     private val templateEngine: SpringTemplateEngine,
-    private val organizationRepository: OrganizationRepository,
+    private val defaultSenderProvider: DefaultSenderProvider,
     @Value("\${spring.application.base-url}")
     private val baseUrl: String
 ) {
@@ -47,12 +44,7 @@ class MailService(
 
         fun from(from: String) = apply { this.from = from }
 
-        private fun fromDefault(): String {
-            val organization = organizationRepository.getByType(OrganizationType.OWNER)
-                ?: throw IncompleteConfigurationException("No organization configured!")
-            return organization.getEmail()
-                ?: throw IncompleteConfigurationException("No organization email configured!")
-        }
+        private fun fromDefault() = defaultSenderProvider.defaultSenderEmail()
 
         fun to(vararg to: String) = apply { this.to.addAll(to) }
 

@@ -33,9 +33,9 @@ class ModularityTest {
     }
 
     private fun String.involves(module: String) =
-        contains("'$module'") || contains("Slice $module") || contains("be.sgl.backend.$module.")
+        contains("'$module'") || contains("Slice $module")
 
     companion object {
-        val STRICT_MODULES = listOf<String>()
+        val STRICT_MODULES = listOf("shared")
     }
 }

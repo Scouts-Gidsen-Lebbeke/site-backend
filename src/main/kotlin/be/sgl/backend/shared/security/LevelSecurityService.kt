@@ -1,7 +1,5 @@
 package be.sgl.backend.shared.security
 
-import be.sgl.backend.shared.security.RoleLevel
-import be.sgl.backend.repository.user.UserRepository
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -14,7 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class LevelSecurityService(
-    private val userRepository: UserRepository,
+    private val userLevelProvider: UserLevelProvider,
 ) {
 
     fun isAdmin() = currentUserHasRoleWithLevel(RoleLevel.ADMIN)
@@ -24,8 +22,8 @@ class LevelSecurityService(
     private fun currentUserHasRoleWithLevel(level: RoleLevel): Boolean {
         val authentication = SecurityContextHolder.getContext().authentication ?: return false
         val username = authentication.name ?: return false
-        val user = userRepository.findByUsername(username) ?: return false
-        return user.level >= level
+        val userLevel = userLevelProvider.levelOf(username) ?: return false
+        return userLevel >= level
     }
 }
 
