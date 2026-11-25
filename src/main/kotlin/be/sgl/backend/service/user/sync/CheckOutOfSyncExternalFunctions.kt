@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.access.AccessApi
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.organization.RoleApi
 import mu.KotlinLogging
 

@@ -1,11 +1,11 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.user.BloodGroup
-import be.sgl.backend.entity.user.MedicalRecord
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.BloodGroup
+import be.sgl.backend.people.domain.MedicalRecord
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.steekkaart
-import be.sgl.backend.repository.user.MedicalRecordRepository
+import be.sgl.backend.people.domain.MedicalRecordRepository
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat

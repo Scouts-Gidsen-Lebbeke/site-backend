@@ -4,10 +4,10 @@ import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
-import be.sgl.backend.entity.user.MedicalRecordTestMother.medicalRecord
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.MedicalRecordTestMother.medicalRecord
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.repository.user.MedicalRecordRepository
+import be.sgl.backend.people.domain.MedicalRecordRepository
 import be.sgl.backend.shared.util.reducePrice
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested

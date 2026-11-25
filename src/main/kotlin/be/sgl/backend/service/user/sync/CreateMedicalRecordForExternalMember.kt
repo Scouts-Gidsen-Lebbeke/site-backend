@@ -1,10 +1,10 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.user.BloodGroup
-import be.sgl.backend.entity.user.MedicalRecord
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.BloodGroup
+import be.sgl.backend.people.domain.MedicalRecord
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.api.LedenApi
-import be.sgl.backend.repository.user.MedicalRecordRepository
+import be.sgl.backend.people.domain.MedicalRecordRepository
 import mu.KotlinLogging
 
 @ExternalUsecase

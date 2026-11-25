@@ -3,7 +3,7 @@ package be.sgl.backend.setting.web
 import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.setting.domain.SettingTestMother.setting
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.setting.SettingApi
 import be.sgl.backend.setting.SettingId
 import be.sgl.backend.setting.domain.SettingRepository

@@ -1,7 +1,7 @@
 package be.sgl.backend.controller
 
 import be.sgl.backend.shared.security.OnlyAuthenticated
-import be.sgl.backend.dto.RemoteFile
+import be.sgl.backend.shared.image.RemoteFile
 import be.sgl.backend.shared.image.ImageService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content

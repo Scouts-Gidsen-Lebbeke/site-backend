@@ -12,7 +12,7 @@ import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.shared.exception.ActivityNotFoundException
 import be.sgl.backend.shared.exception.ActivityRegistrationNotFoundException

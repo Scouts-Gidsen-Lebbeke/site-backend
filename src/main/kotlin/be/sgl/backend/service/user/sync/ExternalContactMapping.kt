@@ -1,8 +1,8 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.ContactRole
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.Contact
+import be.sgl.backend.people.domain.ContactRole
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.model.Contact as ExternalContact
 
 /**

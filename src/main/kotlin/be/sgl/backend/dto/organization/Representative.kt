@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.organization
 
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import java.io.File
 
 // read-only, internal

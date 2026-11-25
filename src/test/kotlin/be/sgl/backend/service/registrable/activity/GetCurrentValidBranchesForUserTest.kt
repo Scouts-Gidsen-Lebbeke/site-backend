@@ -3,7 +3,7 @@ package be.sgl.backend.service.registrable.activity
 import be.sgl.backend.entity.PaymentTestMother.membership
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.shared.Sex
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import org.assertj.core.api.Assertions.assertThat

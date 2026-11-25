@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserTestMother.user
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.security.RoleLevel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

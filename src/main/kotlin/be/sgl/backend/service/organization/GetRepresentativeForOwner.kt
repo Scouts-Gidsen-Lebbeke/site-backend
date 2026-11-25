@@ -2,7 +2,7 @@ package be.sgl.backend.service.organization
 
 import be.sgl.backend.dto.organization.Representative
 import be.sgl.backend.setting.SettingId
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.image.ImageService
 import be.sgl.backend.shared.image.ImageService.ImageDirectory.ORGANIZATION
 import be.sgl.backend.setting.SettingApi

@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.organization
 
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserTestMother
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.UserTestMother
 import java.io.File
 
 object RepresentativeTestMother {

@@ -4,10 +4,10 @@ import be.sgl.backend.shared.address.Address
 import be.sgl.backend.shared.address.AddressTestMother
 import be.sgl.backend.entity.PaymentTestMother
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.ContactTestMother
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserTestMother
+import be.sgl.backend.people.domain.Contact
+import be.sgl.backend.people.domain.ContactTestMother
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.UserTestMother
 import java.time.LocalDate
 import java.time.LocalDateTime
 

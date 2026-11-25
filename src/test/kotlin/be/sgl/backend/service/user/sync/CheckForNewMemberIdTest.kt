@@ -1,9 +1,9 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.mail.MailService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

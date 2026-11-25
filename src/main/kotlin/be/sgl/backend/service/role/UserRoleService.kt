@@ -7,8 +7,7 @@ import be.sgl.backend.organization.application.RoleService
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.web.BranchDTO
-import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.exception.UserNotFoundException
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
@@ -19,7 +18,7 @@ class UserRoleService(
     private val roleService: RoleService,
     private val roleRepository: RoleRepository,
     private val branchService: BranchService,
-    private val userDataProvider: UserDataProvider,
+    private val roleAssigner: RoleAssigner,
     private val accessApi: AccessApi,
     private val userRepository: UserRepository,
     private val entityManager: EntityManager
@@ -40,7 +39,7 @@ class UserRoleService(
 
     private fun assignRole(username: String, role: Role): UserRoleDTO {
         val user = getUserByUsername(username)
-        check(userDataProvider.startRole(user, role)) { "User already has this role!" }
+        check(roleAssigner.startRole(user, role)) { "User already has this role!" }
         entityManager.flush()
         entityManager.refresh(user)
         return UserRoleDTO.of(user, role)
@@ -50,7 +49,7 @@ class UserRoleService(
     fun deassignRoleFromUser(roleId: Int, username: String) {
         val user = getUserByUsername(username)
         val role = roleService.getRoleById(roleId)
-        userDataProvider.endRole(user, role)
+        roleAssigner.endRole(user, role)
     }
 
     fun getUserRolesByRole(roleId: Int): List<UserRoleDTO> {

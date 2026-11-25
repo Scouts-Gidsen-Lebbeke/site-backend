@@ -3,7 +3,7 @@ package be.sgl.backend.service.membership
 import be.sgl.backend.shared.config.LocaleConfig.Companion.BE_NL
 import be.sgl.backend.entity.PaymentTestMother.membership
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.shared.mail.MailService

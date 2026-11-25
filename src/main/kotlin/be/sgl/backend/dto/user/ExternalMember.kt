@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.user
 
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.service.user.sync.SyncState
 
 // read-only, internal

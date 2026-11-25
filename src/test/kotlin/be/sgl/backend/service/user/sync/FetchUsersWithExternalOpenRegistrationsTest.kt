@@ -1,10 +1,10 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lidAanvraag
 import be.sgl.backend.openapi.model.LidAanvragen
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

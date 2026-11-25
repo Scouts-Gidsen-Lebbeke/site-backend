@@ -3,10 +3,10 @@ package be.sgl.backend.service.branch
 import be.sgl.backend.access.AccessApi
 import be.sgl.backend.dto.branch.BranchWithStaff
 import be.sgl.backend.dto.user.StaffDTO
-import be.sgl.backend.entity.user.StaffData
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.StaffData
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.organization.application.BranchService
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.setting.SettingApi
 import be.sgl.backend.setting.SettingId
 import be.sgl.backend.shared.util.Usecase

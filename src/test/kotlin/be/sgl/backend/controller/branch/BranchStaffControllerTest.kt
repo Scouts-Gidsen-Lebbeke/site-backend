@@ -2,14 +2,14 @@ package be.sgl.backend.controller.branch
 
 import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.access.domain.UserRoleTestMother.userRole
-import be.sgl.backend.entity.user.StaffDataTestMother.staffData
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.StaffDataTestMother.staffData
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.domain.Branch
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.setting.SettingId
 import be.sgl.backend.setting.domain.SettingRepository
 import be.sgl.backend.setting.domain.SettingTestMother.setting
@@ -50,7 +50,7 @@ class BranchStaffControllerTest {
     private fun persistedBranchWithStaff(nickname: String): Branch {
         val branch = branchRepository.save(branch().id(null).name("Welpen").build())
         val role = roleRepository.save(staffRole(branch).id(null).build())
-        val staff = userRepository.save(user().id(null).username("staff").firstName("Jan").staffData(staffData().totem("Bever").nickname(branch, nickname).build()).build())
+        val staff = userRepository.save(user().id(null).username("staff").firstName("Jan").staffData(staffData().totem("Bever").nickname(branch.id!!, nickname).build()).build())
         userRoleRepository.save(userRole().userId(staff.id!!).roleId(role.id!!).build())
         return branch
     }

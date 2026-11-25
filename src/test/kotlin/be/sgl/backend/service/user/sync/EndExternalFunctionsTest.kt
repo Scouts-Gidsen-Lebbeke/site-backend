@@ -2,14 +2,14 @@ package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_ID
 import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.openapi.model.Lid
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor

@@ -1,9 +1,9 @@
 package be.sgl.backend.service.organization
 
 import be.sgl.backend.setting.SettingId
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.shared.exception.IncompleteConfigurationException
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.image.ImageService
 import be.sgl.backend.shared.image.ImageService.ImageDirectory.ORGANIZATION
 import be.sgl.backend.setting.SettingApi

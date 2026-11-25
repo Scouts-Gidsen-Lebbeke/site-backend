@@ -5,13 +5,13 @@ import be.sgl.backend.dto.registrable.event.CreateEventRegistrationRequestTestMo
 import be.sgl.backend.entity.PayableTestMother.event
 import be.sgl.backend.entity.PaymentTestMother.eventRegistration
 import be.sgl.backend.entity.registrable.event.EventRegistration
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.shared.exception.EventNotFoundException
 import be.sgl.backend.shared.exception.EventRegistrationNotFoundException
 import be.sgl.backend.shared.exception.LocalizedException
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.mail.MailService
 import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData

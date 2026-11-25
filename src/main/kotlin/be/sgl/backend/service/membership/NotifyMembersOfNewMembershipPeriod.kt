@@ -1,7 +1,7 @@
 package be.sgl.backend.service.membership
 
 import be.sgl.backend.entity.membership.MembershipPeriod
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.shared.mail.MailService

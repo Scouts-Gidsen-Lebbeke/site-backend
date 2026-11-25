@@ -1,8 +1,8 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.access.AccessApi
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.organization.RoleApi
 import be.sgl.backend.organization.RoleSummary

@@ -4,7 +4,7 @@ import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.news.domain.NewsItemRepository
 import be.sgl.backend.news.domain.NewsItemTestMother.newsItem
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.IntegrationTest
 import be.sgl.backend.shared.util.PersistedUsers
 import org.assertj.core.api.Assertions.assertThat

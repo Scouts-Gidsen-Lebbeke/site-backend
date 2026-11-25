@@ -2,10 +2,10 @@ package be.sgl.backend.shared.util
 
 import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.access.domain.UserRoleTestMother.userRole
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 
 class PersistedUsers(
     private val userRepository: UserRepository,

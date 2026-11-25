@@ -9,7 +9,7 @@ import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.entity.registrable.event.EventRegistration
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.service.payment.PaymentService
 import be.sgl.backend.shared.exception.EventNotFoundException
 import be.sgl.backend.shared.exception.EventRegistrationNotFoundException

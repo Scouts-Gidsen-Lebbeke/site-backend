@@ -1,7 +1,7 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.eqValue

@@ -2,9 +2,9 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
-import be.sgl.backend.entity.user.ContactTestMother.contact
-import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.repository.user.ContactRepository
+import be.sgl.backend.people.domain.ContactTestMother.contact
+import be.sgl.backend.people.domain.UserTestMother.user
+import be.sgl.backend.people.domain.ContactRepository
 import be.sgl.backend.setting.SettingApi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled

@@ -2,7 +2,7 @@ package be.sgl.backend.entity.membership
 
 import be.sgl.backend.entity.Payment
 import be.sgl.backend.organization.domain.Branch
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne
 

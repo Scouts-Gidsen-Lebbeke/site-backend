@@ -2,8 +2,8 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.repository.user.ContactRepository
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.ContactRepository
 import be.sgl.backend.setting.SettingApi
 import be.sgl.backend.shared.util.Usecase
 import mu.KotlinLogging

@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.registrable.event
 
 import be.sgl.backend.entity.registrable.Registration
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToOne

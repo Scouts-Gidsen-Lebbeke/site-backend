@@ -7,17 +7,18 @@ import be.sgl.backend.dto.membership.MembershipDTO
 import be.sgl.backend.dto.membership.UserRegistrationDTO
 import be.sgl.backend.organization.domain.Branch
 import be.sgl.backend.entity.membership.Membership
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.service.payment.PaymentService
+import be.sgl.backend.service.role.RoleAssigner
 import be.sgl.backend.shared.exception.BranchNotFoundException
 import be.sgl.backend.shared.exception.MembershipNotFoundException
 import be.sgl.backend.shared.exception.UserNotFoundException
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.people.application.UserDataProvider
 import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -32,6 +33,7 @@ class MembershipService(
     private val roleRepository: RoleRepository,
     private val userRepository: UserRepository,
     private val userDataProvider: UserDataProvider,
+    private val roleAssigner: RoleAssigner,
     private val alertLogger: AlertLogger,
     private val validateAndCreateMembership: ValidateAndCreateMembership,
     private val createCertificateForMembership: CreateCertificateForMembership
@@ -124,7 +126,7 @@ class MembershipService(
     override fun handlePaymentPaid(payment: Membership) {
         roleRepository.getRoleToSyncByBranch(payment.branch)?.let {
             logger.info { "Membership ${payment.id} to branch ${payment.branch} requires role ${it.name}, assigning it..." }
-            userDataProvider.startRole(payment.user, it)
+            roleAssigner.startRole(payment.user, it)
         }
         val params = mapOf(
             "member" to payment.user.firstName,

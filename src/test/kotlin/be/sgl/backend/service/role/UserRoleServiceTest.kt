@@ -1,7 +1,7 @@
 package be.sgl.backend.service.role
 
 import be.sgl.backend.access.AccessApi
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.application.BranchService
 import be.sgl.backend.organization.application.RoleService
 import be.sgl.backend.organization.domain.BranchTestMother.branch
@@ -9,8 +9,7 @@ import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
 import be.sgl.backend.organization.web.BranchDTO
-import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.exception.RoleNotFoundException
 import be.sgl.backend.shared.exception.UserNotFoundException
 import jakarta.persistence.EntityManager
@@ -36,7 +35,7 @@ class UserRoleServiceTest {
     @Mock
     lateinit var branchService: BranchService
     @Mock
-    lateinit var userDataProvider: UserDataProvider
+    lateinit var roleAssigner: RoleAssigner
     @Mock
     lateinit var accessApi: AccessApi
     @Mock
@@ -61,7 +60,7 @@ class UserRoleServiceTest {
             given(roleService.getBranchById(branchId)).willReturn(branch)
             given(roleRepository.getStaffRoleToSyncByBranch(branch)).willReturn(role)
             given(userRepository.findByUsername(username)).willReturn(user)
-            given(userDataProvider.startRole(user, role)).willReturn(true)
+            given(roleAssigner.startRole(user, role)).willReturn(true)
 
             // when
             val result = testee.markUserAsStaff(branchId, username)
@@ -81,7 +80,7 @@ class UserRoleServiceTest {
             assertThatThrownBy { testee.markUserAsStaff(branchId, username) }
                 .isInstanceOf(IllegalStateException::class.java)
                 .hasMessage("No staff role configured for the given branch!")
-            then(userDataProvider).shouldHaveNoInteractions()
+            then(roleAssigner).shouldHaveNoInteractions()
         }
 
         @Test
@@ -91,7 +90,7 @@ class UserRoleServiceTest {
             val role = adminRole().id(2).build()
             given(roleService.findAdminRole()).willReturn(role)
             given(userRepository.findByUsername(username)).willReturn(user)
-            given(userDataProvider.startRole(user, role)).willReturn(true)
+            given(roleAssigner.startRole(user, role)).willReturn(true)
 
             // when
             val result = testee.markUserAsAdmin(username)
@@ -107,14 +106,14 @@ class UserRoleServiceTest {
             val role = adminRole().id(2).build()
             given(roleService.findAdminRole()).willReturn(role)
             given(userRepository.findByUsername(username)).willReturn(user)
-            given(userDataProvider.startRole(user, role)).willReturn(true)
+            given(roleAssigner.startRole(user, role)).willReturn(true)
 
             // when
             testee.markUserAsAdmin(username)
 
             // then
-            val order = inOrder(userDataProvider, entityManager)
-            order.verify(userDataProvider).startRole(user, role)
+            val order = inOrder(roleAssigner, entityManager)
+            order.verify(roleAssigner).startRole(user, role)
             order.verify(entityManager).flush()
             order.verify(entityManager).refresh(user)
         }
@@ -126,7 +125,7 @@ class UserRoleServiceTest {
             val role = adminRole().id(2).build()
             given(roleService.findAdminRole()).willReturn(role)
             given(userRepository.findByUsername(username)).willReturn(user)
-            given(userDataProvider.startRole(user, role)).willReturn(false)
+            given(roleAssigner.startRole(user, role)).willReturn(false)
 
             // when / then
             assertThatThrownBy { testee.markUserAsAdmin(username) }
@@ -144,7 +143,7 @@ class UserRoleServiceTest {
             // when / then
             assertThatThrownBy { testee.markUserAsAdmin(username) }
                 .isInstanceOf(UserNotFoundException::class.java)
-            then(userDataProvider).shouldHaveNoInteractions()
+            then(roleAssigner).shouldHaveNoInteractions()
         }
     }
 
@@ -163,7 +162,7 @@ class UserRoleServiceTest {
             testee.deassignRoleFromUser(role.id!!, username)
 
             // then
-            then(userDataProvider).should().endRole(user, role)
+            then(roleAssigner).should().endRole(user, role)
         }
 
         @Test
@@ -174,7 +173,7 @@ class UserRoleServiceTest {
             // when / then
             assertThatThrownBy { testee.deassignRoleFromUser(2, username) }
                 .isInstanceOf(UserNotFoundException::class.java)
-            then(userDataProvider).shouldHaveNoInteractions()
+            then(roleAssigner).shouldHaveNoInteractions()
         }
     }
 

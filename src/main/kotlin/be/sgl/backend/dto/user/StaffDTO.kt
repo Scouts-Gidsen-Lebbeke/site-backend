@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.user
 
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import io.swagger.v3.oas.annotations.media.Schema
 
 // read-only
@@ -14,7 +14,7 @@ data class StaffDTO(
 ) {
     companion object {
         fun of(user: User, branchId: Int): StaffDTO {
-            return StaffDTO(user.name, user.firstName, user.image, user.staffData.nicknames.entries.firstOrNull { it.key.id == branchId }?.value, user.staffData.totem)
+            return StaffDTO(user.name, user.firstName, user.image, user.staffData.nicknames[branchId], user.staffData.totem)
         }
     }
 }

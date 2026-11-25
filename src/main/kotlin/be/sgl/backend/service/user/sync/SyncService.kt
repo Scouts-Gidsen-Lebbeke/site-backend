@@ -4,7 +4,7 @@ import be.sgl.backend.shared.alert.AlertCode
 import be.sgl.backend.shared.alert.AlertLogger
 import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.repository.membership.MembershipRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.shared.util.ForExternalOrganization
 import be.sgl.backend.shared.util.I18nUtil.Companion.i18n

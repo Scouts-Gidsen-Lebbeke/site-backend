@@ -5,9 +5,10 @@ import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.Role.Companion.adminRole
 import be.sgl.backend.shared.security.RoleLevel
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.application.CheckForInitialRun
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.ForInternalOrganization
 import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager

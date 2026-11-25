@@ -1,8 +1,8 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.api.LedenApi
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.mail.MailService
 import mu.KotlinLogging
 

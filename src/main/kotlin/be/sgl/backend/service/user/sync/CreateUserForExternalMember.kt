@@ -3,14 +3,14 @@ package be.sgl.backend.service.user.sync
 import be.sgl.backend.access.AccessApi
 import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.user.*
+import be.sgl.backend.people.domain.*
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.PersoonsGegevens
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.ContactRepository
+import be.sgl.backend.people.domain.UserRepository
 import jakarta.persistence.EntityManager
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value

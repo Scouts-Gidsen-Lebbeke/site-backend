@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.registrable.activity
 
-import be.sgl.backend.dto.user.UserDTO
+import be.sgl.backend.people.web.UserDTO
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime

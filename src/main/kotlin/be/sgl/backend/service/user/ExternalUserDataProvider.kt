@@ -2,16 +2,14 @@ package be.sgl.backend.service.user
 
 import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.organization.domain.Role
-import be.sgl.backend.entity.user.*
-import be.sgl.backend.entity.user.Contact
+import be.sgl.backend.people.domain.*
+import be.sgl.backend.people.domain.Contact
 import be.sgl.backend.shared.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.*
-import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.service.user.sync.CreateExternalFunctions
-import be.sgl.backend.service.user.sync.EndExternalFunctions
+import be.sgl.backend.people.application.UserDataProvider
+import be.sgl.backend.people.domain.ContactRepository
 import be.sgl.backend.shared.util.ForExternalOrganization
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -24,10 +22,9 @@ class ExternalUserDataProvider(
     val externalOrganizationId: String,
     val lidaanvragenApi: LidaanvragenApi,
     val ledenApi: LedenApi,
-    val createExternalFunctions: CreateExternalFunctions,
-    val endExternalFunctions: EndExternalFunctions,
-    private val contactRepository: ContactRepository
-) : UserDataProvider() {
+    private val contactRepository: ContactRepository,
+    userRepository: UserRepository
+) : UserDataProvider(userRepository) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -61,31 +58,6 @@ class ExternalUserDataProvider(
         super.updateUser(user)
         ledenApi.patchLid(externalId, true, lid)
         return user
-    }
-
-    override fun startRole(user: User, role: Role): Boolean {
-        if (!super.startRole(user, role)) return false
-        // A lot easier than a check on authorization, externally synchronized roles are scaffolded
-        // at membership creation, so 99% of the time in a non-admin user request
-        if (role.memberRole) {
-            logger.info { "Staring a role synchronized automatically, skipping external synchronization." }
-            return true
-        }
-        val externalId = user.externalId ?: run {
-            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external synchronization of role ${role.name}." }
-            return true
-        }
-        createExternalFunctions.execute(externalId, role.externalId, role.backupExternalId)
-        return true
-    }
-
-    override fun endRole(user: User, role: Role) {
-        super.endRole(user, role)
-        val externalId = user.externalId ?: run {
-            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external synchronization of role ${role.name}." }
-            return
-        }
-        endExternalFunctions.execute(externalId, role.externalId, role.backupExternalId)
     }
 
     companion object {

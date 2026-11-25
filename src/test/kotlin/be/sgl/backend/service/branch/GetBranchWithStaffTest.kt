@@ -1,12 +1,12 @@
 package be.sgl.backend.service.branch
 
 import be.sgl.backend.access.AccessApi
-import be.sgl.backend.entity.user.StaffDataTestMother.staffData
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.StaffDataTestMother.staffData
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.application.BranchService
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.web.BranchDTO
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.setting.SettingApi
 import be.sgl.backend.setting.SettingId
 import be.sgl.backend.shared.exception.BranchNotFoundException
@@ -42,7 +42,7 @@ class GetBranchWithStaffTest {
     fun `should embed staff with their nickname for the branch when staff is visible`() {
         // given
         val nickname = "Akela"
-        val staff = user().name("staffName").staffData(staffData().totem("Bever").nickname(branch().id(id).build(), nickname).build()).build()
+        val staff = user().name("staffName").staffData(staffData().totem("Bever").nickname(id, nickname).build()).build()
         given(branchService.getBranch(id)).willReturn(BranchDTO.of(branch))
         given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
         given(accessApi.staffUserIdsOf(id)).willReturn(listOf(staff.id!!))
@@ -60,7 +60,7 @@ class GetBranchWithStaffTest {
     @Test
     fun `should not set a nickname when the staff has none for the branch`() {
         // given
-        val staff = user().staffData(staffData().nickname(branch().id(id + 1).build(), "Other").build()).build()
+        val staff = user().staffData(staffData().nickname(id + 1, "Other").build()).build()
         given(branchService.getBranch(id)).willReturn(BranchDTO.of(branch))
         given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
         given(accessApi.staffUserIdsOf(id)).willReturn(listOf(staff.id!!))

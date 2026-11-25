@@ -2,13 +2,13 @@ package be.sgl.backend.organization.web
 
 import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.access.domain.UserRoleTestMother.userRole
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.IntegrationTest
 import be.sgl.backend.shared.util.PersistedUsers
 import org.assertj.core.api.Assertions.assertThat

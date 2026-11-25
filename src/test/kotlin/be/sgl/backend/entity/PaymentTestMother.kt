@@ -13,8 +13,8 @@ import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother
 import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.entity.registrable.event.EventRegistration
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserTestMother
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.UserTestMother
 import java.time.LocalDateTime
 
 object PaymentTestMother {

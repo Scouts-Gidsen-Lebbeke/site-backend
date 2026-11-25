@@ -4,7 +4,7 @@ import be.sgl.backend.dto.organization.Representative
 import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.organization.domain.OrganizationTestMother.organization
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.service.organization.GetRepresentativeForOwner
 import be.sgl.backend.organization.application.OrganizationProvider
 import org.apache.pdfbox.Loader

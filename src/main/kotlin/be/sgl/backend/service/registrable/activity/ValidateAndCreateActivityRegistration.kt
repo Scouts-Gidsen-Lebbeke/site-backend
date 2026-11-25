@@ -3,9 +3,9 @@ package be.sgl.backend.service.registrable.activity
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.repository.user.SiblingRepository
+import be.sgl.backend.people.domain.SiblingRepository
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import be.sgl.backend.shared.util.reducePrice
 import mu.KotlinLogging

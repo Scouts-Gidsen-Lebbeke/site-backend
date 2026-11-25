@@ -1,17 +1,17 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.shared.address.AddressTestMother.address
-import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.ContactRole
-import be.sgl.backend.entity.user.ContactTestMother
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.Contact
+import be.sgl.backend.people.domain.ContactRole
+import be.sgl.backend.people.domain.ContactTestMother
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Contact.RolEnum
 import be.sgl.backend.openapi.model.GroepsadminTestMother.adres
 import be.sgl.backend.openapi.model.GroepsadminTestMother.contact
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
-import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.ContactRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat

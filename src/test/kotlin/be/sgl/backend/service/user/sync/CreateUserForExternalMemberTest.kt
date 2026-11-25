@@ -3,10 +3,10 @@ package be.sgl.backend.service.user.sync
 import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleTestMother.memberRole
-import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.ContactRole
+import be.sgl.backend.people.domain.Contact
+import be.sgl.backend.people.domain.ContactRole
 import be.sgl.backend.shared.Sex
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Contact.RolEnum
 import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_ID
@@ -16,8 +16,8 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.openapi.model.PersoonsGegevens.GeslachtEnum
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.ContactRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue

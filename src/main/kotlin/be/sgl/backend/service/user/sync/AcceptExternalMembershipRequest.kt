@@ -3,11 +3,11 @@ package be.sgl.backend.service.user.sync
 import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.RoleApi
 import be.sgl.backend.organization.RoleSummary
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.service.user.ExternalUserDataProvider.Companion.toDto
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value

@@ -2,7 +2,7 @@ package be.sgl.backend.controller
 
 import be.sgl.backend.shared.security.OnlyAdmin
 import be.sgl.backend.shared.security.Public
-import be.sgl.backend.dto.RemoteFile
+import be.sgl.backend.shared.image.RemoteFile
 import be.sgl.backend.shared.image.ImageService
 import be.sgl.backend.shared.image.ImageService.Companion.IMAGE_BASE_PATH
 import be.sgl.backend.shared.image.ImageService.ImageDirectory.BACKGROUND

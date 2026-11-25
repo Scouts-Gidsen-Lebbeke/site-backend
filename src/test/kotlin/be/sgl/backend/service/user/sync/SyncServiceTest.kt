@@ -5,11 +5,11 @@ import be.sgl.backend.shared.alert.AlertLogger
 import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.dto.user.ExternalMemberTestMother.externalMember
 import be.sgl.backend.entity.PaymentTestMother.membership
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.membership.MembershipRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.service.user.sync.CheckOutOfSyncExternalFunctions.OutOfSyncState
 import be.sgl.backend.shared.util.I18nUtil
 import be.sgl.backend.shared.util.anyValue

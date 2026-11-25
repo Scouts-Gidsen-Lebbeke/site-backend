@@ -2,7 +2,7 @@ package be.sgl.backend.service.user.inital
 
 import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.shared.util.IntegrationTest

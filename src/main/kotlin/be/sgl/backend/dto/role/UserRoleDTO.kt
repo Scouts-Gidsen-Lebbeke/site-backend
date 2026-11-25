@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.role
 
-import be.sgl.backend.dto.user.UserDTO
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.web.UserDTO
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.web.RoleDTO
 

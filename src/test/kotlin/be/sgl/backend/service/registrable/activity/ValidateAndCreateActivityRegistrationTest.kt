@@ -5,10 +5,10 @@ import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
-import be.sgl.backend.entity.user.SiblingRelationTestMother.siblingRelation
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.SiblingRelationTestMother.siblingRelation
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.repository.user.SiblingRepository
+import be.sgl.backend.people.domain.SiblingRepository
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import be.sgl.backend.shared.util.reducePrice
 import org.assertj.core.api.Assertions.assertThat

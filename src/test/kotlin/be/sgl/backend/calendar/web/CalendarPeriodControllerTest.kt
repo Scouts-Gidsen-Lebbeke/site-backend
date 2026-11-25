@@ -8,7 +8,7 @@ import be.sgl.backend.calendar.domain.CalendarRepository
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.IntegrationTest
 import be.sgl.backend.shared.util.PersistedUsers
 import org.assertj.core.api.Assertions.assertThat

@@ -1,11 +1,11 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.Contact
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.api.LedenApi
-import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.ContactRepository
+import be.sgl.backend.people.domain.UserRepository
 
 @ExternalUsecase
 class FetchExternalData(

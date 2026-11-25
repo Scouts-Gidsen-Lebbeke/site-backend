@@ -7,7 +7,7 @@ import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
 import be.sgl.backend.shared.security.RoleLevel
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.shared.exception.ActivityNotFoundException
 import be.sgl.backend.shared.exception.ActivityRegistrationNotFoundException
 import be.sgl.backend.shared.exception.LocalizedException
@@ -16,7 +16,7 @@ import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.mail.MailService
 import be.sgl.backend.service.payment.CheckoutProvider
 import be.sgl.backend.shared.util.anyValue

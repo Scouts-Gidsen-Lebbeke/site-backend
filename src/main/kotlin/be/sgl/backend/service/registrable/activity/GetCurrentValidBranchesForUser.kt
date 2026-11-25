@@ -1,7 +1,7 @@
 package be.sgl.backend.service.registrable.activity
 
 import be.sgl.backend.organization.domain.Branch
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import mu.KotlinLogging

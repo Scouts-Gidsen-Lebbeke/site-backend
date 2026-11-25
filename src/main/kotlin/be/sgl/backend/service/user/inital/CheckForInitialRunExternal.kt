@@ -7,13 +7,14 @@ import be.sgl.backend.organization.domain.ContactMethodType
 import be.sgl.backend.organization.domain.Organization
 import be.sgl.backend.organization.domain.OrganizationType
 import be.sgl.backend.organization.domain.Role.Companion.adminRole
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.application.CheckForInitialRun
+import be.sgl.backend.people.domain.User
 import be.sgl.backend.openapi.api.GroepenApi
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Groep
 import be.sgl.backend.organization.domain.OrganizationRepository
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import be.sgl.backend.service.user.sync.CreateUserForExternalMember
 import be.sgl.backend.service.user.sync.ExternalUsecase

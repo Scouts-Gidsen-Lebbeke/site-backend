@@ -10,8 +10,8 @@ import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.membership.Membership
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.organization.domain.RoleTestMother.memberRole
-import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.shared.exception.BranchNotFoundException
 import be.sgl.backend.shared.exception.MembershipNotFoundException
 import be.sgl.backend.shared.exception.UserNotFoundException
@@ -19,10 +19,11 @@ import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.mail.MailService
 import be.sgl.backend.service.payment.CheckoutProvider
-import be.sgl.backend.service.user.UserDataProvider
+import be.sgl.backend.people.application.UserDataProvider
+import be.sgl.backend.service.role.RoleAssigner
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
@@ -59,6 +60,8 @@ class MembershipServiceTest {
     lateinit var userRepository: UserRepository
     @Mock
     lateinit var userDataProvider: UserDataProvider
+    @Mock
+    lateinit var roleAssigner: RoleAssigner
     @Mock
     lateinit var alertLogger: AlertLogger
     @Mock
@@ -378,7 +381,7 @@ class MembershipServiceTest {
             testee.handlePaymentPaid(membership)
 
             // then
-            then(userDataProvider).should().startRole(membership.user, role)
+            then(roleAssigner).should().startRole(membership.user, role)
         }
 
         @Test
@@ -392,7 +395,7 @@ class MembershipServiceTest {
             testee.handlePaymentPaid(membership)
 
             // then
-            then(userDataProvider).shouldHaveNoInteractions()
+            then(roleAssigner).shouldHaveNoInteractions()
         }
 
         @Test

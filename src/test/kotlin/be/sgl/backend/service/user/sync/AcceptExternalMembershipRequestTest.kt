@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user.sync
 
 import be.sgl.backend.access.AccessApi
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import be.sgl.backend.organization.RoleApi
 import be.sgl.backend.organization.RoleSummary
 import be.sgl.backend.organization.RoleSummaryTestMother.memberRoleSummary
@@ -11,7 +11,7 @@ import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_ID
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.openapi.model.Lid
-import be.sgl.backend.repository.user.UserRepository
+import be.sgl.backend.people.domain.UserRepository
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue

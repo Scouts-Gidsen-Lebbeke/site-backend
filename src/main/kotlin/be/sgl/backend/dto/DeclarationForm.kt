@@ -2,8 +2,8 @@ package be.sgl.backend.dto
 
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.User
+import be.sgl.backend.people.domain.Contact
+import be.sgl.backend.people.domain.User
 import java.time.format.DateTimeFormatter
 
 data class DeclarationForm(

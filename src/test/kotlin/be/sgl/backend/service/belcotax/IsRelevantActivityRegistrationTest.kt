@@ -1,7 +1,7 @@
 package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
-import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.people.domain.UserTestMother.user
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
