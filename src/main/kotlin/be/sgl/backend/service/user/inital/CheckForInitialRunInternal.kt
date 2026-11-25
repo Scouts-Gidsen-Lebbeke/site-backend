@@ -1,16 +1,18 @@
 package be.sgl.backend.service.user.inital
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.Role.Companion.adminRole
 import be.sgl.backend.shared.security.RoleLevel
-import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.util.ForInternalOrganization
 import jakarta.annotation.PostConstruct
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Component
@@ -18,6 +20,8 @@ import java.time.LocalDate
 class CheckForInitialRunInternal(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
+    private val accessApi: AccessApi,
+    private val entityManager: EntityManager
 ) : CheckForInitialRun {
 
     private var isInitialRun = false
@@ -27,6 +31,7 @@ class CheckForInitialRunInternal(
         isInitialRun = userRepository.count() == 0L
     }
 
+    @Transactional
     override fun execute(userDetails: CustomUserDetails): User? {
         if (!isInitialRun) return null
         val adminRole = createAdminRoleIfNeeded()
@@ -40,8 +45,9 @@ class CheckForInitialRunInternal(
         user = userRepository.save(user)
         // the first user administers the app, the role can only be linked once the user has an id
         adminRole?.let {
-            user.roles.add(UserRole(user, it))
-            user = userRepository.save(user)
+            accessApi.assign(user.id!!, it.id!!)
+            entityManager.flush()
+            entityManager.refresh(user)
         }
         isInitialRun = false
         return user

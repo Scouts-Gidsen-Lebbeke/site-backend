@@ -1,9 +1,5 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.organization.domain.BranchTestMother.branch
-import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.security.RoleLevel
@@ -26,11 +22,9 @@ class RepositoryUserLevelProviderTest {
     private val username = "jdoe"
 
     @Test
-    fun `should return the highest role level when the user has several roles`() {
+    fun `should return the level of the user when the user exists`() {
         // given
-        val user = user().username(username).build()
-        userRole().user(user).role(staffRole(branch().build()).build()).build()
-        userRole().user(user).role(adminRole().build()).build()
+        val user = user().username(username).level(RoleLevel.ADMIN).build()
         given(userRepository.findByUsername(username)).willReturn(user)
 
         // when

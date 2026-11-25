@@ -3,8 +3,8 @@ package be.sgl.backend.entity.user
 import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.role.UserRole
 import jakarta.persistence.*
+import org.hibernate.annotations.Formula
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Period
@@ -48,10 +48,11 @@ class User : Serializable {
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     val addresses: MutableList<Address> = mutableListOf()
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val roles: MutableList<UserRole> = mutableListOf()
+    // TODO: read the level from UserLevelProvider once people is extracted
+    @Formula("(select coalesce(max(r.level), 0) from user_role ur join role r on r.id = ur.role_id where ur.user_id = id)")
+    private var levelOrdinal: Int = 0
     val level: RoleLevel
-        get() = roles.maxOfOrNull { it.role.level } ?: RoleLevel.GUEST
+        get() = RoleLevel.entries[levelOrdinal]
 
     @OneToOne(cascade = [CascadeType.ALL], mappedBy = "user")
     var staffData = StaffData(this)

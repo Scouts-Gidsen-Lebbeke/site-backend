@@ -6,8 +6,8 @@ import be.sgl.backend.shared.security.OnlyAuthenticated
 import be.sgl.backend.organization.web.BranchDTO
 import be.sgl.backend.dto.role.UserRoleDTO
 import be.sgl.backend.dto.role.StaffLinkRequest
-import be.sgl.backend.service.role.FindStaffBranchForUser
 import be.sgl.backend.service.role.UserRoleService
+import be.sgl.backend.shared.exception.UserRoleNotFoundException
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -29,8 +29,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/user-roles")
 @Tag(name = "User roles", description = "Endpoints for managing user roles.")
 class UserRoleController(
-    private val userRoleService: UserRoleService,
-    private val findStaffBranchForUser: FindStaffBranchForUser,
+    private val userRoleService: UserRoleService
 ) {
 
     @GetMapping("/role/{roleId}", produces = [APPLICATION_JSON_VALUE])
@@ -72,8 +71,8 @@ class UserRoleController(
         ]
     )
     fun getStaffBranchForCurrentUser(@AuthenticationPrincipal userDetails: CustomUserDetails): ResponseEntity<BranchDTO> {
-        val staffBranch = findStaffBranchForUser.execute(userDetails.username)
-        return staffBranch?.let { ResponseEntity.ok(BranchDTO.of(it)) } ?: ResponseEntity.noContent().build()
+        val staffBranch = userRoleService.getStaffBranch(userDetails.username)
+        return staffBranch?.let { ResponseEntity.ok(it) } ?: ResponseEntity.noContent().build()
     }
 
     @PostMapping("/admin", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
@@ -104,6 +103,6 @@ class UserRoleController(
         ]
     )
     fun deassignRoleFromUser(@PathVariable id: Int) {
-        userRoleService.deassignRoleFromUser(id)
+        throw UserRoleNotFoundException()
     }
 }

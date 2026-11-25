@@ -1,5 +1,6 @@
 package be.sgl.backend.setting.web
 
+import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.setting.domain.SettingTestMother.setting
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -32,9 +33,11 @@ class SettingControllerTest {
     private lateinit var userRepository: UserRepository
     @Autowired
     private lateinit var roleRepository: RoleRepository
+    @Autowired
+    private lateinit var userRoleRepository: UserRoleRepository
 
     private val settingId = SettingId.CALENDAR_NAME.name
-    private val users by lazy { PersistedUsers(userRepository, roleRepository) }
+    private val users by lazy { PersistedUsers(userRepository, roleRepository, userRoleRepository) }
 
     @AfterEach
     fun cleanUp() {

@@ -226,6 +226,34 @@ class RoleServiceTest {
     }
 
     @Nested
+    inner class FindAdminRole {
+
+        @Test
+        fun `should return the first admin role when one is configured`() {
+            // given
+            val adminRole = adminRole().id(9).build()
+            given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf(adminRole))
+
+            // when
+            val result = testee.findAdminRole()
+
+            // then
+            assertThat(result).isSameAs(adminRole)
+        }
+
+        @Test
+        fun `should fail when no admin role is configured`() {
+            // given
+            given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf())
+
+            // when / then
+            assertThatThrownBy { testee.findAdminRole() }
+                .isInstanceOf(IllegalStateException::class.java)
+                .hasMessage("No admin role configured!")
+        }
+    }
+
+    @Nested
     inner class RolesToSync {
 
         @Test

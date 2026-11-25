@@ -6,8 +6,7 @@ import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.entity.registrable.activity.ActivityRestrictionTestMother.activityRestriction
-import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.shared.exception.ActivityNotFoundException
 import be.sgl.backend.shared.exception.ActivityRegistrationNotFoundException
@@ -559,8 +558,7 @@ class ActivityRegistrationServiceTest {
         @Test
         fun `should let staff cancel the registration of another user`() {
             // given
-            val staff = user().id(3).username("staff").build()
-            userRole().user(staff).role(staffRole(branch().build()).build()).build()
+            val staff = user().id(3).username("staff").level(RoleLevel.STAFF).build()
             val registration = activityRegistration().paid().price(100.0).activity(openedActivity().build()).user(user).build()
             given(userRepository.findByUsername("staff")).willReturn(staff)
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))
@@ -591,8 +589,7 @@ class ActivityRegistrationServiceTest {
         @Test
         fun `should let staff cancel a registration of a non cancellable activity`() {
             // given
-            val staff = user().id(3).username("staff").build()
-            userRole().user(staff).role(staffRole(branch().build()).build()).build()
+            val staff = user().id(3).username("staff").level(RoleLevel.STAFF).build()
             val registration = activityRegistration().paid().price(100.0).activity(openedActivity().cancellable(false).build()).user(user).build()
             given(userRepository.findByUsername("staff")).willReturn(staff)
             given(paymentRepository.findById(1)).willReturn(Optional.of(registration))

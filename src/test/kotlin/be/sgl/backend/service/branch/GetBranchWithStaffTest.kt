@@ -1,5 +1,6 @@
 package be.sgl.backend.service.branch
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.entity.user.StaffDataTestMother.staffData
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.organization.application.BranchService
@@ -29,6 +30,8 @@ class GetBranchWithStaffTest {
     lateinit var userRepository: UserRepository
     @Mock
     lateinit var settingApi: SettingApi
+    @Mock
+    lateinit var accessApi: AccessApi
     @InjectMocks
     lateinit var testee: GetBranchWithStaff
 
@@ -42,7 +45,8 @@ class GetBranchWithStaffTest {
         val staff = user().name("staffName").staffData(staffData().totem("Bever").nickname(branch().id(id).build(), nickname).build()).build()
         given(branchService.getBranch(id)).willReturn(BranchDTO.of(branch))
         given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
-        given(userRepository.getStaffForBranch(id)).willReturn(listOf(staff))
+        given(accessApi.staffUserIdsOf(id)).willReturn(listOf(staff.id!!))
+        given(userRepository.findAllById(listOf(staff.id!!))).willReturn(listOf(staff))
 
         // when
         val result = testee.execute(id)
@@ -59,7 +63,8 @@ class GetBranchWithStaffTest {
         val staff = user().staffData(staffData().nickname(branch().id(id + 1).build(), "Other").build()).build()
         given(branchService.getBranch(id)).willReturn(BranchDTO.of(branch))
         given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
-        given(userRepository.getStaffForBranch(id)).willReturn(listOf(staff))
+        given(accessApi.staffUserIdsOf(id)).willReturn(listOf(staff.id!!))
+        given(userRepository.findAllById(listOf(staff.id!!))).willReturn(listOf(staff))
 
         // when
         val result = testee.execute(id)
@@ -80,6 +85,7 @@ class GetBranchWithStaffTest {
         // then
         assertThat(result.staff).isEmpty()
         then(userRepository).shouldHaveNoInteractions()
+        then(accessApi).shouldHaveNoInteractions()
     }
 
     @Test

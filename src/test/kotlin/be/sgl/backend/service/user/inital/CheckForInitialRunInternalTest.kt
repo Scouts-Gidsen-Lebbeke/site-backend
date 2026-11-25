@@ -1,5 +1,6 @@
 package be.sgl.backend.service.user.inital
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.shared.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
@@ -11,11 +12,13 @@ import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argThatValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.inOrder
 import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
@@ -25,6 +28,10 @@ class CheckForInitialRunInternalTest {
     lateinit var userRepository: UserRepository
     @Mock
     lateinit var roleRepository: RoleRepository
+    @Mock
+    lateinit var accessApi: AccessApi
+    @Mock
+    lateinit var entityManager: EntityManager
     @InjectMocks
     lateinit var testee: CheckForInitialRunInternal
 
@@ -42,6 +49,7 @@ class CheckForInitialRunInternalTest {
         then(userRepository).should().count()
         then(userRepository).shouldHaveNoMoreInteractions()
         then(roleRepository).shouldHaveNoInteractions()
+        then(accessApi).shouldHaveNoInteractions()
     }
 
     @Test
@@ -91,34 +99,60 @@ class CheckForInitialRunInternalTest {
     }
 
     @Test
-    fun `should give the initial user the admin level`() {
+    fun `should assign the new admin role and then refresh the user when no roles exist`() {
         // given
         given(userRepository.count()).willReturn(0L)
         given(roleRepository.count()).willReturn(0L)
-        given(userRepository.save(anyValue<User>())).willAnswer { it.arguments[0] }
+        given(roleRepository.save(anyValue<Role>())).willAnswer { (it.arguments[0] as Role).apply { id = ADMIN_ROLE_ID } }
+        given(userRepository.save(anyValue<User>())).willAnswer { (it.arguments[0] as User).apply { id = USER_ID } }
         testee.checkInitialRun()
 
         // when
         val result = testee.execute(userDetails().build())
 
         // then
-        assertThat(result!!.level).isEqualTo(RoleLevel.ADMIN)
+        val order = inOrder(accessApi, entityManager)
+        order.verify(accessApi).assign(USER_ID, ADMIN_ROLE_ID)
+        order.verify(entityManager).flush()
+        order.verify(entityManager).refresh(result)
     }
 
     @Test
-    fun `should give the initial user the existing admin role when roles already exist`() {
+    fun `should assign the existing admin role to the initial user when roles already exist`() {
         // given
-        val existingAdminRole = adminRole().build()
+        val existingAdminRole = adminRole().id(ADMIN_ROLE_ID).build()
         given(userRepository.count()).willReturn(0L)
         given(roleRepository.count()).willReturn(1L)
         given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf(existingAdminRole))
+        given(userRepository.save(anyValue<User>())).willAnswer { (it.arguments[0] as User).apply { id = USER_ID } }
+        testee.checkInitialRun()
+
+        // when
+        testee.execute(userDetails().build())
+
+        // then
+        then(accessApi).should().assign(USER_ID, ADMIN_ROLE_ID)
+    }
+
+    @Test
+    fun `should not assign a role when roles exist but none is an admin role`() {
+        // given
+        given(userRepository.count()).willReturn(0L)
+        given(roleRepository.count()).willReturn(1L)
+        given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf())
         given(userRepository.save(anyValue<User>())).willAnswer { it.arguments[0] }
         testee.checkInitialRun()
 
         // when
-        val result = testee.execute(userDetails().build())
+        testee.execute(userDetails().build())
 
         // then
-        assertThat(result!!.roles).extracting("role").containsExactly(existingAdminRole)
+        then(accessApi).shouldHaveNoInteractions()
+        then(entityManager).shouldHaveNoInteractions()
+    }
+
+    companion object {
+        private const val USER_ID = 5
+        private const val ADMIN_ROLE_ID = 9
     }
 }

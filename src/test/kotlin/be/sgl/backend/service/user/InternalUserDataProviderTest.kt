@@ -1,13 +1,10 @@
 package be.sgl.backend.service.user
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.shared.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -28,7 +25,7 @@ class InternalUserDataProviderTest {
     @Mock
     lateinit var userRepository: UserRepository
     @Mock
-    lateinit var userRoleRepository: UserRoleRepository
+    lateinit var accessApi: AccessApi
     @InjectMocks
     lateinit var testee: InternalUserDataProvider
 
@@ -65,47 +62,45 @@ class InternalUserDataProviderTest {
     inner class StartRole {
 
         @Test
-        fun `should save and add the role when the user does not have it yet`() {
+        fun `should return true when the user does not have the role yet`() {
             // given
             val user = user().build()
             val role = staffRole(branch().build()).build()
-            given(userRoleRepository.save(anyValue<UserRole>())).willAnswer { it.arguments[0] }
+            given(accessApi.assign(user.id!!, role.id!!)).willReturn(true)
 
             // when
             val result = testee.startRole(user, role)
 
             // then
-            assertThat(result!!.role).isSameAs(role)
-            assertThat(user.roles).containsExactly(result)
+            assertThat(result).isTrue()
         }
 
         @Test
-        fun `should return null and not save when the user already has the role`() {
+        fun `should return false when the user already has the role`() {
             // given
             val user = user().build()
             val role = staffRole(branch().build()).build()
-            userRole().user(user).role(role).build()
+            given(accessApi.assign(user.id!!, role.id!!)).willReturn(false)
 
             // when
             val result = testee.startRole(user, role)
 
             // then
-            assertThat(result).isNull()
-            assertThat(user.roles).hasSize(1)
-            then(userRoleRepository).shouldHaveNoInteractions()
+            assertThat(result).isFalse()
         }
     }
 
     @Test
-    fun `should delete the user role when ending a role`() {
+    fun `should revoke the role when ending a role`() {
         // given
-        val userRole = userRole().build()
+        val user = user().build()
+        val role = staffRole(branch().build()).build()
 
         // when
-        testee.endRole(userRole)
+        testee.endRole(user, role)
 
         // then
-        then(userRoleRepository).should().delete(userRole)
+        then(accessApi).should().revoke(user.id!!, role.id!!)
     }
 
     @Test

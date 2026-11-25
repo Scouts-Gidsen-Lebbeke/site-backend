@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user.sync
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_ID
@@ -9,7 +9,6 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.openapi.model.GroepsadminTestMother.lid
 import be.sgl.backend.openapi.model.Lid
 import be.sgl.backend.organization.domain.RoleRepository
-import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
 import be.sgl.backend.shared.util.anyValue
@@ -41,13 +40,13 @@ class EndExternalFunctionsTest {
     @Mock
     lateinit var roleRepository: RoleRepository
     @Mock
-    lateinit var userRoleRepository: UserRoleRepository
+    lateinit var accessApi: AccessApi
 
     lateinit var testee: EndExternalFunctions
 
     @BeforeEach
     fun setUp() {
-        testee = EndExternalFunctions(ledenApi, userRepository, roleRepository, userRoleRepository, EXTERNAL_ORGANIZATION_ID)
+        testee = EndExternalFunctions(ledenApi, userRepository, roleRepository, accessApi, EXTERNAL_ORGANIZATION_ID)
     }
 
     @AfterEach
@@ -132,8 +131,8 @@ class EndExternalFunctionsTest {
             given(ledenApi.getLid("old")).willReturn(lid().build())
             given(userRepository.getByUsername("me")).willReturn(me)
             given(roleRepository.getRoleByExternalIdEquals(VGA_FUNCTION)).willReturn(adminRole)
-            given(userRoleRepository.findByRole(adminRole)).willReturn(mutableListOf(
-                userRole().user(me).role(adminRole).build(), userRole().user(other).role(adminRole).build()))
+            given(accessApi.userIdsWithRole(adminRole.id!!)).willReturn(listOf(me.id!!, other.id!!))
+            given(userRepository.findAllById(listOf(me.id!!, other.id!!))).willReturn(listOf(me, other))
 
             // when
             testee.execute("old", VGA_FUNCTION)
@@ -165,7 +164,8 @@ class EndExternalFunctionsTest {
             given(ledenApi.getLid("old")).willReturn(lid().build())
             given(userRepository.getByUsername("me")).willReturn(me)
             given(roleRepository.getRoleByExternalIdEquals(VGA_FUNCTION)).willReturn(adminRole)
-            given(userRoleRepository.findByRole(adminRole)).willReturn(mutableListOf(userRole().user(me).role(adminRole).build()))
+            given(accessApi.userIdsWithRole(adminRole.id!!)).willReturn(listOf(me.id!!))
+            given(userRepository.findAllById(listOf(me.id!!))).willReturn(listOf(me))
 
             // when / then
             assertThatThrownBy { testee.execute("old", VGA_FUNCTION) }.isInstanceOf(NoSuchElementException::class.java)

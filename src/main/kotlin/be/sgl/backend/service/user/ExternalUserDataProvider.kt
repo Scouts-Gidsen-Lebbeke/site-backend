@@ -3,7 +3,6 @@ package be.sgl.backend.service.user
 import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.address.Address
 import be.sgl.backend.organization.domain.Role
-import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.shared.exception.LocalizedException
@@ -64,29 +63,29 @@ class ExternalUserDataProvider(
         return user
     }
 
-    override fun startRole(user: User, role: Role): UserRole? {
-        val newRole = super.startRole(user, role) ?: return null
+    override fun startRole(user: User, role: Role): Boolean {
+        if (!super.startRole(user, role)) return false
         // A lot easier than a check on authorization, externally synchronized roles are scaffolded
         // at membership creation, so 99% of the time in a non-admin user request
         if (role.memberRole) {
             logger.info { "Staring a role synchronized automatically, skipping external synchronization." }
-            return newRole
+            return true
         }
         val externalId = user.externalId ?: run {
             logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external synchronization of role ${role.name}." }
-            return newRole
+            return true
         }
         createExternalFunctions.execute(externalId, role.externalId, role.backupExternalId)
-        return newRole
+        return true
     }
 
-    override fun endRole(userRole: UserRole) {
-        super.endRole(userRole)
-        val externalId = userRole.user.externalId ?: run {
-            logger.warn { "User ${userRole.user.username} is not linked to Groepsadmin, skipping external synchronization of role ${userRole.role.name}." }
+    override fun endRole(user: User, role: Role) {
+        super.endRole(user, role)
+        val externalId = user.externalId ?: run {
+            logger.warn { "User ${user.username} is not linked to Groepsadmin, skipping external synchronization of role ${role.name}." }
             return
         }
-        endExternalFunctions.execute(externalId, userRole.role.externalId, userRole.role.backupExternalId)
+        endExternalFunctions.execute(externalId, role.externalId, role.backupExternalId)
     }
 
     companion object {

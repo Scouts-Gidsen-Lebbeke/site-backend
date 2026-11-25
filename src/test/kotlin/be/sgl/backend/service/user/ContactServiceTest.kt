@@ -2,8 +2,7 @@ package be.sgl.backend.service.user
 
 import be.sgl.backend.dto.user.CreateOrUpdateContactRequestTestMother.contactRequest
 import be.sgl.backend.shared.address.AddressTestMother.address
-import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother.contact
@@ -47,9 +46,7 @@ class ContactServiceTest {
     private val stranger = user().id(2).username(STRANGER).build()
 
     private fun admin(): User {
-        val admin = user().id(3).username(ADMIN).build()
-        userRole().user(admin).role(adminRole().build()).build()
-        return admin
+        return user().id(3).username(ADMIN).level(RoleLevel.ADMIN).build()
     }
 
     @Nested

@@ -1,6 +1,8 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.organization.domain.Role
+import be.sgl.backend.access.AccessApi
+import be.sgl.backend.organization.RoleApi
+import be.sgl.backend.organization.RoleSummary
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
@@ -18,14 +20,16 @@ class AcceptExternalMembershipRequest(
     private val userRepository: UserRepository,
     private val lidaanvragenApi: LidaanvragenApi,
     private val ledenApi: LedenApi,
-    private val createExternalFunctions: CreateExternalFunctions
+    private val createExternalFunctions: CreateExternalFunctions,
+    private val roleApi: RoleApi,
+    private val accessApi: AccessApi
 ) {
 
     private val logger = KotlinLogging.logger {}
 
     fun execute(user: User, requestId: String): Boolean {
         logger.info { "User has external membership request $requestId, trying to accept..." }
-        val newRole = user.roles.firstOrNull { it.role.forExternalSync }?.role
+        val newRole = roleApi.findRoles(accessApi.roleIdsOf(user.id!!)).firstOrNull { it.forExternalSync }
         if (newRole == null) {
             // This should only happen for staff branch memberships, which shouldn't be common for new members
             logger.info { "Internal membership didn't assign role, manual intervention is needed." }
@@ -39,7 +43,7 @@ class AcceptExternalMembershipRequest(
         return true
     }
 
-    private fun createExternalMemberForUser(user: User, newRole: Role): String {
+    private fun createExternalMemberForUser(user: User, newRole: RoleSummary): String {
         logger.info { "Translating internal user #${user.id} into an external user..." }
         var newLid = user.toDto(emptyList())
         newLid.functies = listOf(

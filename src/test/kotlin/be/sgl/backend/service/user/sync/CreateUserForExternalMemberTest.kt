@@ -1,5 +1,6 @@
 package be.sgl.backend.service.user.sync
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleTestMother.memberRole
 import be.sgl.backend.entity.user.Contact
@@ -43,16 +44,18 @@ class CreateUserForExternalMemberTest {
     lateinit var roleRepository: RoleRepository
     @Mock
     lateinit var contactRepository: ContactRepository
+    @Mock
+    lateinit var accessApi: AccessApi
 
     lateinit var testee: CreateUserForExternalMember
 
     @BeforeEach
     fun setUp() {
-        testee = CreateUserForExternalMember(ledenApi, userRepository, EXTERNAL_ORGANIZATION_ID, roleRepository, contactRepository)
+        testee = CreateUserForExternalMember(ledenApi, userRepository, EXTERNAL_ORGANIZATION_ID, roleRepository, contactRepository, accessApi)
     }
 
     private fun stubSave() {
-        given(userRepository.save(anyValue<User>())).willAnswer { it.arguments[0] }
+        given(userRepository.save(anyValue<User>())).willAnswer { (it.arguments[0] as User).apply { id = USER_ID } }
     }
 
     @Test
@@ -89,7 +92,7 @@ class CreateUserForExternalMemberTest {
     }
 
     @Test
-    fun `should only add roles for known functions of the organization`() {
+    fun `should only assign roles for known functions of the organization`() {
         // given
         val role = memberRole(branch().build()).externalId("known").build()
         given(ledenApi.getLid("ext-1")).willReturn(lid().functies(
@@ -102,11 +105,11 @@ class CreateUserForExternalMemberTest {
         stubSave()
 
         // when
-        val result = testee.execute("ext-1")
+        testee.execute("ext-1")
 
         // then
-        assertThat(result.roles).extracting("role").containsExactly(role)
-        assertThat(result.roles.single().user).isSameAs(result)
+        then(accessApi).should().assign(USER_ID, role.id!!)
+        then(accessApi).shouldHaveNoMoreInteractions()
     }
 
     @Test
@@ -178,7 +181,7 @@ class CreateUserForExternalMemberTest {
     }
 
     @Test
-    fun `should not add roles for ended functions`() {
+    fun `should not assign roles for ended functions`() {
         // given
         given(ledenApi.getLid("ext-1")).willReturn(lid().functies(functie().functie("known").ended().build()).build())
         org.mockito.Mockito.lenient().`when`(roleRepository.getRoleByExternalIdEquals("known"))
@@ -186,9 +189,13 @@ class CreateUserForExternalMemberTest {
         stubSave()
 
         // when
-        val result = testee.execute("ext-1")
+        testee.execute("ext-1")
 
         // then
-        assertThat(result.roles).isEmpty()
+        then(accessApi).shouldHaveNoInteractions()
+    }
+
+    companion object {
+        private const val USER_ID = 7
     }
 }

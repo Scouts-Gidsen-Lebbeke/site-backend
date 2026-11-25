@@ -1,13 +1,13 @@
 package be.sgl.backend.organization.web
 
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
+import be.sgl.backend.access.domain.UserRoleRepository
+import be.sgl.backend.access.domain.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.organization.domain.BranchRepository
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.util.IntegrationTest
 import be.sgl.backend.shared.util.PersistedUsers
@@ -34,7 +34,7 @@ class RoleControllerTest {
     @Autowired
     private lateinit var userRepository: UserRepository
 
-    private val users by lazy { PersistedUsers(userRepository, roleRepository) }
+    private val users by lazy { PersistedUsers(userRepository, roleRepository, userRoleRepository) }
 
     @AfterEach
     fun cleanUp() {
@@ -53,14 +53,14 @@ class RoleControllerTest {
         users.admin(ADMIN)
         val role = persistedStaffRole()
         val staff = userRepository.save(user().id(null).username(STAFF).build())
-        userRoleRepository.save(userRole().user(staff).role(role).build())
+        userRoleRepository.save(userRole().userId(staff.id!!).roleId(role.id!!).build())
 
         // when
         val result = mockMvc.perform(delete("/roles/${role.id}").with(jwt().jwt { it.subject(ADMIN) }))
 
         // then
         result.andExpect(status().isOk)
-        assertThat(userRoleRepository.findAll().map { it.role.id }).doesNotContain(role.id)
+        assertThat(userRoleRepository.findByRoleId(role.id!!)).isEmpty()
         assertThat(roleRepository.existsById(role.id!!)).isFalse()
     }
 

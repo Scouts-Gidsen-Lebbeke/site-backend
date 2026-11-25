@@ -6,6 +6,12 @@ object RoleSummaryTestMother {
 
     fun roleSummary() = RoleSummaryBuilder()
 
+    fun memberRoleSummary(branchId: Int) = RoleSummaryBuilder().branchId(branchId).externalId("memberExternalId")
+
+    fun staffRoleSummary(staffBranchId: Int) = RoleSummaryBuilder().staffBranchId(staffBranchId).level(RoleLevel.STAFF)
+
+    fun adminRoleSummary() = RoleSummaryBuilder().level(RoleLevel.ADMIN)
+
     class RoleSummaryBuilder {
         private var id = 1
         private var name = "roleName"

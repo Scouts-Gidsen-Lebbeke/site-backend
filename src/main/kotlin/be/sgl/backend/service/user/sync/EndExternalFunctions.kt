@@ -1,12 +1,12 @@
 package be.sgl.backend.service.user.sync
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.Lid
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.repository.role.UserRoleRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
@@ -17,7 +17,7 @@ class EndExternalFunctions(
     private val ledenApi: LedenApi,
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
-    private val userRoleRepository: UserRoleRepository,
+    private val accessApi: AccessApi,
     @Value("\${organization.external.id}")
     private val externalOrganizationId: String
 ) {
@@ -51,8 +51,8 @@ class EndExternalFunctions(
             // If the current user removes its own admin role, we should pick another admin
             val adminRole = roleRepository.getRoleByExternalIdEquals(VGA_FUNCTION)
                 ?: throw IllegalStateException("Admin role corresponding to VGA not found")
-            externalIdOfNewRootAdmin = userRoleRepository.findByRole(adminRole)
-                .first { it.user.externalId != externalIdOfOldRootAdmin }.user.externalId
+            externalIdOfNewRootAdmin = userRepository.findAllById(accessApi.userIdsWithRole(adminRole.id!!))
+                .first { it.externalId != externalIdOfOldRootAdmin }.externalId
         }
         val vgaFunction = FunctieInstantie().apply {
             groep = externalOrganizationId

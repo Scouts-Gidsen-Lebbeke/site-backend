@@ -1,12 +1,11 @@
 package be.sgl.backend.service.user
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
 import be.sgl.backend.organization.domain.RoleTestMother.memberRole
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.shared.Sex
@@ -20,18 +19,15 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_
 import be.sgl.backend.openapi.model.Lid
 import be.sgl.backend.openapi.model.LidAanvraag
 import be.sgl.backend.openapi.model.PersoonsGegevens.GeslachtEnum
-import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.ExternalUserDataProvider.Companion.toDto
 import be.sgl.backend.service.user.sync.CreateExternalFunctions
 import be.sgl.backend.service.user.sync.EndExternalFunctions
-import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
 import be.sgl.backend.shared.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -61,7 +57,7 @@ class ExternalUserDataProviderTest {
     @Mock
     lateinit var userRepository: UserRepository
     @Mock
-    lateinit var userRoleRepository: UserRoleRepository
+    lateinit var accessApi: AccessApi
 
     lateinit var testee: ExternalUserDataProvider
 
@@ -71,7 +67,7 @@ class ExternalUserDataProviderTest {
         testee = ExternalUserDataProvider(EXTERNAL_ORGANIZATION_ID, lidaanvragenApi, ledenApi, createExternalFunctions,
             endExternalFunctions, contactRepository)
         ReflectionTestUtils.setField(testee, "userRepository", userRepository)
-        ReflectionTestUtils.setField(testee, "userRoleRepository", userRoleRepository)
+        ReflectionTestUtils.setField(testee, "accessApi", accessApi)
     }
 
     @Nested
@@ -167,13 +163,13 @@ class ExternalUserDataProviderTest {
             // given
             val user = user().externalId("ext-1").build()
             val role = staffRole(branch().build()).externalId("func").backupExternalId("backup").build()
-            given(userRoleRepository.save(anyValue<UserRole>())).willAnswer { it.arguments[0] }
+            given(accessApi.assign(user.id!!, role.id!!)).willReturn(true)
 
             // when
             val result = testee.startRole(user, role)
 
             // then
-            assertThat(result).isNotNull()
+            assertThat(result).isTrue()
             then(createExternalFunctions).should().execute("ext-1", "func", "backup")
         }
 
@@ -182,13 +178,13 @@ class ExternalUserDataProviderTest {
             // given
             val user = user().externalId("ext-1").build()
             val role = memberRole(branch().build()).build()
-            given(userRoleRepository.save(anyValue<UserRole>())).willAnswer { it.arguments[0] }
+            given(accessApi.assign(user.id!!, role.id!!)).willReturn(true)
 
             // when
             val result = testee.startRole(user, role)
 
             // then
-            assertThat(result).isNotNull()
+            assertThat(result).isTrue()
             then(createExternalFunctions).shouldHaveNoInteractions()
         }
 
@@ -197,13 +193,13 @@ class ExternalUserDataProviderTest {
             // given
             val user = user().externalId("ext-1").build()
             val role = adminRole().build()
-            userRole().user(user).role(role).build()
+            given(accessApi.assign(user.id!!, role.id!!)).willReturn(false)
 
             // when
             val result = testee.startRole(user, role)
 
             // then
-            assertThat(result).isNull()
+            assertThat(result).isFalse()
             then(createExternalFunctions).shouldHaveNoInteractions()
         }
 
@@ -212,10 +208,14 @@ class ExternalUserDataProviderTest {
             // given
             val user = user().build()
             val role = staffRole(branch().build()).externalId("func").build()
-            given(userRoleRepository.save(anyValue<UserRole>())).willAnswer { it.arguments[0] }
+            given(accessApi.assign(user.id!!, role.id!!)).willReturn(true)
 
-            // when / then
-            assertThatCode { testee.startRole(user, role) }.doesNotThrowAnyException()
+            // when
+            val result = testee.startRole(user, role)
+
+            // then
+            assertThat(result).isTrue()
+            then(createExternalFunctions).shouldHaveNoInteractions()
         }
     }
 
@@ -223,16 +223,16 @@ class ExternalUserDataProviderTest {
     inner class EndRole {
 
         @Test
-        fun `should delete the role and end the external functions`() {
+        fun `should revoke the role and end the external functions`() {
             // given
             val user = user().externalId("ext-1").build()
-            val userRole = userRole().user(user).role(staffRole(branch().build()).externalId("func").backupExternalId("backup").build()).build()
+            val role = staffRole(branch().build()).externalId("func").backupExternalId("backup").build()
 
             // when
-            testee.endRole(userRole)
+            testee.endRole(user, role)
 
             // then
-            then(userRoleRepository).should().delete(userRole)
+            then(accessApi).should().revoke(user.id!!, role.id!!)
             then(endExternalFunctions).should().execute("ext-1", "func", "backup")
         }
 
@@ -240,25 +240,26 @@ class ExternalUserDataProviderTest {
         fun `should also end the external functions when ending a member role`() {
             // given
             val user = user().externalId("ext-1").build()
-            val userRole = userRole().user(user).role(memberRole(branch().build()).externalId("member").build()).build()
+            val role = memberRole(branch().build()).externalId("member").build()
 
             // when
-            testee.endRole(userRole)
+            testee.endRole(user, role)
 
             // then
             then(endExternalFunctions).should().execute("ext-1", "member", null)
         }
 
         @Test
-        fun `should only delete the role when the user has no external id`() {
+        fun `should only revoke the role when the user has no external id`() {
             // given
-            val userRole = userRole().user(user().build()).role(staffRole(branch().build()).externalId("func").build()).build()
+            val user = user().build()
+            val role = staffRole(branch().build()).externalId("func").build()
 
             // when
-            testee.endRole(userRole)
+            testee.endRole(user, role)
 
             // then
-            then(userRoleRepository).should().delete(userRole)
+            then(accessApi).should().revoke(user.id!!, role.id!!)
             then(endExternalFunctions).shouldHaveNoInteractions()
         }
     }

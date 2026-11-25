@@ -12,8 +12,6 @@ import java.time.LocalDate
 interface UserRepository : JpaRepository<User, Int> {
     fun findByUsername(username: String): User?
     fun getByUsername(username: String): User
-    @Query("select distinct u from User u join fetch u.staffData join u.roles ur join ur.role r where r.staffBranch.id = :branchId")
-    fun getStaffForBranch(branchId: Int): List<User>
     fun findByNameAndFirstNameAndEmail(name: String, firstName: String, email: String): User?
     @Query("from User where name like concat('%', :query, '%') or firstName like concat('%', :query, '%')")
     fun findByQuery(query: String): List<User>

@@ -1,5 +1,6 @@
 package be.sgl.backend.news.web
 
+import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.news.domain.NewsItemRepository
 import be.sgl.backend.news.domain.NewsItemTestMother.newsItem
 import be.sgl.backend.organization.domain.RoleRepository
@@ -29,8 +30,10 @@ class NewsItemControllerTest {
     private lateinit var userRepository: UserRepository
     @Autowired
     private lateinit var roleRepository: RoleRepository
+    @Autowired
+    private lateinit var userRoleRepository: UserRoleRepository
 
-    private val users by lazy { PersistedUsers(userRepository, roleRepository) }
+    private val users by lazy { PersistedUsers(userRepository, roleRepository, userRoleRepository) }
     private val request = """{"title": "Kamp", "content": "Inschrijvingen zijn open"}"""
 
     @AfterEach

@@ -1,10 +1,11 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.organization.domain.BranchTestMother.branch
-import be.sgl.backend.organization.domain.RoleTestMother.memberRole
-import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.entity.user.UserTestMother.user
+import be.sgl.backend.organization.RoleApi
+import be.sgl.backend.organization.RoleSummary
+import be.sgl.backend.organization.RoleSummaryTestMother.memberRoleSummary
+import be.sgl.backend.organization.RoleSummaryTestMother.staffRoleSummary
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_ID
@@ -36,19 +37,32 @@ class AcceptExternalMembershipRequestTest {
     lateinit var ledenApi: LedenApi
     @Mock
     lateinit var createExternalFunctions: CreateExternalFunctions
+    @Mock
+    lateinit var roleApi: RoleApi
+    @Mock
+    lateinit var accessApi: AccessApi
 
     lateinit var testee: AcceptExternalMembershipRequest
 
     @BeforeEach
     fun setUp() {
-        testee = AcceptExternalMembershipRequest(EXTERNAL_ORGANIZATION_ID, userRepository, lidaanvragenApi, ledenApi, createExternalFunctions)
+        testee = AcceptExternalMembershipRequest(EXTERNAL_ORGANIZATION_ID, userRepository, lidaanvragenApi, ledenApi, createExternalFunctions, roleApi, accessApi)
+    }
+
+    private val userId = 1
+    private val branchId = 2
+
+    private fun givenRoles(vararg roles: RoleSummary) {
+        val roleIds = roles.map { it.id }
+        given(accessApi.roleIdsOf(userId)).willReturn(roleIds)
+        given(roleApi.findRoles(roleIds)).willReturn(roles.toList())
     }
 
     @Test
     fun `should not accept when the user has no role for external sync`() {
         // given
         val user = user().build()
-        userRole().user(user).role(staffRole(branch().build()).externalId("staff").build()).build()
+        givenRoles(staffRoleSummary(branchId).externalId("staff").build())
 
         // when
         val result = testee.execute(user, "r1")
@@ -63,7 +77,7 @@ class AcceptExternalMembershipRequestTest {
     fun `should create the external member with the member function and accept the request`() {
         // given
         val user = user().firstName("John").build()
-        userRole().user(user).role(memberRole(branch().build()).externalId("member").build()).build()
+        givenRoles(memberRoleSummary(branchId).externalId("member").build())
         val captor = argumentCaptor<Lid>()
         given(ledenApi.postLid(eqValue(false), captureValue(captor), isNull())).willReturn(lid().id("new-ext").build())
 
@@ -84,7 +98,7 @@ class AcceptExternalMembershipRequestTest {
     fun `should add the backup function afterwards when the role has one`() {
         // given
         val user = user().build()
-        userRole().user(user).role(memberRole(branch().build()).externalId("member").backupExternalId("backup").build()).build()
+        givenRoles(memberRoleSummary(branchId).externalId("member").backupExternalId("backup").build())
         given(ledenApi.postLid(eqValue(false), anyValue(), isNull())).willReturn(lid().id("new-ext").build())
 
         // when

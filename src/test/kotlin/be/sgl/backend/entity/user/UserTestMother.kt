@@ -2,7 +2,8 @@ package be.sgl.backend.entity.user
 
 import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.role.UserRole
+import be.sgl.backend.shared.security.RoleLevel
+import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDate
 
 object UserTestMother {
@@ -28,7 +29,7 @@ object UserTestMother {
         private var hasReduction = false
         private var hasHandicap = false
         private val addresses = mutableListOf<Address>()
-        private val roles = mutableListOf<UserRole>()
+        private var level = RoleLevel.GUEST
         private var staffData = StaffData()
 
         fun id(id: Int?) = apply { this.id = id }
@@ -67,7 +68,7 @@ object UserTestMother {
 
         fun addresses(vararg addresses: Address) = apply { this.addresses.addAll(addresses) }
 
-        fun roles(vararg roles: UserRole) = apply { this.roles.addAll(roles) }
+        fun level(level: RoleLevel) = apply { this.level = level }
 
         fun staffData(staffData: StaffData) = apply { this.staffData = staffData }
 
@@ -91,7 +92,7 @@ object UserTestMother {
             user.hasReduction = hasReduction
             user.hasHandicap = hasHandicap
             user.addresses.addAll(addresses)
-            user.roles.addAll(roles)
+            ReflectionTestUtils.setField(user, "levelOrdinal", level.ordinal)
             staffData.user = user
             user.staffData = staffData
             return user

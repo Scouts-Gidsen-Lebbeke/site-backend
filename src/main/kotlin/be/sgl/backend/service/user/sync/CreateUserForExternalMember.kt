@@ -1,12 +1,13 @@
 package be.sgl.backend.service.user.sync
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.address.Address
-import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.*
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.FunctieInstantie
 import be.sgl.backend.openapi.model.PersoonsGegevens
+import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
@@ -21,7 +22,8 @@ class CreateUserForExternalMember(
     @Value("\${organization.external.id}")
     private var externalOrganizationId: String,
     private val roleRepository: RoleRepository,
-    private val contactRepository: ContactRepository
+    private val contactRepository: ContactRepository,
+    private val accessApi: AccessApi
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -29,12 +31,12 @@ class CreateUserForExternalMember(
     fun execute(externalId: String): User {
         logger.info { "Creating new user based on external id $externalId..." }
         val externalMember = ledenApi.getLid(externalId)
+        val roles = externalMember.functies.mapNotNull(::translateFunction)
         var newUser = User().apply {
             this.externalId = externalMember.id
             name = externalMember.vgagegevens.achternaam
             firstName = externalMember.vgagegevens.voornaam
             email = externalMember.email
-            roles.addAll(externalMember.functies.mapNotNull { f -> translateFunction(this, f) })
             sex = when(externalMember.persoonsgegevens.geslacht) {
                 PersoonsGegevens.GeslachtEnum.MAN -> Sex.MALE
                 PersoonsGegevens.GeslachtEnum.VROUW -> Sex.FEMALE
@@ -59,14 +61,14 @@ class CreateUserForExternalMember(
             } } )
         }
         newUser = userRepository.save(newUser)
+        roles.forEach { accessApi.assign(newUser.id!!, it.id!!) }
         externalMember.contacten.map { Contact().updateFrom(it, newUser) }.forEach(contactRepository::save)
         return newUser
     }
 
-    private fun translateFunction(user: User, function: FunctieInstantie): UserRole? {
+    private fun translateFunction(function: FunctieInstantie): Role? {
         if (function.groep != externalOrganizationId) return null
         if (function.einde?.isBefore(OffsetDateTime.now()) == true) return null
-        val role = roleRepository.getRoleByExternalIdEquals(function.functie) ?: return null
-        return UserRole(user, role)
+        return roleRepository.getRoleByExternalIdEquals(function.functie)
     }
 }

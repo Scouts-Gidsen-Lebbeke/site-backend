@@ -1,20 +1,18 @@
 package be.sgl.backend.service.role
 
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.organization.domain.BranchRepository
+import be.sgl.backend.organization.application.BranchService
+import be.sgl.backend.organization.application.RoleService
 import be.sgl.backend.organization.domain.BranchTestMother.branch
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.organization.domain.RoleTestMother.memberRole
 import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.repository.role.UserRoleRepository
+import be.sgl.backend.organization.web.BranchDTO
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.UserDataProvider
 import be.sgl.backend.shared.exception.RoleNotFoundException
 import be.sgl.backend.shared.exception.UserNotFoundException
-import be.sgl.backend.shared.exception.UserRoleNotFoundException
-import be.sgl.backend.shared.security.RoleLevel
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -25,25 +23,28 @@ import org.mockito.BDDMockito.then
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class UserRoleServiceTest {
 
     @Mock
+    lateinit var roleService: RoleService
+    @Mock
     lateinit var roleRepository: RoleRepository
+    @Mock
+    lateinit var branchService: BranchService
     @Mock
     lateinit var userDataProvider: UserDataProvider
     @Mock
-    lateinit var branchRepository: BranchRepository
-    @Mock
-    lateinit var userRoleRepository: UserRoleRepository
+    lateinit var accessApi: AccessApi
     @Mock
     lateinit var userRepository: UserRepository
     @InjectMocks
     lateinit var testee: UserRoleService
 
-    private val branch = branch().id(4).build()
+    private val branchId = 4
+    private val branch = branch().id(branchId).build()
+    private val username = "jdoe"
 
     @Nested
     inner class AssignRoles {
@@ -51,45 +52,61 @@ class UserRoleServiceTest {
         @Test
         fun `should start the staff role of the branch when marking a user as staff`() {
             // given
-            val user = user().username("jdoe").build()
+            val user = user().username(username).build()
             val role = staffRole(branch).id(2).build()
-            given(branchRepository.findById(4)).willReturn(Optional.of(branch))
+            given(roleService.getBranchById(branchId)).willReturn(branch)
             given(roleRepository.getStaffRoleToSyncByBranch(branch)).willReturn(role)
-            given(userRepository.findByUsername("jdoe")).willReturn(user)
-            given(userDataProvider.startRole(user, role)).willReturn(userRole().user(user).role(role).build())
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(userDataProvider.startRole(user, role)).willReturn(true)
 
             // when
-            val result = testee.markUserAsStaff(4, "jdoe")
+            val result = testee.markUserAsStaff(branchId, username)
 
             // then
-            assertThat(result.role.id).isEqualTo(2)
-            assertThat(result.user.username).isEqualTo("jdoe")
+            assertThat(result.role.id).isEqualTo(role.id)
+            assertThat(result.user.username).isEqualTo(username)
         }
 
         @Test
         fun `should fail when the branch has no staff role`() {
             // given
-            given(branchRepository.findById(4)).willReturn(Optional.of(branch))
+            given(roleService.getBranchById(branchId)).willReturn(branch)
             given(roleRepository.getStaffRoleToSyncByBranch(branch)).willReturn(null)
 
             // when / then
-            assertThatThrownBy { testee.markUserAsStaff(4, "jdoe") }
+            assertThatThrownBy { testee.markUserAsStaff(branchId, username) }
                 .isInstanceOf(IllegalStateException::class.java)
                 .hasMessage("No staff role configured for the given branch!")
             then(userDataProvider).shouldHaveNoInteractions()
         }
 
         @Test
+        fun `should start the admin role when marking a user as admin`() {
+            // given
+            val user = user().username(username).build()
+            val role = adminRole().id(2).build()
+            given(roleService.findAdminRole()).willReturn(role)
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(userDataProvider.startRole(user, role)).willReturn(true)
+
+            // when
+            val result = testee.markUserAsAdmin(username)
+
+            // then
+            assertThat(result.role.id).isEqualTo(role.id)
+        }
+
+        @Test
         fun `should fail when the user already has the role`() {
             // given
-            val user = user().username("jdoe").build()
+            val user = user().username(username).build()
             val role = adminRole().id(2).build()
-            given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf(role))
-            given(userRepository.findByUsername("jdoe")).willReturn(user)
-            given(userDataProvider.startRole(user, role)).willReturn(null)
+            given(roleService.findAdminRole()).willReturn(role)
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(userDataProvider.startRole(user, role)).willReturn(false)
 
             // when / then
-            assertThatThrownBy { testee.markUserAsAdmin("jdoe") }
+            assertThatThrownBy { testee.markUserAsAdmin(username) }
                 .isInstanceOf(IllegalStateException::class.java)
                 .hasMessage("User already has this role!")
         }
@@ -97,23 +114,13 @@ class UserRoleServiceTest {
         @Test
         fun `should fail when the user to assign does not exist`() {
             // given
-            given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf(adminRole().build()))
-            given(userRepository.findByUsername("jdoe")).willReturn(null)
+            given(roleService.findAdminRole()).willReturn(adminRole().build())
+            given(userRepository.findByUsername(username)).willReturn(null)
 
             // when / then
-            assertThatThrownBy { testee.markUserAsAdmin("jdoe") }
+            assertThatThrownBy { testee.markUserAsAdmin(username) }
                 .isInstanceOf(UserNotFoundException::class.java)
-        }
-
-        @Test
-        fun `should fail when no admin role is configured`() {
-            // given
-            given(roleRepository.findByLevel(RoleLevel.ADMIN)).willReturn(mutableListOf())
-
-            // when / then
-            assertThatThrownBy { testee.markUserAsAdmin("jdoe") }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessage("No admin role configured!")
+            then(userDataProvider).shouldHaveNoInteractions()
         }
     }
 
@@ -121,69 +128,29 @@ class UserRoleServiceTest {
     inner class DeassignRoleFromUser {
 
         @Test
-        fun `should end the role when it is a staff role`() {
+        fun `should end the role of the user when both exist`() {
             // given
-            val userRole = userRole().role(staffRole(branch).build()).build()
-            given(userRoleRepository.findById(1)).willReturn(Optional.of(userRole))
+            val user = user().username(username).build()
+            val role = staffRole(branch).id(2).build()
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(roleService.getRoleById(role.id!!)).willReturn(role)
 
             // when
-            testee.deassignRoleFromUser(1)
+            testee.deassignRoleFromUser(role.id!!, username)
 
             // then
-            then(userDataProvider).should().endRole(userRole)
+            then(userDataProvider).should().endRole(user, role)
         }
 
         @Test
-        fun `should fail when the role is a member role`() {
+        fun `should throw when the user does not exist`() {
             // given
-            val userRole = userRole().role(memberRole(branch).build()).build()
-            given(userRoleRepository.findById(1)).willReturn(Optional.of(userRole))
+            given(userRepository.findByUsername(username)).willReturn(null)
 
             // when / then
-            assertThatThrownBy { testee.deassignRoleFromUser(1) }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessage("Member roles can't be manually deassigned!")
+            assertThatThrownBy { testee.deassignRoleFromUser(2, username) }
+                .isInstanceOf(UserNotFoundException::class.java)
             then(userDataProvider).shouldHaveNoInteractions()
-        }
-
-        @Test
-        fun `should end the admin role when other admins remain`() {
-            // given
-            val adminRole = adminRole().build()
-            val userRole = userRole().user(user().id(1).build()).role(adminRole).build()
-            val otherAdmin = userRole().user(user().id(2).build()).role(adminRole).build()
-            given(userRoleRepository.findById(1)).willReturn(Optional.of(userRole))
-            given(userRoleRepository.findByRole(adminRole)).willReturn(mutableListOf(userRole, otherAdmin))
-
-            // when
-            testee.deassignRoleFromUser(1)
-
-            // then
-            then(userDataProvider).should().endRole(userRole)
-        }
-
-        @Test
-        fun `should fail when removing the last admin`() {
-            // given
-            val adminRole = adminRole().build()
-            val userRole = userRole().role(adminRole).build()
-            given(userRoleRepository.findById(1)).willReturn(Optional.of(userRole))
-            given(userRoleRepository.findByRole(adminRole)).willReturn(mutableListOf(userRole))
-
-            // when / then
-            assertThatThrownBy { testee.deassignRoleFromUser(1) }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessage("At least one admin should exist!")
-        }
-
-        @Test
-        fun `should throw when the user role does not exist`() {
-            // given
-            given(userRoleRepository.findById(1)).willReturn(Optional.empty())
-
-            // when / then
-            assertThatThrownBy { testee.deassignRoleFromUser(1) }
-                .isInstanceOf(UserRoleNotFoundException::class.java)
         }
     }
 
@@ -191,29 +158,76 @@ class UserRoleServiceTest {
     inner class GetUserRolesByRole {
 
         @Test
-        fun `should map the user roles of the role when it exists`() {
+        fun `should map the holders of the role when it exists`() {
             // given
             val role = staffRole(branch).id(2).build()
-            val userRole = userRole().user(user().username("jdoe").build()).role(role).build()
-            given(roleRepository.findById(2)).willReturn(Optional.of(role))
-            given(userRoleRepository.findByRole(role)).willReturn(mutableListOf(userRole))
+            val user = user().username(username).build()
+            given(roleService.getRoleById(role.id!!)).willReturn(role)
+            given(accessApi.userIdsWithRole(role.id!!)).willReturn(listOf(user.id!!))
+            given(userRepository.findAllById(listOf(user.id!!))).willReturn(listOf(user))
 
             // when
-            val result = testee.getUserRolesByRole(2)
+            val result = testee.getUserRolesByRole(role.id!!)
 
             // then
-            assertThat(result).extracting<String?> { it.user.username }.containsExactly("jdoe")
+            assertThat(result).extracting<String?> { it.user.username }.containsExactly(username)
         }
 
         @Test
         fun `should throw when the role does not exist`() {
             // given
-            given(roleRepository.findById(2)).willReturn(Optional.empty())
+            given(roleService.getRoleById(2)).willAnswer { throw RoleNotFoundException() }
 
             // when / then
             assertThatThrownBy { testee.getUserRolesByRole(2) }
                 .isInstanceOf(RoleNotFoundException::class.java)
-            then(userRoleRepository).shouldHaveNoInteractions()
+            then(accessApi).shouldHaveNoInteractions()
+        }
+    }
+
+    @Nested
+    inner class GetStaffBranch {
+
+        @Test
+        fun `should return the staff branch when the user has an active one`() {
+            // given
+            val user = user().username(username).build()
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(accessApi.staffBranchIdOf(user.id!!)).willReturn(branchId)
+            given(branchService.getBranch(branchId)).willReturn(BranchDTO.of(branch))
+
+            // when
+            val result = testee.getStaffBranch(username)
+
+            // then
+            assertThat(result!!.id).isEqualTo(branchId)
+        }
+
+        @Test
+        fun `should return null when the user has no active staff branch`() {
+            // given
+            val user = user().username(username).build()
+            given(userRepository.findByUsername(username)).willReturn(user)
+            given(accessApi.staffBranchIdOf(user.id!!)).willReturn(null)
+
+            // when
+            val result = testee.getStaffBranch(username)
+
+            // then
+            assertThat(result).isNull()
+            then(branchService).shouldHaveNoInteractions()
+        }
+
+        @Test
+        fun `should throw when the user does not exist`() {
+            // given
+            given(userRepository.findByUsername(username)).willReturn(null)
+
+            // when / then
+            assertThatThrownBy { testee.getStaffBranch(username) }
+                .isInstanceOf(UserNotFoundException::class.java)
+                .hasMessage("User $username not found")
+            then(accessApi).shouldHaveNoInteractions()
         }
     }
 }

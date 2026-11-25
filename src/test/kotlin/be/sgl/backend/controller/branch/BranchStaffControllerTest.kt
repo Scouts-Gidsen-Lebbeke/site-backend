@@ -1,6 +1,7 @@
 package be.sgl.backend.controller.branch
 
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
+import be.sgl.backend.access.domain.UserRoleRepository
+import be.sgl.backend.access.domain.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.StaffDataTestMother.staffData
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.organization.domain.Branch
@@ -34,9 +35,12 @@ class BranchStaffControllerTest {
     private lateinit var userRepository: UserRepository
     @Autowired
     private lateinit var settingRepository: SettingRepository
+    @Autowired
+    private lateinit var userRoleRepository: UserRoleRepository
 
     @AfterEach
     fun cleanUp() {
+        userRoleRepository.deleteAll()
         userRepository.deleteAll()
         roleRepository.deleteAll()
         branchRepository.deleteAll()
@@ -46,9 +50,8 @@ class BranchStaffControllerTest {
     private fun persistedBranchWithStaff(nickname: String): Branch {
         val branch = branchRepository.save(branch().id(null).name("Welpen").build())
         val role = roleRepository.save(staffRole(branch).id(null).build())
-        val staff = user().id(null).username("staff").firstName("Jan").staffData(staffData().totem("Bever").nickname(branch, nickname).build()).build()
-        userRole().user(staff).role(role).build()
-        userRepository.save(staff)
+        val staff = userRepository.save(user().id(null).username("staff").firstName("Jan").staffData(staffData().totem("Bever").nickname(branch, nickname).build()).build())
+        userRoleRepository.save(userRole().userId(staff.id!!).roleId(role.id!!).build())
         return branch
     }
 

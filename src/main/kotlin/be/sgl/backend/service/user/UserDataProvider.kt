@@ -1,10 +1,9 @@
 package be.sgl.backend.service.user
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.repository.role.UserRoleRepository
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -19,7 +18,7 @@ abstract class UserDataProvider {
     @Autowired
     protected lateinit var userRepository: UserRepository
     @Autowired
-    protected lateinit var userRoleRepository: UserRoleRepository
+    protected lateinit var accessApi: AccessApi
 
     /**
      * Mark the given user as completely registered.
@@ -32,19 +31,17 @@ abstract class UserDataProvider {
         return userRepository.save(user)
     }
 
-    open fun startRole(user: User, role: Role): UserRole? {
+    open fun startRole(user: User, role: Role): Boolean {
         logger.debug { "Starting role ${role.name} for ${user.username}..." }
-        if (user.roles.any { it.role == role }) {
+        if (!accessApi.assign(user.id!!, role.id!!)) {
             logger.warn { "${user.username} already has the role ${role.name}! Starting aborted." }
-            return null
+            return false
         }
-        val newRole = userRoleRepository.save(UserRole(user, role))
-        user.roles.add(newRole)
-        return newRole
+        return true
     }
 
-    open fun endRole(userRole: UserRole) {
-        logger.debug { "Ending role ${userRole.role.name} for ${userRole.user.username}..." }
-        userRoleRepository.delete(userRole)
+    open fun endRole(user: User, role: Role) {
+        logger.debug { "Ending role ${role.name} for ${user.username}..." }
+        accessApi.revoke(user.id!!, role.id!!)
     }
 }

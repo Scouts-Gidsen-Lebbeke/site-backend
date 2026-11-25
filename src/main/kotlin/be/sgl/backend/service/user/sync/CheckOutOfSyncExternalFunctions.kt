@@ -1,13 +1,17 @@
 package be.sgl.backend.service.user.sync
 
+import be.sgl.backend.access.AccessApi
 import be.sgl.backend.entity.user.User
+import be.sgl.backend.organization.RoleApi
 import mu.KotlinLogging
 
 @ExternalUsecase
 class CheckOutOfSyncExternalFunctions(
     private val fetchCurrentlyActiveExternalFunctions: FetchCurrentlyActiveExternalFunctions,
     private val createExternalFunctions: CreateExternalFunctions,
-    private val endExternalFunctions: EndExternalFunctions
+    private val endExternalFunctions: EndExternalFunctions,
+    private val roleApi: RoleApi,
+    private val accessApi: AccessApi
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -18,7 +22,7 @@ class CheckOutOfSyncExternalFunctions(
             .map { it.functie }.toMutableList()
         logger.info { "Current external functions: $uncheckedActiveExternalFunctions" }
         val functionsToAssign = mutableListOf<String>()
-        for (role in user.roles.map { it.role }) {
+        for (role in roleApi.findRoles(accessApi.roleIdsOf(user.id!!))) {
             if (role.adminRole) {
                 // remove both, an admin may hold VGA and AVGA at the same time
                 val hasFunction = uncheckedActiveExternalFunctions.remove(role.externalId)

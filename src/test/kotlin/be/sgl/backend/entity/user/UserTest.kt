@@ -1,12 +1,6 @@
 package be.sgl.backend.entity.user
 
-import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.shared.address.AddressTestMother.address
-import be.sgl.backend.organization.domain.BranchTestMother.branch
-import be.sgl.backend.organization.domain.RoleTestMother.adminRole
-import be.sgl.backend.organization.domain.RoleTestMother.memberRole
-import be.sgl.backend.organization.domain.RoleTestMother.staffRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -104,50 +98,6 @@ class UserTest {
 
             // then
             assertThat(age).isEqualTo(-1)
-        }
-    }
-
-    @Nested
-    inner class Level {
-
-        @Test
-        fun `should be guest when the user has no roles`() {
-            // given
-            val testee = user().build()
-
-            // when
-            val level = testee.level
-
-            // then
-            assertThat(level).isEqualTo(RoleLevel.GUEST)
-        }
-
-        @Test
-        fun `should be the highest level of all roles when the user has multiple roles`() {
-            // given
-            val testee = user().build()
-            userRole().user(testee).role(memberRole(branch().build()).id(1).build()).build()
-            userRole().user(testee).role(adminRole().id(2).build()).build()
-            userRole().user(testee).role(staffRole(branch().build()).id(3).build()).build()
-
-            // when
-            val level = testee.level
-
-            // then
-            assertThat(level).isEqualTo(RoleLevel.ADMIN)
-        }
-
-        @Test
-        fun `should be staff when the only role is a staff role`() {
-            // given
-            val testee = user().build()
-            userRole().user(testee).role(staffRole(branch().build()).build()).build()
-
-            // when
-            val level = testee.level
-
-            // then
-            assertThat(level).isEqualTo(RoleLevel.STAFF)
         }
     }
 

@@ -83,16 +83,16 @@ class RoleService(
         return roleRepository.getStaffRoleToSyncByBranch(branch)?.let(RoleDTO::of)
     }
 
-    private fun findAdminRole(): Role {
+    fun findAdminRole(): Role {
         return roleRepository.findByLevel(RoleLevel.ADMIN).firstOrNull()
             ?: throw IllegalStateException("No admin role configured!")
     }
 
-    private fun getRoleById(id: Int): Role {
+    fun getRoleById(id: Int): Role {
         return roleRepository.findById(id).orElseThrow { RoleNotFoundException() }
     }
 
-    private fun getBranchById(id: Int): Branch {
+    fun getBranchById(id: Int): Branch {
         return branchRepository.findById(id).orElseThrow { BranchNotFoundException() }
     }
 }
