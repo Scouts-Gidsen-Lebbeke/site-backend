@@ -12,8 +12,8 @@ import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.activity.ActivityRepository
 import be.sgl.backend.repository.activity.ActivityRestrictionRepository
-import be.sgl.backend.exception.ActivityNotFoundException
-import be.sgl.backend.exception.LocalizedException
+import be.sgl.backend.shared.exception.ActivityNotFoundException
+import be.sgl.backend.shared.exception.LocalizedException
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

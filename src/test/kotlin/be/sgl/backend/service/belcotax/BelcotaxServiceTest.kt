@@ -3,10 +3,10 @@ package be.sgl.backend.service.belcotax
 import be.sgl.backend.dto.DeclarationFormTestMother.declarationForm
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.LocalizedException
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.LocalizedException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.MailService
+import be.sgl.backend.shared.mail.MailService
 import generated.Verzendingen
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

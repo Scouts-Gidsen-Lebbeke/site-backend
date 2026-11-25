@@ -3,7 +3,7 @@ package be.sgl.backend.service.organization
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.repository.organization.OrganizationRepository
-import be.sgl.backend.exception.IncompleteConfigurationException
+import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 

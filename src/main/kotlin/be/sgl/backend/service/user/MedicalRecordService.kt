@@ -3,7 +3,7 @@ package be.sgl.backend.service.user
 import be.sgl.backend.dto.user.MedicalRecordDTO
 import be.sgl.backend.repository.user.MedicalRecordRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import org.springframework.stereotype.Service
 
 @Service

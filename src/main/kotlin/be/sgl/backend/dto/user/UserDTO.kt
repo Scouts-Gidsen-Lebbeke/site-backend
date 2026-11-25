@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.user
 
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.User
 import io.swagger.v3.oas.annotations.media.Schema

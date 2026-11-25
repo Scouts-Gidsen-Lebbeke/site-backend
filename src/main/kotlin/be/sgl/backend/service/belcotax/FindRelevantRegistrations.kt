@@ -2,7 +2,7 @@ package be.sgl.backend.service.belcotax
 
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.shared.util.Usecase
 import mu.KotlinLogging
 import java.time.LocalDateTime
 

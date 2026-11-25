@@ -4,14 +4,14 @@ import be.sgl.backend.dto.branch.BranchDTO
 import be.sgl.backend.dto.branch.BranchWithStaff
 import be.sgl.backend.dto.branch.CreateOrUpdateBranchRequest
 import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.setting.SettingId
+import be.sgl.backend.setting.SettingId
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.exception.BranchNotFoundException
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
-import be.sgl.backend.service.ImageService.ImageDirectory.BRANCH
-import be.sgl.backend.service.SettingService
+import be.sgl.backend.shared.exception.BranchNotFoundException
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.TEMPORARY
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.BRANCH
+import be.sgl.backend.setting.SettingApi
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,12 +19,12 @@ class BranchService(
     private val branchRepository: BranchRepository,
     private val userRepository: UserRepository,
     private val imageService: ImageService,
-    private val settingService: SettingService
+    private val settingApi: SettingApi
 ) {
 
     fun getBranchDTOById(id: Int): BranchWithStaff {
         val branch = getBranchById(id)
-        if (settingService.getOrDefault(SettingId.STAFF_VISIBLE.name, true)) {
+        if (settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)) {
             branch.staff = userRepository.getStaffForBranch(branch)
         }
         return BranchWithStaff.of(branch)

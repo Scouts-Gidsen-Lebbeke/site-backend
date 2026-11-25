@@ -1,16 +1,16 @@
 package be.sgl.backend.service.membership
 
-import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
+import be.sgl.backend.shared.config.LocaleConfig.Companion.BE_NL
 import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestrictionTestMother.membershipRestriction
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
-import be.sgl.backend.service.MailService
-import be.sgl.backend.util.I18nUtil
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
+import be.sgl.backend.shared.mail.MailService
+import be.sgl.backend.shared.util.I18nUtil
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

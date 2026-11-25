@@ -3,8 +3,8 @@ package be.sgl.backend.dto.user
 import be.sgl.backend.dto.AddressDTO
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
-import be.sgl.backend.util.Nis
-import be.sgl.backend.util.PhoneNumber
+import be.sgl.backend.shared.util.Nis
+import be.sgl.backend.shared.util.PhoneNumber
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank

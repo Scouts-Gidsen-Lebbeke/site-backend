@@ -3,8 +3,8 @@ package be.sgl.backend.service.role
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.exception.UserNotFoundException
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.shared.exception.UserNotFoundException
+import be.sgl.backend.shared.util.Usecase
 
 @Usecase
 class FindStaffBranchForUser(private val userRepository: UserRepository) {

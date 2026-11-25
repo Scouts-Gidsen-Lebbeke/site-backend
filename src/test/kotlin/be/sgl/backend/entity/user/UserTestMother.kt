@@ -30,7 +30,7 @@ object UserTestMother {
         private val roles = mutableListOf<UserRole>()
         private var staffData = StaffData()
 
-        fun id(id: Int) = apply { this.id = id }
+        fun id(id: Int?) = apply { this.id = id }
 
         fun username(username: String) = apply { this.username = username }
 

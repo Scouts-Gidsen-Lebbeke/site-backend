@@ -2,7 +2,7 @@ package be.sgl.backend.service.organization
 
 import be.sgl.backend.entity.organization.OrganizationTestMother.organization
 import be.sgl.backend.entity.organization.OrganizationType
-import be.sgl.backend.exception.IncompleteConfigurationException
+import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import be.sgl.backend.repository.organization.OrganizationRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

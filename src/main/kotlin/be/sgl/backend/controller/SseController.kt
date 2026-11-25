@@ -1,7 +1,7 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.security.Public
-import be.sgl.backend.service.SseService
+import be.sgl.backend.shared.security.Public
+import be.sgl.backend.shared.sse.SseService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema

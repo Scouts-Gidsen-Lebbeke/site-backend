@@ -5,9 +5,9 @@ import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_
 import be.sgl.backend.openapi.model.Lid
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.AVGA_FUNCTION
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
-import be.sgl.backend.util.eqValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
+import be.sgl.backend.shared.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

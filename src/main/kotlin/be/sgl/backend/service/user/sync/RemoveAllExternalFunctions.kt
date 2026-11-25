@@ -3,7 +3,7 @@ package be.sgl.backend.service.user.sync
 import be.sgl.backend.dto.user.ExternalMember
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Lid
-import be.sgl.backend.service.MailService
+import be.sgl.backend.shared.mail.MailService
 import mu.KotlinLogging
 import java.time.OffsetDateTime
 

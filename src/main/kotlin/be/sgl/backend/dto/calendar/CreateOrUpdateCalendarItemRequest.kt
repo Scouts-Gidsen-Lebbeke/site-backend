@@ -2,7 +2,7 @@ package be.sgl.backend.dto.calendar
 
 import be.sgl.backend.dto.AddressDTO
 import be.sgl.backend.entity.calendar.CalendarItem
-import be.sgl.backend.util.StartEndTime
+import be.sgl.backend.shared.util.StartEndTime
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull

@@ -7,7 +7,7 @@ spring:
     password: # dynamic
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
   mail:
     host: # dynamic
     port: # dynamic

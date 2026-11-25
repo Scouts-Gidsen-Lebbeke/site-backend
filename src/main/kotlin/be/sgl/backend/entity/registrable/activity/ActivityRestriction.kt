@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.registrable.activity
 
-import be.sgl.backend.entity.Auditable
+import be.sgl.backend.shared.persistence.Auditable
 import be.sgl.backend.entity.branch.Branch
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue

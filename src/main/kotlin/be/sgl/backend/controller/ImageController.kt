@@ -1,8 +1,8 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.security.OnlyAuthenticated
+import be.sgl.backend.shared.security.OnlyAuthenticated
 import be.sgl.backend.dto.RemoteFile
-import be.sgl.backend.service.ImageService
+import be.sgl.backend.shared.image.ImageService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.TEMPORARY
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 

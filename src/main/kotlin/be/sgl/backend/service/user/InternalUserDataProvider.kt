@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.util.ForInternalOrganization
+import be.sgl.backend.shared.util.ForInternalOrganization
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 

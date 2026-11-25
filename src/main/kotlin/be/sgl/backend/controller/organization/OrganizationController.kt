@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.organization
 
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.organization.OrganizationDTO
 import be.sgl.backend.service.organization.OrganizationService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse

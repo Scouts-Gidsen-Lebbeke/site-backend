@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.calendar
 
-import be.sgl.backend.config.security.OnlyStaff
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyStaff
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.calendar.*
 import be.sgl.backend.service.calendar.CalendarService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse

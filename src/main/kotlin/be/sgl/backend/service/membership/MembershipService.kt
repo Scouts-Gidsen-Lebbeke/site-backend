@@ -1,7 +1,7 @@
 package be.sgl.backend.service.membership
 
-import be.sgl.backend.alert.AlertCode
-import be.sgl.backend.alert.AlertLogger
+import be.sgl.backend.shared.alert.AlertCode
+import be.sgl.backend.shared.alert.AlertLogger
 import be.sgl.backend.dto.Customer
 import be.sgl.backend.dto.membership.MembershipDTO
 import be.sgl.backend.dto.membership.UserRegistrationDTO
@@ -14,9 +14,9 @@ import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.payment.PaymentService
-import be.sgl.backend.exception.BranchNotFoundException
-import be.sgl.backend.exception.MembershipNotFoundException
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.BranchNotFoundException
+import be.sgl.backend.shared.exception.MembershipNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.service.user.UserDataProvider
 import jakarta.transaction.Transactional
 import mu.KotlinLogging

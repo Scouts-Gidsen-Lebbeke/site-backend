@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.calendar
 
 import be.sgl.backend.entity.Address
-import be.sgl.backend.entity.Auditable
+import be.sgl.backend.shared.persistence.Auditable
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime

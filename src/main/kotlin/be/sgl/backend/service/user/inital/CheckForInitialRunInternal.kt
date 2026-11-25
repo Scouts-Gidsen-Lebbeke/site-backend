@@ -1,14 +1,14 @@
 package be.sgl.backend.service.user.inital
 
-import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.Role.Companion.adminRole
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.util.ForInternalOrganization
+import be.sgl.backend.shared.util.ForInternalOrganization
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import java.time.LocalDate

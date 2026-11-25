@@ -4,8 +4,8 @@ import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.SimplifiedPaymentStatus
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.service.MailService
-import be.sgl.backend.util.anyValue
+import be.sgl.backend.shared.mail.MailService
+import be.sgl.backend.shared.util.anyValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach

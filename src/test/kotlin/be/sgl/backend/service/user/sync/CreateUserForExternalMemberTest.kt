@@ -17,9 +17,9 @@ import be.sgl.backend.openapi.model.PersoonsGegevens.GeslachtEnum
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

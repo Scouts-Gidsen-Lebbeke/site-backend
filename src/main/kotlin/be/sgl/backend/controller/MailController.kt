@@ -1,9 +1,9 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.shared.security.OnlyStaff
 import be.sgl.backend.dto.MailDTO
-import be.sgl.backend.service.MailService
-import be.sgl.backend.service.SseService
+import be.sgl.backend.shared.mail.MailService
+import be.sgl.backend.shared.sse.SseService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse

@@ -1,14 +1,14 @@
 package be.sgl.backend.service.membership
 
-import be.sgl.backend.config.LocaleConfig.Companion.BE_NL
+import be.sgl.backend.shared.config.LocaleConfig.Companion.BE_NL
 import be.sgl.backend.entity.PaymentTestMother.membership
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.membership.MembershipPeriodRepository
 import be.sgl.backend.repository.membership.MembershipRepository
-import be.sgl.backend.service.MailService
-import be.sgl.backend.util.I18nUtil
-import be.sgl.backend.util.anyValue
+import be.sgl.backend.shared.mail.MailService
+import be.sgl.backend.shared.util.I18nUtil
+import be.sgl.backend.shared.util.anyValue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

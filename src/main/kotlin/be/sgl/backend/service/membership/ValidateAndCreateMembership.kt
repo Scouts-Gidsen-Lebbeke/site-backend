@@ -9,8 +9,8 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository
 import be.sgl.backend.repository.user.SiblingRepository
-import be.sgl.backend.util.Usecase
-import be.sgl.backend.util.reducePrice
+import be.sgl.backend.shared.util.Usecase
+import be.sgl.backend.shared.util.reducePrice
 import mu.KotlinLogging
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters.lastDayOfYear

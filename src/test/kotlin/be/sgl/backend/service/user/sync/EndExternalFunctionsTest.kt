@@ -12,10 +12,10 @@ import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.role.UserRoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
-import be.sgl.backend.util.eqValue
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
+import be.sgl.backend.shared.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach

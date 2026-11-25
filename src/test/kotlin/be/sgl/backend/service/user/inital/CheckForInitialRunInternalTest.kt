@@ -1,14 +1,14 @@
 package be.sgl.backend.service.user.inital
 
-import be.sgl.backend.config.CustomUserDetailsTestMother.userDetails
+import be.sgl.backend.shared.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.role.RoleTestMother.adminRole
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argThatValue
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argThatValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

@@ -5,7 +5,7 @@ import be.sgl.backend.entity.role.RoleTestMother.adminRole
 import be.sgl.backend.entity.role.RoleTestMother.memberRole
 import be.sgl.backend.entity.role.RoleTestMother.role
 import be.sgl.backend.entity.role.RoleTestMother.staffRole
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

@@ -4,11 +4,11 @@ import be.sgl.backend.dto.user.ContactDTO
 import be.sgl.backend.dto.user.CreateOrUpdateContactRequest
 import be.sgl.backend.entity.Address
 import be.sgl.backend.entity.user.Contact
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import be.sgl.backend.entity.user.User
-import be.sgl.backend.exception.AddressNotFoundException
-import be.sgl.backend.exception.ContactNotFoundException
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.AddressNotFoundException
+import be.sgl.backend.shared.exception.ContactNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.AddressRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository

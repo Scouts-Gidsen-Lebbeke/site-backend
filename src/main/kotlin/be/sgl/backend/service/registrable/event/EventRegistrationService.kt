@@ -11,9 +11,9 @@ import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.payment.PaymentService
-import be.sgl.backend.exception.EventNotFoundException
-import be.sgl.backend.exception.EventRegistrationNotFoundException
-import be.sgl.backend.exception.LocalizedException
+import be.sgl.backend.shared.exception.EventNotFoundException
+import be.sgl.backend.shared.exception.EventRegistrationNotFoundException
+import be.sgl.backend.shared.exception.LocalizedException
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
 import mu.KotlinLogging
 import org.springframework.stereotype.Service

@@ -11,7 +11,7 @@ import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.LocalizedException
+import be.sgl.backend.shared.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.api.LidaanvragenApi
 import be.sgl.backend.openapi.model.Adres
@@ -26,10 +26,10 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.ExternalUserDataProvider.Companion.toDto
 import be.sgl.backend.service.user.sync.CreateExternalFunctions
 import be.sgl.backend.service.user.sync.EndExternalFunctions
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
-import be.sgl.backend.util.eqValue
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
+import be.sgl.backend.shared.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy

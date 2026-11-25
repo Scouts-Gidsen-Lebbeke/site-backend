@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.util.ForExternalOrganization
+import be.sgl.backend.shared.util.ForExternalOrganization
 import org.springframework.stereotype.Component
 
 @Component

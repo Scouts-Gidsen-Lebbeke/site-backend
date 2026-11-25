@@ -4,9 +4,9 @@ import be.sgl.backend.dto.Customer
 import be.sgl.backend.entity.PayableTestMother.activity
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.SimplifiedPaymentStatus
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
-import be.sgl.backend.util.eqValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
+import be.sgl.backend.shared.util.eqValue
 import be.woutschoovaerts.mollie.Client
 import be.woutschoovaerts.mollie.data.common.Amount
 import be.woutschoovaerts.mollie.data.common.Link

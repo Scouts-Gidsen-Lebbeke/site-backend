@@ -1,11 +1,11 @@
 package be.sgl.backend.controller
 
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.RemoteFile
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.Companion.IMAGE_BASE_PATH
-import be.sgl.backend.service.ImageService.ImageDirectory.BACKGROUND
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.Companion.IMAGE_BASE_PATH
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.BACKGROUND
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema

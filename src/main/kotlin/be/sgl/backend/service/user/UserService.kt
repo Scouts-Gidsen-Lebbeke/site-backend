@@ -1,14 +1,14 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.config.CustomUserDetails
+import be.sgl.backend.shared.config.CustomUserDetails
 import be.sgl.backend.dto.user.UserDTO
-import be.sgl.backend.service.ImageService
+import be.sgl.backend.shared.image.ImageService
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.repository.user.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.PROFILE_PICTURE
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.service.user.inital.CheckForInitialRun
 import java.nio.file.Path
 

@@ -4,13 +4,13 @@ import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.entity.registrable.activity.ActivityRegistration
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.service.SettingService
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.setting.SettingApi
+import be.sgl.backend.shared.util.Usecase
 import mu.KotlinLogging
 
 @Usecase
 class FilterIntoValidFormData(
-    private val settingService: SettingService,
+    private val settingApi: SettingApi,
     private val contactRepository: ContactRepository
 ) {
     private val logger = KotlinLogging.logger {}
@@ -46,7 +46,7 @@ class FilterIntoValidFormData(
     }
 
     private fun getDispatchRateForYear(year: Int): Double {
-        return settingService.getOrDefault("DISPATCH_RATE_$year", DEFAULT_DISPATCH_RATE)
+        return settingApi.getOrDefault("DISPATCH_RATE_$year", DEFAULT_DISPATCH_RATE)
     }
 
     companion object {

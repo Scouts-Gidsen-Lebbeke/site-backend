@@ -7,7 +7,7 @@ import be.sgl.backend.entity.user.User
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.service.registrable.CalculatePriceFromAdditionalData
-import be.sgl.backend.util.reducePrice
+import be.sgl.backend.shared.util.reducePrice
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 

@@ -4,11 +4,11 @@ import be.sgl.backend.dto.user.ExternalMemberTestMother.externalMember
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.functie
 import be.sgl.backend.openapi.model.Lid
-import be.sgl.backend.service.MailService
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
-import be.sgl.backend.util.eqValue
+import be.sgl.backend.shared.mail.MailService
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
+import be.sgl.backend.shared.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

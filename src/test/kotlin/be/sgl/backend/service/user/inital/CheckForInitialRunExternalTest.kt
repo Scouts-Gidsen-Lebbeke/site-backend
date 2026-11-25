@@ -1,13 +1,13 @@
 package be.sgl.backend.service.user.inital
 
-import be.sgl.backend.config.CustomUserDetailsTestMother.userDetails
+import be.sgl.backend.shared.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.entity.organization.ContactMethodType
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationTestMother.organization
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.entity.role.Role
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.IncompleteConfigurationException
+import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import be.sgl.backend.openapi.api.GroepenApi
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.GroepsadminTestMother.EXTERNAL_ORGANIZATION_ID
@@ -21,10 +21,10 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.AVGA_FUNCTION
 import be.sgl.backend.service.user.inital.CheckForInitialRunExternal.Companion.VGA_FUNCTION
 import be.sgl.backend.service.user.sync.CreateUserForExternalMember
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argThatValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argThatValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach

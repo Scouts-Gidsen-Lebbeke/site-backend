@@ -1,13 +1,13 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.config.CustomUserDetailsTestMother.userDetails
+import be.sgl.backend.shared.config.CustomUserDetailsTestMother.userDetails
 import be.sgl.backend.entity.user.SiblingRelationTestMother.siblingRelation
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.user.SiblingRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.PROFILE_PICTURE
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.PROFILE_PICTURE
 import be.sgl.backend.service.user.inital.CheckForInitialRun
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

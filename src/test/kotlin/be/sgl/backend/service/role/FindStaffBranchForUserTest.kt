@@ -6,7 +6,7 @@ import be.sgl.backend.entity.role.RoleTestMother.memberRole
 import be.sgl.backend.entity.role.RoleTestMother.staffRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.UserNotFoundException
+import be.sgl.backend.shared.exception.UserNotFoundException
 import be.sgl.backend.repository.user.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

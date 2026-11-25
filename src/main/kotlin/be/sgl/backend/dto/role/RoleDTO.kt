@@ -2,7 +2,7 @@ package be.sgl.backend.dto.role
 
 import be.sgl.backend.dto.branch.BranchBaseDTO
 import be.sgl.backend.entity.role.Role
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 import io.swagger.v3.oas.annotations.media.Schema
 
 // read-only

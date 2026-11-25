@@ -9,7 +9,7 @@ import be.sgl.backend.entity.registrable.RegistrableStatus.Companion.getStatus
 import be.sgl.backend.entity.registrable.event.Event
 import be.sgl.backend.repository.event.EventRegistrationRepository
 import be.sgl.backend.repository.event.EventRepository
-import be.sgl.backend.exception.EventNotFoundException
+import be.sgl.backend.shared.exception.EventNotFoundException
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

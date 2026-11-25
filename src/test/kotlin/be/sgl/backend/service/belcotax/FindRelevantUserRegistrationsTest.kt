@@ -3,8 +3,8 @@ package be.sgl.backend.service.belcotax
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.activity.ActivityRegistrationRepository
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.eqValue
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.eqValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

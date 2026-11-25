@@ -7,11 +7,11 @@ import be.sgl.backend.entity.calendar.CalendarPeriod
 import be.sgl.backend.repository.calendar.CalendarItemRepository
 import be.sgl.backend.repository.calendar.CalendarPeriodRepository
 import be.sgl.backend.repository.calendar.CalendarRepository
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.*
-import be.sgl.backend.exception.CalendarItemNotFoundException
-import be.sgl.backend.exception.CalendarNotFoundException
-import be.sgl.backend.exception.CalendarPeriodNotFoundException
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.*
+import be.sgl.backend.shared.exception.CalendarItemNotFoundException
+import be.sgl.backend.shared.exception.CalendarNotFoundException
+import be.sgl.backend.shared.exception.CalendarPeriodNotFoundException
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull

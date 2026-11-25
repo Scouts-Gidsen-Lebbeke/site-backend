@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.registrable.event
 
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.registrable.event.CreateOrUpdateEventRequest
 import be.sgl.backend.dto.registrable.event.EventBaseDTO
 import be.sgl.backend.dto.registrable.event.EventDTO

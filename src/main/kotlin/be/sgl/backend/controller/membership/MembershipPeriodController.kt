@@ -1,7 +1,7 @@
 package be.sgl.backend.controller.membership
 
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.Public
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.Public
 import be.sgl.backend.dto.membership.CreateOrUpdateMembershipPeriodRequest
 import be.sgl.backend.dto.membership.MembershipPeriodDTO
 import be.sgl.backend.dto.membership.MembershipPeriodResult

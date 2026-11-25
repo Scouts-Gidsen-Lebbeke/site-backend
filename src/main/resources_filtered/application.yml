@@ -8,6 +8,9 @@ spring:
     url: # TODO: pass as an environment variable
     username: # TODO: pass as an environment variable
     password: # TODO: pass as an environment variable
+  jpa:
+    hibernate:
+      ddl-auto: validate
   messages:
     fallback-to-system-locale: false
   servlet:

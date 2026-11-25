@@ -5,19 +5,19 @@ import be.sgl.backend.dto.branch.CreateOrUpdateBranchRequestTestMother.branchReq
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.setting.SettingId
+import be.sgl.backend.setting.SettingId
 import be.sgl.backend.entity.user.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
-import be.sgl.backend.exception.BranchNotFoundException
+import be.sgl.backend.shared.exception.BranchNotFoundException
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.user.UserRepository
-import be.sgl.backend.service.ImageService
-import be.sgl.backend.service.ImageService.ImageDirectory.BRANCH
-import be.sgl.backend.service.ImageService.ImageDirectory.TEMPORARY
-import be.sgl.backend.service.SettingService
-import be.sgl.backend.util.anyValue
-import be.sgl.backend.util.argumentCaptor
-import be.sgl.backend.util.captureValue
+import be.sgl.backend.shared.image.ImageService
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.BRANCH
+import be.sgl.backend.shared.image.ImageService.ImageDirectory.TEMPORARY
+import be.sgl.backend.setting.SettingApi
+import be.sgl.backend.shared.util.anyValue
+import be.sgl.backend.shared.util.argumentCaptor
+import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -41,7 +41,7 @@ class BranchServiceTest {
     @Mock
     lateinit var imageService: ImageService
     @Mock
-    lateinit var settingService: SettingService
+    lateinit var settingApi: SettingApi
     @InjectMocks
     lateinit var testee: BranchService
 
@@ -56,7 +56,7 @@ class BranchServiceTest {
             val branch = branch().build()
             val staff = user().name("staffName").build()
             given(branchRepository.findById(id)).willReturn(Optional.of(branch))
-            given(settingService.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
+            given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(true)
             given(userRepository.getStaffForBranch(branch)).willReturn(listOf(staff))
 
             // when
@@ -71,7 +71,7 @@ class BranchServiceTest {
             // given
             val branch = branch().build()
             given(branchRepository.findById(id)).willReturn(Optional.of(branch))
-            given(settingService.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(false)
+            given(settingApi.getOrDefault(SettingId.STAFF_VISIBLE.name, true)).willReturn(false)
 
             // when
             val result = testee.getBranchDTOById(id)

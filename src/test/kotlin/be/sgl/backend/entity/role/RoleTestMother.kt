@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.role
 
 import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.user.RoleLevel
+import be.sgl.backend.shared.security.RoleLevel
 
 object RoleTestMother {
 
@@ -25,7 +25,7 @@ object RoleTestMother {
         private var staffBranch: Branch? = null
         private var level = RoleLevel.GUEST
 
-        fun id(id: Int) = apply { this.id = id }
+        fun id(id: Int?) = apply { this.id = id }
 
         fun externalId(externalId: String?) = apply { this.externalId = externalId }
 

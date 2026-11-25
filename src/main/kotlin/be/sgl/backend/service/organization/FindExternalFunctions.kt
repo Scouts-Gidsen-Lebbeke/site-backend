@@ -3,7 +3,7 @@ package be.sgl.backend.service.organization
 import be.sgl.backend.dto.role.ExternalFunction
 import be.sgl.backend.openapi.api.FunctiesApi
 import be.sgl.backend.openapi.model.Functie
-import be.sgl.backend.util.Usecase
+import be.sgl.backend.shared.util.Usecase
 import org.springframework.beans.factory.annotation.Value
 
 @Usecase

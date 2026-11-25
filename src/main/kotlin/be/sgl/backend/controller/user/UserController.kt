@@ -1,9 +1,9 @@
 package be.sgl.backend.controller.user
 
-import be.sgl.backend.config.CustomUserDetails
-import be.sgl.backend.config.security.OnlyAdmin
-import be.sgl.backend.config.security.OnlyAuthenticated
-import be.sgl.backend.config.security.OnlyStaff
+import be.sgl.backend.shared.config.CustomUserDetails
+import be.sgl.backend.shared.security.OnlyAdmin
+import be.sgl.backend.shared.security.OnlyAuthenticated
+import be.sgl.backend.shared.security.OnlyStaff
 import be.sgl.backend.dto.RemoteFile
 import be.sgl.backend.dto.user.UserDTO
 import be.sgl.backend.service.user.UserService

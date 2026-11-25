@@ -7,7 +7,7 @@ import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.calendar.CalendarItemRepository
 import be.sgl.backend.repository.calendar.CalendarPeriodRepository
 import be.sgl.backend.repository.calendar.CalendarRepository
-import be.sgl.backend.exception.CalendarPeriodNotFoundException
+import be.sgl.backend.shared.exception.CalendarPeriodNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.time.LocalDate
