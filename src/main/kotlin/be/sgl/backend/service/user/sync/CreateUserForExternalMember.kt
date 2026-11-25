@@ -11,8 +11,10 @@ import be.sgl.backend.organization.domain.Role
 import be.sgl.backend.organization.domain.RoleRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
+import jakarta.persistence.EntityManager
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 
 @ExternalUsecase
@@ -23,11 +25,13 @@ class CreateUserForExternalMember(
     private var externalOrganizationId: String,
     private val roleRepository: RoleRepository,
     private val contactRepository: ContactRepository,
-    private val accessApi: AccessApi
+    private val accessApi: AccessApi,
+    private val entityManager: EntityManager
 ) {
 
     private val logger = KotlinLogging.logger {}
 
+    @Transactional
     fun execute(externalId: String): User {
         logger.info { "Creating new user based on external id $externalId..." }
         val externalMember = ledenApi.getLid(externalId)
@@ -61,7 +65,11 @@ class CreateUserForExternalMember(
             } } )
         }
         newUser = userRepository.save(newUser)
-        roles.forEach { accessApi.assign(newUser.id!!, it.id!!) }
+        if (roles.isNotEmpty()) {
+            roles.forEach { accessApi.assign(newUser.id!!, it.id!!) }
+            entityManager.flush()
+            entityManager.refresh(newUser)
+        }
         externalMember.contacten.map { Contact().updateFrom(it, newUser) }.forEach(contactRepository::save)
         return newUser
     }

@@ -21,6 +21,7 @@ import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.util.anyValue
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
+import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +30,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
+import org.mockito.InOrder
 import org.mockito.Mock
+import org.mockito.Mockito.inOrder
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 
@@ -46,12 +49,14 @@ class CreateUserForExternalMemberTest {
     lateinit var contactRepository: ContactRepository
     @Mock
     lateinit var accessApi: AccessApi
+    @Mock
+    lateinit var entityManager: EntityManager
 
     lateinit var testee: CreateUserForExternalMember
 
     @BeforeEach
     fun setUp() {
-        testee = CreateUserForExternalMember(ledenApi, userRepository, EXTERNAL_ORGANIZATION_ID, roleRepository, contactRepository, accessApi)
+        testee = CreateUserForExternalMember(ledenApi, userRepository, EXTERNAL_ORGANIZATION_ID, roleRepository, contactRepository, accessApi, entityManager)
     }
 
     private fun stubSave() {
@@ -193,6 +198,37 @@ class CreateUserForExternalMemberTest {
 
         // then
         then(accessApi).shouldHaveNoInteractions()
+    }
+
+    @Test
+    fun `should flush and refresh the user when roles are assigned`() {
+        // given
+        val role = memberRole(branch().build()).externalId("known").build()
+        given(ledenApi.getLid("ext-1")).willReturn(lid().functies(functie().functie("known").build()).build())
+        given(roleRepository.getRoleByExternalIdEquals("known")).willReturn(role)
+        stubSave()
+
+        // when
+        val result = testee.execute("ext-1")
+
+        // then
+        val order: InOrder = inOrder(accessApi, entityManager)
+        order.verify(accessApi).assign(USER_ID, role.id!!)
+        order.verify(entityManager).flush()
+        order.verify(entityManager).refresh(result)
+    }
+
+    @Test
+    fun `should not flush when no roles are assigned`() {
+        // given
+        given(ledenApi.getLid("ext-1")).willReturn(lid().build())
+        stubSave()
+
+        // when
+        testee.execute("ext-1")
+
+        // then
+        then(entityManager).shouldHaveNoInteractions()
     }
 
     companion object {
