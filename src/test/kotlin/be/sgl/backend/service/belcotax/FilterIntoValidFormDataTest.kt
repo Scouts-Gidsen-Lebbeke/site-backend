@@ -5,7 +5,7 @@ import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.user.ContactRepository
-import be.sgl.backend.service.SettingService
+import be.sgl.backend.setting.SettingApi
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 class FilterIntoValidFormDataTest {
 
     @Mock
-    lateinit var settingService: SettingService
+    lateinit var settingApi: SettingApi
     @Mock
     lateinit var contactRepository: ContactRepository
     @InjectMocks
@@ -76,7 +76,7 @@ class FilterIntoValidFormDataTest {
 
             // then
             assertThat(forms).isEmpty()
-            then(settingService).shouldHaveNoInteractions()
+            then(settingApi).shouldHaveNoInteractions()
         }
     }
 
@@ -92,7 +92,7 @@ class FilterIntoValidFormDataTest {
             val otherParent = contact().id(2).user(user).build()
             val registrations = registrations(1)
             given(contactRepository.findContactsByUserAndNisNotNull(user)).willReturn(listOf(parent, otherParent))
-            given(settingService.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(defaultRate)
+            given(settingApi.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(defaultRate)
 
             // when
             val forms = testee.execute(user, registrations)
@@ -115,7 +115,7 @@ class FilterIntoValidFormDataTest {
             // given
             val registrations = registrations(4)
             given(contactRepository.findContactsByUserAndNisNotNull(user)).willReturn(listOf(parent))
-            given(settingService.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(defaultRate)
+            given(settingApi.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(defaultRate)
 
             // when
             val forms = testee.execute(user, registrations)
@@ -131,7 +131,7 @@ class FilterIntoValidFormDataTest {
             // given
             val registrations = registrations(5)
             given(contactRepository.findContactsByUserAndNisNotNull(user)).willReturn(listOf(parent))
-            given(settingService.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(defaultRate)
+            given(settingApi.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(defaultRate)
 
             // when
             val forms = testee.execute(user, registrations)
@@ -148,7 +148,7 @@ class FilterIntoValidFormDataTest {
             // given
             val configuredRate = 16.1
             given(contactRepository.findContactsByUserAndNisNotNull(user)).willReturn(listOf(parent))
-            given(settingService.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(configuredRate)
+            given(settingApi.getOrDefault("DISPATCH_RATE_$year", defaultRate)).willReturn(configuredRate)
 
             // when
             val forms = testee.execute(user, registrations(1))

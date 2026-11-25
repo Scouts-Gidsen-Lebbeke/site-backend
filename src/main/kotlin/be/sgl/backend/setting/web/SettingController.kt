@@ -1,8 +1,8 @@
-package be.sgl.backend.controller.setting
+package be.sgl.backend.setting.web
 
 import be.sgl.backend.shared.security.OnlyAdmin
 import be.sgl.backend.shared.security.Public
-import be.sgl.backend.service.SettingService
+import be.sgl.backend.setting.application.SettingService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse

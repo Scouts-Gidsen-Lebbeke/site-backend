@@ -1,6 +1,7 @@
-package be.sgl.backend.entity.setting
+package be.sgl.backend.setting.domain
 
-import be.sgl.backend.entity.setting.SettingTestMother.setting
+import be.sgl.backend.setting.SettingId
+import be.sgl.backend.setting.domain.SettingTestMother.setting
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

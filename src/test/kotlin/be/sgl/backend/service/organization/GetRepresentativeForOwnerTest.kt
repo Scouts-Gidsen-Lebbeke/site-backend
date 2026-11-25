@@ -1,12 +1,12 @@
 package be.sgl.backend.service.organization
 
-import be.sgl.backend.entity.setting.SettingId
+import be.sgl.backend.setting.SettingId
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.shared.exception.IncompleteConfigurationException
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.image.ImageService
 import be.sgl.backend.shared.image.ImageService.ImageDirectory.ORGANIZATION
-import be.sgl.backend.service.SettingService
+import be.sgl.backend.setting.SettingApi
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ import java.io.File
 class GetRepresentativeForOwnerTest {
 
     @Mock
-    lateinit var settingService: SettingService
+    lateinit var settingApi: SettingApi
     @Mock
     lateinit var userRepository: UserRepository
     @Mock
@@ -35,14 +35,14 @@ class GetRepresentativeForOwnerTest {
     private val user = user().username(username).build()
 
     private fun givenRepresentativeUser() {
-        given(settingService.get(SettingId.REPRESENTATIVE_USERNAME.name)).willReturn(username)
+        given(settingApi.get(SettingId.REPRESENTATIVE_USERNAME.name)).willReturn(username)
         given(userRepository.getByUsername(username)).willReturn(user)
     }
 
     @Test
     fun `should throw when no representative is configured`() {
         // given
-        given(settingService.get(SettingId.REPRESENTATIVE_USERNAME.name)).willReturn(null)
+        given(settingApi.get(SettingId.REPRESENTATIVE_USERNAME.name)).willReturn(null)
 
         // when / then
         assertThatThrownBy { testee.execute() }
@@ -54,8 +54,8 @@ class GetRepresentativeForOwnerTest {
     fun `should throw when no signature is configured`() {
         // given
         givenRepresentativeUser()
-        given(settingService.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, defaultTitle)).willReturn(defaultTitle)
-        given(settingService.get(SettingId.REPRESENTATIVE_SIGNATURE.name)).willReturn(null)
+        given(settingApi.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, defaultTitle)).willReturn(defaultTitle)
+        given(settingApi.get(SettingId.REPRESENTATIVE_SIGNATURE.name)).willReturn(null)
 
         // when / then
         assertThatThrownBy { testee.execute() }
@@ -67,8 +67,8 @@ class GetRepresentativeForOwnerTest {
     fun `should throw when the signature image does not exist`() {
         // given
         givenRepresentativeUser()
-        given(settingService.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, defaultTitle)).willReturn(defaultTitle)
-        given(settingService.get(SettingId.REPRESENTATIVE_SIGNATURE.name)).willReturn(signatureFileName)
+        given(settingApi.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, defaultTitle)).willReturn(defaultTitle)
+        given(settingApi.get(SettingId.REPRESENTATIVE_SIGNATURE.name)).willReturn(signatureFileName)
         given(imageService.get(signatureFileName, ORGANIZATION)).willReturn(null)
 
         // when / then
@@ -83,8 +83,8 @@ class GetRepresentativeForOwnerTest {
         val title = "Voorzitter"
         val signature = File(signatureFileName)
         givenRepresentativeUser()
-        given(settingService.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, defaultTitle)).willReturn(title)
-        given(settingService.get(SettingId.REPRESENTATIVE_SIGNATURE.name)).willReturn(signatureFileName)
+        given(settingApi.getOrDefault(SettingId.REPRESENTATIVE_TITLE.name, defaultTitle)).willReturn(title)
+        given(settingApi.get(SettingId.REPRESENTATIVE_SIGNATURE.name)).willReturn(signatureFileName)
         given(imageService.get(signatureFileName, ORGANIZATION)).willReturn(signature)
 
         // when

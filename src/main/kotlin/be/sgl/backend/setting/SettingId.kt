@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.setting
+package be.sgl.backend.setting
 
 enum class SettingId {
     LATEST_DISPATCH_RATE,

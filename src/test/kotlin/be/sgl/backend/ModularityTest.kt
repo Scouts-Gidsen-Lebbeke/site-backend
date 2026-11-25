@@ -36,6 +36,6 @@ class ModularityTest {
         contains("'$module'") || contains("Slice $module")
 
     companion object {
-        val STRICT_MODULES = listOf("shared")
+        val STRICT_MODULES = listOf("shared", "setting")
     }
 }

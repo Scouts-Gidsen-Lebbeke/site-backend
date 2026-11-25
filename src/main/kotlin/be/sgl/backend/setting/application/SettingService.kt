@@ -1,28 +1,29 @@
-package be.sgl.backend.service
+package be.sgl.backend.setting.application
 
-import be.sgl.backend.entity.setting.Setting
-import be.sgl.backend.repository.SettingRepository
+import be.sgl.backend.setting.domain.Setting
+import be.sgl.backend.setting.domain.SettingRepository
+import be.sgl.backend.setting.SettingApi
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
 @Component
 class SettingService(
     private val settingRepository: SettingRepository
-) {
+) : SettingApi {
 
-    fun get(id: String): String? {
+    override fun get(id: String): String? {
         return settingRepository.findByIdOrNull(id)?.value
     }
 
-    fun getOrDefault(id: String, default: String): String {
+    override fun getOrDefault(id: String, default: String): String {
         return get(id) ?: default
     }
 
-    fun getOrDefault(id: String, default: Double): Double {
+    override fun getOrDefault(id: String, default: Double): Double {
         return get(id)?.toDoubleOrNull() ?: default
     }
 
-    fun getOrDefault(id: String, default: Boolean): Boolean {
+    override fun getOrDefault(id: String, default: Boolean): Boolean {
         return get(id)?.toBooleanStrictOrNull() ?: default
     }
 

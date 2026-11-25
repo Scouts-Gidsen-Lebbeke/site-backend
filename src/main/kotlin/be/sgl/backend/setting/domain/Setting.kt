@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.setting
+package be.sgl.backend.setting.domain
 
 import be.sgl.backend.shared.persistence.Auditable
 import jakarta.persistence.Entity

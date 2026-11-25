@@ -1,8 +1,8 @@
-package be.sgl.backend.service
+package be.sgl.backend.setting.application
 
-import be.sgl.backend.entity.setting.Setting
-import be.sgl.backend.entity.setting.SettingTestMother.setting
-import be.sgl.backend.repository.SettingRepository
+import be.sgl.backend.setting.domain.Setting
+import be.sgl.backend.setting.domain.SettingTestMother.setting
+import be.sgl.backend.setting.domain.SettingRepository
 import be.sgl.backend.shared.util.argumentCaptor
 import be.sgl.backend.shared.util.captureValue
 import org.assertj.core.api.Assertions.assertThat
