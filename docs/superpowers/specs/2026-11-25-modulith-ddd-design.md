@@ -65,7 +65,7 @@ Base package `be.sgl.backend.<module>`. Each module contains its own controllers
 | `shared` (open module) | config, security plumbing, mail, PDF utils, SSE, images, exceptions, alerts, `Auditable`, `Conditionals`, `Usecase` | — | — |
 | `setting` | `Setting`, `SettingId` | `SettingApi` | — |
 | `people` | `User`, `Contact`, `MedicalRecord`, `Address`, `SiblingRelation`, `StaffData` | `UserApi` → read models (`UserSummary`: id, username, name, birthdate/age, sex, NIS, account, reduction flags, home address) | `setting` |
-| `organization` | `Organization`, `ContactMethod`, `Branch`, `BranchStatus`, `Role`, `RoleLevel`, `OrganizationProvider` | `OrganizationApi` (owner/certifier), `BranchApi`, `RoleApi` | `people`, `setting` |
+| `organization` | `Organization`, `ContactMethod`, `Branch`, `BranchStatus`, `Role`, `OrganizationProvider` | `OrganizationApi` (owner/certifier), `BranchApi`, `RoleApi` | `people`, `setting` |
 | `access` | `UserRole(userId, roleId)`; level computation; `@Public/@OnlyAuthenticated/@OnlyStaff/@OnlyAdmin` checks | `AccessApi` (level of user, staff of branch, assign/revoke); listens to `MembershipPaid` | `organization`, `people` |
 | `payment` | `Payment` (amount, status, provider id, `ownerType`, `ownerId`), `CheckoutProvider` + Mollie/Payconiq, webhook, refunds, refund cost | `PaymentApi.startCheckout/refund/status`; publishes `PaymentCompleted`, `PaymentCanceled`, `PaymentRefunded` | `people` |
 | `membership` | `Membership`, `MembershipPeriod`, `MembershipRestriction`, membership certificates | `MembershipApi`; publishes `MembershipPaid`; listens to payment events | `people`, `organization`, `payment`, `setting` |
@@ -80,7 +80,8 @@ The dependency graph above is acyclic. `groepsadmin` and `belcotax` are delibera
 
 ### Notable relocations
 
-- `RoleLevel` moves from `entity.user` to `organization`.
+- `RoleLevel` moves from `entity.user` to `shared.security` (not `organization`: `people` needs it for `UserDTO.level`, and `organization` depends on `people`).
+- `MailService` gets its default sender through a `DefaultSenderProvider` SPI in `shared`, implemented by `organization` (owner organization email).
 - `User.roles` and `User.level` are removed. `access` computes level as max level over the user's roles. The security annotations ask `AccessApi`.
 - `RoleService` splits: role CRUD (`createMemberRole`, `createStaffRole`, `update*`, `deleteRole`, `getRoleToSync*`) → `organization`; assignment (`markUserAsStaff`, `markUserAsAdmin`, `assignRole`, `deassignRoleFromUser`, `getUserRolesByRole`) and `FindStaffBranchForUser` → `access`.
 - Inside `organization`, `Role → Branch` stays a real JPA association (same module).
@@ -123,10 +124,10 @@ The dependency graph above is acyclic. `groepsadmin` and `belcotax` are delibera
 
 One module per PR, each independently deployable and green:
 
-0. Flyway baseline; add `spring-modulith-starter-core`, `-starter-jpa`, `-starter-test`; add `ModularityTest` running `verify()`, initially tolerating the known violations (documented list that shrinks per PR).
-1. `shared` + leaves: `setting`, `news`.
-2. `calendar`, `shop` (parked, entities only).
-3. `organization` (branch + role definitions) and `access`; security annotations switch to `AccessApi`; branch staff API change.
+0. Flyway baseline; add `spring-modulith-starter-core`, `-starter-test`; add `ModularityTest` that is strict for a growing `STRICT_MODULES` list and tolerates violations in the legacy layer packages. (`-starter-jpa` / event registry comes with step 5, the first step that publishes events.)
+1. `shared` (open, with `UserLevelProvider` and `DefaultSenderProvider` SPIs) + leaves: `setting`, `news`.
+2. `organization` (branch + role definitions) and `access`; `access` implements `UserLevelProvider`; branch staff API change.
+3. `calendar` (needs ID-only branch from step 2), `shop` (parked, entities only).
 4. `people` (drop `roles`/`level` from `User`; `UserApi` read models; remove external `UserRepository` usages).
 5. `payment` (new table + backfill, events, listeners in membership/activity; remove `PaymentService<T>`). Keep the Mollie webhook URL unchanged so in-flight payments still resolve.
 6. `membership`.
