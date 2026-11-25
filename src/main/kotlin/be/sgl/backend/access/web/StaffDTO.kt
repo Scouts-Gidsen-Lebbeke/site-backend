@@ -1,9 +1,8 @@
-package be.sgl.backend.dto.user
+package be.sgl.backend.access.web
 
-import be.sgl.backend.people.domain.User
+import be.sgl.backend.people.StaffMember
 import io.swagger.v3.oas.annotations.media.Schema
 
-// read-only
 @Schema(name = "Staff")
 data class StaffDTO(
     val name: String,
@@ -13,8 +12,8 @@ data class StaffDTO(
     val totem: String?,
 ) {
     companion object {
-        fun of(user: User, branchId: Int): StaffDTO {
-            return StaffDTO(user.name, user.firstName, user.image, user.staffData.nicknames[branchId], user.staffData.totem)
+        fun of(staffMember: StaffMember): StaffDTO {
+            return StaffDTO(staffMember.name, staffMember.firstName, staffMember.image, staffMember.nickname, staffMember.totem)
         }
     }
 }

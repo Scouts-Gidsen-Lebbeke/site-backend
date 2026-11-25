@@ -63,6 +63,20 @@ class BranchController(
         return branchService.getBranchesWithCalendar()
     }
 
+    @GetMapping("/{id}", produces = [APPLICATION_JSON_VALUE])
+    @Public
+    @Operation(
+        summary = "Get a specific branch",
+        description = "Returns the branch with the given id, regardless of its state.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Ok", content = [Content(schema = Schema(implementation = BranchDTO::class))]),
+            ApiResponse(responseCode = "404", description = "Invalid id", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
+        ]
+    )
+    fun getBranch(@PathVariable id: Int): BranchDTO {
+        return branchService.getBranch(id)
+    }
+
     @PostMapping(consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     @OnlyStaff
     @Operation(

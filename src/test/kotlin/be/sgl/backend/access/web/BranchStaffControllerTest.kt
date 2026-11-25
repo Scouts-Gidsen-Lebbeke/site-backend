@@ -1,4 +1,4 @@
-package be.sgl.backend.controller.branch
+package be.sgl.backend.access.web
 
 import be.sgl.backend.access.domain.UserRoleRepository
 import be.sgl.backend.access.domain.UserRoleTestMother.userRole
@@ -56,36 +56,34 @@ class BranchStaffControllerTest {
     }
 
     @Test
-    fun `should embed staff when staff is visible`() {
+    fun `should list staff with branch nickname when staff is visible`() {
         // given
         val nickname = "Akela"
         val branch = persistedBranchWithStaff(nickname)
 
         // when
-        val result = mockMvc.perform(get("/branches/${branch.id}"))
+        val result = mockMvc.perform(get("/branches/${branch.id}/staff"))
 
         // then
         result.andExpect(status().isOk)
-            .andExpect(jsonPath("$.name").value(branch.name))
-            .andExpect(jsonPath("$.staff.length()").value(1))
-            .andExpect(jsonPath("$.staff[0].firstName").value("Jan"))
-            .andExpect(jsonPath("$.staff[0].nickname").value(nickname))
-            .andExpect(jsonPath("$.staff[0].totem").value("Bever"))
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].firstName").value("Jan"))
+            .andExpect(jsonPath("$[0].nickname").value(nickname))
+            .andExpect(jsonPath("$[0].totem").value("Bever"))
     }
 
     @Test
-    fun `should omit staff when STAFF_VISIBLE is false`() {
+    fun `should return empty list when STAFF_VISIBLE is false`() {
         // given
         val branch = persistedBranchWithStaff("Akela")
         settingRepository.save(setting().id(SettingId.STAFF_VISIBLE).value(false).build())
 
         // when
-        val result = mockMvc.perform(get("/branches/${branch.id}"))
+        val result = mockMvc.perform(get("/branches/${branch.id}/staff"))
 
         // then
         result.andExpect(status().isOk)
-            .andExpect(jsonPath("$.name").value(branch.name))
-            .andExpect(jsonPath("$.staff.length()").value(0))
+            .andExpect(jsonPath("$.length()").value(0))
     }
 
     @Test
@@ -94,7 +92,7 @@ class BranchStaffControllerTest {
         val unknownId = Int.MAX_VALUE
 
         // when
-        val result = mockMvc.perform(get("/branches/$unknownId"))
+        val result = mockMvc.perform(get("/branches/$unknownId/staff"))
 
         // then
         result.andExpect(status().isNotFound)
