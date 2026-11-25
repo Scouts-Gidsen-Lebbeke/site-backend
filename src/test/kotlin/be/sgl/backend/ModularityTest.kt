@@ -21,19 +21,16 @@ class ModularityTest {
     }
 
     @Test
-    fun `should report no violations when they involve a strict module`() {
+    fun `should report no violations when a strict module is the source`() {
         // given
         val messages = modules.detectViolations().messages
 
         // when
-        val offending = messages.filter { message -> STRICT_MODULES.any { message.involves(it) } }
+        val offending = messages.filter { message -> ViolationFilter.isOffending(message, STRICT_MODULES) }
 
         // then
         assertThat(offending).withFailMessage(offending.joinToString("\n\n")).isEmpty()
     }
-
-    private fun String.involves(module: String) =
-        contains("'$module'") || contains("Slice $module")
 
     companion object {
         val STRICT_MODULES = listOf("shared", "setting", "news")
