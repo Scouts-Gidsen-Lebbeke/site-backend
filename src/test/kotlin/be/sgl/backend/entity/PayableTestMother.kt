@@ -5,9 +5,6 @@ import be.sgl.backend.entity.registrable.Registrable
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction
 import be.sgl.backend.entity.registrable.event.Event
-import be.sgl.backend.entity.shop.DeliveryOption
-import be.sgl.backend.entity.shop.Shop
-import be.sgl.backend.entity.shop.ShopItem
 import java.time.LocalDateTime
 
 object PayableTestMother {
@@ -15,8 +12,6 @@ object PayableTestMother {
     fun activity() = ActivityBuilder()
 
     fun event() = EventBuilder()
-
-    fun shop() = ShopBuilder()
 
     abstract class PayableBuilder<T : PayableBuilder<T, R>, R : Payable> {
         private var id: Int? = 1
@@ -207,33 +202,6 @@ object PayableTestMother {
             val event = super.build()
             event.needsMobile = needsMobile
             return event
-        }
-    }
-
-    class ShopBuilder : PayableBuilder<ShopBuilder, Shop>() {
-
-        private var deliveryOptions = mutableListOf<DeliveryOption>()
-        private var items = mutableListOf<ShopItem>()
-
-        fun deliveryOptions(vararg deliveryOptions: DeliveryOption): ShopBuilder {
-            this.deliveryOptions = deliveryOptions.toMutableList()
-            return this
-        }
-
-        fun items(vararg items: ShopItem): ShopBuilder {
-            this.items = items.toMutableList()
-            return this
-        }
-
-        override fun create() = Shop()
-
-        override fun self() = this
-
-        override fun build(): Shop {
-            val shop = super.build()
-            shop.deliveryOptions = deliveryOptions
-            shop.items = items
-            return shop
         }
     }
 }

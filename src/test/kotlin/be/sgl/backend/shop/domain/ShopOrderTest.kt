@@ -1,7 +1,7 @@
-package be.sgl.backend.entity.shop
+package be.sgl.backend.shop.domain
 
-import be.sgl.backend.entity.PayableTestMother.shop
-import be.sgl.backend.entity.PaymentTestMother.shopOrder
+import be.sgl.backend.shop.domain.ShopTestMother.shop
+import be.sgl.backend.shop.domain.ShopOrderTestMother.shopOrder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

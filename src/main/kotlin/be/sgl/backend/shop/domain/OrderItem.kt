@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.shop
+package be.sgl.backend.shop.domain
 
 import be.sgl.backend.shared.persistence.Auditable
 import jakarta.persistence.Entity
