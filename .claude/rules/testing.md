@@ -73,7 +73,7 @@ Each distinct context configuration starts a new Spring context and new containe
 - Derive expected values from the inputs (`activity.price - activity.siblingReduction`) instead of hard-coding unexplained numbers. If a literal has to stay, give it a name.
 
 ## 5. Test data: always use test mothers
-- **Never create entities with their constructors or `apply { }` blocks in tests.** Use the test mothers in `src/test/kotlin/be/sgl/backend/entity/**`, for example `user().build()`, `activity().price(500.0).build()` and `membership().user(user).build()`. The same goes for non-trivial DTOs and requests.
+- **Never create entities with their constructors or `apply { }` blocks in tests.** Use the test mothers in `src/test/kotlin/be/sgl/backend/entity/**` (or `<module>/domain` for migrated modules), for example `user().build()`, `activity().price(500.0).build()` and `membership().user(user).build()`. The same goes for non-trivial DTOs and requests.
 - If a mother is missing, **create it** before writing the test (for example `SiblingRelation(user, sibling)` in `ValidateAndCreateActivityRegistrationTest` needs a `SiblingRelationTestMother`). Follow the existing conventions:
   - `object <Entity>TestMother` in the **entity's package**, with a factory method `fun <entity>() = <Entity>Builder()`
   - a builder with private `var` fields that have **valid, sensible defaults** (id `1`, a non-null name, nested entities built from their own mothers), so `build()` with no arguments gives a usable object

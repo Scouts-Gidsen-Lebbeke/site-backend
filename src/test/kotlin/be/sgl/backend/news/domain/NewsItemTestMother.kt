@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.news
+package be.sgl.backend.news.domain
 
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDateTime

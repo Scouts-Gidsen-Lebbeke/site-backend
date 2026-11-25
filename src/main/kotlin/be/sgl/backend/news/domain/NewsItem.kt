@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.news
+package be.sgl.backend.news.domain
 
 import be.sgl.backend.shared.persistence.Auditable
 import jakarta.persistence.*

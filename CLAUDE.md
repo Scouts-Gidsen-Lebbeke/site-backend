@@ -23,11 +23,16 @@ There is no `mvnw` script (only `.mvn/wrapper`), so use a system `mvn`.
   When you add behavior that depends on the external/internal mode or on a payment provider, use these annotations rather than runtime `if` checks.
 
 ## Architecture
-Package root: `be.sgl.backend`. Layers are split by domain (branch, calendar, membership, news, organization, registrable/activity, registrable/event, role, user, setting, shop):
-`controller/<domain>` → `service/<domain>` → `repository/<domain>` → `entity/<domain>`, with request and response objects in `dto/<domain>`.
+Package root: `be.sgl.backend`. The code is migrating from horizontal layers to a Spring Modulith modular monolith (design: `docs/superpowers/specs/2026-11-25-modulith-ddd-design.md`).
+
+- **Modules** (migrated: `shared`, `setting`, `news`): each direct sub-package of `be.sgl.backend` is a module. Its root package is the public API (interfaces such as `SettingApi`, shared enums, events); the sub-packages are internal: `web` (controllers, request/response DTOs), `application` (services, use cases, API implementations) and `domain` (entities, repositories, module exceptions). Other modules use only the root package, reference other modules' aggregates by ID, and never touch their entities or repositories.
+- **`shared`** is an open module for cross-cutting code (config, security, util, exceptions, alerts, mail, images, SSE, `Auditable`, `RoleLevel`). It must not depend on any domain code; it asks for what it needs through SPIs that domains implement (`UserLevelProvider`, `DefaultSenderProvider`).
+- **Boundaries are tested**: `ModularityTest` fails on any Modulith violation involving a module in `STRICT_MODULES`. Add every new or migrated module to that list; never work around a violation with an allow-list.
+- **Legacy layers** (not migrated yet): `controller/<domain>` → `service/<domain>` → `repository/<domain>` → `entity/<domain>`, with request and response objects in `dto/<domain>`. They are tolerated by `ModularityTest` until their domain is extracted.
+- **Schema**: Flyway owns the schema. Every change is a new `V<n>__<description>.sql` in `src/main/resources/db/migration` (V1 is the prod baseline); `ddl-auto` is `validate` in every profile.
 
 - **Use-case classes**: Besides `*Service` classes, business logic is split into single-purpose classes annotated `@Usecase` (a `@Component` alias in `shared/util/Usecase.kt`). Each one has an `execute(...)` method and a verb-phrase name, for example `ValidateAndCreateMembership` or `CreateCertificateForActivityRegistration`. Services orchestrate these. Follow this pattern for new non-trivial logic.
-- **Security** (`shared/security/`): The app is a JWT resource server backed by Keycloak (Scouts en Gidsen Vlaanderen login). `SecurityConfig` permits every request at the filter level, so authorization is done **per endpoint** with the meta-annotations in `LevelSecurityService.kt`: `@Public`, `@OnlyAuthenticated`, `@OnlyStaff`, `@OnlyAdmin`. They compare the user's `RoleLevel` from the DB. Every new endpoint needs one of these annotations.
+- **Security** (`shared/security/`): The app is a JWT resource server backed by Keycloak (Scouts en Gidsen Vlaanderen login). `SecurityConfig` permits every request at the filter level, so authorization is done **per endpoint** with the meta-annotations in `LevelSecurityService.kt`: `@Public`, `@OnlyAuthenticated`, `@OnlyStaff`, `@OnlyAdmin`. They compare the user's `RoleLevel`, looked up through `UserLevelProvider`. Every new endpoint needs one of these annotations.
 - **Groepsadmin client**: Generated from `src/main/resources/openapi/*.yaml` and wired in `config/GroepsAdminConfig.kt` (`DynamicAuthApiClient` forwards the caller's bearer token).
 - **Organization**: `OrganizationProvider` returns the cached OWNER and CERTIFIER organizations from the DB. Many flows (certificates, Belcotax) throw `IncompleteConfigurationException` if these are missing.
 - **Documents and mail**: Certificates and forms fill the PDF templates in `src/main/resources/forms/` with PDFBox (`shared/util/PdfUtils.kt`). Emails are Thymeleaf templates in `src/main/resources/templates/`, sent by `MailService`. Belcotax XML (`service/belcotax/`) uses JAXB classes generated from `xsd/Belcotax-2023.xsd`.
@@ -47,7 +52,7 @@ These end up under `target/`. Don't edit them. Change the spec or XSD and regene
 ## Tests
 - `@IntegrationTest` (`src/test/kotlin/.../shared/util/IntegrationTest.kt`) = `@SpringBootTest` + `test` profile + MockMvc + MariaDB and mail Testcontainers.
 - `TestConfigurations` replaces `CheckoutProvider` with `MockedCheckoutProvider`.
-- Test data is built with Object Mothers in `src/test/kotlin/.../entity/**/*TestMother.kt`. Reuse or extend them instead of building entities inline.
+- Test data is built with Object Mothers in `src/test/kotlin/.../entity/**/*TestMother.kt` (for migrated modules: next to the entity, in `<module>/domain`). `PersistedUsers` saves users with or without an admin role for security tests. Reuse or extend them instead of building entities inline.
 
 ## Deployment
 On a push to `main`, `.github/workflows/multi-env-build-push-deploy.yml` builds the jar, pushes a multi-arch image to `ghcr.io/<owner>/backend:latest`, then copies a generated `.env` and `compose-prod.yml` to the prod server over SSH and restarts it with `podman compose`. The Cloud Run steps in README.md (and its badge) are outdated.

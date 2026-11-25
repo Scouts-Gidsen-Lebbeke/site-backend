@@ -1,10 +1,10 @@
-package be.sgl.backend.service.news
+package be.sgl.backend.news.application
 
-import be.sgl.backend.dto.news.CreateOrUpdateNewsItemRequest
-import be.sgl.backend.dto.news.NewsItemDTO
-import be.sgl.backend.entity.news.NewsItem
-import be.sgl.backend.repository.news.NewsItemRepository
-import be.sgl.backend.shared.exception.NewsItemNotFoundException
+import be.sgl.backend.news.web.CreateOrUpdateNewsItemRequest
+import be.sgl.backend.news.web.NewsItemDTO
+import be.sgl.backend.news.domain.NewsItem
+import be.sgl.backend.news.domain.NewsItemRepository
+import be.sgl.backend.news.domain.NewsItemNotFoundException
 import be.sgl.backend.shared.image.ImageService
 import org.springframework.stereotype.Service
 import be.sgl.backend.shared.image.ImageService.ImageDirectory.*

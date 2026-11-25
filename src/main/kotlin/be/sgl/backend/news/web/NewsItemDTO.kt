@@ -1,6 +1,6 @@
-package be.sgl.backend.dto.news
+package be.sgl.backend.news.web
 
-import be.sgl.backend.entity.news.NewsItem
+import be.sgl.backend.news.domain.NewsItem
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 

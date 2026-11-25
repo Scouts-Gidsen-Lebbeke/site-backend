@@ -1,4 +1,4 @@
-package be.sgl.backend.dto.news
+package be.sgl.backend.news.web
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size

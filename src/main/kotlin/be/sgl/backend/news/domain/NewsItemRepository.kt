@@ -1,6 +1,6 @@
-package be.sgl.backend.repository.news
+package be.sgl.backend.news.domain
 
-import be.sgl.backend.entity.news.NewsItem
+import be.sgl.backend.news.domain.NewsItem
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository

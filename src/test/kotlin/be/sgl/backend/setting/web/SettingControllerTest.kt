@@ -1,15 +1,13 @@
 package be.sgl.backend.setting.web
 
-import be.sgl.backend.entity.role.RoleTestMother.adminRole
-import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.setting.domain.SettingTestMother.setting
-import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.role.RoleRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.setting.SettingApi
 import be.sgl.backend.setting.SettingId
 import be.sgl.backend.setting.domain.SettingRepository
 import be.sgl.backend.shared.util.IntegrationTest
+import be.sgl.backend.shared.util.PersistedUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -36,23 +34,12 @@ class SettingControllerTest {
     private lateinit var roleRepository: RoleRepository
 
     private val settingId = SettingId.CALENDAR_NAME.name
+    private val users by lazy { PersistedUsers(userRepository, roleRepository) }
 
     @AfterEach
     fun cleanUp() {
         settingRepository.deleteAll()
-        userRepository.deleteAll()
-        roleRepository.deleteAll()
-    }
-
-    private fun givenAdmin() {
-        val role = roleRepository.save(adminRole().id(null).build())
-        val admin = user().id(null).username(ADMIN).build()
-        userRole().user(admin).role(role).build()
-        userRepository.save(admin)
-    }
-
-    private fun givenUserWithoutRoles() {
-        userRepository.save(user().id(null).username(MEMBER).build())
+        users.deleteAll()
     }
 
     @Test
@@ -71,7 +58,7 @@ class SettingControllerTest {
     @Test
     fun `should forbid the update when the user is not an admin`() {
         // given
-        givenUserWithoutRoles()
+        users.withoutRoles(MEMBER)
 
         // when
         val result = mockMvc.perform(put("/settings/$settingId").param("value", "x").with(jwt().jwt { it.subject(MEMBER) }))
@@ -84,7 +71,7 @@ class SettingControllerTest {
     @Test
     fun `should store the value when an admin updates the setting`() {
         // given
-        givenAdmin()
+        users.admin(ADMIN)
         val value = "Nieuwe kalender"
 
         // when
@@ -98,7 +85,7 @@ class SettingControllerTest {
     @Test
     fun `should delete the setting when an admin updates it without a value`() {
         // given
-        givenAdmin()
+        users.admin(ADMIN)
         settingRepository.save(setting().name(settingId).build())
 
         // when

@@ -1,10 +1,10 @@
-package be.sgl.backend.controller.news
+package be.sgl.backend.news.web
 
 import be.sgl.backend.shared.security.OnlyStaff
 import be.sgl.backend.shared.security.Public
-import be.sgl.backend.dto.news.CreateOrUpdateNewsItemRequest
-import be.sgl.backend.dto.news.NewsItemDTO
-import be.sgl.backend.service.news.NewsItemService
+import be.sgl.backend.news.web.CreateOrUpdateNewsItemRequest
+import be.sgl.backend.news.web.NewsItemDTO
+import be.sgl.backend.news.application.NewsItemService
 import io.github.wimdeblauwe.errorhandlingspringbootstarter.ApiErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema

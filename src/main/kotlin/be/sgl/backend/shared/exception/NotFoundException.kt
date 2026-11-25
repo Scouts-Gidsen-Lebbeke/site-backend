@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 @ResponseStatus(HttpStatus.NOT_FOUND)
 abstract class NotFoundException(message: String) : Exception(message)
 
-class NewsItemNotFoundException : NotFoundException("News item not found")
-
 class OrganizationNotFoundException : NotFoundException("Organization not found")
 
 class CalendarPeriodNotFoundException : NotFoundException("Calendar period not found")
