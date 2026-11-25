@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.organization
 
-import be.sgl.backend.entity.Address
+import be.sgl.backend.shared.address.Address
 import be.sgl.backend.shared.persistence.Auditable
 import jakarta.persistence.*
 

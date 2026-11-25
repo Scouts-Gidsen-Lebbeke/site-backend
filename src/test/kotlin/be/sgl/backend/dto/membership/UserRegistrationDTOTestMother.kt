@@ -1,8 +1,8 @@
 package be.sgl.backend.dto.membership
 
-import be.sgl.backend.dto.AddressDTO
-import be.sgl.backend.entity.AddressTestMother
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.address.AddressDTO
+import be.sgl.backend.shared.address.AddressTestMother
+import be.sgl.backend.shared.Sex
 import java.time.LocalDate
 
 object UserRegistrationDTOTestMother {

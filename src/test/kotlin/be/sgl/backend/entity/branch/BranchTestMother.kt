@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.branch
 
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.User
 
 object BranchTestMother {

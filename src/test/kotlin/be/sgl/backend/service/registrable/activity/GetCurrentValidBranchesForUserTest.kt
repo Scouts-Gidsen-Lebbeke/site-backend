@@ -2,7 +2,7 @@ package be.sgl.backend.service.registrable.activity
 
 import be.sgl.backend.entity.PaymentTestMother.membership
 import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.repository.branch.BranchRepository
 import be.sgl.backend.repository.membership.MembershipRepository

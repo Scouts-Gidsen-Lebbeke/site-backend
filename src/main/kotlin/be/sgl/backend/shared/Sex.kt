@@ -1,4 +1,4 @@
-package be.sgl.backend.entity.user
+package be.sgl.backend.shared
 
 enum class Sex {
     MALE, FEMALE, UNKNOWN

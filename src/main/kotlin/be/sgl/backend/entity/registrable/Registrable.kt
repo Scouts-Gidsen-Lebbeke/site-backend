@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.registrable
 
-import be.sgl.backend.entity.Address
+import be.sgl.backend.shared.address.Address
 import be.sgl.backend.entity.Payable
 import jakarta.persistence.*
 import java.time.LocalDateTime

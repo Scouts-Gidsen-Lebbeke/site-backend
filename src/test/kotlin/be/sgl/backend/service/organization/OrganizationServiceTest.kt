@@ -1,15 +1,15 @@
 package be.sgl.backend.service.organization
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import be.sgl.backend.dto.organization.ContactMethodDTO
 import be.sgl.backend.dto.organization.OrganizationDTO
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.organization.ContactMethodType
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationTestMother.organization
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.shared.exception.OrganizationNotFoundException
-import be.sgl.backend.repository.AddressRepository
+import be.sgl.backend.shared.address.AddressRepository
 import be.sgl.backend.repository.organization.OrganizationRepository
 import be.sgl.backend.shared.image.ImageService
 import be.sgl.backend.shared.image.ImageService.ImageDirectory.ORGANIZATION

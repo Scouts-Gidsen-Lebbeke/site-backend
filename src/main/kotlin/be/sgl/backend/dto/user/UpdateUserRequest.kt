@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.user
 
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.util.Nis
 import be.sgl.backend.shared.util.PhoneNumber
 import jakarta.validation.constraints.Email

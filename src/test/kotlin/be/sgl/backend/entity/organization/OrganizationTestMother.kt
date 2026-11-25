@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.organization
 
-import be.sgl.backend.entity.Address
-import be.sgl.backend.entity.AddressTestMother
+import be.sgl.backend.shared.address.Address
+import be.sgl.backend.shared.address.AddressTestMother
 import org.springframework.test.util.ReflectionTestUtils
 
 object OrganizationTestMother {

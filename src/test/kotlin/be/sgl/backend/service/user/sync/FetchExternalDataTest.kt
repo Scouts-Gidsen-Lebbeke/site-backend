@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother

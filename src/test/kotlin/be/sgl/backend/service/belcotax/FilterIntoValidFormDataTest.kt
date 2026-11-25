@@ -1,6 +1,6 @@
 package be.sgl.backend.service.belcotax
 
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.user.ContactTestMother.contact
 import be.sgl.backend.entity.user.UserTestMother.user

@@ -6,7 +6,7 @@ import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
 import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.setting.SettingId
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.shared.exception.BranchNotFoundException
 import be.sgl.backend.repository.branch.BranchRepository

@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.registrable.event
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import java.time.LocalDateTime
 
 object CreateOrUpdateEventRequestTestMother {

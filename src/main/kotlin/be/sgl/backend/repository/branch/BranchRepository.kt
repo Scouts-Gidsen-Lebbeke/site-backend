@@ -1,7 +1,7 @@
 package be.sgl.backend.repository.branch
 
 import be.sgl.backend.entity.branch.Branch
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository

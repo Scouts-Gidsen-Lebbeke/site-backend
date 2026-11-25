@@ -4,7 +4,7 @@ import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.role.RoleTestMother.memberRole
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LedenApi
 import be.sgl.backend.openapi.model.Contact.RolEnum

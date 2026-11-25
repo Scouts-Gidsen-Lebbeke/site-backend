@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.organization
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import be.sgl.backend.entity.organization.OrganizationType
 import be.sgl.backend.shared.util.Kbo
 import jakarta.validation.constraints.NotBlank

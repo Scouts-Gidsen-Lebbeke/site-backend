@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user.sync
 
-import be.sgl.backend.entity.Address
+import be.sgl.backend.shared.address.Address
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.openapi.api.LedenApi

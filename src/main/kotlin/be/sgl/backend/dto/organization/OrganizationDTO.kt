@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.organization
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationType
 import io.swagger.v3.oas.annotations.media.Schema

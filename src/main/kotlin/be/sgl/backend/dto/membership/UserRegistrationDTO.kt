@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.membership
 
-import be.sgl.backend.dto.AddressDTO
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.address.AddressDTO
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.util.PhoneNumber
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid

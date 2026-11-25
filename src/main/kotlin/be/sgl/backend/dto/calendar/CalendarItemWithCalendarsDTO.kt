@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.calendar
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import be.sgl.backend.entity.calendar.CalendarItem
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime

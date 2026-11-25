@@ -1,6 +1,6 @@
 package be.sgl.backend.service.user
 
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.role.RoleTestMother.adminRole
 import be.sgl.backend.entity.role.RoleTestMother.memberRole
@@ -9,7 +9,7 @@ import be.sgl.backend.entity.role.UserRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.entity.user.ContactTestMother.contact
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.shared.exception.LocalizedException
 import be.sgl.backend.openapi.api.LedenApi

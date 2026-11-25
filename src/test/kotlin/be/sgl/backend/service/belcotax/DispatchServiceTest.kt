@@ -3,7 +3,7 @@ package be.sgl.backend.service.belcotax
 import be.sgl.backend.dto.DeclarationForm
 import be.sgl.backend.dto.DeclarationFormTestMother.declarationForm
 import be.sgl.backend.dto.organization.RepresentativeTestMother.representative
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.PaymentTestMother.activityRegistration
 import be.sgl.backend.entity.organization.Organization
 import be.sgl.backend.entity.organization.OrganizationTestMother.organization

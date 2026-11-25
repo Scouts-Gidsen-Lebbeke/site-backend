@@ -1,7 +1,7 @@
 package be.sgl.backend.entity.branch
 
 import be.sgl.backend.entity.branch.BranchTestMother.branch
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.UserTestMother.user
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

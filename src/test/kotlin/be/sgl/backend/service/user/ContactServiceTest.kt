@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user
 
 import be.sgl.backend.dto.user.CreateOrUpdateContactRequestTestMother.contactRequest
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import be.sgl.backend.entity.role.RoleTestMother.adminRole
 import be.sgl.backend.entity.role.UserRoleTestMother.userRole
 import be.sgl.backend.entity.user.Contact
@@ -12,7 +12,7 @@ import be.sgl.backend.entity.user.UserTestMother.user
 import be.sgl.backend.shared.exception.AddressNotFoundException
 import be.sgl.backend.shared.exception.ContactNotFoundException
 import be.sgl.backend.shared.exception.UserNotFoundException
-import be.sgl.backend.repository.AddressRepository
+import be.sgl.backend.shared.address.AddressRepository
 import be.sgl.backend.repository.user.ContactRepository
 import be.sgl.backend.repository.user.UserRepository
 import be.sgl.backend.shared.util.anyValue

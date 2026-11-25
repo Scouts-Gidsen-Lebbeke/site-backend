@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.user
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import be.sgl.backend.entity.user.Contact
 import be.sgl.backend.entity.user.ContactRole
 import be.sgl.backend.shared.util.Nis

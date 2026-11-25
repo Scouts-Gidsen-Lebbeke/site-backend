@@ -1,4 +1,4 @@
-package be.sgl.backend.entity
+package be.sgl.backend.shared.address
 
 object AddressTestMother {
 

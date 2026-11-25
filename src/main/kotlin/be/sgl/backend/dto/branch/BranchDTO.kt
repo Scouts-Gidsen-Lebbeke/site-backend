@@ -2,7 +2,7 @@ package be.sgl.backend.dto.branch
 
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(name = "Branch")

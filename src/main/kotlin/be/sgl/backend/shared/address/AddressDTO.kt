@@ -1,6 +1,5 @@
-package be.sgl.backend.dto
+package be.sgl.backend.shared.address
 
-import be.sgl.backend.entity.Address
 import be.sgl.backend.shared.util.CountryCode
 import jakarta.validation.constraints.NotBlank
 import java.io.Serializable

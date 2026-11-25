@@ -1,6 +1,5 @@
-package be.sgl.backend.repository
+package be.sgl.backend.shared.address
 
-import be.sgl.backend.entity.Address
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

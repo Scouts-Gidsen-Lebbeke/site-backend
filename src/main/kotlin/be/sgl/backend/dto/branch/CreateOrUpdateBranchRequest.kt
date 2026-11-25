@@ -2,7 +2,7 @@ package be.sgl.backend.dto.branch
 
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

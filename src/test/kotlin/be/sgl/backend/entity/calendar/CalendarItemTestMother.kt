@@ -1,6 +1,6 @@
 package be.sgl.backend.entity.calendar
 
-import be.sgl.backend.entity.Address
+import be.sgl.backend.shared.address.Address
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDateTime
 

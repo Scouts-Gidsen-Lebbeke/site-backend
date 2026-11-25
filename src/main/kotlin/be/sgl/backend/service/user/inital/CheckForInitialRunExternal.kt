@@ -1,7 +1,7 @@
 package be.sgl.backend.service.user.inital
 
 import be.sgl.backend.shared.config.CustomUserDetails
-import be.sgl.backend.entity.Address
+import be.sgl.backend.shared.address.Address
 import be.sgl.backend.entity.organization.ContactMethod
 import be.sgl.backend.entity.organization.ContactMethodType
 import be.sgl.backend.entity.organization.Organization

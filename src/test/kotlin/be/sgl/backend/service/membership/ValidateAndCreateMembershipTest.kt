@@ -5,7 +5,7 @@ import be.sgl.backend.entity.branch.BranchTestMother.branch
 import be.sgl.backend.entity.membership.MembershipPeriod
 import be.sgl.backend.entity.membership.MembershipPeriodTestMother.membershipPeriod
 import be.sgl.backend.entity.membership.MembershipRestrictionTestMother.membershipRestriction
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.entity.user.SiblingRelationTestMother.siblingRelation
 import be.sgl.backend.entity.user.User
 import be.sgl.backend.entity.user.UserTestMother.user

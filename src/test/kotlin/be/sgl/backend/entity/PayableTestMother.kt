@@ -1,5 +1,6 @@
 package be.sgl.backend.entity
 
+import be.sgl.backend.shared.address.Address
 import be.sgl.backend.entity.registrable.Registrable
 import be.sgl.backend.entity.registrable.activity.Activity
 import be.sgl.backend.entity.registrable.activity.ActivityRestriction

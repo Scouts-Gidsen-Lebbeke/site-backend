@@ -1,6 +1,6 @@
-package be.sgl.backend.entity
+package be.sgl.backend.shared.address
 
-import be.sgl.backend.entity.AddressTestMother.address
+import be.sgl.backend.shared.address.AddressTestMother.address
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

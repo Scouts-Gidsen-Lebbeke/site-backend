@@ -1,7 +1,8 @@
 package be.sgl.backend.entity.user
 
+import be.sgl.backend.shared.Sex
 import be.sgl.backend.shared.security.RoleLevel
-import be.sgl.backend.entity.Address
+import be.sgl.backend.shared.address.Address
 import be.sgl.backend.entity.role.UserRole
 import jakarta.persistence.*
 import java.io.Serializable

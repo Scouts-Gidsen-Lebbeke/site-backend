@@ -1,6 +1,6 @@
 package be.sgl.backend.dto.registrable.activity
 
-import be.sgl.backend.dto.AddressDTO
+import be.sgl.backend.shared.address.AddressDTO
 import be.sgl.backend.entity.registrable.activity.Activity
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime

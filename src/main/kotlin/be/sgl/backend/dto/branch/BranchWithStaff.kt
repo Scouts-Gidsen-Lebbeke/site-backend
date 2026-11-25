@@ -3,7 +3,7 @@ package be.sgl.backend.dto.branch
 import be.sgl.backend.dto.user.StaffDTO
 import be.sgl.backend.entity.branch.Branch
 import be.sgl.backend.entity.branch.BranchStatus
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 
 data class BranchWithStaff(
     val id: Int,

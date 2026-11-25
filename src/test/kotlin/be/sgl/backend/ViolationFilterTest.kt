@@ -58,7 +58,7 @@ class ViolationFilterTest {
 
     companion object {
         const val STRICT_SOURCE_VIOLATION =
-            "Module 'news' depends on module 'entity' via be.sgl.backend.news.domain.TmpN -> be.sgl.backend.entity.Address. Allowed targets: shared."
+            "Module 'news' depends on module 'entity' via be.sgl.backend.news.domain.TmpN -> be.sgl.backend.shared.address.Address. Allowed targets: shared."
 
         const val LEGACY_SOURCE_VIOLATION =
             "Module 'tmpa' depends on non-exposed type be.sgl.backend.news.domain.NewsItem within module 'news'!\n" +

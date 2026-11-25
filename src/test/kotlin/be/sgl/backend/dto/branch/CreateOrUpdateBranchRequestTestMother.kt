@@ -1,7 +1,7 @@
 package be.sgl.backend.dto.branch
 
 import be.sgl.backend.entity.branch.BranchStatus
-import be.sgl.backend.entity.user.Sex
+import be.sgl.backend.shared.Sex
 
 object CreateOrUpdateBranchRequestTestMother {
 
